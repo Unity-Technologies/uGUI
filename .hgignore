@@ -1,0 +1,9 @@
+syntax: glob
+Output
+UISystem.v12.suo
+UnityEditor.UI/bin
+UnityEditor.UI/obj
+UnityEngine.UI/obj
+UnityEngine.UI/bin
+UnityEngine.UI-Editor/bin
+UnityEngine.UI-Editor/obj

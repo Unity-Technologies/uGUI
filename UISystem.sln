@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI", "UI", "{0AB31E2A-A3B6-4FCA-A633-E33F4619C496}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityEngine.UI", "UnityEngine.UI\UnityEngine.UI.csproj", "{CBC800DF-4DE1-4CBC-9C97-98CBB375204F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityEditor.UI", "UnityEditor.UI\UnityEditor.UI.csproj", "{82BC885F-670B-41C5-BE97-D9D4510419AE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityEngine.UI-Editor", "UnityEngine.UI-Editor\UnityEngine.UI-Editor.csproj", "{E62B51AA-17F8-46F9-96FF-9072C6D47B09}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CBC800DF-4DE1-4CBC-9C97-98CBB375204F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBC800DF-4DE1-4CBC-9C97-98CBB375204F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBC800DF-4DE1-4CBC-9C97-98CBB375204F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBC800DF-4DE1-4CBC-9C97-98CBB375204F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82BC885F-670B-41C5-BE97-D9D4510419AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82BC885F-670B-41C5-BE97-D9D4510419AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82BC885F-670B-41C5-BE97-D9D4510419AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82BC885F-670B-41C5-BE97-D9D4510419AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E62B51AA-17F8-46F9-96FF-9072C6D47B09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E62B51AA-17F8-46F9-96FF-9072C6D47B09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E62B51AA-17F8-46F9-96FF-9072C6D47B09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E62B51AA-17F8-46F9-96FF-9072C6D47B09}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CBC800DF-4DE1-4CBC-9C97-98CBB375204F} = {0AB31E2A-A3B6-4FCA-A633-E33F4619C496}
+		{82BC885F-670B-41C5-BE97-D9D4510419AE} = {0AB31E2A-A3B6-4FCA-A633-E33F4619C496}
+		{E62B51AA-17F8-46F9-96FF-9072C6D47B09} = {0AB31E2A-A3B6-4FCA-A633-E33F4619C496}
+	EndGlobalSection
+EndGlobal

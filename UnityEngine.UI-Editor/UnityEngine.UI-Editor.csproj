@@ -1,0 +1,263 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E62B51AA-17F8-46F9-96FF-9072C6D47B09}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>UnityEngine.UI</RootNamespace>
+    <AssemblyName>UnityEngine.UI</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>False</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;UNITY_EDITOR</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>True</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;UNITY_EDITOR</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="UnityEditor">
+      <HintPath>..\lib\UnityEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\lib\UnityEngine.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\UnityEngine.UI\EventSystem\EventData\AxisEventData.cs">
+      <Link>EventSystem\EventData\AxisEventData.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\EventData\BaseEventData.cs">
+      <Link>EventSystem\EventData\BaseEventData.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\EventData\PointerEventData.cs">
+      <Link>EventSystem\EventData\PointerEventData.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\EventHandle.cs">
+      <Link>EventSystem\EventHandle.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\EventInterfaces.cs">
+      <Link>EventSystem\EventInterfaces.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\EventSystem.cs">
+      <Link>EventSystem\EventSystem.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\EventTrigger.cs">
+      <Link>EventSystem\EventTrigger.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\EventTriggerType.cs">
+      <Link>EventSystem\EventTriggerType.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\ExecuteEvents.cs">
+      <Link>EventSystem\ExecuteEvents.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\InputModules\BaseInputModule.cs">
+      <Link>EventSystem\InputModules\BaseInputModule.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\InputModules\PointerInputModule.cs">
+      <Link>EventSystem\InputModules\PointerInputModule.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\InputModules\StandaloneInputModule.cs">
+      <Link>EventSystem\InputModules\StandaloneInputModule.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\InputModules\TouchInputModule.cs">
+      <Link>EventSystem\InputModules\TouchInputModule.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\MoveDirection.cs">
+      <Link>EventSystem\MoveDirection.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\RaycasterManager.cs">
+      <Link>EventSystem\RaycasterManager.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\Raycasters\BaseRaycaster.cs">
+      <Link>EventSystem\Raycasters\BaseRaycaster.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\Raycasters\Physics2DRaycaster.cs">
+      <Link>EventSystem\Raycasters\Physics2DRaycaster.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\Raycasters\PhysicsRaycaster.cs">
+      <Link>EventSystem\Raycasters\PhysicsRaycaster.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\RaycastResult.cs">
+      <Link>EventSystem\RaycastResult.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\UIBehaviour.cs">
+      <Link>EventSystem\UIBehaviour.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Animation\CoroutineTween.cs">
+      <Link>UI\Animation\CoroutineTween.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\AnimationTriggers.cs">
+      <Link>UI\Core\AnimationTriggers.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Button.cs">
+      <Link>UI\Core\Button.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\CanvasUpdateRegistry.cs">
+      <Link>UI\Core\CanvasUpdateRegistry.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\ColorBlock.cs">
+      <Link>UI\Core\ColorBlock.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\FontData.cs">
+      <Link>UI\Core\FontData.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Graphic.cs">
+      <Link>UI\Core\Graphic.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\GraphicRaycaster.cs">
+      <Link>UI\Core\GraphicRaycaster.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\GraphicRegistry.cs">
+      <Link>UI\Core\GraphicRegistry.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\IGraphicEnabledDisabled.cs">
+      <Link>UI\Core\IGraphicEnabledDisabled.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Image.cs">
+      <Link>UI\Core\Image.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\IMask.cs">
+      <Link>UI\Core\IMask.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\IMaskable.cs">
+      <Link>UI\Core\IMaskable.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\InputField.cs">
+      <Link>UI\Core\InputField.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Layout\AspectRatioFitter.cs">
+      <Link>UI\Core\Layout\AspectRatioFitter.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Layout\CanvasScaler.cs">
+      <Link>UI\Core\Layout\CanvasScaler.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Layout\ContentSizeFitter.cs">
+      <Link>UI\Core\Layout\ContentSizeFitter.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Layout\GridLayoutGroup.cs">
+      <Link>UI\Core\Layout\GridLayoutGroup.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Layout\HorizontalLayoutGroup.cs">
+      <Link>UI\Core\Layout\HorizontalLayoutGroup.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Layout\HorizontalOrVerticalLayoutGroup.cs">
+      <Link>UI\Core\Layout\HorizontalOrVerticalLayoutGroup.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Layout\ILayoutElement.cs">
+      <Link>UI\Core\Layout\ILayoutElement.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Layout\LayoutElement.cs">
+      <Link>UI\Core\Layout\LayoutElement.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Layout\LayoutGroup.cs">
+      <Link>UI\Core\Layout\LayoutGroup.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Layout\LayoutRebuilder.cs">
+      <Link>UI\Core\Layout\LayoutRebuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Layout\LayoutUtility.cs">
+      <Link>UI\Core\Layout\LayoutUtility.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Layout\VerticalLayoutGroup.cs">
+      <Link>UI\Core\Layout\VerticalLayoutGroup.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\MaskableGraphic.cs">
+      <Link>UI\Core\MaskableGraphic.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\MaterialModifiers\IMaterialModifier.cs">
+      <Link>UI\Core\MaterialModifiers\IMaterialModifier.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\MaterialModifiers\Mask.cs">
+      <Link>UI\Core\MaterialModifiers\Mask.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Misc.cs">
+      <Link>UI\Core\Misc.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Navigation.cs">
+      <Link>UI\Core\Navigation.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\RawImage.cs">
+      <Link>UI\Core\RawImage.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Scrollbar.cs">
+      <Link>UI\Core\Scrollbar.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\ScrollRect.cs">
+      <Link>UI\Core\ScrollRect.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Selectable.cs">
+      <Link>UI\Core\Selectable.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\SetPropertyUtility.cs">
+      <Link>UI\Core\SetPropertyUtility.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Slider.cs">
+      <Link>UI\Core\Slider.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\SpriteState.cs">
+      <Link>UI\Core\SpriteState.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\StencilMaterial.cs">
+      <Link>UI\Core\StencilMaterial.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Text.cs">
+      <Link>UI\Core\Text.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Toggle.cs">
+      <Link>UI\Core\Toggle.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\ToggleGroup.cs">
+      <Link>UI\Core\ToggleGroup.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Utility\ComponentListPool.cs">
+      <Link>UI\Core\Utility\ComponentListPool.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Utility\ObjectPool.cs">
+      <Link>UI\Core\Utility\ObjectPool.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\VertexModifiers\BaseVertexEffect.cs">
+      <Link>UI\Core\VertexModifiers\BaseVertexEffect.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\VertexModifiers\IVertexModifier.cs">
+      <Link>UI\Core\VertexModifiers\IVertexModifier.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\VertexModifiers\Outline.cs">
+      <Link>UI\Core\VertexModifiers\Outline.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\VertexModifiers\PositionAsUV1.cs">
+      <Link>UI\Core\VertexModifiers\PositionAsUV1.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\VertexModifiers\Shadow.cs">
+      <Link>UI\Core\VertexModifiers\Shadow.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+  </PropertyGroup>
+  <Target Name="AfterBuild">
+    <MakeDir Directories="$(ProjectDir)..\Output" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).dll" DestinationFiles="$(ProjectDir)..\Output\$(TargetName).dll" />
+    <!--Uncomment the block below and change the destination to copy the built dll into your unity install directory-->
+    <!--<Copy SourceFiles="$(TargetDir)$(TargetName).dll" DestinationFiles="C:\Program Files (x86)\Unity\Editor\Data\UnityExtensions\Unity\GUISystem\4.6.0\$(TargetName).dll"/>-->
+  </Target>
+</Project>

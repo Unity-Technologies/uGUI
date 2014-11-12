@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{82BC885F-670B-41C5-BE97-D9D4510419AE}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>UnityEditor.UI</RootNamespace>
+    <AssemblyName>UnityEditor.UI</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>False</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>3</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>True</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="UnityEditor">
+      <HintPath>..\lib\UnityEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\lib\UnityEngine.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="EventSystem\EventTriggerEditor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\EventSystemEditor.cs" />
+    <Compile Include="UI\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\ButtonEditor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\GraphicEditor.cs" />
+    <Compile Include="UI\ImageEditor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\InputFieldEditor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\InterceptedEventsPreview.cs" />
+    <Compile Include="UI\MenuOptions.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\PropertyDrawers\AnimationTriggersDrawer.cs" />
+    <Compile Include="UI\PropertyDrawers\ColorBlockDrawer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\PropertyDrawers\FontDataDrawer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\PropertyDrawers\NavigationDrawer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\PropertyDrawers\SpriteStateDrawer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\RawImageEditor.cs" />
+    <Compile Include="UI\SelectableEditor.cs" />
+    <Compile Include="UI\SliderEditor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\TextEditor.cs" />
+    <Compile Include="UI\ToggleEditor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\GridLayoutGroupEditor.cs" />
+    <Compile Include="UI\HorizontalOrVerticalLayoutGroupEditor.cs" />
+    <Compile Include="UI\MaskEditor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\ScrollRectEditor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\ScrollbarEditor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\ContentSizeFitterEditor.cs" />
+    <Compile Include="UI\LayoutElementEditor.cs" />
+    <Compile Include="UI\LayoutPropertiesPreview.cs" />
+    <Compile Include="UI\AspectRatioFitterEditor.cs" />
+    <Compile Include="UI\PrefabLayoutRebuilder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\SelfControllerEditor.cs" />
+    <Compile Include="UI\CanvasScalerEditor.cs" />
+    <Compile Include="UI\SpriteDrawUtility.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UnityEngine.UI-Editor\UnityEngine.UI-Editor.csproj">
+      <Project>{e62b51aa-17f8-46f9-96ff-9072c6d47b09}</Project>
+      <Name>UnityEngine.UI-Editor</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+  </PropertyGroup>
+  <Target Name="AfterBuild">
+    <MakeDir Directories="$(ProjectDir)..\Output\Editor" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).dll" DestinationFiles="$(ProjectDir)..\Output\Editor\$(TargetName).dll" />
+    <!--Uncomment the block below and change the destination to copy the built dll into your unity install directory-->
+    <!--<Copy SourceFiles="$(TargetDir)$(TargetName).dll" DestinationFiles="C:\Program Files (x86)\Unity\Editor\Data\UnityExtensions\Unity\GUISystem\4.6.0\Editor\$(TargetName).dll"/>-->
+  </Target>
+</Project>
