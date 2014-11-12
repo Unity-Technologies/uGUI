@@ -257,6 +257,7 @@
   <Target Name="AfterBuild">
     <MakeDir Directories="$(ProjectDir)..\Output" />
     <Copy SourceFiles="$(TargetDir)$(TargetName).dll" DestinationFiles="$(ProjectDir)..\Output\$(TargetName).dll" />
+    <Copy Condition="'$(Configuration)' == 'Debug'" SourceFiles="$(TargetDir)$(TargetName).dll.mdb" DestinationFiles="$(ProjectDir)..\Output\$(TargetName).dll.mdb" />
     <!--Uncomment the block below and change the destination to copy the built dll into your unity install directory-->
     <!--<Copy SourceFiles="$(TargetDir)$(TargetName).dll" DestinationFiles="C:\Program Files (x86)\Unity\Editor\Data\UnityExtensions\Unity\GUISystem\4.6.0\$(TargetName).dll"/>-->
   </Target>
