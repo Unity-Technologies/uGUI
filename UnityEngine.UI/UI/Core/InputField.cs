@@ -256,6 +256,18 @@ namespace UnityEngine.UI
                 if (this.text == value)
                     return;
 
+                m_Text = value;
+
+                // If not currently editing the text, set the visible range to the whole text.
+                // The UpdateLabel method will then truncate it to the part that fits inside the Text area.
+                // We can't do this when text is being edited since it would discard the current scroll,
+                // which is defined by means of the m_DrawStart and m_DrawEnd indices.
+                if (!m_AllowInput)
+                {
+                    m_DrawStart = 0;
+                    m_DrawEnd = m_Text.Length;
+                }
+
 #if UNITY_EDITOR
                 if (!Application.isPlaying)
                 {
@@ -263,12 +275,13 @@ namespace UnityEngine.UI
                     return;
                 }
 #endif
-                m_Text = value;
+
                 if (m_Keyboard != null)
                     m_Keyboard.text = text;
 
                 if (m_CaretPosition > m_Text.Length)
                     m_CaretPosition = m_CaretSelectPosition = m_Text.Length;
+
                 UpdateLabel();
             }
         }
@@ -1454,7 +1467,7 @@ namespace UnityEngine.UI
         private void MarkGeometryAsDirty()
         {
 #if UNITY_EDITOR
-            if (!Application.isPlaying)
+            if (!Application.isPlaying || UnityEditor.PrefabUtility.GetPrefabObject(gameObject) != null)
                 return;
 #endif
 

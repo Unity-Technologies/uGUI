@@ -332,9 +332,7 @@ namespace UnityEngine.UI
         protected virtual void UpdateMaterial()
         {
             if (IsActive())
-            {
                 canvasRenderer.SetMaterial(materialForRendering, mainTexture);
-            }
         }
 
         /// <summary>

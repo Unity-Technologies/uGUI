@@ -131,7 +131,7 @@ namespace UnityEngine.EventSystems
 
         public virtual void OnSubmit(BaseEventData eventData)
         {
-            Execute(EventTriggerType.Sumbit, eventData);
+            Execute(EventTriggerType.Submit, eventData);
         }
 
         public virtual void OnCancel(BaseEventData eventData)
