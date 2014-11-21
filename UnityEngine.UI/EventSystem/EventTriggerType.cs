@@ -23,8 +23,6 @@ namespace UnityEngine.EventSystems
         InitializePotentialDrag = 12,
         BeginDrag = 13,
         EndDrag = 14,
-        [System.Obsolete("Use EventTriggerType.Submit instead.", false)]
-        Sumbit = 15,
         Submit = 15,
         Cancel = 16
     }

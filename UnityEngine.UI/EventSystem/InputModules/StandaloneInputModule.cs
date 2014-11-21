@@ -8,7 +8,7 @@ namespace UnityEngine.EventSystems
     {
         private float m_NextAction;
 
-        private InputMode m_CurrentInputMode = InputMode.Buttons;
+        private InputMode m_CurrentInputMode = InputMode.Mouse;
 
         private Vector2 m_LastMousePosition;
         private Vector2 m_MousePosition;
