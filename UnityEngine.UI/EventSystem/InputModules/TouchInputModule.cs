@@ -204,7 +204,12 @@ namespace UnityEngine.EventSystems
                 pointerEvent.eligibleForClick = false;
                 pointerEvent.pointerPress = null;
                 pointerEvent.rawPointerPress = null;
+
+                if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
+                    ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.endDragHandler);
+
                 pointerEvent.dragging = false;
+                pointerEvent.pointerDrag = null;
 
                 if (pointerEvent.pointerDrag != null)
                     ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.endDragHandler);

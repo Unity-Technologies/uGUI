@@ -14,7 +14,7 @@ namespace UnityEngine.EventSystems
 
         protected Dictionary<int, PointerEventData> m_PointerData = new Dictionary<int, PointerEventData>();
 
-        private bool GetPointerData(int id, out PointerEventData data, bool create)
+        protected bool GetPointerData(int id, out PointerEventData data, bool create)
         {
             if (!m_PointerData.TryGetValue(id, out data) && create)
             {

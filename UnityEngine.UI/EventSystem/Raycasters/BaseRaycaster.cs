@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace UnityEngine.EventSystems
@@ -7,7 +8,18 @@ namespace UnityEngine.EventSystems
         public abstract void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList);
         public abstract Camera eventCamera { get; }
 
+        [Obsolete("Please use sortOrderPriority and renderOrderPriority", false)]
         public virtual int priority
+        {
+            get { return 0; }
+        }
+
+        public virtual int sortOrderPriority
+        {
+            get { return int.MaxValue; }
+        }
+
+        public virtual int renderOrderPriority
         {
             get { return int.MaxValue; }
         }

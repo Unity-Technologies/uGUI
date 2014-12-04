@@ -6,7 +6,7 @@ namespace UnityEngine.UI
 {
     [AddComponentMenu("UI/Slider", 34)]
     [RequireComponent(typeof(RectTransform))]
-    public class Slider : Selectable, IBeginDragHandler, IDragHandler, IInitializePotentialDragHandler, ICanvasElement
+    public class Slider : Selectable, IDragHandler, IInitializePotentialDragHandler, ICanvasElement
     {
         public enum Direction
         {
@@ -275,10 +275,12 @@ namespace UnityEngine.UI
             return IsActive() && IsInteractable() && eventData.button == PointerEventData.InputButton.Left;
         }
 
-        public virtual void OnBeginDrag(PointerEventData eventData)
+        public override void OnPointerDown(PointerEventData eventData)
         {
             if (!MayDrag(eventData))
                 return;
+
+            base.OnPointerDown(eventData);
 
             m_Offset = Vector2.zero;
             if (m_HandleContainerRect != null && RectTransformUtility.RectangleContainsScreenPoint(m_HandleRect, eventData.position, eventData.enterEventCamera))
@@ -292,15 +294,6 @@ namespace UnityEngine.UI
                 // Outside the slider handle - jump to this point instead
                 UpdateDrag(eventData, eventData.pressEventCamera);
             }
-        }
-
-        public override void OnPointerDown(PointerEventData eventData)
-        {
-            if (!MayDrag(eventData))
-                return;
-
-            base.OnPointerDown(eventData);
-            UpdateDrag(eventData, eventData.pressEventCamera);
         }
 
         public virtual void OnDrag(PointerEventData eventData)

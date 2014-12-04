@@ -45,17 +45,28 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\UnityEngine.UI-Editor\UnityEngine.UI-Editor.csproj">
+      <Project>{e62b51aa-17f8-46f9-96ff-9072c6d47b09}</Project>
+      <Name>UnityEngine.UI-Editor</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="EventSystem\EventSystemEditor.cs" />
     <Compile Include="EventSystem\EventTriggerEditor.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="EventSystem\EventSystemEditor.cs" />
+    <Compile Include="UI\AspectRatioFitterEditor.cs" />
     <Compile Include="UI\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="UI\ButtonEditor.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="UI\CanvasScalerEditor.cs" />
+    <Compile Include="UI\ContentSizeFitterEditor.cs" />
     <Compile Include="UI\GraphicEditor.cs" />
+    <Compile Include="UI\GridLayoutGroupEditor.cs" />
+    <Compile Include="UI\HorizontalOrVerticalLayoutGroupEditor.cs" />
     <Compile Include="UI\ImageEditor.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -63,7 +74,15 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="UI\InterceptedEventsPreview.cs" />
+    <Compile Include="UI\LayoutElementEditor.cs" />
+    <Compile Include="UI\LayoutPropertiesPreview.cs" />
+    <Compile Include="UI\MaskEditor.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="UI\MenuOptions.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\PrefabLayoutRebuilder.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="UI\PropertyDrawers\AnimationTriggersDrawer.cs" />
@@ -80,43 +99,27 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="UI\RawImageEditor.cs" />
+    <Compile Include="UI\ScrollbarEditor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\ScrollRectEditor.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="UI\SelectableEditor.cs" />
+    <Compile Include="UI\SelfControllerEditor.cs" />
     <Compile Include="UI\SliderEditor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\SpriteDrawUtility.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="UI\TextEditor.cs" />
     <Compile Include="UI\ToggleEditor.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="UI\GridLayoutGroupEditor.cs" />
-    <Compile Include="UI\HorizontalOrVerticalLayoutGroupEditor.cs" />
-    <Compile Include="UI\MaskEditor.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="UI\ScrollRectEditor.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="UI\ScrollbarEditor.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="UI\ContentSizeFitterEditor.cs" />
-    <Compile Include="UI\LayoutElementEditor.cs" />
-    <Compile Include="UI\LayoutPropertiesPreview.cs" />
-    <Compile Include="UI\AspectRatioFitterEditor.cs" />
-    <Compile Include="UI\PrefabLayoutRebuilder.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="UI\SelfControllerEditor.cs" />
-    <Compile Include="UI\CanvasScalerEditor.cs" />
-    <Compile Include="UI\SpriteDrawUtility.cs">
-      <SubType>Code</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\UnityEngine.UI-Editor\UnityEngine.UI-Editor.csproj">
-      <Project>{e62b51aa-17f8-46f9-96ff-9072c6d47b09}</Project>
-      <Name>UnityEngine.UI-Editor</Name>
-    </ProjectReference>
+    <None Include="UI\MenuOptions.cs.orig" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

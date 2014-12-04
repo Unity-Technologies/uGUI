@@ -70,22 +70,12 @@ namespace UnityEditor.UI
             itemTransform.localScale = Vector3.one;
         }
 
-        private static GameObject GetParentFromMenuCommandContextOrActiveCanvasInSelection(MenuCommand menuCommand)
-        {
-            GameObject parent = menuCommand.context as GameObject;
-            if (parent == null || FindInParents<Canvas>(parent) == null)
-            {
-                parent = GetParentActiveCanvasInSelection(true);
-            }
-            return parent;
-        }
-
         private static GameObject CreateUIElementRoot(string name, MenuCommand menuCommand, Vector2 size)
         {
             GameObject parent = menuCommand.context as GameObject;
-            if (parent == null || FindInParents<Canvas>(parent) == null)
+            if (parent == null || parent.GetComponentInParent<Canvas>() == null)
             {
-                parent = GetParentActiveCanvasInSelection(true);
+                parent = GetOrCreateCanvasGameObject();
             }
             GameObject child = new GameObject(name);
 
@@ -451,45 +441,23 @@ namespace UnityEditor.UI
             }
         }
 
-        static public T FindInParents<T>(GameObject go) where T : Component
+        // Helper function that returns a Canvas GameObject; preferably a parent of the selection, or other existing Canvas.
+        static public GameObject GetOrCreateCanvasGameObject()
         {
-            if (go == null)
-                return null;
+            GameObject selectedGo = Selection.activeGameObject;
 
-            T comp = null;
-            Transform t = go.transform;
-            while (t != null && comp == null)
-            {
-                comp = t.GetComponent<T>();
-                t = t.parent;
-            }
-            return comp;
-        }
+            // Try to find a gameobject that is the selected GO or one if its parents.
+            Canvas canvas = (selectedGo != null) ? selectedGo.GetComponentInParent<Canvas>() : null;
+            if (canvas != null && canvas.gameObject.activeInHierarchy)
+                return canvas.gameObject;
 
-        // Helper function that returns the selected root object.
-        static public GameObject GetParentActiveCanvasInSelection(bool createIfMissing)
-        {
-            GameObject go = Selection.activeGameObject;
+            // No canvas in selection or its parents? Then use just any canvas..
+            canvas = Object.FindObjectOfType(typeof(Canvas)) as Canvas;
+            if (canvas != null && canvas.gameObject.activeInHierarchy)
+                return canvas.gameObject;
 
-            // Try to find a gameobject that is the selected GO or one if ots parents
-            Canvas p = (go != null) ? FindInParents<Canvas>(go) : null;
-            // Only use active objects
-            if (p != null && p.gameObject.activeInHierarchy)
-                go = p.gameObject;
-
-            // No canvas in selection or its parents? Then use just any canvas.
-            if (go == null)
-            {
-                Canvas canvas = Object.FindObjectOfType(typeof(Canvas)) as Canvas;
-                if (canvas != null)
-                    go = canvas.gameObject;
-            }
-
-            // No canvas present? Create a new one.
-            if (createIfMissing && go == null)
-                go = MenuOptions.CreateNewUI();
-
-            return go;
+            // No canvas in the scene at all? Then create a new one.
+            return MenuOptions.CreateNewUI();
         }
     }
 }

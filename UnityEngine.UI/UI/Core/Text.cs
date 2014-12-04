@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
-using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
@@ -20,6 +18,7 @@ namespace UnityEngine.UI
         private TextGenerator m_TextCacheForLayout;
 
         private static float kEpsilon = 0.0001f;
+        static protected Material s_DefaultText = null;
 
         // We use this flag instead of Unregistering/Registering the callback to avoid allocation.
         [NonSerialized] private bool m_DisableFontTextureChangedCallback = false;
@@ -46,12 +45,7 @@ namespace UnityEngine.UI
             get
             {
                 if (s_DefaultText == null)
-                {
-                    Shader shader = Shader.Find("UI/Default Font");
-                    s_DefaultText = new Material(shader);
-                    s_DefaultText.hideFlags = HideFlags.DontSave;
-                    s_DefaultText.name = "Default Text Material";
-                }
+                    s_DefaultText = Canvas.GetDefaultCanvasTextMaterial();
                 return s_DefaultText;
             }
         }
@@ -73,12 +67,12 @@ namespace UnityEngine.UI
             }
         }
 
-        private void FontTextureChanged()
+        public void FontTextureChanged()
         {
             // Only invoke if we are not destroyed.
             if (!this)
             {
-                UnregisterFontTextureChanged();
+                FontUpdateTracker.UntrackText(this);
                 return;
             }
 
@@ -100,11 +94,6 @@ namespace UnityEngine.UI
                 SetAllDirty();
         }
 
-        /// <summary>
-        /// Set the font used by this Text.
-        /// </summary>
-        [NonSerialized]
-        private bool callbackRegistered = false;
         public Font font
         {
             get
@@ -116,11 +105,11 @@ namespace UnityEngine.UI
                 if (m_FontData.font == value)
                     return;
 
-                UnregisterFontTextureChanged();
+                FontUpdateTracker.UntrackText(this);
 
                 m_FontData.font = value;
 
-                RegisterFontTextureChanged();
+                FontUpdateTracker.TrackText(this);
 
                 SetAllDirty();
             }
@@ -148,7 +137,8 @@ namespace UnityEngine.UI
                 else if (m_Text != value)
                 {
                     m_Text = value;
-                    SetAllDirty();
+                    SetVerticesDirty();
+                    SetLayoutDirty();
                 }
             }
         }
@@ -168,7 +158,8 @@ namespace UnityEngine.UI
                 if (m_FontData.richText == value)
                     return;
                 m_FontData.richText = value;
-                SetAllDirty();
+                SetVerticesDirty();
+                SetLayoutDirty();
             }
         }
 
@@ -187,7 +178,8 @@ namespace UnityEngine.UI
                 if (m_FontData.bestFit == value)
                     return;
                 m_FontData.bestFit = value;
-                SetAllDirty();
+                SetVerticesDirty();
+                SetLayoutDirty();
             }
         }
 
@@ -202,7 +194,9 @@ namespace UnityEngine.UI
                 if (m_FontData.minSize == value)
                     return;
                 m_FontData.minSize = value;
-                SetAllDirty();
+
+                SetVerticesDirty();
+                SetLayoutDirty();
             }
         }
 
@@ -217,7 +211,9 @@ namespace UnityEngine.UI
                 if (m_FontData.maxSize == value)
                     return;
                 m_FontData.maxSize = value;
-                SetAllDirty();
+
+                SetVerticesDirty();
+                SetLayoutDirty();
             }
         }
 
@@ -236,7 +232,9 @@ namespace UnityEngine.UI
                 if (m_FontData.alignment == value)
                     return;
                 m_FontData.alignment = value;
-                SetAllDirty();
+
+                SetVerticesDirty();
+                SetLayoutDirty();
             }
         }
 
@@ -251,7 +249,43 @@ namespace UnityEngine.UI
                 if (m_FontData.fontSize == value)
                     return;
                 m_FontData.fontSize = value;
-                SetAllDirty();
+
+                SetVerticesDirty();
+                SetLayoutDirty();
+            }
+        }
+
+        public HorizontalWrapMode horizontalOverflow
+        {
+            get
+            {
+                return m_FontData.horizontalOverflow;
+            }
+            set
+            {
+                if (m_FontData.horizontalOverflow == value)
+                    return;
+                m_FontData.horizontalOverflow = value;
+
+                SetVerticesDirty();
+                SetLayoutDirty();
+            }
+        }
+
+        public VerticalWrapMode verticalOverflow
+        {
+            get
+            {
+                return m_FontData.verticalOverflow;
+            }
+            set
+            {
+                if (m_FontData.verticalOverflow == value)
+                    return;
+                m_FontData.verticalOverflow = value;
+
+                SetVerticesDirty();
+                SetLayoutDirty();
             }
         }
 
@@ -266,7 +300,9 @@ namespace UnityEngine.UI
                 if (m_FontData.lineSpacing == value)
                     return;
                 m_FontData.lineSpacing = value;
-                SetAllDirty();
+
+                SetVerticesDirty();
+                SetLayoutDirty();
             }
         }
 
@@ -285,7 +321,9 @@ namespace UnityEngine.UI
                 if (m_FontData.fontStyle == value)
                     return;
                 m_FontData.fontStyle = value;
-                SetAllDirty();
+
+                SetVerticesDirty();
+                SetLayoutDirty();
             }
         }
 
@@ -293,11 +331,12 @@ namespace UnityEngine.UI
         {
             get
             {
-                if (!canvas)
+                var localCanvas = canvas;
+                if (!localCanvas)
                     return 1;
                 // For dynamic fonts, ensure we use one pixel per pixel on the screen.
                 if (!font || font.dynamic)
-                    return canvas.scaleFactor;
+                    return localCanvas.scaleFactor;
                 // For non-dynamic fonts, calculate pixels per unit based on specified font size relative to font object's own font size.
                 if (m_FontData.fontSize <= 0)
                     return 1;
@@ -305,34 +344,16 @@ namespace UnityEngine.UI
             }
         }
 
-        private void RegisterFontTextureChanged()
-        {
-            if (m_FontData.font != null && !callbackRegistered)
-            {
-                m_FontData.font.textureRebuildCallback += FontTextureChanged;
-                callbackRegistered = true;
-            }
-        }
-
-        private void UnregisterFontTextureChanged()
-        {
-            if (m_FontData.font != null)
-            {
-                m_FontData.font.textureRebuildCallback -= FontTextureChanged;
-                callbackRegistered = false;
-            }
-        }
-
         protected override void OnEnable()
         {
             base.OnEnable();
             cachedTextGenerator.Invalidate();
-            RegisterFontTextureChanged();
+            FontUpdateTracker.TrackText(this);
         }
 
         protected override void OnDisable()
         {
-            UnregisterFontTextureChanged();
+            FontUpdateTracker.UntrackText(this);
             base.OnDisable();
         }
 
@@ -357,12 +378,13 @@ namespace UnityEngine.UI
             var settings = new TextGenerationSettings();
 
             // Settings affected by pixels density
-            settings.generationExtents = extents * pixelsPerUnit + Vector2.one * kEpsilon;
-            if (font.dynamic)
+            var pixelsPerUnitCached = pixelsPerUnit;
+            settings.generationExtents = extents * pixelsPerUnitCached + Vector2.one * kEpsilon;
+            if (font != null && font.dynamic)
             {
-                settings.fontSize = Mathf.FloorToInt(m_FontData.fontSize * pixelsPerUnit);
-                settings.resizeTextMinSize = Mathf.FloorToInt(m_FontData.minSize * pixelsPerUnit);
-                settings.resizeTextMaxSize = Mathf.FloorToInt(m_FontData.maxSize * pixelsPerUnit);
+                settings.fontSize = Mathf.FloorToInt(m_FontData.fontSize * pixelsPerUnitCached);
+                settings.resizeTextMinSize = Mathf.FloorToInt(m_FontData.minSize * pixelsPerUnitCached);
+                settings.resizeTextMaxSize = Mathf.FloorToInt(m_FontData.maxSize * pixelsPerUnitCached);
             }
 
             // Other settings
@@ -492,14 +514,14 @@ namespace UnityEngine.UI
         public virtual int layoutPriority { get { return 0; } }
 
 #if UNITY_EDITOR
-        override protected void OnRebuildRequested()
+        public override void OnRebuildRequested()
         {
             // After a Font asset gets re-imported the managed side gets deleted and recreated,
             // that means the delegates are not persisted.
             // so we need to properly enforce a consistent state here.
-            UnregisterFontTextureChanged();
+            FontUpdateTracker.UntrackText(this);
+            FontUpdateTracker.TrackText(this);
 
-            RegisterFontTextureChanged();
             // Also the textgenerator is no longer valid.
             cachedTextGenerator.Invalidate();
 

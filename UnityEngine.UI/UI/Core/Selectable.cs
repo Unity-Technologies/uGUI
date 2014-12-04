@@ -1,10 +1,6 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine.Events;
 using UnityEngine.Serialization;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
@@ -316,7 +312,8 @@ namespace UnityEngine.UI
         public Selectable FindSelectable(Vector3 dir)
         {
             dir = dir.normalized;
-            Vector3 pos = transform.TransformPoint(GetPointOnRectEdge(transform as RectTransform, dir));
+            Vector3 localDir = Quaternion.Inverse(transform.rotation) * dir;
+            Vector3 pos = transform.TransformPoint(GetPointOnRectEdge(transform as RectTransform, localDir));
             float maxScore = Mathf.NegativeInfinity;
             Selectable bestPick = null;
             for (int i = 0; i < s_List.Count; ++i)
@@ -495,40 +492,44 @@ namespace UnityEngine.UI
             if (!IsActive())
                 return false;
 
-            if (IsPressed(eventData))
+            if (IsPressed())
                 return false;
 
-            bool selected = false;
-            if (eventData as PointerEventData == null)
-                selected = hasSelection;
-
+            bool selected = hasSelection;
             if (eventData is PointerEventData)
             {
                 var pointerData = eventData as PointerEventData;
-                selected =
+                selected |=
                     (isPointerDown && !isPointerInside && pointerData.pointerPress == gameObject) // This object pressed, but pointer moved off
                     || (!isPointerDown && isPointerInside && pointerData.pointerPress == gameObject) // This object pressed, but pointer released over (PointerUp event)
                     || (!isPointerDown && isPointerInside && pointerData.pointerPress == null); // Nothing pressed, but pointer is over
             }
-
+            else
+            {
+                selected |= isPointerInside;
+            }
             return selected;
         }
 
-        // Whether the control should be pressed.
+        [Obsolete("Is Pressed no longer requires eventData", false)]
         protected bool IsPressed(BaseEventData eventData)
+        {
+            return IsPressed();
+        }
+
+        // Whether the control should be pressed.
+        protected bool IsPressed()
         {
             if (!IsActive())
                 return false;
 
-            bool pressed = ((hasSelection && (eventData as PointerEventData == null)) || isPointerInside) && isPointerDown;
-
-            return pressed;
+            return isPointerInside && isPointerDown;
         }
 
         // The current visual state of the control.
         protected void UpdateSelectionState(BaseEventData eventData)
         {
-            if (IsPressed(eventData))
+            if (IsPressed())
             {
                 m_CurrentSelectionState = SelectionState.Pressed;
                 return;

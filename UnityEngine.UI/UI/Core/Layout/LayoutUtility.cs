@@ -76,6 +76,8 @@ namespace UnityEngine.UI
             for (int i = 0; i < components.Count; i++)
             {
                 var layoutComp = components[i] as ILayoutElement;
+                if (layoutComp is Behaviour && !(layoutComp as Behaviour).enabled)
+                    continue;
 
                 int priority = layoutComp.layoutPriority;
                 // If this layout components has lower priority than a previously used, ignore it.

@@ -150,6 +150,8 @@ namespace UnityEngine.UI
 
         protected override void OnDisable()
         {
+            CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
+
             if (m_HorizontalScrollbar)
                 m_HorizontalScrollbar.onValueChanged.RemoveListener(SetHorizontalNormalizedPosition);
             if (m_VerticalScrollbar)

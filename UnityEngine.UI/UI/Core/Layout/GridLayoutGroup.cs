@@ -179,9 +179,9 @@ namespace UnityEngine.UI
                 }
 
                 if (cornerX == 1)
-                    positionX = cellCountX - 1 - positionX;
+                    positionX = actualCellCountX - 1 - positionX;
                 if (cornerY == 1)
-                    positionY = cellCountY - 1 - positionY;
+                    positionY = actualCellCountY - 1 - positionY;
 
                 SetChildAlongAxis(rectChildren[i], 0, startOffset.x + (cellSize[0] + spacing[0]) * positionX, cellSize[0]);
                 SetChildAlongAxis(rectChildren[i], 1, startOffset.y + (cellSize[1] + spacing[1]) * positionY, cellSize[1]);

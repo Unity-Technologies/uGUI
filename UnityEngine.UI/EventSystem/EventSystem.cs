@@ -135,9 +135,11 @@ namespace UnityEngine.EventSystems
                     return -1;
             }
 
+            if (lhs.module.sortOrderPriority != rhs.module.sortOrderPriority)
+                return rhs.module.sortOrderPriority.CompareTo(lhs.module.sortOrderPriority);
 
-            if (lhs.module.priority != rhs.module.priority)
-                return lhs.module.priority.CompareTo(rhs.module.priority);
+            if (lhs.module.renderOrderPriority != rhs.module.renderOrderPriority)
+                return rhs.module.renderOrderPriority.CompareTo(lhs.module.renderOrderPriority);
 
             if (lhs.depth != rhs.depth)
                 return rhs.depth.CompareTo(lhs.depth);

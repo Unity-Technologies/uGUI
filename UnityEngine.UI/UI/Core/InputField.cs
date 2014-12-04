@@ -258,20 +258,10 @@ namespace UnityEngine.UI
 
                 m_Text = value;
 
-                // If not currently editing the text, set the visible range to the whole text.
-                // The UpdateLabel method will then truncate it to the part that fits inside the Text area.
-                // We can't do this when text is being edited since it would discard the current scroll,
-                // which is defined by means of the m_DrawStart and m_DrawEnd indices.
-                if (!m_AllowInput)
-                {
-                    m_DrawStart = 0;
-                    m_DrawEnd = m_Text.Length;
-                }
-
 #if UNITY_EDITOR
                 if (!Application.isPlaying)
                 {
-                    UpdateLabel();
+                    SendOnValueChangedAndUpdateLabel();
                     return;
                 }
 #endif
@@ -282,7 +272,7 @@ namespace UnityEngine.UI
                 if (m_CaretPosition > m_Text.Length)
                     m_CaretPosition = m_CaretSelectPosition = m_Text.Length;
 
-                UpdateLabel();
+                SendOnValueChangedAndUpdateLabel();
             }
         }
 
@@ -374,6 +364,7 @@ namespace UnityEngine.UI
             if (m_TextComponent != null)
             {
                 m_TextComponent.RegisterDirtyVerticesCallback(MarkGeometryAsDirty);
+                m_TextComponent.RegisterDirtyVerticesCallback(UpdateLabel);
                 UpdateLabel();
             }
         }
@@ -382,8 +373,10 @@ namespace UnityEngine.UI
         {
             DeactivateInputField();
             if (m_TextComponent != null)
+            {
                 m_TextComponent.UnregisterDirtyVerticesCallback(MarkGeometryAsDirty);
-
+                m_TextComponent.UnregisterDirtyVerticesCallback(UpdateLabel);
+            }
             CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
 
             base.OnDisable();
@@ -538,22 +531,37 @@ namespace UnityEngine.UI
                 for (int i = 0; i < val.Length; ++i)
                 {
                     char c = val[i];
+
+                    if (c == '\r' || (int)c == 3)
+                        c = '\n';
+
                     if (onValidateInput != null)
                         c = onValidateInput(m_Text, m_Text.Length, c);
                     else if (characterValidation != CharacterValidation.None)
                         c = Validate(m_Text, m_Text.Length, c);
-                    if (c != 0) m_Text += c;
+
+                    if (lineType == LineType.MultiLineSubmit && c == '\n')
+                    {
+                        m_Keyboard.text = m_Text;
+
+                        OnDeselect(null);
+                        return;
+                    }
+
+                    if (c != 0)
+                        m_Text += c;
                 }
 
-                if (characterLimit > 0 && m_Text.Length > characterLimit) m_Text = m_Text.Substring(0, characterLimit);
+                if (characterLimit > 0 && m_Text.Length > characterLimit)
+                    m_Text = m_Text.Substring(0, characterLimit);
                 caretPosition = caretSelectPos = m_Text.Length;
 
                 // Set keyboard text before updating label, as we might have changed it with validation
                 // and update label will take the old value from keyboard if we don't change it here
-                if (m_Text != val) m_Keyboard.text = m_Text;
+                if (m_Text != val)
+                    m_Keyboard.text = m_Text;
 
-                SendOnValueChanged();
-                UpdateLabel();
+                SendOnValueChangedAndUpdateLabel();
             }
 
             if (m_Keyboard.done)
@@ -632,7 +640,7 @@ namespace UnityEngine.UI
 
             for (int i = startCharIndex; i < endCharIndex; i++)
             {
-                if (i >= gen.characterCount)
+                if (i >= gen.characterCountVisible)
                     break;
 
                 UICharInfo charInfo = gen.characters[i];
@@ -676,7 +684,7 @@ namespace UnityEngine.UI
 
             m_DragPositionOutOfBounds = !RectTransformUtility.RectangleContainsScreenPoint(textComponent.rectTransform, eventData.position, eventData.pressEventCamera);
             if (m_DragPositionOutOfBounds && m_DragCoroutine == null)
-                m_DragCoroutine = StartCoroutine("MouseDragOutsideRect", eventData);
+                m_DragCoroutine = StartCoroutine(MouseDragOutsideRect(eventData));
 
             eventData.Use();
         }
@@ -723,6 +731,8 @@ namespace UnityEngine.UI
         {
             if (!MayDrag(eventData))
                 return;
+
+            EventSystem.current.SetSelectedGameObject(gameObject, eventData);
 
             bool hadFocusBefore = m_AllowInput;
             base.OnPointerDown(eventData);
@@ -1070,7 +1080,7 @@ namespace UnityEngine.UI
 
         private int LineUpCharacterPosition(int originalPos, bool goToFirstChar)
         {
-            if (originalPos >= cachedInputTextGenerator.characterCount)
+            if (originalPos >= cachedInputTextGenerator.characterCountVisible)
                 return 0;
 
             UICharInfo originChar = cachedInputTextGenerator.characters[originalPos];
@@ -1097,7 +1107,7 @@ namespace UnityEngine.UI
 
         private int LineDownCharacterPosition(int originalPos, bool goToLastChar)
         {
-            if (originalPos >= cachedInputTextGenerator.characterCount)
+            if (originalPos >= cachedInputTextGenerator.characterCountVisible)
                 return text.Length;
 
             UICharInfo originChar = cachedInputTextGenerator.characters[originalPos];
@@ -1171,17 +1181,13 @@ namespace UnityEngine.UI
             {
                 m_Text = text.Substring(0, caretPosition) + text.Substring(caretSelectPos, text.Length - caretSelectPos);
                 caretSelectPos = caretPosition;
-
-                SendOnValueChanged();
             }
             else
             {
                 m_Text = text.Substring(0, caretSelectPos) + text.Substring(caretPosition, text.Length - caretPosition);
                 caretPosition = caretSelectPos;
-
-                SendOnValueChanged();
             }
-            UpdateLabel();
+            SendOnValueChangedAndUpdateLabel();
         }
 
         private void ForwardSpace()
@@ -1195,11 +1201,9 @@ namespace UnityEngine.UI
                 if (caretPosition < text.Length)
                 {
                     m_Text = text.Remove(caretPosition, 1);
-
-                    SendOnValueChanged();
+                    SendOnValueChangedAndUpdateLabel();
                 }
             }
-            UpdateLabel();
         }
 
         private void Backspace()
@@ -1213,14 +1217,10 @@ namespace UnityEngine.UI
                 if (caretPosition > 0)
                 {
                     m_Text = text.Remove(caretPosition - 1, 1);
-
                     caretSelectPos = caretPosition = caretPosition - 1;
-
-                    SendOnValueChanged();
+                    SendOnValueChangedAndUpdateLabel();
                 }
             }
-
-            UpdateLabel();
         }
 
         // Insert the character and update the label.
@@ -1233,10 +1233,16 @@ namespace UnityEngine.UI
             if (characterLimit > 0 && text.Length >= characterLimit)
                 return;
 
-            text = text.Insert(m_CaretPosition, replaceString);
+            m_Text = text.Insert(m_CaretPosition, replaceString);
             caretSelectPos = caretPosition += replaceString.Length;
 
             SendOnValueChanged();
+        }
+
+        private void SendOnValueChangedAndUpdateLabel()
+        {
+            SendOnValueChanged();
+            UpdateLabel();
         }
 
         private void SendOnValueChanged()
@@ -1315,8 +1321,20 @@ namespace UnityEngine.UI
                     processed = fullText;
 
                 bool isEmpty = string.IsNullOrEmpty(fullText);
+
                 if (m_Placeholder != null)
                     m_Placeholder.enabled = isEmpty;
+
+                // If not currently editing the text, set the visible range to the whole text.
+                // The UpdateLabel method will then truncate it to the part that fits inside the Text area.
+                // We can't do this when text is being edited since it would discard the current scroll,
+                // which is defined by means of the m_DrawStart and m_DrawEnd indices.
+                if (!m_AllowInput)
+                {
+                    m_DrawStart = 0;
+                    m_DrawEnd = m_Text.Length;
+                }
+
                 if (!isEmpty)
                 {
                     // Determine what will actually fit into the given line
@@ -1433,7 +1451,7 @@ namespace UnityEngine.UI
 
                 if (drawEnd <= caretPos)
                 {
-                    drawEnd = Mathf.Min(caretPos, gen.characterCount - 1);
+                    drawEnd = Mathf.Min(caretPos, gen.characterCountVisible);
                     drawStart = 0;
                     for (int i = drawEnd; i > 0; --i)
                     {
@@ -1450,8 +1468,8 @@ namespace UnityEngine.UI
                     if (drawStart > caretPos)
                         drawStart = caretPos;
 
-                    drawEnd = gen.characterCount;
-                    for (int i = drawStart; i < gen.characterCount; ++i)
+                    drawEnd = gen.characterCountVisible;
+                    for (int i = drawStart; i < gen.characterCountVisible; ++i)
                     {
                         width -= characters[i].charWidth;
                         if (width < 0)
@@ -1588,21 +1606,19 @@ namespace UnityEngine.UI
             int adjustedPos = Mathf.Max(0, caretPosition - m_DrawStart);
             TextGenerator gen = m_TextComponent.cachedTextGenerator;
 
+            if (gen == null)
+                return;
+
             if (m_TextComponent.resizeTextForBestFit)
                 height = gen.fontSizeUsedForBestFit / m_TextComponent.pixelsPerUnit;
 
             Vector2 startPosition = Vector2.zero;
 
             // Calculate startPosition.x
-            if (gen != null && gen.characterCount > adjustedPos)
+            if (gen.characterCountVisible + 1 > adjustedPos || adjustedPos == 0)
             {
                 UICharInfo cursorChar = gen.characters[adjustedPos];
                 startPosition.x = cursorChar.cursorPos.x;
-            }
-            else if (adjustedPos - 1 < gen.characterCount)
-            {
-                UICharInfo cursorChar = gen.characters[adjustedPos - 1];
-                startPosition.x = cursorChar.cursorPos.x + cursorChar.charWidth;
             }
             startPosition.x /= m_TextComponent.pixelsPerUnit;
 
@@ -1705,7 +1721,7 @@ namespace UnityEngine.UI
             vert.color = selectionColor;
 
             int currentChar = startChar;
-            while (currentChar <= endChar && currentChar < gen.characterCount)
+            while (currentChar <= endChar && currentChar < gen.characterCountVisible)
             {
                 if (currentChar + 1 == nextLineStartIdx || currentChar == endChar)
                 {
@@ -1907,7 +1923,6 @@ namespace UnityEngine.UI
                 m_CaretPosition = m_CaretSelectPosition = 0;
 
                 SendOnSubmit();
-                UpdateLabel();
 
                 Input.imeCompositionMode = IMECompositionMode.Auto;
             }

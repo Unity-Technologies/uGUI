@@ -120,11 +120,17 @@
     <Compile Include="..\UnityEngine.UI\UI\Core\FontData.cs">
       <Link>UI\Core\FontData.cs</Link>
     </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\FontUpdateTracker.cs">
+      <Link>UI\Core\FontUpdateTracker.cs</Link>
+    </Compile>
     <Compile Include="..\UnityEngine.UI\UI\Core\Graphic.cs">
       <Link>UI\Core\Graphic.cs</Link>
     </Compile>
     <Compile Include="..\UnityEngine.UI\UI\Core\GraphicRaycaster.cs">
       <Link>UI\Core\GraphicRaycaster.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\GraphicRebuildTracker.cs">
+      <Link>UI\Core\GraphicRebuildTracker.cs</Link>
     </Compile>
     <Compile Include="..\UnityEngine.UI\UI\Core\GraphicRegistry.cs">
       <Link>UI\Core\GraphicRegistry.cs</Link>
@@ -227,6 +233,9 @@
     </Compile>
     <Compile Include="..\UnityEngine.UI\UI\Core\ToggleGroup.cs">
       <Link>UI\Core\ToggleGroup.cs</Link>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Utility\CanvasListPool.cs">
+      <Link>UI\Core\Utility\CanvasListPool.cs</Link>
     </Compile>
     <Compile Include="..\UnityEngine.UI\UI\Core\Utility\ComponentListPool.cs">
       <Link>UI\Core\Utility\ComponentListPool.cs</Link>

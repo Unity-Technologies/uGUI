@@ -1,8 +1,8 @@
 # README #
 
-The Unity UI system is open an available for use in your games and applications. This document details how to get it up and running on your computer and start modifying the code!
+The Unity UI system is open and available for use in your games and applications. This document details how to get it up and running on your computer and start modifying the code!
 
-### What license is the UI system shipped under ###
+### What license is the UI system shipped under? ###
 Like the rest of the Unity open source projects, the UI system is released under an MIT/X11 license.
 
 ### How do I get started? ###
@@ -17,8 +17,8 @@ Like the rest of the Unity open source projects, the UI system is released under
 + A folder will be created in the root directory called "Output", the generated dll's will output here in the correct folder structure
     * If you wish to use these dll's
     * Locate your Unity install location
-    * Windows: Copy the contents of Output folder to: Data\UnityExtensions\Unity\GUISystem\{UNITY_VERSION}
-    * OSX: Copy the contents of Output folder to: Unity.app/Contents/UnityExtensions/Unity/GUISystem/{UNITY_VERSION}
+    * Windows: Copy the contents of Output folder to: `Data\UnityExtensions\Unity\GUISystem\{UNITY_VERSION}`
+    * OSX: Copy the contents of Output folder to: `Unity.app/Contents/UnityExtensions/Unity/GUISystem/{UNITY_VERSION}`
 
 + If you want the dll's to copy automatically on build
     + For each visual studio project file

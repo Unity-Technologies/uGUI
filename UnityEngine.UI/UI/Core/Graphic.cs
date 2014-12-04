@@ -18,9 +18,7 @@ namespace UnityEngine.UI
         : UIBehaviour,
           ICanvasElement
     {
-        static protected Color32 s_White = Color.white;
         static protected Material s_DefaultUI = null;
-        static protected Material s_DefaultText = null;
         static protected Texture2D s_WhiteTexture = null;
 
         /// <summary>
@@ -32,12 +30,7 @@ namespace UnityEngine.UI
             get
             {
                 if (s_DefaultUI == null)
-                {
-                    Shader shader = Shader.Find("UI/Default");
-                    s_DefaultUI = new Material(shader);
-                    s_DefaultUI.hideFlags = HideFlags.DontSave;
-                    s_DefaultUI.name = "Default UI Material";
-                }
+                    s_DefaultUI = Canvas.GetDefaultCanvasMaterial();
                 return s_DefaultUI;
             }
         }
@@ -59,8 +52,10 @@ namespace UnityEngine.UI
         [NonSerialized] private bool m_VertsDirty;
         [NonSerialized] private bool m_MaterialDirty;
 
-        [NonSerialized] protected UnityAction m_OnDirtyVertsCallback;
 
+        [NonSerialized] protected UnityAction m_OnDirtyLayoutCallback;
+        [NonSerialized] protected UnityAction m_OnDirtyVertsCallback;
+        [NonSerialized] protected UnityAction m_OnDirtyMaterialCallback;
 
         // Tween controls for the Graphic
         [NonSerialized]
@@ -88,6 +83,9 @@ namespace UnityEngine.UI
                 return;
 
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
+
+            if (m_OnDirtyLayoutCallback != null)
+                m_OnDirtyLayoutCallback();
         }
 
         public virtual void SetVerticesDirty()
@@ -97,6 +95,7 @@ namespace UnityEngine.UI
 
             m_VertsDirty = true;
             CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
+
             if (m_OnDirtyVertsCallback != null)
                 m_OnDirtyVertsCallback();
         }
@@ -108,6 +107,9 @@ namespace UnityEngine.UI
 
             m_MaterialDirty = true;
             CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
+
+            if (m_OnDirtyMaterialCallback != null)
+                m_OnDirtyMaterialCallback();
         }
 
         protected override void OnRectTransformDimensionsChange()
@@ -166,7 +168,11 @@ namespace UnityEngine.UI
 
         private void CacheCanvas()
         {
-            m_Canvas = gameObject.GetComponentInParent<Canvas>();
+            var list = CanvasListPool.Get();
+            gameObject.GetComponentsInParent(false, list);
+            if (list.Count > 0)
+                m_Canvas = list[0];
+            CanvasListPool.Release(list);
         }
 
         /// <summary>
@@ -243,7 +249,7 @@ namespace UnityEngine.UI
             GraphicRegistry.RegisterGraphicForCanvas(canvas, this);
 
 #if UNITY_EDITOR
-            CanvasRenderer.onRequestRebuild += OnRebuildRequested;
+            GraphicRebuildTracker.TrackGraphic(this);
 #endif
             if (s_WhiteTexture == null)
                 s_WhiteTexture = Texture2D.whiteTexture;
@@ -259,7 +265,7 @@ namespace UnityEngine.UI
         protected override void OnDisable()
         {
 #if UNITY_EDITOR
-            CanvasRenderer.onRequestRebuild -= OnRebuildRequested;
+            GraphicRebuildTracker.UnTrackGraphic(this);
 #endif
             GraphicRegistry.UnregisterGraphicForCanvas(canvas, this);
             CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
@@ -364,7 +370,7 @@ namespace UnityEngine.UI
         }
 
 #if UNITY_EDITOR
-        protected virtual void OnRebuildRequested()
+        public virtual void OnRebuildRequested()
         {
             SetAllDirty();
         }
@@ -469,6 +475,16 @@ namespace UnityEngine.UI
             CrossFadeColor(CreateColorFromAlpha(alpha), duration, ignoreTimeScale, true, false);
         }
 
+        public void RegisterDirtyLayoutCallback(UnityAction action)
+        {
+            m_OnDirtyLayoutCallback += action;
+        }
+
+        public void UnregisterDirtyLayoutCallback(UnityAction action)
+        {
+            m_OnDirtyLayoutCallback -= action;
+        }
+
         public void RegisterDirtyVerticesCallback(UnityAction action)
         {
             m_OnDirtyVertsCallback += action;
@@ -477,6 +493,16 @@ namespace UnityEngine.UI
         public void UnregisterDirtyVerticesCallback(UnityAction action)
         {
             m_OnDirtyVertsCallback -= action;
+        }
+
+        public void RegisterDirtyMaterialCallback(UnityAction action)
+        {
+            m_OnDirtyMaterialCallback += action;
+        }
+
+        public void UnregisterDirtyMaterialCallback(UnityAction action)
+        {
+            m_OnDirtyMaterialCallback -= action;
         }
     }
 }

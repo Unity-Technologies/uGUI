@@ -7,7 +7,7 @@ namespace UnityEngine.UI
 {
     [AddComponentMenu("Event/Graphic Raycaster")]
     [RequireComponent(typeof(Canvas))]
-    public class GraphicRaycaster : BaseRaycaster, ISerializationCallbackReceiver
+    public class GraphicRaycaster : BaseRaycaster
     {
         protected const int kNoEventMaskSet = -1;
         public enum BlockingObjects
@@ -18,14 +18,27 @@ namespace UnityEngine.UI
             All = 3,
         }
 
-        [SerializeField]
-        private int m_Priority = -1;
-
-        public override int priority
+        public override int sortOrderPriority
         {
             get
             {
-                return m_Priority;
+                // We need to return the sorting order here as distance will all be 0 for overlay.
+                if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+                    return canvas.sortingOrder;
+
+                return base.sortOrderPriority;
+            }
+        }
+
+        public override int renderOrderPriority
+        {
+            get
+            {
+                // We need to return the sorting order here as distance will all be 0 for overlay.
+                if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+                    return canvas.renderOrder;
+
+                return base.renderOrderPriority;
             }
         }
 
@@ -97,7 +110,6 @@ namespace UnityEngine.UI
                 }
             }
 
-            // Debug.Log("Trying canvas: " + m_Canvas.gameObject);
             m_RaycastResults.Clear();
             Raycast(canvas, eventCamera, eventData.position, m_RaycastResults);
 
@@ -155,11 +167,6 @@ namespace UnityEngine.UI
             }
         }
 
-        public int defaultPriority
-        {
-            get { return 3; }
-        }
-
         /// <summary>
         /// Perform a raycast into the screen and collect all graphics underneath it.
         /// </summary>
@@ -170,7 +177,6 @@ namespace UnityEngine.UI
             // Necessary for the event system
             var foundGraphics = GraphicRegistry.GetGraphicsForCanvas(canvas);
             s_SortedGraphics.Clear();
-
             for (int i = 0; i < foundGraphics.Count; ++i)
             {
                 Graphic graphic = foundGraphics[i];
@@ -194,20 +200,5 @@ namespace UnityEngine.UI
                 results.Add(s_SortedGraphics[i]);
             //		Debug.Log (cast.ToString());
         }
-
-        #region serialization callback
-
-        void ISerializationCallbackReceiver.OnBeforeSerialize()
-        { }
-
-        void ISerializationCallbackReceiver.OnAfterDeserialize()
-        {
-            if (m_Priority <= 0)
-            {
-                m_Priority = defaultPriority;
-            }
-        }
-
-        #endregion
     }
 }

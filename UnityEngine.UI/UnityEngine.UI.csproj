@@ -39,17 +39,22 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EventSystem\EventData\AxisEventData.cs" />
-    <Compile Include="EventSystem\EventData\BaseEventData.cs" />
-    <Compile Include="EventSystem\EventData\PointerEventData.cs" />
+    <Compile Include="EventSystem\EventData\AxisEventData.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\EventData\BaseEventData.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\EventData\PointerEventData.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="EventSystem\EventHandle.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="EventSystem\EventInterfaces.cs" />
-    <Compile Include="EventSystem\EventSystem.cs">
+    <Compile Include="EventSystem\EventInterfaces.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="EventSystem\RaycasterManager.cs">
+    <Compile Include="EventSystem\EventSystem.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="EventSystem\EventTrigger.cs">
@@ -61,86 +66,190 @@
     <Compile Include="EventSystem\ExecuteEvents.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="EventSystem\InputModules\BaseInputModule.cs" />
-    <Compile Include="EventSystem\InputModules\PointerInputModule.cs" />
-    <Compile Include="EventSystem\InputModules\StandaloneInputModule.cs" />
-    <Compile Include="EventSystem\InputModules\TouchInputModule.cs" />
+    <Compile Include="EventSystem\InputModules\BaseInputModule.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\InputModules\PointerInputModule.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\InputModules\StandaloneInputModule.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\InputModules\TouchInputModule.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="EventSystem\MoveDirection.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="EventSystem\Raycasters\BaseRaycaster.cs" />
-    <Compile Include="EventSystem\Raycasters\Physics2DRaycaster.cs" />
-    <Compile Include="EventSystem\Raycasters\PhysicsRaycaster.cs" />
+    <Compile Include="EventSystem\RaycasterManager.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\Raycasters\BaseRaycaster.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\Raycasters\Physics2DRaycaster.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\Raycasters\PhysicsRaycaster.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="EventSystem\RaycastResult.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="EventSystem\UIBehaviour.cs" />
-    <Compile Include="UI\Animation\CoroutineTween.cs" />
-    <Compile Include="UI\Core\AnimationTriggers.cs" />
-    <Compile Include="UI\Core\CanvasUpdateRegistry.cs" />
-    <Compile Include="UI\Core\ColorBlock.cs" />
-    <Compile Include="UI\Core\FontData.cs" />
-    <Compile Include="UI\Core\IGraphicEnabledDisabled.cs" />
-    <Compile Include="UI\Core\Utility\ComponentListPool.cs" />
-    <Compile Include="UI\Core\VertexModifiers\BaseVertexEffect.cs" />
-    <Compile Include="UI\Core\GraphicRaycaster.cs" />
-    <Compile Include="UI\Core\MaterialModifiers\IMaterialModifier.cs" />
-    <Compile Include="UI\Core\VertexModifiers\IVertexModifier.cs" />
-    <Compile Include="UI\Core\VertexModifiers\PositionAsUV1.cs" />
-    <Compile Include="UI\Core\MaterialModifiers\Mask.cs" />
-    <Compile Include="UI\Core\GraphicRegistry.cs" />
-    <Compile Include="UI\Core\IMask.cs" />
-    <Compile Include="UI\Core\IMaskable.cs" />
-    <Compile Include="UI\Core\Layout\LayoutRebuilder.cs" />
-    <Compile Include="UI\Core\Navigation.cs" />
+    <Compile Include="EventSystem\UIBehaviour.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\Animation\CoroutineTween.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\AnimationTriggers.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="UI\Core\Button.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="UI\Core\Graphic.cs" />
+    <Compile Include="UI\Core\CanvasUpdateRegistry.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\ColorBlock.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\FontData.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\FontUpdateTracker.cs" />
+    <Compile Include="UI\Core\Graphic.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\GraphicRaycaster.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\GraphicRebuildTracker.cs" />
+    <Compile Include="UI\Core\GraphicRegistry.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\IGraphicEnabledDisabled.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="UI\Core\Image.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\IMask.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\IMaskable.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="UI\Core\InputField.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="UI\Core\MaskableGraphic.cs" />
+    <Compile Include="UI\Core\Layout\AspectRatioFitter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\CanvasScaler.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\ContentSizeFitter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\GridLayoutGroup.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\HorizontalLayoutGroup.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\HorizontalOrVerticalLayoutGroup.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\ILayoutElement.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\LayoutElement.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\LayoutGroup.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\LayoutRebuilder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\LayoutUtility.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\VerticalLayoutGroup.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\MaskableGraphic.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\MaterialModifiers\IMaterialModifier.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\MaterialModifiers\Mask.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="UI\Core\Misc.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="UI\Core\RawImage.cs" />
-    <Compile Include="UI\Core\ScrollRect.cs" />
+    <Compile Include="UI\Core\Navigation.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\RawImage.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Scrollbar.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\ScrollRect.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="UI\Core\Selectable.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="UI\Core\SetPropertyUtility.cs" />
+    <Compile Include="UI\Core\SetPropertyUtility.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="UI\Core\Slider.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="UI\Core\SpriteState.cs" />
+    <Compile Include="UI\Core\SpriteState.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="UI\Core\StencilMaterial.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="UI\Core\Text.cs" />
+    <Compile Include="UI\Core\Text.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="UI\Core\Toggle.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="UI\Core\Scrollbar.cs" />
-    <Compile Include="UI\Core\ToggleGroup.cs" />
-    <Compile Include="UI\Core\Layout\LayoutElement.cs" />
-    <Compile Include="UI\Core\Layout\ILayoutElement.cs" />
-    <Compile Include="UI\Core\Layout\HorizontalOrVerticalLayoutGroup.cs" />
-    <Compile Include="UI\Core\Layout\HorizontalLayoutGroup.cs" />
-    <Compile Include="UI\Core\Layout\VerticalLayoutGroup.cs" />
-    <Compile Include="UI\Core\Layout\GridLayoutGroup.cs" />
-    <Compile Include="UI\Core\Layout\ContentSizeFitter.cs" />
-    <Compile Include="UI\Core\Layout\LayoutGroup.cs" />
-    <Compile Include="UI\Core\Layout\LayoutUtility.cs" />
-    <Compile Include="UI\Core\Utility\ObjectPool.cs" />
-    <Compile Include="UI\Core\VertexModifiers\Outline.cs" />
-    <Compile Include="UI\Core\VertexModifiers\Shadow.cs" />
-    <Compile Include="UI\Core\Layout\AspectRatioFitter.cs" />
-    <Compile Include="UI\Core\Layout\CanvasScaler.cs" />
+    <Compile Include="UI\Core\ToggleGroup.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Utility\CanvasListPool.cs" />
+    <Compile Include="UI\Core\Utility\ComponentListPool.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Utility\ObjectPool.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\VertexModifiers\BaseVertexEffect.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\VertexModifiers\IVertexModifier.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\VertexModifiers\Outline.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\VertexModifiers\PositionAsUV1.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\VertexModifiers\Shadow.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

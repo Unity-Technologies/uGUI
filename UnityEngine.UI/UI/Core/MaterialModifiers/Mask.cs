@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
 using UnityEngine.Serialization;
@@ -100,8 +99,13 @@ namespace UnityEngine.UI
 
         protected override void OnDisable()
         {
-            NotifyMaskStateChanged();
+            // we call base OnDisable first here
+            // as we need to have the IsActive return the
+            // correct value when we notify the children
+            // that the mask state has changed.
             base.OnDisable();
+            ClearCachedMaterial();
+            NotifyMaskStateChanged();
         }
 
 #if UNITY_EDITOR

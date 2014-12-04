@@ -104,7 +104,7 @@ namespace UnityEngine.UI
                     }
                     catch (Exception e)
                     {
-                        Debug.LogException(e, instance.m_LayoutRebuildQueue[i].transform);
+                        Debug.LogException(e, instance.m_GraphicRebuildQueue[k].transform);
                     }
                 }
             }
