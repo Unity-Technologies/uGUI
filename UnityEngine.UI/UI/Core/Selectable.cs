@@ -208,7 +208,13 @@ namespace UnityEngine.UI
             {
                 // Need to clear out the override image on the target...
                 DoSpriteSwap(null);
-                OnSetProperty();
+
+                // If the transition mode got changed, we need to clear all the transitions, since we don't know what the old transition mode was.
+                StartColorTween(Color.white, true);
+                TriggerAnimation(m_AnimationTriggers.normalTrigger);
+
+                // And now go to the right state.
+                InternalEvaluateAndTransitionToSelectionState(true);
             }
         }
 
@@ -476,7 +482,7 @@ namespace UnityEngine.UI
 
         void TriggerAnimation(string triggername)
         {
-            if (animator == null || animator.runtimeAnimatorController == null || string.IsNullOrEmpty(triggername))
+            if (animator == null || !animator.enabled || animator.runtimeAnimatorController == null || string.IsNullOrEmpty(triggername))
                 return;
 
             animator.ResetTrigger(m_AnimationTriggers.normalTrigger);

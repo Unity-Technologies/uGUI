@@ -932,11 +932,18 @@ namespace UnityEngine.UI
 
         public virtual void OnUpdateSelected(BaseEventData eventData)
         {
+            // Only activate if we are not already activated.
             if (m_ShouldActivateNextUpdate)
             {
-                ActivateInputField();
+                if (!isFocused)
+                {
+                    ActivateInputFieldInternal();
+                    m_ShouldActivateNextUpdate = false;
+                    return;
+                }
+
+                // Reset as we are already activated.
                 m_ShouldActivateNextUpdate = false;
-                return;
             }
 
             if (!isFocused)
@@ -956,6 +963,7 @@ namespace UnityEngine.UI
                     }
                 }
             }
+
             if (consumedEvent)
                 UpdateLabel();
 
@@ -1843,10 +1851,6 @@ namespace UnityEngine.UI
 
         public void ActivateInputField()
         {
-            // Already activated do nothing.
-            if (m_AllowInput)
-                return;
-
             if (m_TextComponent == null || m_TextComponent.font == null || !IsActive() || !IsInteractable())
                 return;
 
@@ -1857,11 +1861,13 @@ namespace UnityEngine.UI
                     m_Keyboard.active = true;
                     m_Keyboard.text = m_Text;
                 }
-
-                m_ShouldActivateNextUpdate = true;
-                return;
             }
 
+            m_ShouldActivateNextUpdate = true;
+        }
+
+        private void ActivateInputFieldInternal()
+        {
             if (TouchScreenKeyboard.isSupported)
             {
                 if (Input.touchSupported)
@@ -1906,7 +1912,6 @@ namespace UnityEngine.UI
             if (!m_AllowInput)
                 return;
 
-            m_AllowInput = false;
             m_HasDoneFocusTransition = false;
 
             if (m_TextComponent != null && IsActive() && IsInteractable())
@@ -1926,6 +1931,7 @@ namespace UnityEngine.UI
 
                 Input.imeCompositionMode = IMECompositionMode.Auto;
             }
+            m_AllowInput = false;
 
             MarkGeometryAsDirty();
         }

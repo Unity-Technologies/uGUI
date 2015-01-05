@@ -69,6 +69,7 @@ namespace UnityEngine.EventSystems
             @to.delta = @from.delta;
             @to.scrollDelta = @from.scrollDelta;
             @to.pointerCurrentRaycast = @from.pointerCurrentRaycast;
+            @to.pointerEnter = @from.pointerEnter;
         }
 
         protected static PointerEventData.FramePressState StateForMouseButton(int buttonId)

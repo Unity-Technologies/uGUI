@@ -360,13 +360,21 @@ namespace UnityEngine.UI
         {
             if (m_HorizontalScrollbar)
             {
-                m_HorizontalScrollbar.size = Mathf.Clamp01((m_ViewBounds.size.x - Mathf.Abs(offset.x)) / m_ContentBounds.size.x);
+                if (m_ContentBounds.size.x > 0)
+                    m_HorizontalScrollbar.size = Mathf.Clamp01((m_ViewBounds.size.x - Mathf.Abs(offset.x)) / m_ContentBounds.size.x);
+                else
+                    m_HorizontalScrollbar.size = 1;
+
                 m_HorizontalScrollbar.value = horizontalNormalizedPosition;
             }
 
             if (m_VerticalScrollbar)
             {
-                m_VerticalScrollbar.size = Mathf.Clamp01((m_ViewBounds.size.y - Mathf.Abs(offset.y)) / m_ContentBounds.size.y);
+                if (m_ContentBounds.size.y > 0)
+                    m_VerticalScrollbar.size = Mathf.Clamp01((m_ViewBounds.size.y - Mathf.Abs(offset.y)) / m_ContentBounds.size.y);
+                else
+                    m_VerticalScrollbar.size = 1;
+
                 m_VerticalScrollbar.value = verticalNormalizedPosition;
             }
         }

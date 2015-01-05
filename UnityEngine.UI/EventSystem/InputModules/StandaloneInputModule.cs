@@ -135,7 +135,6 @@ namespace UnityEngine.EventSystems
             if (toSelect == null)
                 toSelect = eventSystem.firstSelectedGameObject;
 
-            eventSystem.SetSelectedGameObject(null, GetBaseEventData());
             eventSystem.SetSelectedGameObject(toSelect, GetBaseEventData());
         }
 

@@ -24,7 +24,7 @@ namespace UnityEngine.UI
             {
                 // We need to return the sorting order here as distance will all be 0 for overlay.
                 if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
-                    return canvas.sortingOrder;
+                    return int.MaxValue - canvas.sortingOrder;
 
                 return base.sortOrderPriority;
             }
@@ -36,7 +36,7 @@ namespace UnityEngine.UI
             {
                 // We need to return the sorting order here as distance will all be 0 for overlay.
                 if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
-                    return canvas.renderOrder;
+                    return int.MaxValue - canvas.renderOrder;
 
                 return base.renderOrderPriority;
             }

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace UnityEditor.UI
+namespace UnityEditor.EventSystems
 {
     [CustomEditor(typeof(EventSystem), true)]
     public class EventSystemEditor : Editor
@@ -33,7 +33,7 @@ namespace UnityEditor.UI
 
         private GUIStyle m_PreviewLabelStyle;
 
-        public GUIStyle previewLabelStyle
+        protected GUIStyle previewLabelStyle
         {
             get
             {

@@ -118,7 +118,9 @@
     <Compile Include="UI\Core\FontData.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="UI\Core\FontUpdateTracker.cs" />
+    <Compile Include="UI\Core\FontUpdateTracker.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="UI\Core\Graphic.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -228,7 +230,9 @@
     <Compile Include="UI\Core\ToggleGroup.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="UI\Core\Utility\CanvasListPool.cs" />
+    <Compile Include="UI\Core\Utility\CanvasListPool.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="UI\Core\Utility\ComponentListPool.cs">
       <SubType>Code</SubType>
     </Compile>

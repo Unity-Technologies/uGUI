@@ -49,6 +49,7 @@ namespace UnityEngine.EventSystems
         public GameObject firstSelectedGameObject
         {
             get { return m_FirstSelected; }
+            set { m_FirstSelected = value; }
         }
 
         public GameObject currentSelectedGameObject
@@ -136,10 +137,10 @@ namespace UnityEngine.EventSystems
             }
 
             if (lhs.module.sortOrderPriority != rhs.module.sortOrderPriority)
-                return rhs.module.sortOrderPriority.CompareTo(lhs.module.sortOrderPriority);
+                return lhs.module.sortOrderPriority.CompareTo(rhs.module.sortOrderPriority);
 
             if (lhs.module.renderOrderPriority != rhs.module.renderOrderPriority)
-                return rhs.module.renderOrderPriority.CompareTo(lhs.module.renderOrderPriority);
+                return lhs.module.renderOrderPriority.CompareTo(rhs.module.renderOrderPriority);
 
             if (lhs.depth != rhs.depth)
                 return rhs.depth.CompareTo(lhs.depth);

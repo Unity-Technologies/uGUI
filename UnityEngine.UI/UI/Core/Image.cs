@@ -317,6 +317,7 @@ namespace UnityEngine.UI
 
             Rect rect = GetPixelAdjustedRect();
             border = GetAdjustedBorders(border / pixelsPerUnit, rect);
+            padding = padding / pixelsPerUnit;
 
             s_VertScratch[0] = new Vector2(padding.x, padding.y);
             s_VertScratch[3] = new Vector2(rect.width - padding.z, rect.height - padding.w);

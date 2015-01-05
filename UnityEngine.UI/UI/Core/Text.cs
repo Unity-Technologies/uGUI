@@ -12,7 +12,7 @@ namespace UnityEngine.UI
     {
         [SerializeField] private FontData m_FontData = FontData.defaultFontData;
 
-        [TextArea(3, 10)][SerializeField] private string m_Text = String.Empty;
+        [TextArea(3, 10)][SerializeField] protected string m_Text = String.Empty;
 
         private TextGenerator m_TextCache;
         private TextGenerator m_TextCacheForLayout;
@@ -119,7 +119,7 @@ namespace UnityEngine.UI
         /// Text that's being displayed by the Text.
         /// </summary>
 
-        public string text
+        public virtual string text
         {
             get
             {

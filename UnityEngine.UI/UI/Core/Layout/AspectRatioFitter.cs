@@ -55,6 +55,9 @@ namespace UnityEngine.UI
 
         private void UpdateRect()
         {
+            if (!IsActive())
+                return;
+
             m_Tracker.Clear();
 
             switch (m_AspectMode)
