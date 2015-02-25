@@ -277,7 +277,7 @@ namespace UnityEngine.UI
                     break;
                 case SelectionState.Disabled:
                     tintColor = m_Colors.disabledColor;
-                    transitionSprite = m_SpriteState.disabledSprite;;
+                    transitionSprite = m_SpriteState.disabledSprite;
                     triggerName = m_AnimationTriggers.disabledTrigger;
                     break;
                 default:

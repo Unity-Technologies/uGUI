@@ -18,7 +18,8 @@ namespace UnityEngine.UI
         [System.NonSerialized]
         private RectTransform m_Rect;
 
-        private RectTransform rectTransform {
+        private RectTransform rectTransform
+        {
             get
             {
                 if (m_Rect == null)
