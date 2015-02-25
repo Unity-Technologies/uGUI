@@ -86,7 +86,9 @@ namespace UnityEngine.EventSystems
                         gameObject = hits[b].collider.gameObject,
                         module = this,
                         distance = hits[b].distance,
-                        index = resultAppendList.Count
+                        index = resultAppendList.Count,
+                        sortingLayer = 0,
+                        sortingOrder = 0
                     };
                     resultAppendList.Add(result);
                 }

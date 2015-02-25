@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine.UI.Collections;
 
 namespace UnityEngine.UI
 {
@@ -30,8 +31,8 @@ namespace UnityEngine.UI
         private bool m_PerformingLayoutUpdate;
         private bool m_PerformingGraphicUpdate;
 
-        private readonly List<ICanvasElement> m_LayoutRebuildQueue = new List<ICanvasElement>();
-        private readonly List<ICanvasElement> m_GraphicRebuildQueue = new List<ICanvasElement>();
+        private readonly IndexedSet<ICanvasElement> m_LayoutRebuildQueue = new IndexedSet<ICanvasElement>();
+        private readonly IndexedSet<ICanvasElement> m_GraphicRebuildQueue = new IndexedSet<ICanvasElement>();
 
         protected CanvasUpdateRegistry()
         {
@@ -54,7 +55,7 @@ namespace UnityEngine.UI
 
             var isUnityObject = element is Object;
             if (isUnityObject)
-                valid = (element as Object) != null;
+                valid = (element as Object) != null; //Here we make use of the overloaded UnityEngine.Object == null, that checks if the native object is alive.
 
             return valid;
         }
@@ -142,8 +143,6 @@ namespace UnityEngine.UI
 
         private void InternalRegisterCanvasElementForLayoutRebuild(ICanvasElement element)
         {
-            if (m_LayoutRebuildQueue.Contains(element))
-                return;
             m_LayoutRebuildQueue.Add(element);
         }
 
@@ -159,8 +158,7 @@ namespace UnityEngine.UI
                 Debug.LogError(string.Format("Trying to add {0} for graphic rebuild while we are already inside a graphic rebuild loop. This is not supported.", element));
                 return;
             }
-            if (!m_GraphicRebuildQueue.Contains(element))
-                m_GraphicRebuildQueue.Add(element);
+            m_GraphicRebuildQueue.Add(element);
         }
 
         public static void UnRegisterCanvasElementForRebuild(ICanvasElement element)

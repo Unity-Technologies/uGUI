@@ -24,7 +24,7 @@ namespace UnityEngine.UI
             {
                 // We need to return the sorting order here as distance will all be 0 for overlay.
                 if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
-                    return int.MaxValue - canvas.sortingOrder;
+                    return canvas.sortingOrder;
 
                 return base.sortOrderPriority;
             }
@@ -36,14 +36,19 @@ namespace UnityEngine.UI
             {
                 // We need to return the sorting order here as distance will all be 0 for overlay.
                 if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
-                    return int.MaxValue - canvas.renderOrder;
+                    return canvas.renderOrder;
 
                 return base.renderOrderPriority;
             }
         }
 
-        public bool ignoreReversedGraphics = true;
-        public BlockingObjects blockingObjects = BlockingObjects.None;
+        [SerializeField]
+        private bool m_IgnoreReversedGraphics = true;
+        [SerializeField]
+        private BlockingObjects m_BlockingObjects = BlockingObjects.None;
+
+        public bool ignoreReversedGraphics { get {return m_IgnoreReversedGraphics; } set{ m_IgnoreReversedGraphics = value; } }
+        public BlockingObjects blockingObjects { get {return m_BlockingObjects; } set{ m_BlockingObjects = value; } }
 
         [SerializeField]
         protected LayerMask m_BlockingMask = kNoEventMaskSet;
@@ -84,28 +89,31 @@ namespace UnityEngine.UI
 
             float hitDistance = float.MaxValue;
 
+            Ray ray = new Ray();
+
+            if (eventCamera != null)
+                ray = eventCamera.ScreenPointToRay(eventData.position);
+
             if (canvas.renderMode != RenderMode.ScreenSpaceOverlay && blockingObjects != BlockingObjects.None)
             {
-                var ray = eventCamera.ScreenPointToRay(eventData.position);
                 float dist = eventCamera.farClipPlane - eventCamera.nearClipPlane;
 
                 if (blockingObjects == BlockingObjects.ThreeD || blockingObjects == BlockingObjects.All)
                 {
-                    var hits = Physics.RaycastAll(ray, dist, m_BlockingMask);
-
-                    if (hits.Length > 0 && hits[0].distance < hitDistance)
+                    RaycastHit hit;
+                    if (Physics.Raycast(ray, out hit, dist, m_BlockingMask))
                     {
-                        hitDistance = hits[0].distance;
+                        hitDistance = hit.distance;
                     }
                 }
 
                 if (blockingObjects == BlockingObjects.TwoD || blockingObjects == BlockingObjects.All)
                 {
-                    var hits = Physics2D.GetRayIntersectionAll(ray, dist, m_BlockingMask);
+                    RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, dist, m_BlockingMask);
 
-                    if (hits.Length > 0 && hits[0].fraction * dist < hitDistance)
+                    if (hit.collider != null)
                     {
-                        hitDistance = hits[0].fraction * dist;
+                        hitDistance = hit.fraction * dist;
                     }
                 }
             }
@@ -137,7 +145,19 @@ namespace UnityEngine.UI
 
                 if (appendGraphic)
                 {
-                    float distance = (eventCamera == null || canvas.renderMode == RenderMode.ScreenSpaceOverlay) ? 0 : Vector3.Distance(eventCamera.transform.position, canvas.transform.position);
+                    float distance = 0;
+
+                    if (eventCamera == null || canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+                        distance = 0;
+                    else
+                    {
+                        // http://geomalgorithms.com/a06-_intersect-2.html
+                        distance = (Vector3.Dot(go.transform.forward, go.transform.position - ray.origin) / Vector3.Dot(go.transform.forward, ray.direction));
+
+                        // Check to see if the go is behind the camera.
+                        if (distance < 0)
+                            continue;
+                    }
 
                     if (distance >= hitDistance)
                         continue;
@@ -148,7 +168,9 @@ namespace UnityEngine.UI
                         module = this,
                         distance = distance,
                         index = resultAppendList.Count,
-                        depth = m_RaycastResults[index].depth
+                        depth = m_RaycastResults[index].depth,
+                        sortingLayer =  canvas.sortingLayerID,
+                        sortingOrder = canvas.sortingOrder
                     };
                     resultAppendList.Add(castResult);
                 }

@@ -2,12 +2,13 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI.Collections;
 
 namespace UnityEngine.UI
 {
     public static class GraphicRebuildTracker
     {
-        static List<Graphic> m_Tracked = new List<Graphic>();
+        static IList<Graphic> m_Tracked = new IndexedSet<Graphic>();
         static bool s_Initialized;
 
         public static void TrackGraphic(Graphic g)
@@ -18,11 +19,6 @@ namespace UnityEngine.UI
                 s_Initialized = true;
             }
 
-            for (int i = 0; i < m_Tracked.Count; i++)
-            {
-                if (m_Tracked[i] == g)
-                    return;
-            }
             m_Tracked.Add(g);
         }
 

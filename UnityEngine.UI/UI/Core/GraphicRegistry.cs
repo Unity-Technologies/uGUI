@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine.UI.Collections;
 
 namespace UnityEngine.UI
 {
@@ -6,10 +7,17 @@ namespace UnityEngine.UI
     {
         private static GraphicRegistry s_Instance;
 
-        private readonly Dictionary<Canvas, List<Graphic>> m_Graphics = new Dictionary<Canvas, List<Graphic>>();
+        private readonly Dictionary<Canvas, IndexedSet<Graphic>> m_Graphics = new Dictionary<Canvas, IndexedSet<Graphic>>();
+
 
         protected GraphicRegistry()
-        { }
+        {
+#pragma warning disable 168
+            Dictionary<Graphic, int> emptyGraphicDic;
+            Dictionary<ICanvasElement, int> emptyElementDic;
+
+#pragma warning restore 168
+        }
 
         public static GraphicRegistry instance
         {
@@ -26,17 +34,17 @@ namespace UnityEngine.UI
             if (c == null)
                 return;
 
-            List<Graphic> graphics;
+            IndexedSet<Graphic> graphics;
             instance.m_Graphics.TryGetValue(c, out graphics);
 
             if (graphics != null)
             {
-                if (!graphics.Contains(graphic))
-                    graphics.Add(graphic);
+                graphics.Add(graphic);
                 return;
             }
 
-            graphics = new List<Graphic> {graphic};
+            graphics = new IndexedSet<Graphic>();
+            graphics.Add(graphic);
             instance.m_Graphics.Add(c, graphics);
         }
 
@@ -45,10 +53,8 @@ namespace UnityEngine.UI
             if (c == null)
                 return;
 
-            List<Graphic> graphics;
-            instance.m_Graphics.TryGetValue(c, out graphics);
-
-            if (graphics != null)
+            IndexedSet<Graphic> graphics;
+            if (instance.m_Graphics.TryGetValue(c, out graphics))
             {
                 graphics.Remove(graphic);
             }
@@ -57,9 +63,11 @@ namespace UnityEngine.UI
         private static readonly List<Graphic> s_EmptyList = new List<Graphic>();
         public static IList<Graphic> GetGraphicsForCanvas(Canvas canvas)
         {
-            List<Graphic> graphics;
-            instance.m_Graphics.TryGetValue(canvas, out graphics);
-            return graphics ?? s_EmptyList;
+            IndexedSet<Graphic> graphics;
+            if (instance.m_Graphics.TryGetValue(canvas, out graphics))
+                return graphics;
+
+            return s_EmptyList;
         }
     }
 }

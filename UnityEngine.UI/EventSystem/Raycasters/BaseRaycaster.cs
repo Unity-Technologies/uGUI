@@ -16,12 +16,12 @@ namespace UnityEngine.EventSystems
 
         public virtual int sortOrderPriority
         {
-            get { return int.MaxValue; }
+            get { return int.MinValue; }
         }
 
         public virtual int renderOrderPriority
         {
-            get { return int.MaxValue; }
+            get { return int.MinValue; }
         }
 
         #region Unity Lifetime calls

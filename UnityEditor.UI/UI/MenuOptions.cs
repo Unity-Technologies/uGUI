@@ -165,7 +165,7 @@ namespace UnityEditor.UI
             go.AddComponent<Image>();
         }
 
-        [MenuItem("GameObject/UI/RawImage", false, 2004)]
+        [MenuItem("GameObject/UI/Raw Image", false, 2004)]
         static public void AddRawImage(MenuCommand menuCommand)
         {
             GameObject go = CreateUIElementRoot("RawImage", menuCommand, s_ImageGUIElementSize);
@@ -331,7 +331,7 @@ namespace UnityEditor.UI
             labelRect.offsetMax        = new Vector2(-5f, -2f);
         }
 
-        [MenuItem("GameObject/UI/InputField", false, 2008)]
+        [MenuItem("GameObject/UI/Input Field", false, 2008)]
         public static void AddInputField(MenuCommand menuCommand)
         {
             GameObject root = CreateUIElementRoot("InputField", menuCommand, s_ThickGUIElementSize);
@@ -410,7 +410,7 @@ namespace UnityEditor.UI
             return root;
         }
 
-        [MenuItem("GameObject/UI/EventSystem", false, 2010)]
+        [MenuItem("GameObject/UI/Event System", false, 2010)]
         public static void CreateEventSystem(MenuCommand menuCommand)
         {
             GameObject parent = menuCommand.context as GameObject;

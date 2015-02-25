@@ -327,7 +327,7 @@ namespace UnityEngine.UI
             }
         }
 
-        public float pixelsPerUnit
+        public float  pixelsPerUnit
         {
             get
             {
@@ -338,7 +338,7 @@ namespace UnityEngine.UI
                 if (!font || font.dynamic)
                     return localCanvas.scaleFactor;
                 // For non-dynamic fonts, calculate pixels per unit based on specified font size relative to font object's own font size.
-                if (m_FontData.fontSize <= 0)
+                if (m_FontData.fontSize <= 0 || font.fontSize <= 0)
                     return 1;
                 return font.fontSize / (float)m_FontData.fontSize;
             }
@@ -382,9 +382,9 @@ namespace UnityEngine.UI
             settings.generationExtents = extents * pixelsPerUnitCached + Vector2.one * kEpsilon;
             if (font != null && font.dynamic)
             {
-                settings.fontSize = Mathf.FloorToInt(m_FontData.fontSize * pixelsPerUnitCached);
-                settings.resizeTextMinSize = Mathf.FloorToInt(m_FontData.minSize * pixelsPerUnitCached);
-                settings.resizeTextMaxSize = Mathf.FloorToInt(m_FontData.maxSize * pixelsPerUnitCached);
+                settings.fontSize = Mathf.Min(Mathf.FloorToInt(m_FontData.fontSize * pixelsPerUnitCached), 1000);
+                settings.resizeTextMinSize = Mathf.Min(Mathf.FloorToInt(m_FontData.minSize * pixelsPerUnitCached), 1000);
+                settings.resizeTextMaxSize = Mathf.Min(Mathf.FloorToInt(m_FontData.maxSize * pixelsPerUnitCached), 1000);
             }
 
             // Other settings

@@ -305,7 +305,7 @@ namespace UnityEngine.EventSystems
 
             var behaviour = component as Behaviour;
             if (behaviour != null)
-                return behaviour.enabled;
+                return behaviour.enabled && behaviour.isActiveAndEnabled;
             return true;
         }
 

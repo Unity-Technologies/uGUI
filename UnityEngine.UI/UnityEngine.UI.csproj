@@ -215,6 +215,7 @@
     <Compile Include="UI\Core\Slider.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="UI\Core\SpecializedCollections\IndexedSet.cs" />
     <Compile Include="UI\Core\SpriteState.cs">
       <SubType>Code</SubType>
     </Compile>

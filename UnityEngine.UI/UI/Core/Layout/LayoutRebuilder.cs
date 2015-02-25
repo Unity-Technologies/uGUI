@@ -32,7 +32,7 @@ namespace UnityEngine.UI
 
         static void StripDisabledBehavioursFromList(List<Component> components)
         {
-            components.RemoveAll(e => e is Behaviour && !(e as Behaviour).enabled);
+            components.RemoveAll(e => e is Behaviour && (!(e as Behaviour).enabled || !(e as Behaviour).isActiveAndEnabled));
         }
 
         void ICanvasElement.Rebuild(CanvasUpdate executing)

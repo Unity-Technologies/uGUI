@@ -21,7 +21,7 @@ namespace UnityEngine.EventSystems
 
             float dist = eventCamera.farClipPlane - eventCamera.nearClipPlane;
 
-            var hits = Physics2D.GetRayIntersectionAll(ray, dist, finalEventMask);
+            var hits = Physics2D.RaycastAll(ray.origin, ray.direction, dist, finalEventMask);
 
             if (hits.Length != 0)
             {
@@ -29,12 +29,16 @@ namespace UnityEngine.EventSystems
                 eventData.worldNormal = hits[0].normal;
                 for (int b = 0, bmax = hits.Length; b < bmax; ++b)
                 {
+                    SpriteRenderer sr = hits[b].collider.gameObject.GetComponent<SpriteRenderer>();
+
                     var result = new RaycastResult
                     {
                         gameObject = hits[b].collider.gameObject,
                         module = this,
                         distance = Vector3.Distance(eventCamera.transform.position, hits[b].transform.position),
-                        index = resultAppendList.Count
+                        index = resultAppendList.Count,
+                        sortingLayer =  sr != null ? sr.sortingLayerID : 0,
+                        sortingOrder = sr != null ? sr.sortingOrder : 0
                     };
                     resultAppendList.Add(result);
                 }

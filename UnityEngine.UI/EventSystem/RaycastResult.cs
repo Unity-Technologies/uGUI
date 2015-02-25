@@ -14,6 +14,8 @@ namespace UnityEngine.EventSystems
         public float distance; // The distance from the origin this hit was.
         public float index; // The index this element is in the raycastList (used for sorting)
         public int depth;
+        public int sortingLayer;
+        public int sortingOrder;
 
         public bool isValid
         {
@@ -27,6 +29,19 @@ namespace UnityEngine.EventSystems
             distance = 0;
             index = 0;
             depth = 0;
+        }
+
+        public override string ToString()
+        {
+            return "Name: " + gameObject.name + "\n" +
+                   "module: " + module.camera + "\n" +
+                   "distance: " + distance + "\n" +
+                   "index: " + index + "\n" +
+                   "depth: " + depth + "\n" +
+                   "module.sortOrderPriority: " + module.sortOrderPriority + "\n" +
+                   "module.renderOrderPriority: " + module.renderOrderPriority + "\n" +
+                   "sortingLayer: " + sortingLayer + "\n" +
+                   "sortingOrder: " + sortingOrder;
         }
     }
 }

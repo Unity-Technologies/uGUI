@@ -72,12 +72,6 @@ namespace UnityEngine.UI
 
         private SelectionState m_CurrentSelectionState;
 
-#if UNITY_EDITOR
-        // Whether the OnEnable of this Instace has been run already.
-        [NonSerialized]
-        private bool m_HasEnableRun = false;
-#endif
-
         public Navigation        navigation        { get { return m_Navigation; } set { if (SetPropertyUtility.SetStruct(ref m_Navigation, value))        OnSetProperty(); } }
         public Transition        transition        { get { return m_Transition; } set { if (SetPropertyUtility.SetStruct(ref m_Transition, value))        OnSetProperty(); } }
         public ColorBlock        colors            { get { return m_Colors; } set { if (SetPropertyUtility.SetStruct(ref m_Colors, value))            OnSetProperty(); } }
@@ -123,16 +117,24 @@ namespace UnityEngine.UI
             while (t != null)
             {
                 t.GetComponents(m_CanvasGroupCache);
+                bool shouldBreak = false;
                 for (var i = 0; i < m_CanvasGroupCache.Count; i++)
                 {
+                    // if the parent group does not allow interaction
+                    // we need to break
                     if (!m_CanvasGroupCache[i].interactable)
                     {
                         groupAllowInteraction = false;
-                        break;
+                        shouldBreak = true;
                     }
+                    // if this is a 'fresh' group, then break
+                    // as we should not consider parents
                     if (m_CanvasGroupCache[i].ignoreParentGroups)
-                        break;
+                        shouldBreak = true;
                 }
+                if (shouldBreak)
+                    break;
+
                 t = t.parent;
             }
 
@@ -171,16 +173,12 @@ namespace UnityEngine.UI
 
             m_CurrentSelectionState = state;
             InternalEvaluateAndTransitionToSelectionState(true);
-
-#if UNITY_EDITOR
-            m_HasEnableRun = true;
-#endif
         }
 
         private void OnSetProperty()
         {
 #if UNITY_EDITOR
-            if (Application.isPlaying)
+            if (!Application.isPlaying)
                 InternalEvaluateAndTransitionToSelectionState(true);
             else
 #endif
@@ -204,7 +202,7 @@ namespace UnityEngine.UI
             // OnValidate can be called before OnEnable, this makes it unsafe to access other components
             // since they might not have been initialized yet.
             // OnSetProperty potentially access Animator or Graphics. (case 618186)
-            if (m_HasEnableRun)
+            if (isActiveAndEnabled)
             {
                 // Need to clear out the override image on the target...
                 DoSpriteSwap(null);
@@ -382,7 +380,7 @@ namespace UnityEngine.UI
         // Convenience function -- change the selection to the specified object if it's not null and happens to be active.
         void Navigate(AxisEventData eventData, Selectable sel)
         {
-            if (sel != null && sel.enabled && sel.gameObject.activeInHierarchy)
+            if (sel != null && sel.IsActive())
                 eventData.selectedObject = sel.gameObject;
         }
 
@@ -482,7 +480,7 @@ namespace UnityEngine.UI
 
         void TriggerAnimation(string triggername)
         {
-            if (animator == null || !animator.enabled || animator.runtimeAnimatorController == null || string.IsNullOrEmpty(triggername))
+            if (animator == null || !animator.enabled || !animator.isActiveAndEnabled || animator.runtimeAnimatorController == null || string.IsNullOrEmpty(triggername))
                 return;
 
             animator.ResetTrigger(m_AnimationTriggers.normalTrigger);
