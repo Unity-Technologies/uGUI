@@ -508,7 +508,23 @@ namespace UnityEngine.UI
         // TODO: Make LateUpdate a coroutine instead. Allows us to control the update to only be when the field is active.
         protected virtual void LateUpdate()
         {
-            if (!isFocused || InPlaceEditing())
+            if (InPlaceEditing())
+                return;
+
+            if (m_ShouldActivateNextUpdate)
+            {
+                if (!isFocused)
+                {
+                    ActivateInputFieldInternal();
+                    m_ShouldActivateNextUpdate = false;
+                    return;
+                }
+
+                // Reset as we are already activated.
+                m_ShouldActivateNextUpdate = false;
+            }
+
+            if (!isFocused)
                 return;
 
             AssignPositioningIfNeeded();
