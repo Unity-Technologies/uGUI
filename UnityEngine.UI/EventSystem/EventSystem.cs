@@ -151,11 +151,11 @@ namespace UnityEngine.EventSystems
             if (lhs.sortingOrder != rhs.sortingOrder)
                 return rhs.sortingOrder.CompareTo(lhs.sortingOrder);
 
-            if (lhs.distance != rhs.distance)
-                return lhs.distance.CompareTo(rhs.distance);
-
             if (lhs.depth != rhs.depth)
                 return rhs.depth.CompareTo(lhs.depth);
+
+            if (lhs.distance != rhs.distance)
+                return lhs.distance.CompareTo(rhs.distance);
 
             return lhs.index.CompareTo(rhs.index);
         }
