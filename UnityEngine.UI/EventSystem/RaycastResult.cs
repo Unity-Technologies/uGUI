@@ -16,6 +16,10 @@ namespace UnityEngine.EventSystems
         public int depth;
         public int sortingLayer;
         public int sortingOrder;
+        // World-space position where a ray cast into the screen hits something
+        public Vector3 worldPosition;
+        // World-space normal where a ray cast into the screen hits something
+        public Vector3 worldNormal;
 
         public bool isValid
         {
@@ -29,6 +33,10 @@ namespace UnityEngine.EventSystems
             distance = 0;
             index = 0;
             depth = 0;
+            sortingLayer = 0;
+            sortingOrder = 0;
+            worldNormal = Vector3.up;
+            worldPosition = Vector3.zero;
         }
 
         public override string ToString()
@@ -38,6 +46,8 @@ namespace UnityEngine.EventSystems
                    "distance: " + distance + "\n" +
                    "index: " + index + "\n" +
                    "depth: " + depth + "\n" +
+                   "worldNormal: " + worldNormal + "\n" +
+                   "worldPosition: " + worldPosition + "\n" +
                    "module.sortOrderPriority: " + module.sortOrderPriority + "\n" +
                    "module.renderOrderPriority: " + module.renderOrderPriority + "\n" +
                    "sortingLayer: " + sortingLayer + "\n" +

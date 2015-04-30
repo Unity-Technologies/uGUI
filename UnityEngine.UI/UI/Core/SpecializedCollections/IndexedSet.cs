@@ -19,7 +19,6 @@ namespace UnityEngine.UI.Collections
         //We use a Dictionary to speed up list lookup, this makes it cheaper to guarantee no duplicates (set)
         //When removing we move the last item to the removed item position, this way we only need to update the index cache of a single item. (fast removal)
         //Order of the elements is not guaranteed. A removal will change the order of the items.
-        //TODO: If we add support to sort, this could be used in the CanvasUpdateRegistry.
 
         readonly List<T> m_List = new List<T>();
         Dictionary<T, int> m_Dictionary = new Dictionary<T, int>();

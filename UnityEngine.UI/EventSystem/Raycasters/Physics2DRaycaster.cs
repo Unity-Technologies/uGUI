@@ -25,17 +25,17 @@ namespace UnityEngine.EventSystems
 
             if (hits.Length != 0)
             {
-                eventData.worldPosition = hits[0].point;
-                eventData.worldNormal = hits[0].normal;
                 for (int b = 0, bmax = hits.Length; b < bmax; ++b)
                 {
-                    SpriteRenderer sr = hits[b].collider.gameObject.GetComponent<SpriteRenderer>();
+                    var sr = hits[b].collider.gameObject.GetComponent<SpriteRenderer>();
 
                     var result = new RaycastResult
                     {
                         gameObject = hits[b].collider.gameObject,
                         module = this,
                         distance = Vector3.Distance(eventCamera.transform.position, hits[b].transform.position),
+                        worldPosition = hits[b].point,
+                        worldNormal = hits[b].normal,
                         index = resultAppendList.Count,
                         sortingLayer =  sr != null ? sr.sortingLayerID : 0,
                         sortingOrder = sr != null ? sr.sortingOrder : 0

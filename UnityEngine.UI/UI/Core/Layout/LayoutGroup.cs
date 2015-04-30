@@ -4,6 +4,7 @@ using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
+    [DisallowMultipleComponent]
     [ExecuteInEditMode]
     [RequireComponent(typeof(RectTransform))]
     public abstract class LayoutGroup : UIBehaviour, ILayoutElement, ILayoutGroup

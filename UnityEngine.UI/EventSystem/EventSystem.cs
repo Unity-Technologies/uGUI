@@ -36,7 +36,6 @@ namespace UnityEngine.EventSystems
         }
 
         private GameObject m_CurrentSelected;
-        private GameObject m_LastSelected;
 
         public BaseInputModule currentInputModule
         {
@@ -57,9 +56,10 @@ namespace UnityEngine.EventSystems
             get { return m_CurrentSelected; }
         }
 
+        [Obsolete("lastSelectedGameObject is no longer supported")]
         public GameObject lastSelectedGameObject
         {
-            get { return m_LastSelected; }
+            get { return null; }
         }
 
         protected EventSystem()
@@ -100,7 +100,6 @@ namespace UnityEngine.EventSystems
 
             // Debug.Log("Selection: new (" + selected + ") old (" + m_CurrentSelected + ")");
             ExecuteEvents.Execute(m_CurrentSelected, pointer, ExecuteEvents.deselectHandler);
-            m_LastSelected = m_CurrentSelected;
             m_CurrentSelected = selected;
             ExecuteEvents.Execute(m_CurrentSelected, pointer, ExecuteEvents.selectHandler);
             m_SelectionGuard = false;
@@ -289,7 +288,6 @@ namespace UnityEngine.EventSystems
         {
             var sb = new StringBuilder();
             sb.AppendLine("<b>Selected:</b>" + currentSelectedGameObject);
-            sb.AppendLine("<b>Last Selected:</b>" + lastSelectedGameObject);
             sb.AppendLine();
             sb.AppendLine();
             sb.AppendLine(m_CurrentInputModule != null ? m_CurrentInputModule.ToString() : "No module");

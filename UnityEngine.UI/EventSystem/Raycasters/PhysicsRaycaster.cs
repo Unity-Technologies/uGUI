@@ -67,7 +67,6 @@ namespace UnityEngine.EventSystems
                 return;
 
             var ray = eventCamera.ScreenPointToRay(eventData.position);
-
             float dist = eventCamera.farClipPlane - eventCamera.nearClipPlane;
 
             var hits = Physics.RaycastAll(ray, dist, finalEventMask);
@@ -77,8 +76,6 @@ namespace UnityEngine.EventSystems
 
             if (hits.Length != 0)
             {
-                eventData.worldPosition = hits[0].point;
-                eventData.worldNormal = hits[0].normal;
                 for (int b = 0, bmax = hits.Length; b < bmax; ++b)
                 {
                     var result = new RaycastResult
@@ -86,6 +83,8 @@ namespace UnityEngine.EventSystems
                         gameObject = hits[b].collider.gameObject,
                         module = this,
                         distance = hits[b].distance,
+                        worldPosition = hits[b].point,
+                        worldNormal = hits[b].normal,
                         index = resultAppendList.Count,
                         sortingLayer = 0,
                         sortingOrder = 0
