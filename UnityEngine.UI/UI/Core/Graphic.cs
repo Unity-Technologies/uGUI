@@ -293,6 +293,9 @@ namespace UnityEngine.UI
 
         protected override void OnCanvasHierarchyChanged()
         {
+            if (!IsActive())
+                return;
+
             // Use m_Cavas so we dont auto call CacheCanvas
             Canvas currentCanvas = m_Canvas;
             CacheCanvas();
