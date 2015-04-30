@@ -18,7 +18,7 @@ namespace UnityEngine.UI
         }
 
         [Serializable]
-        public class ScrollRectEvent : UnityEvent<Vector2> { }
+        public class ScrollRectEvent : UnityEvent<Vector2> {}
 
         [SerializeField]
         private RectTransform m_Content;
@@ -123,7 +123,7 @@ namespace UnityEngine.UI
         private bool m_HasRebuiltLayout = false;
 
         protected ScrollRect()
-        { }
+        {}
 
         public virtual void Rebuild(CanvasUpdate executing)
         {

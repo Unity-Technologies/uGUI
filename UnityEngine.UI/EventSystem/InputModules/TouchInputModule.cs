@@ -6,7 +6,7 @@ namespace UnityEngine.EventSystems
     public class TouchInputModule : PointerInputModule
     {
         protected TouchInputModule()
-        { }
+        {}
 
         private Vector2 m_LastMousePosition;
         private Vector2 m_MousePosition;

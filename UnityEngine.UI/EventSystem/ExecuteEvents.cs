@@ -8,7 +8,7 @@ namespace UnityEngine.EventSystems
     {
         public delegate void EventFunction<T1>(T1 handler, BaseEventData eventData);
 
-        public static T ValidateEventData<T>(BaseEventData data) where T: class
+        public static T ValidateEventData<T>(BaseEventData data) where T : class
         {
             if ((data as T) == null)
                 throw new ArgumentException(String.Format("Invalid type: {0} passed to event expecting {1}", data.GetType(), typeof(T)));
@@ -243,12 +243,12 @@ namespace UnityEngine.EventSystems
 
         private static readonly ObjectPool<List<IEventSystemHandler>> s_HandlerListPool = new ObjectPool<List<IEventSystemHandler>>(null, l => l.Clear());
 
-        public static bool Execute<T>(GameObject target, BaseEventData eventData, EventFunction<T> functor) where T: IEventSystemHandler
+        public static bool Execute<T>(GameObject target, BaseEventData eventData, EventFunction<T> functor) where T : IEventSystemHandler
         {
             var internalHandlers = s_HandlerListPool.Get();
             GetEventList<T>(target, internalHandlers);
-            //	if (s_InternalHandlers.Count > 0)
-            //		Debug.Log("Executinng " + typeof (T) + " on " + target);
+            //  if (s_InternalHandlers.Count > 0)
+            //      Debug.Log("Executinng " + typeof (T) + " on " + target);
 
             for (var i = 0; i < internalHandlers.Count; i++)
             {
@@ -284,7 +284,7 @@ namespace UnityEngine.EventSystems
         /// </summary>
         private static readonly List<Transform> s_InternalTransformList = new List<Transform>(30);
 
-        public static GameObject ExecuteHierarchy<T>(GameObject root, BaseEventData eventData, EventFunction<T> callbackFunction) where T: IEventSystemHandler
+        public static GameObject ExecuteHierarchy<T>(GameObject root, BaseEventData eventData, EventFunction<T> callbackFunction) where T : IEventSystemHandler
         {
             GetEventChain(root, s_InternalTransformList);
 
@@ -297,7 +297,7 @@ namespace UnityEngine.EventSystems
             return null;
         }
 
-        private static bool ShouldSendToComponent<T>(Component component) where T: IEventSystemHandler
+        private static bool ShouldSendToComponent<T>(Component component) where T : IEventSystemHandler
         {
             var valid = component is T;
             if (!valid)
@@ -312,7 +312,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Get the specified object's event event.
         /// </summary>
-        private static void GetEventList<T>(GameObject go, IList<IEventSystemHandler> results) where T: IEventSystemHandler
+        private static void GetEventList<T>(GameObject go, IList<IEventSystemHandler> results) where T : IEventSystemHandler
         {
             // Debug.LogWarning("GetEventList<" + typeof(T).Name + ">");
             if (results == null)
@@ -338,7 +338,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Whether the specified game object will be able to handle the specified event.
         /// </summary>
-        public static bool CanHandleEvent<T>(GameObject go) where T: IEventSystemHandler
+        public static bool CanHandleEvent<T>(GameObject go) where T : IEventSystemHandler
         {
             var internalHandlers = s_HandlerListPool.Get();
             GetEventList<T>(go, internalHandlers);
@@ -350,7 +350,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Bubble the specified event on the game object, figuring out which object will actually receive the event.
         /// </summary>
-        public static GameObject GetEventHandler<T>(GameObject root) where T: IEventSystemHandler
+        public static GameObject GetEventHandler<T>(GameObject root) where T : IEventSystemHandler
         {
             if (root == null)
                 return null;

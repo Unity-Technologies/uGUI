@@ -18,7 +18,7 @@ namespace UnityEngine.UI
         }
 
         [Serializable]
-        public class ScrollEvent : UnityEvent<float> { }
+        public class ScrollEvent : UnityEvent<float> {}
 
         [SerializeField]
         private RectTransform m_HandleRect;
@@ -30,7 +30,7 @@ namespace UnityEngine.UI
         public Direction direction { get { return m_Direction; } set { if (SetPropertyUtility.SetStruct(ref m_Direction, value)) UpdateVisuals(); } }
 
         protected Scrollbar()
-        { }
+        {}
 
         // Scroll bar's current value in 0 to 1 range.
         [Range(0f, 1f)]

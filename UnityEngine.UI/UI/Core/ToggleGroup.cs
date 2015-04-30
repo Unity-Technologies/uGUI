@@ -14,7 +14,7 @@ namespace UnityEngine.UI
         private List<Toggle> m_Toggles = new List<Toggle>();
 
         protected ToggleGroup()
-        { }
+        {}
 
         private void ValidateToggleIsInGroup(Toggle toggle)
         {

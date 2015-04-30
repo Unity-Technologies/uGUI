@@ -30,7 +30,7 @@ namespace UnityEngine.UI
 
         private DrivenRectTransformTracker m_Tracker;
 
-        protected AspectRatioFitter() { }
+        protected AspectRatioFitter() {}
 
         #region Unity Lifetime calls
 
@@ -127,9 +127,9 @@ namespace UnityEngine.UI
             return parent.rect.size;
         }
 
-        public virtual void SetLayoutHorizontal() { }
+        public virtual void SetLayoutHorizontal() {}
 
-        public virtual void SetLayoutVertical() { }
+        public virtual void SetLayoutVertical() {}
 
         protected void SetDirty()
         {

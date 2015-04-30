@@ -27,7 +27,7 @@ namespace UnityEngine.UI.CoroutineTween
             Alpha
         }
 
-        public class ColorTweenCallback : UnityEvent<Color> { }
+        public class ColorTweenCallback : UnityEvent<Color> {}
 
         private ColorTweenCallback m_Target;
         private Color m_StartColor;

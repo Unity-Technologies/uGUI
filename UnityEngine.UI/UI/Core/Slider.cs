@@ -17,7 +17,7 @@ namespace UnityEngine.UI
         }
 
         [Serializable]
-        public class SliderEvent : UnityEvent<float> { }
+        public class SliderEvent : UnityEvent<float> {}
 
         [SerializeField]
         private RectTransform m_FillRect;
@@ -99,7 +99,7 @@ namespace UnityEngine.UI
         float stepSize { get { return wholeNumbers ? 1 : (maxValue - minValue) * 0.1f; } }
 
         protected Slider()
-        { }
+        {}
 
 #if UNITY_EDITOR
         protected override void OnValidate()

@@ -11,7 +11,7 @@ namespace UnityEngine.EventSystems
         private Vector2 m_MousePosition;
 
         protected StandaloneInputModule()
-        { }
+        {}
 
         [Obsolete("Mode is no longer needed on input module as it handles both mouse and keyboard simultaneously.", false)]
         public enum InputMode

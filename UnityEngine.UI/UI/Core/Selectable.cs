@@ -85,7 +85,7 @@ namespace UnityEngine.UI
         private bool             hasSelection      { get; set; }
 
         protected Selectable()
-        { }
+        {}
 
         // Convenience function that converts the Graphic to a Image, if possible
         public Image image

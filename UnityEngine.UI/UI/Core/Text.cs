@@ -24,7 +24,7 @@ namespace UnityEngine.UI
         [NonSerialized] private bool m_DisableFontTextureChangedCallback = false;
 
         protected Text()
-        { }
+        {}
 
         /// <summary>
         /// Get or set the material used by this Text.
@@ -476,8 +476,8 @@ namespace UnityEngine.UI
             m_DisableFontTextureChangedCallback = false;
         }
 
-        public virtual void CalculateLayoutInputHorizontal() { }
-        public virtual void CalculateLayoutInputVertical() { }
+        public virtual void CalculateLayoutInputHorizontal() {}
+        public virtual void CalculateLayoutInputVertical() {}
 
         public virtual float minWidth
         {

@@ -136,7 +136,7 @@ namespace UnityEngine.UI
         }
 
         void ISerializationCallbackReceiver.OnBeforeSerialize()
-        { }
+        {}
 
         void ISerializationCallbackReceiver.OnAfterDeserialize()
         {

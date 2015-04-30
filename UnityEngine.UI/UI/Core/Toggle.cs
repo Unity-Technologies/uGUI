@@ -20,7 +20,7 @@ namespace UnityEngine.UI
 
         [Serializable]
         public class ToggleEvent : UnityEvent<bool>
-        { }
+        {}
 
         /// <summary>
         /// Transition type.
@@ -64,7 +64,7 @@ namespace UnityEngine.UI
         private bool m_IsOn;
 
         protected Toggle()
-        { }
+        {}
 
 #if UNITY_EDITOR
         protected override void OnValidate()
