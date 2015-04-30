@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
@@ -42,8 +43,10 @@ namespace UnityEngine.UI
             }
         }
 
+        [FormerlySerializedAs("ignoreReversedGraphics")]
         [SerializeField]
         private bool m_IgnoreReversedGraphics = true;
+        [FormerlySerializedAs("blockingObjects")]
         [SerializeField]
         private BlockingObjects m_BlockingObjects = BlockingObjects.None;
 
@@ -56,7 +59,7 @@ namespace UnityEngine.UI
         private Canvas m_Canvas;
 
         protected GraphicRaycaster()
-        { }
+        {}
 
         private Canvas canvas
         {
@@ -217,10 +220,10 @@ namespace UnityEngine.UI
             }
 
             s_SortedGraphics.Sort((g1, g2) => g2.depth.CompareTo(g1.depth));
-            //		StringBuilder cast = new StringBuilder();
+            //      StringBuilder cast = new StringBuilder();
             for (int i = 0; i < s_SortedGraphics.Count; ++i)
                 results.Add(s_SortedGraphics[i]);
-            //		Debug.Log (cast.ToString());
+            //      Debug.Log (cast.ToString());
         }
     }
 }

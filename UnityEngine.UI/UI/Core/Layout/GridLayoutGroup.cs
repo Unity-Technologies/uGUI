@@ -29,7 +29,7 @@ namespace UnityEngine.UI
         public int constraintCount { get { return m_ConstraintCount; } set { SetProperty(ref m_ConstraintCount, value); } }
 
         protected GridLayoutGroup()
-        { }
+        {}
 
         public override void CalculateLayoutInputHorizontal()
         {

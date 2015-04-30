@@ -49,7 +49,7 @@ namespace UnityEngine.UI
         }
 
         protected Mask()
-        { }
+        {}
 
         public virtual bool MaskEnabled()
         {

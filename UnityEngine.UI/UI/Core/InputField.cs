@@ -64,10 +64,10 @@ namespace UnityEngine.UI
         public delegate char OnValidateInput(string text, int charIndex, char addedChar);
 
         [Serializable]
-        public class SubmitEvent : UnityEvent<string> { }
+        public class SubmitEvent : UnityEvent<string> {}
 
         [Serializable]
-        public class OnChangeEvent : UnityEvent<string> { }
+        public class OnChangeEvent : UnityEvent<string> {}
 
         static protected TouchScreenKeyboard m_Keyboard;
         static private readonly char[] kSeparators = { ' ', '.', ',' };
@@ -200,7 +200,7 @@ namespace UnityEngine.UI
         const string kEmailSpecialCharacters = "!#$%&'*+-/=?^_`{|}~";
 
         protected InputField()
-        { }
+        {}
 
 
         protected TextGenerator cachedInputTextGenerator
@@ -1450,6 +1450,7 @@ namespace UnityEngine.UI
                             if (height < lines[startLine].height)
                                 break;
                             drawStart = GetLineStartPosition(gen, startLine);
+
                             height -= lines[startLine].height;
                         }
                         else

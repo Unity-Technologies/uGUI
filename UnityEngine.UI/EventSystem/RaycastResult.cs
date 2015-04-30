@@ -34,7 +34,7 @@ namespace UnityEngine.EventSystems
         public override string ToString()
         {
             return "Name: " + gameObject.name + "\n" +
-                   "module: " + module.camera + "\n" +
+                   "module: " + module.GetComponent<Camera>() + "\n" +
                    "distance: " + distance + "\n" +
                    "index: " + index + "\n" +
                    "depth: " + depth + "\n" +

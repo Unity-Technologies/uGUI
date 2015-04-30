@@ -14,12 +14,12 @@ namespace UnityEngine.UI
         private List<Toggle> m_Toggles = new List<Toggle>();
 
         protected ToggleGroup()
-        { }
+        {}
 
         private void ValidateToggleIsInGroup(Toggle toggle)
         {
             if (toggle == null || !m_Toggles.Contains(toggle))
-                throw new ArgumentException(string.Format("Toggle {0} is not part of ToggleGroup {1}", toggle, this));
+                throw new ArgumentException(string.Format("Toggle {0} is not part of ToggleGroup {1}", new object[] {toggle, this}));
         }
 
         public void NotifyToggleOn(Toggle toggle)

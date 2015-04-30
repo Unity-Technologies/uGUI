@@ -11,7 +11,7 @@ namespace UnityEngine.UI
     public class Button : Selectable, IPointerClickHandler, ISubmitHandler
     {
         [Serializable]
-        public class ButtonClickedEvent : UnityEvent { }
+        public class ButtonClickedEvent : UnityEvent {}
 
         // Event delegates triggered on click.
         [FormerlySerializedAs("onClick")]
@@ -19,7 +19,7 @@ namespace UnityEngine.UI
         private ButtonClickedEvent m_OnClick = new ButtonClickedEvent();
 
         protected Button()
-        { }
+        {}
 
         public ButtonClickedEvent onClick
         {

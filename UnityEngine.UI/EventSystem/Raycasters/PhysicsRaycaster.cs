@@ -23,7 +23,7 @@ namespace UnityEngine.EventSystems
         protected LayerMask m_EventMask = kNoEventMaskSet;
 
         protected PhysicsRaycaster()
-        { }
+        {}
 
         public override Camera eventCamera
         {

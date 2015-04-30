@@ -21,10 +21,10 @@ namespace UnityEngine.UI
         static protected Material s_DefaultText = null;
 
         // We use this flag instead of Unregistering/Registering the callback to avoid allocation.
-        [NonSerialized] private bool m_DisableFontTextureChangedCallback = false;
+        [NonSerialized] private bool m_DisableFontTextureRebuiltCallback = false;
 
         protected Text()
-        { }
+        {}
 
         /// <summary>
         /// Get or set the material used by this Text.
@@ -76,7 +76,7 @@ namespace UnityEngine.UI
                 return;
             }
 
-            if (m_DisableFontTextureChangedCallback)
+            if (m_DisableFontTextureRebuiltCallback)
                 return;
 
             cachedTextGenerator.Invalidate();
@@ -432,7 +432,7 @@ namespace UnityEngine.UI
             // We dont care if we the font Texture changes while we are doing our Update.
             // The end result of cachedTextGenerator will be valid for this instance.
             // Otherwise we can get issues like Case 619238.
-            m_DisableFontTextureChangedCallback = true;
+            m_DisableFontTextureRebuiltCallback = true;
 
             Vector2 extents = rectTransform.rect.size;
 
@@ -473,11 +473,11 @@ namespace UnityEngine.UI
                     vbo.Add(uiv);
                 }
             }
-            m_DisableFontTextureChangedCallback = false;
+            m_DisableFontTextureRebuiltCallback = false;
         }
 
-        public virtual void CalculateLayoutInputHorizontal() { }
-        public virtual void CalculateLayoutInputVertical() { }
+        public virtual void CalculateLayoutInputHorizontal() {}
+        public virtual void CalculateLayoutInputVertical() {}
 
         public virtual float minWidth
         {

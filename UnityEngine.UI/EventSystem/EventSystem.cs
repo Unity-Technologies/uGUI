@@ -63,7 +63,7 @@ namespace UnityEngine.EventSystems
         }
 
         protected EventSystem()
-        { }
+        {}
 
         public void UpdateModules()
         {

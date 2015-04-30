@@ -106,7 +106,7 @@ namespace UnityEngine.EventSystems
 
             GameObject commonRoot = FindCommonRoot(currentPointerData.pointerEnter, newEnterTarget);
 #if UNITY_EDITOR
-            //				lastCommonRoot = commonRoot;
+            //              lastCommonRoot = commonRoot;
 #endif
             // and we already an entered object from last time
             if (currentPointerData.pointerEnter != null)
@@ -171,13 +171,13 @@ namespace UnityEngine.EventSystems
         }
 
         public virtual void DeactivateModule()
-        { }
+        {}
 
         public virtual void ActivateModule()
-        { }
+        {}
 
         public virtual void UpdateModule()
-        { }
+        {}
 
         public virtual bool IsModuleSupported()
         {

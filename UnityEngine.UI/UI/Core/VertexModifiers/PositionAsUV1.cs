@@ -6,7 +6,7 @@ namespace UnityEngine.UI
     public class PositionAsUV1 : BaseVertexEffect
     {
         protected PositionAsUV1()
-        { }
+        {}
 
         public override void ModifyVertices(List<UIVertex> verts)
         {

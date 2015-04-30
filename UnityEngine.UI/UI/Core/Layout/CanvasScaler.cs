@@ -79,7 +79,7 @@ namespace UnityEngine.UI
         private float m_PrevReferencePixelsPerUnit = 100;
 
 
-        protected CanvasScaler() { }
+        protected CanvasScaler() {}
 
         protected override void OnEnable()
         {

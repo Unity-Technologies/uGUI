@@ -8,7 +8,7 @@ namespace UnityEngine.UI
     /// </summary>
 
     [Serializable]
-    public struct FontData : ISerializationCallbackReceiver
+    public class FontData : ISerializationCallbackReceiver
     {
         [SerializeField]
         [FormerlySerializedAs("font")]
@@ -136,7 +136,7 @@ namespace UnityEngine.UI
         }
 
         void ISerializationCallbackReceiver.OnBeforeSerialize()
-        { }
+        {}
 
         void ISerializationCallbackReceiver.OnAfterDeserialize()
         {

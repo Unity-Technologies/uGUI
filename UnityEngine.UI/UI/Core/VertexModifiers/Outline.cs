@@ -6,7 +6,7 @@ namespace UnityEngine.UI
     public class Outline : Shadow
     {
         protected Outline()
-        { }
+        {}
 
         public override void ModifyVertices(List<UIVertex> verts)
         {

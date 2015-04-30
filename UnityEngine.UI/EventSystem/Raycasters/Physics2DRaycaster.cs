@@ -10,7 +10,7 @@ namespace UnityEngine.EventSystems
     public class Physics2DRaycaster : PhysicsRaycaster
     {
         protected Physics2DRaycaster()
-        { }
+        {}
 
         public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
         {

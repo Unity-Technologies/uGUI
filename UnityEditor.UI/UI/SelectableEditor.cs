@@ -3,7 +3,6 @@ using System.Text;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEditorInternal;
 using UnityEditor.AnimatedValues;
 
 namespace UnityEditor.UI
@@ -164,7 +163,7 @@ namespace UnityEditor.UI
                                 if (animator == null)
                                     animator = (target as Selectable).gameObject.AddComponent<Animator>();
 
-                                AnimatorController.SetAnimatorController(animator, controller);
+                                Animations.AnimatorController.SetAnimatorController(animator, controller);
                             }
                         }
                     }
@@ -210,7 +209,7 @@ namespace UnityEditor.UI
             return GetType() != typeof(SelectableEditor);
         }
 
-        private static AnimatorController GenerateSelectableAnimatorContoller(AnimationTriggers animationTriggers, Selectable target)
+        private static Animations.AnimatorController GenerateSelectableAnimatorContoller(AnimationTriggers animationTriggers, Selectable target)
         {
             if (target == null)
                 return null;
@@ -227,12 +226,13 @@ namespace UnityEditor.UI
             var disabledName = string.IsNullOrEmpty(animationTriggers.disabledTrigger) ? "Disabled" : animationTriggers.disabledTrigger;
 
             // Create controller and hook up transitions.
-            var controller = AnimatorController.CreateAnimatorControllerAtPath(path);
-
+            var controller = Animations.AnimatorController.CreateAnimatorControllerAtPath(path);
             GenerateTriggerableTransition(normalName, controller);
             GenerateTriggerableTransition(highlightedName, controller);
             GenerateTriggerableTransition(pressedName, controller);
             GenerateTriggerableTransition(disabledName, controller);
+
+            AssetDatabase.ImportAsset(path);
 
             return controller;
         }
@@ -292,24 +292,22 @@ namespace UnityEditor.UI
             return animPath.ToString();
         }
 
-        private static AnimationClip GenerateTriggerableTransition(string name, AnimatorController controller)
+        private static AnimationClip GenerateTriggerableTransition(string name, Animations.AnimatorController controller)
         {
             // Create the clip
-            var clip = AnimatorController.AllocateAnimatorClip(name);
+            var clip = Animations.AnimatorController.AllocateAnimatorClip(name);
             AssetDatabase.AddObjectToAsset(clip, controller);
 
             // Create a state in the animatior controller for this clip
-            var state = AnimatorController.AddAnimationClipToController(controller, clip);
+            var state = controller.AddMotion(clip);
 
             // Add a transition property
             controller.AddParameter(name, AnimatorControllerParameterType.Trigger);
 
             // Add an any state transition
-            var stateMachine = controller.GetLayer(0).stateMachine;
+            var stateMachine = controller.layers[0].stateMachine;
             var transition = stateMachine.AddAnyStateTransition(state);
-            var condition = transition.GetCondition(0);
-            condition.mode = TransitionConditionMode.If;
-            condition.parameter = name;
+            transition.AddCondition(Animations.AnimatorConditionMode.If, 0, name);
             return clip;
         }
 

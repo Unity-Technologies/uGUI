@@ -16,7 +16,7 @@ namespace UnityEngine.UI
         [SerializeField] Rect m_UVRect = new Rect(0f, 0f, 1f, 1f);
 
         protected RawImage()
-        { }
+        {}
 
         /// <summary>
         /// Returns the texture used to draw this Graphic.

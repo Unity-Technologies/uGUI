@@ -79,9 +79,12 @@ namespace UnityEditor.UI
             {
                 parent = GetOrCreateCanvasGameObject();
             }
-            GameObject child = new GameObject(name);
 
-            Undo.RegisterCreatedObjectUndo(child, "Create " + name);
+            string uniqueName = GameObjectUtility.GetUniqueNameForSibling(parent.transform, name);
+
+            GameObject child = new GameObject(uniqueName);
+
+            Undo.RegisterCreatedObjectUndo(child, "Create " + uniqueName);
             Undo.SetTransformParent(child.transform, parent.transform, "Parent " + child.name);
             GameObjectUtility.SetParentAndAlign(child, parent);
 
@@ -99,6 +102,7 @@ namespace UnityEditor.UI
         static public void AddPanel(MenuCommand menuCommand)
         {
             GameObject panelRoot = CreateUIElementRoot("Panel", menuCommand, s_ThickGUIElementSize);
+            panelRoot.layer = LayerMask.NameToLayer(kUILayerName);
 
             // Set RectTransform to stretch
             RectTransform rectTransform = panelRoot.GetComponent<RectTransform>();

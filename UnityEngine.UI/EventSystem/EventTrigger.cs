@@ -27,7 +27,7 @@ namespace UnityEngine.EventSystems
     {
         [Serializable]
         public class TriggerEvent : UnityEvent<BaseEventData>
-        { }
+        {}
 
         [Serializable]
         public class Entry
@@ -39,7 +39,7 @@ namespace UnityEngine.EventSystems
         public List<Entry> delegates;
 
         protected EventTrigger()
-        { }
+        {}
 
         private void Execute(EventTriggerType id, BaseEventData eventData)
         {

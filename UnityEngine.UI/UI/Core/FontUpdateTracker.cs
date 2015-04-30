@@ -20,7 +20,7 @@ namespace UnityEngine.UI
                 exists = new List<Text>();
                 m_Tracked.Add(t.font, exists);
 
-                t.font.textureRebuildCallback += RebuildForFont(t.font);
+                Font.textureRebuilt += RebuildForFont;
             }
 
             for (int i = 0; i < exists.Count; i++)
@@ -32,19 +32,16 @@ namespace UnityEngine.UI
             exists.Add(t);
         }
 
-        private static Font.FontTextureRebuildCallback RebuildForFont(Font f)
+        private static void RebuildForFont(Font f)
         {
-            return () =>
-                   {
-                       List<Text> texts;
-                       m_Tracked.TryGetValue(f, out texts);
+            List<Text> texts;
+            m_Tracked.TryGetValue(f, out texts);
 
-                       if (texts == null)
-                           return;
+            if (texts == null)
+                return;
 
-                       for (var i = 0; i < texts.Count; i++)
-                           texts[i].FontTextureChanged();
-                   };
+            for (var i = 0; i < texts.Count; i++)
+                texts[i].FontTextureChanged();
         }
 
         public static void UntrackText(Text t)
