@@ -26,10 +26,19 @@ namespace UnityEngine.UI
         public Constraint constraint { get { return m_Constraint; } set { SetProperty(ref m_Constraint, value); } }
 
         [SerializeField] protected int m_ConstraintCount = 2;
-        public int constraintCount { get { return m_ConstraintCount; } set { SetProperty(ref m_ConstraintCount, value); } }
+        public int constraintCount { get { return m_ConstraintCount; } set { SetProperty(ref m_ConstraintCount, Mathf.Max(1, value)); } }
 
         protected GridLayoutGroup()
         {}
+
+        #if UNITY_EDITOR
+        protected override void OnValidate()
+        {
+            base.OnValidate();
+            constraintCount = constraintCount;
+        }
+
+        #endif
 
         public override void CalculateLayoutInputHorizontal()
         {
@@ -133,8 +142,15 @@ namespace UnityEngine.UI
             }
             else
             {
-                cellCountX = Mathf.Max(1, Mathf.FloorToInt((width - padding.horizontal + spacing.x + 0.001f) / (cellSize.x + spacing.x)));
-                cellCountY = Mathf.Max(1, Mathf.FloorToInt((height - padding.vertical + spacing.y + 0.001f) / (cellSize.y + spacing.y)));
+                if (cellSize.x + spacing.x <= 0)
+                    cellCountX = int.MaxValue;
+                else
+                    cellCountX = Mathf.Max(1, Mathf.FloorToInt((width - padding.horizontal + spacing.x + 0.001f) / (cellSize.x + spacing.x)));
+
+                if (cellSize.y + spacing.y <= 0)
+                    cellCountY = int.MaxValue;
+                else
+                    cellCountY = Mathf.Max(1, Mathf.FloorToInt((height - padding.vertical + spacing.y + 0.001f) / (cellSize.y + spacing.y)));
             }
 
             int cornerX = (int)startCorner % 2;

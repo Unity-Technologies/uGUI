@@ -6,9 +6,7 @@ namespace UnityEditor.UI
     // Tools for the editor
     internal class SpriteDrawUtility
     {
-        static Texture2D s_BackdropTex;
         static Texture2D s_ContrastTex;
-        static Texture2D s_GradientTex;
 
         // Returns a usable texture that looks like a high-contrast checker board.
         static Texture2D contrastTexture
@@ -20,17 +18,6 @@ namespace UnityEditor.UI
                             new Color(0f, 0.0f, 0f, 0.5f),
                             new Color(1f, 1f, 1f, 0.5f));
                 return s_ContrastTex;
-            }
-        }
-
-        // Gradient texture is used for title bars / headers.
-        static Texture2D gradientTexture
-        {
-            get
-            {
-                if (s_GradientTex == null)
-                    s_GradientTex = CreateGradientTex();
-                return s_GradientTex;
             }
         }
 

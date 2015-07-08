@@ -168,8 +168,8 @@ namespace UnityEngine.UI
         protected string m_Text = string.Empty;
 
         [SerializeField]
-        [Range(0f, 8f)]
-        private float m_CaretBlinkRate = 1.7f;
+        [Range(0f, 4f)]
+        private float m_CaretBlinkRate = 0.85f;
 
         #endregion
 
@@ -179,6 +179,7 @@ namespace UnityEngine.UI
         protected UIVertex[] m_CursorVerts = null;
         private TextGenerator m_InputTextCache;
         private CanvasRenderer m_CachedInputRenderer;
+        private bool m_PreventFontCallback = false;
         private readonly List<UIVertex> m_Vbo = new List<UIVertex>();
         private bool m_AllowInput = false;
         private bool m_ShouldActivateNextUpdate = false;
@@ -187,7 +188,7 @@ namespace UnityEngine.UI
         private const float kHScrollSpeed = 0.05f;
         private const float kVScrollSpeed = 0.10f;
         protected bool m_CaretVisible;
-        private Coroutine m_BlickCoroutine = null;
+        private Coroutine m_BlinkCoroutine = null;
         private float m_BlinkStartTime = 0.0f;
         protected int m_DrawStart = 0;
         protected int m_DrawEnd = 0;
@@ -334,11 +335,59 @@ namespace UnityEngine.UI
 
         /// <summary>
         /// Current position of the cursor.
+        /// Getters are public Setters are protected
         /// </summary>
 
-        protected int caretPosition { get { return m_CaretPosition + Input.compositionString.Length; } set { m_CaretPosition = value; ClampPos(ref m_CaretPosition); } }
-        protected int caretSelectPos { get { return m_CaretSelectPosition + Input.compositionString.Length; } set { m_CaretSelectPosition = value; ClampPos(ref m_CaretSelectPosition); } }
-        private bool hasSelection { get { return caretPosition != caretSelectPos; } }
+        protected int caretPositionInternal { get { return m_CaretPosition + Input.compositionString.Length; } set { m_CaretPosition = value; ClampPos(ref m_CaretPosition); } }
+        protected int caretSelectPositionInternal { get { return m_CaretSelectPosition + Input.compositionString.Length; } set { m_CaretSelectPosition = value; ClampPos(ref m_CaretSelectPosition); } }
+        private bool hasSelection { get { return caretPositionInternal != caretSelectPositionInternal; } }
+
+        /// <summary>
+        /// Get: Returns the focus position as thats the position that moves around even during selection.
+        /// Set: Set both the anchor and focus position such that a selection doesn't happen
+        /// </summary>
+
+        public int caretPosition
+        {
+            get { return m_CaretSelectPosition + Input.compositionString.Length; }
+            set { selectionAnchorPosition = value; selectionFocusPosition = value; }
+        }
+
+        /// <summary>
+        /// Get: Returns the fixed position of selection
+        /// Set: If Input.compositionString is 0 set the fixed position
+        /// </summary>
+
+        public int selectionAnchorPosition
+        {
+            get { return m_CaretPosition + Input.compositionString.Length; }
+            set
+            {
+                if (Input.compositionString.Length != 0)
+                    return;
+
+                m_CaretPosition = value;
+                ClampPos(ref m_CaretPosition);
+            }
+        }
+
+        /// <summary>
+        /// Get: Returns the variable position of selection
+        /// Set: If Input.compositionString is 0 set the variable position
+        /// </summary>
+
+        public int selectionFocusPosition
+        {
+            get { return m_CaretSelectPosition + Input.compositionString.Length; }
+            set
+            {
+                if (Input.compositionString.Length != 0)
+                    return;
+
+                m_CaretSelectPosition = value;
+                ClampPos(ref m_CaretSelectPosition);
+            }
+        }
 
     #if UNITY_EDITOR
         // Remember: This is NOT related to text validation!
@@ -347,6 +396,11 @@ namespace UnityEngine.UI
         {
             base.OnValidate();
             EnforceContentType();
+
+            //This can be invoked before OnEnabled is called. So we shouldn't be accessing other objects, before OnEnable is called.
+            if (!IsActive())
+                return;
+
             UpdateLabel();
             if (m_AllowInput)
                 SetCaretActive();
@@ -371,6 +425,9 @@ namespace UnityEngine.UI
 
         protected override void OnDisable()
         {
+            // the coroutine will be terminated, so this will ensure it restarts when we are next activated
+            m_BlinkCoroutine = null;
+
             DeactivateInputField();
             if (m_TextComponent != null)
             {
@@ -393,21 +450,21 @@ namespace UnityEngine.UI
 
             while (isFocused && m_CaretBlinkRate > 0)
             {
-                // Update caret state as first thing after waiting.
-                // This also ensures m_CaretBlinkRate didn't get set to 0 in between
-                // checking it above and running this time comparison.
-                if (m_BlinkStartTime + (1f / m_CaretBlinkRate) < Time.unscaledTime)
-                {
-                    m_CaretVisible = !m_CaretVisible;
-                    m_BlinkStartTime = Time.unscaledTime;
+                // the blink rate is expressed as a frequency
+                float blinkPeriod = 1f / m_CaretBlinkRate;
 
+                // the caret should be ON if we are in the first half of the blink period
+                bool blinkState = (Time.unscaledTime - m_BlinkStartTime) % blinkPeriod < blinkPeriod / 2;
+                if (m_CaretVisible != blinkState)
+                {
+                    m_CaretVisible = blinkState;
                     UpdateGeometry();
                 }
 
                 // Then wait again.
                 yield return null;
             }
-            m_BlickCoroutine = null;
+            m_BlinkCoroutine = null;
         }
 
         void SetCaretVisible()
@@ -429,8 +486,8 @@ namespace UnityEngine.UI
 
             if (m_CaretBlinkRate > 0.0f)
             {
-                if (m_BlickCoroutine == null)
-                    m_BlickCoroutine = StartCoroutine(CaretBlink());
+                if (m_BlinkCoroutine == null)
+                    m_BlinkCoroutine = StartCoroutine(CaretBlink());
             }
             else
             {
@@ -445,8 +502,8 @@ namespace UnityEngine.UI
 
         protected void SelectAll()
         {
-            caretPosition = text.Length;
-            caretSelectPos = 0;
+            caretPositionInternal = text.Length;
+            caretSelectPositionInternal = 0;
         }
 
         public void MoveTextEnd(bool shift)
@@ -455,12 +512,12 @@ namespace UnityEngine.UI
 
             if (shift)
             {
-                caretSelectPos = position;
+                caretSelectPositionInternal = position;
             }
             else
             {
-                caretPosition = position;
-                caretSelectPos = caretPosition;
+                caretPositionInternal = position;
+                caretSelectPositionInternal = caretPositionInternal;
             }
             UpdateLabel();
         }
@@ -471,12 +528,12 @@ namespace UnityEngine.UI
 
             if (shift)
             {
-                caretSelectPos = position;
+                caretSelectPositionInternal = position;
             }
             else
             {
-                caretPosition = position;
-                caretSelectPos = caretPosition;
+                caretPositionInternal = position;
+                caretSelectPositionInternal = caretPositionInternal;
             }
 
             UpdateLabel();
@@ -571,7 +628,7 @@ namespace UnityEngine.UI
 
                 if (characterLimit > 0 && m_Text.Length > characterLimit)
                     m_Text = m_Text.Substring(0, characterLimit);
-                caretPosition = caretSelectPos = m_Text.Length;
+                caretPositionInternal = caretSelectPositionInternal = m_Text.Length;
 
                 // Set keyboard text before updating label, as we might have changed it with validation
                 // and update label will take the old value from keyboard if we don't change it here
@@ -696,7 +753,7 @@ namespace UnityEngine.UI
 
             Vector2 localMousePos;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(textComponent.rectTransform, eventData.position, eventData.pressEventCamera, out localMousePos);
-            caretSelectPos = GetCharacterIndexFromPosition(localMousePos) + m_DrawStart;
+            caretSelectPositionInternal = GetCharacterIndexFromPosition(localMousePos) + m_DrawStart;
             MarkGeometryAsDirty();
 
             m_DragPositionOutOfBounds = !RectTransformUtility.RectangleContainsScreenPoint(textComponent.rectTransform, eventData.position, eventData.pressEventCamera);
@@ -768,7 +825,7 @@ namespace UnityEngine.UI
             if (hadFocusBefore)
             {
                 Vector2 pos = ScreenToLocal(eventData.position);
-                caretSelectPos = caretPosition = GetCharacterIndexFromPosition(pos) + m_DrawStart;
+                caretSelectPositionInternal = caretPositionInternal = GetCharacterIndexFromPosition(pos) + m_DrawStart;
             }
             UpdateLabel();
             eventData.Use();
@@ -787,6 +844,8 @@ namespace UnityEngine.UI
             bool isMac = (rp == RuntimePlatform.OSXEditor || rp == RuntimePlatform.OSXPlayer || rp == RuntimePlatform.OSXWebPlayer);
             bool ctrl = isMac ? (currentEventModifiers & EventModifiers.Command) != 0 : (currentEventModifiers & EventModifiers.Control) != 0;
             bool shift = (currentEventModifiers & EventModifiers.Shift) != 0;
+            bool alt = (currentEventModifiers & EventModifiers.Alt) != 0;
+            bool ctrlOnly = ctrl && !alt && !shift;
 
             switch (evt.keyCode)
             {
@@ -817,7 +876,7 @@ namespace UnityEngine.UI
                 // Select All
                 case KeyCode.A:
                 {
-                    if (ctrl)
+                    if (ctrlOnly)
                     {
                         SelectAll();
                         return EditState.Continue;
@@ -828,7 +887,7 @@ namespace UnityEngine.UI
                 // Copy
                 case KeyCode.C:
                 {
-                    if (ctrl)
+                    if (ctrlOnly)
                     {
                         clipboard = GetSelectedString();
                         return EditState.Continue;
@@ -839,7 +898,7 @@ namespace UnityEngine.UI
                 // Paste
                 case KeyCode.V:
                 {
-                    if (ctrl)
+                    if (ctrlOnly)
                     {
                         Append(clipboard);
                         return EditState.Continue;
@@ -850,7 +909,7 @@ namespace UnityEngine.UI
                 // Cut
                 case KeyCode.X:
                 {
-                    if (ctrl)
+                    if (ctrlOnly)
                     {
                         clipboard = GetSelectedString();
                         Delete();
@@ -979,8 +1038,8 @@ namespace UnityEngine.UI
             if (!hasSelection)
                 return "";
 
-            int startPos = caretPosition;
-            int endPos = caretSelectPos;
+            int startPos = caretPositionInternal;
+            int endPos = caretSelectPositionInternal;
 
             // Ensure pos is always less then selPos to make the code simpler
             if (startPos > endPos)
@@ -1000,10 +1059,10 @@ namespace UnityEngine.UI
 
         private int FindtNextWordBegin()
         {
-            if (caretSelectPos + 1 >= text.Length)
+            if (caretSelectPositionInternal + 1 >= text.Length)
                 return text.Length;
 
-            int spaceLoc = text.IndexOfAny(kSeparators, caretSelectPos + 1);
+            int spaceLoc = text.IndexOfAny(kSeparators, caretSelectPositionInternal + 1);
 
             if (spaceLoc == -1)
                 spaceLoc = text.Length;
@@ -1019,7 +1078,7 @@ namespace UnityEngine.UI
             {
                 // By convention, if we have a selection and move right without holding shift,
                 // we just place the cursor at the end.
-                caretPosition = caretSelectPos = Mathf.Max(caretPosition, caretSelectPos);
+                caretPositionInternal = caretSelectPositionInternal = Mathf.Max(caretPositionInternal, caretSelectPositionInternal);
                 return;
             }
 
@@ -1027,20 +1086,20 @@ namespace UnityEngine.UI
             if (ctrl)
                 position = FindtNextWordBegin();
             else
-                position = caretSelectPos + 1;
+                position = caretSelectPositionInternal + 1;
 
             if (shift)
-                caretSelectPos = position;
+                caretSelectPositionInternal = position;
             else
-                caretSelectPos = caretPosition = position;
+                caretSelectPositionInternal = caretPositionInternal = position;
         }
 
         private int FindtPrevWordBegin()
         {
-            if (caretSelectPos - 2 < 0)
+            if (caretSelectPositionInternal - 2 < 0)
                 return 0;
 
-            int spaceLoc = text.LastIndexOfAny(kSeparators, caretSelectPos - 2);
+            int spaceLoc = text.LastIndexOfAny(kSeparators, caretSelectPositionInternal - 2);
 
             if (spaceLoc == -1)
                 spaceLoc = 0;
@@ -1056,7 +1115,7 @@ namespace UnityEngine.UI
             {
                 // By convention, if we have a selection and move left without holding shift,
                 // we just place the cursor at the start.
-                caretPosition = caretSelectPos = Mathf.Min(caretPosition, caretSelectPos);
+                caretPositionInternal = caretSelectPositionInternal = Mathf.Min(caretPositionInternal, caretSelectPositionInternal);
                 return;
             }
 
@@ -1064,12 +1123,12 @@ namespace UnityEngine.UI
             if (ctrl)
                 position = FindtPrevWordBegin();
             else
-                position = caretSelectPos - 1;
+                position = caretSelectPositionInternal - 1;
 
             if (shift)
-                caretSelectPos = position;
+                caretSelectPositionInternal = position;
             else
-                caretSelectPos = caretPosition = position;
+                caretSelectPositionInternal = caretPositionInternal = position;
         }
 
         private int DetermineCharacterLine(int charPos, TextGenerator generator)
@@ -1151,15 +1210,15 @@ namespace UnityEngine.UI
             {
                 // If we have a selection and press down without shift,
                 // set caret position to end of selection before we move it down.
-                caretPosition = caretSelectPos = Mathf.Max(caretPosition, caretSelectPos);
+                caretPositionInternal = caretSelectPositionInternal = Mathf.Max(caretPositionInternal, caretSelectPositionInternal);
             }
 
-            int position = multiLine ? LineDownCharacterPosition(caretSelectPos, goToLastChar) : text.Length;
+            int position = multiLine ? LineDownCharacterPosition(caretSelectPositionInternal, goToLastChar) : text.Length;
 
             if (shift)
-                caretSelectPos = position;
+                caretSelectPositionInternal = position;
             else
-                caretPosition = caretSelectPos = position;
+                caretPositionInternal = caretSelectPositionInternal = position;
         }
 
         private void MoveUp(bool shift)
@@ -1173,31 +1232,31 @@ namespace UnityEngine.UI
             {
                 // If we have a selection and press up without shift,
                 // set caret position to start of selection before we move it up.
-                caretPosition = caretSelectPos = Mathf.Min(caretPosition, caretSelectPos);
+                caretPositionInternal = caretSelectPositionInternal = Mathf.Min(caretPositionInternal, caretSelectPositionInternal);
             }
 
-            int position = multiLine ? LineUpCharacterPosition(caretSelectPos, goToFirstChar) : 0;
+            int position = multiLine ? LineUpCharacterPosition(caretSelectPositionInternal, goToFirstChar) : 0;
 
             if (shift)
-                caretSelectPos = position;
+                caretSelectPositionInternal = position;
             else
-                caretSelectPos = caretPosition = position;
+                caretSelectPositionInternal = caretPositionInternal = position;
         }
 
         private void Delete()
         {
-            if (caretPosition == caretSelectPos)
+            if (caretPositionInternal == caretSelectPositionInternal)
                 return;
 
-            if (caretPosition < caretSelectPos)
+            if (caretPositionInternal < caretSelectPositionInternal)
             {
-                m_Text = text.Substring(0, caretPosition) + text.Substring(caretSelectPos, text.Length - caretSelectPos);
-                caretSelectPos = caretPosition;
+                m_Text = text.Substring(0, caretPositionInternal) + text.Substring(caretSelectPositionInternal, text.Length - caretSelectPositionInternal);
+                caretSelectPositionInternal = caretPositionInternal;
             }
             else
             {
-                m_Text = text.Substring(0, caretSelectPos) + text.Substring(caretPosition, text.Length - caretPosition);
-                caretPosition = caretSelectPos;
+                m_Text = text.Substring(0, caretSelectPositionInternal) + text.Substring(caretPositionInternal, text.Length - caretPositionInternal);
+                caretPositionInternal = caretSelectPositionInternal;
             }
         }
 
@@ -1210,9 +1269,9 @@ namespace UnityEngine.UI
             }
             else
             {
-                if (caretPosition < text.Length)
+                if (caretPositionInternal < text.Length)
                 {
-                    m_Text = text.Remove(caretPosition, 1);
+                    m_Text = text.Remove(caretPositionInternal, 1);
                     SendOnValueChangedAndUpdateLabel();
                 }
             }
@@ -1227,10 +1286,10 @@ namespace UnityEngine.UI
             }
             else
             {
-                if (caretPosition > 0)
+                if (caretPositionInternal > 0)
                 {
-                    m_Text = text.Remove(caretPosition - 1, 1);
-                    caretSelectPos = caretPosition = caretPosition - 1;
+                    m_Text = text.Remove(caretPositionInternal - 1, 1);
+                    caretSelectPositionInternal = caretPositionInternal = caretPositionInternal - 1;
                     SendOnValueChangedAndUpdateLabel();
                 }
             }
@@ -1247,7 +1306,7 @@ namespace UnityEngine.UI
                 return;
 
             m_Text = text.Insert(m_CaretPosition, replaceString);
-            caretSelectPos = caretPosition += replaceString.Length;
+            caretSelectPositionInternal = caretPositionInternal += replaceString.Length;
 
             SendOnValueChanged();
         }
@@ -1301,9 +1360,9 @@ namespace UnityEngine.UI
 
             // If we have an input validator, validate the input first
             if (onValidateInput != null)
-                input = onValidateInput(text, caretPosition, input);
+                input = onValidateInput(text, caretPositionInternal, input);
             else if (characterValidation != CharacterValidation.None)
-                input = Validate(text, caretPosition, input);
+                input = Validate(text, caretPositionInternal, input);
 
             // If the input is invalid, skip it
             if (input == 0)
@@ -1319,7 +1378,7 @@ namespace UnityEngine.UI
 
         protected void UpdateLabel()
         {
-            if (m_TextComponent != null && m_TextComponent.font != null)
+            if (m_TextComponent != null && m_TextComponent.font != null && !m_PreventFontCallback)
             {
                 string fullText;
                 if (Input.compositionString.Length > 0)
@@ -1355,9 +1414,21 @@ namespace UnityEngine.UI
 
                     var settings = m_TextComponent.GetGenerationSettings(extents);
                     settings.generateOutOfBounds = true;
-                    cachedInputTextGenerator.Populate(processed, settings);
 
-                    SetDrawRangeToContainCaretPosition(cachedInputTextGenerator, caretSelectPos, ref m_DrawStart, ref m_DrawEnd);
+                    // TextGenerator.Populate invokes a callback that's called for anything
+                    // that needs to be updated when the data for that font has changed.
+                    // This makes all Text components that use that font update their vertices.
+                    // In turn, this makes the InputField that's associated with that Text component
+                    // update its label by calling this UpdateLabel method.
+                    // This is a recursive call we want to prevent, since it makes the InputField
+                    // update based on font data that didn't yet finish executing, or alternatively
+                    // hang on infinite recursion, depending on whether the cached value is cached
+                    // before or after the calculation.
+                    m_PreventFontCallback = true;
+                    cachedInputTextGenerator.Populate(processed, settings);
+                    m_PreventFontCallback = false;
+
+                    SetDrawRangeToContainCaretPosition(cachedInputTextGenerator, caretSelectPositionInternal, ref m_DrawStart, ref m_DrawEnd);
 
                     processed = processed.Substring(m_DrawStart, Mathf.Min(m_DrawEnd, processed.Length) - m_DrawStart);
 
@@ -1371,10 +1442,10 @@ namespace UnityEngine.UI
 
         private bool IsSelectionVisible()
         {
-            if (m_DrawStart > caretPosition || m_DrawStart > caretSelectPos)
+            if (m_DrawStart > caretPositionInternal || m_DrawStart > caretSelectPositionInternal)
                 return false;
 
-            if (m_DrawEnd < caretPosition || m_DrawEnd < caretSelectPos)
+            if (m_DrawEnd < caretPositionInternal || m_DrawEnd < caretSelectPositionInternal)
                 return false;
 
             return true;
@@ -1621,7 +1692,7 @@ namespace UnityEngine.UI
 
             float width = 1f;
             float height = m_TextComponent.fontSize;
-            int adjustedPos = Mathf.Max(0, caretPosition - m_DrawStart);
+            int adjustedPos = Mathf.Max(0, caretPositionInternal - m_DrawStart);
             TextGenerator gen = m_TextComponent.cachedTextGenerator;
 
             if (gen == null)
@@ -1632,22 +1703,18 @@ namespace UnityEngine.UI
 
             Vector2 startPosition = Vector2.zero;
 
-            // Calculate startPosition.x
+            // Calculate startPosition
             if (gen.characterCountVisible + 1 > adjustedPos || adjustedPos == 0)
             {
                 UICharInfo cursorChar = gen.characters[adjustedPos];
                 startPosition.x = cursorChar.cursorPos.x;
+                startPosition.y = cursorChar.cursorPos.y;
             }
             startPosition.x /= m_TextComponent.pixelsPerUnit;
 
             // TODO: Only clamp when Text uses horizontal word wrap.
             if (startPosition.x > m_TextComponent.rectTransform.rect.xMax)
                 startPosition.x = m_TextComponent.rectTransform.rect.xMax;
-
-            // Calculate startPosition.y
-            int characterLine = DetermineCharacterLine(adjustedPos, gen);
-            float lineHeights = SumLineHeights(characterLine, gen);
-            startPosition.y = m_TextComponent.rectTransform.rect.yMax - lineHeights / m_TextComponent.pixelsPerUnit;
 
             m_CursorVerts[0].position = new Vector3(startPosition.x, startPosition.y - height, 0.0f);
             m_CursorVerts[1].position = new Vector3(startPosition.x + width, startPosition.y - height, 0.0f);
@@ -1701,8 +1768,8 @@ namespace UnityEngine.UI
 
         private void GenerateHightlight(List<UIVertex> vbo, Vector2 roundingOffset)
         {
-            int startChar = Mathf.Max(0, caretPosition - m_DrawStart);
-            int endChar = Mathf.Max(0, caretSelectPos - m_DrawStart);
+            int startChar = Mathf.Max(0, caretPositionInternal - m_DrawStart);
+            int endChar = Mathf.Max(0, caretSelectPositionInternal - m_DrawStart);
 
             // Ensure pos is always less then selPos to make the code simpler
             if (startChar > endChar)
@@ -1745,8 +1812,7 @@ namespace UnityEngine.UI
                 {
                     UICharInfo startCharInfo = gen.characters[startChar];
                     UICharInfo endCharInfo = gen.characters[currentChar];
-                    float lineHeights = SumLineHeights(currentLineIndex, gen);
-                    Vector2 startPosition = new Vector2(startCharInfo.cursorPos.x / m_TextComponent.pixelsPerUnit, m_TextComponent.rectTransform.rect.yMax - (lineHeights / m_TextComponent.pixelsPerUnit));
+                    Vector2 startPosition = new Vector2(startCharInfo.cursorPos.x / m_TextComponent.pixelsPerUnit, startCharInfo.cursorPos.y);
                     Vector2 endPosition = new Vector2((endCharInfo.cursorPos.x + endCharInfo.charWidth) / m_TextComponent.pixelsPerUnit, startPosition.y - height / m_TextComponent.pixelsPerUnit);
 
                     // Checking xMin as well due to text generator not setting possition if char is not rendered.
@@ -1928,7 +1994,7 @@ namespace UnityEngine.UI
             m_HasDoneFocusTransition = false;
             m_AllowInput = false;
 
-            if (m_TextComponent != null && IsActive() && IsInteractable())
+            if (m_TextComponent != null && IsInteractable())
             {
                 if (m_WasCanceled)
                     text = m_OriginalText;

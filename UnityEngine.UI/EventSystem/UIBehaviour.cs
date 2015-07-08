@@ -45,6 +45,9 @@ namespace UnityEngine.EventSystems
         protected virtual void OnCanvasGroupChanged()
         {}
 
+        protected virtual void OnCanvasHierarchyChanged()
+        {}
+
         public bool IsDestroyed()
         {
             // Workaround for Unity native side of the object

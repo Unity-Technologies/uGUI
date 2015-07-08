@@ -5,7 +5,9 @@ namespace UnityEngine.EventSystems
     [AddComponentMenu("Event/Standalone Input Module")]
     public class StandaloneInputModule : PointerInputModule
     {
-        private float m_NextAction;
+        private float m_PrevActionTime;
+        Vector2 m_LastMoveVector;
+        int m_ConsecutiveMoveCount = 0;
 
         private Vector2 m_LastMousePosition;
         private Vector2 m_MousePosition;
@@ -51,6 +53,9 @@ namespace UnityEngine.EventSystems
         private float m_InputActionsPerSecond = 10;
 
         [SerializeField]
+        private float m_RepeatDelay = 0.5f;
+
+        [SerializeField]
         private bool m_AllowActivationOnMobileDevice;
 
         public bool allowActivationOnMobileDevice
@@ -63,6 +68,12 @@ namespace UnityEngine.EventSystems
         {
             get { return m_InputActionsPerSecond; }
             set { m_InputActionsPerSecond = value; }
+        }
+
+        public float repeatDelay
+        {
+            get { return m_RepeatDelay; }
+            set { m_RepeatDelay = value; }
         }
 
         /// <summary>
@@ -131,8 +142,6 @@ namespace UnityEngine.EventSystems
 
             var toSelect = eventSystem.currentSelectedGameObject;
             if (toSelect == null)
-                toSelect = eventSystem.lastSelectedGameObject;
-            if (toSelect == null)
                 toSelect = eventSystem.firstSelectedGameObject;
 
             eventSystem.SetSelectedGameObject(toSelect, GetBaseEventData());
@@ -177,14 +186,6 @@ namespace UnityEngine.EventSystems
             return data.used;
         }
 
-        private bool AllowMoveEventProcessing(float time)
-        {
-            bool allow = Input.GetButtonDown(m_HorizontalAxis);
-            allow |= Input.GetButtonDown(m_VerticalAxis);
-            allow |= (time > m_NextAction);
-            return allow;
-        }
-
         private Vector2 GetRawMoveVector()
         {
             Vector2 move = Vector2.zero;
@@ -215,18 +216,37 @@ namespace UnityEngine.EventSystems
         {
             float time = Time.unscaledTime;
 
-            if (!AllowMoveEventProcessing(time))
+            Vector2 movement = GetRawMoveVector();
+            if (Mathf.Approximately(movement.x, 0f) && Mathf.Approximately(movement.y, 0f))
+            {
+                m_ConsecutiveMoveCount = 0;
+                return false;
+            }
+
+            // If user pressed key again, always allow event
+            bool allow = Input.GetButtonDown(m_HorizontalAxis) || Input.GetButtonDown(m_VerticalAxis);
+            bool similarDir = (Vector2.Dot(movement, m_LastMoveVector) > 0);
+            if (!allow)
+            {
+                // Otherwise, user held down key or axis.
+                // If direction didn't change at least 90 degrees, wait for delay before allowing consequtive event.
+                if (similarDir && m_ConsecutiveMoveCount == 1)
+                    allow = (time > m_PrevActionTime + m_RepeatDelay);
+                // If direction changed at least 90 degree, or we already had the delay, repeat at repeat rate.
+                else
+                    allow = (time > m_PrevActionTime + 1f / m_InputActionsPerSecond);
+            }
+            if (!allow)
                 return false;
 
-            Vector2 movement = GetRawMoveVector();
             // Debug.Log(m_ProcessingEvent.rawType + " axis:" + m_AllowAxisEvents + " value:" + "(" + x + "," + y + ")");
             var axisEventData = GetAxisEventData(movement.x, movement.y, 0.6f);
-            if (!Mathf.Approximately(axisEventData.moveVector.x, 0f)
-                || !Mathf.Approximately(axisEventData.moveVector.y, 0f))
-            {
-                ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, axisEventData, ExecuteEvents.moveHandler);
-            }
-            m_NextAction = time + 1f / m_InputActionsPerSecond;
+            ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, axisEventData, ExecuteEvents.moveHandler);
+            if (!similarDir)
+                m_ConsecutiveMoveCount = 0;
+            m_ConsecutiveMoveCount++;
+            m_PrevActionTime = time;
+            m_LastMoveVector = movement;
             return axisEventData.used;
         }
 
@@ -236,14 +256,7 @@ namespace UnityEngine.EventSystems
         private void ProcessMouseEvent()
         {
             var mouseData = GetMousePointerEventData();
-
-            var pressed = mouseData.AnyPressesThisFrame();
-            var released = mouseData.AnyReleasesThisFrame();
-
             var leftButtonData = mouseData.GetButtonState(PointerEventData.InputButton.Left).eventData;
-
-            if (!UseMouse(pressed, released, leftButtonData.buttonData))
-                return;
 
             // Process the first mouse button fully
             ProcessMousePress(leftButtonData);
@@ -261,14 +274,6 @@ namespace UnityEngine.EventSystems
                 var scrollHandler = ExecuteEvents.GetEventHandler<IScrollHandler>(leftButtonData.buttonData.pointerCurrentRaycast.gameObject);
                 ExecuteEvents.ExecuteHierarchy(scrollHandler, leftButtonData.buttonData, ExecuteEvents.scrollHandler);
             }
-        }
-
-        private static bool UseMouse(bool pressed, bool released, PointerEventData pointerData)
-        {
-            if (pressed || released || pointerData.IsPointerMoving() || pointerData.IsScrolling())
-                return true;
-
-            return false;
         }
 
         private bool SendUpdateEventToSelectedObject()

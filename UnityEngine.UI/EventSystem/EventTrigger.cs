@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace UnityEngine.EventSystems
 {
@@ -36,21 +37,34 @@ namespace UnityEngine.EventSystems
             public TriggerEvent callback = new TriggerEvent();
         }
 
+        [FormerlySerializedAs("delegates")]
+        [SerializeField]
+        private List<Entry> m_Delegates;
+
+        [Obsolete("Please use triggers instead (UnityUpgradable)", true)]
         public List<Entry> delegates;
 
         protected EventTrigger()
         {}
 
+        public List<Entry> triggers
+        {
+            get
+            {
+                if (m_Delegates == null)
+                    m_Delegates = new List<Entry>();
+                return m_Delegates;
+            }
+            set { m_Delegates = value; }
+        }
+
         private void Execute(EventTriggerType id, BaseEventData eventData)
         {
-            if (delegates != null)
+            for (int i = 0, imax = triggers.Count; i < imax; ++i)
             {
-                for (int i = 0, imax = delegates.Count; i < imax; ++i)
-                {
-                    var ent = delegates[i];
-                    if (ent.eventID == id && ent.callback != null)
-                        ent.callback.Invoke(eventData);
-                }
+                var ent = triggers[i];
+                if (ent.eventID == id && ent.callback != null)
+                    ent.callback.Invoke(eventData);
             }
         }
 

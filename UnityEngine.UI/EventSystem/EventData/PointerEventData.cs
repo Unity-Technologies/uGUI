@@ -1,4 +1,6 @@
+using System;
 using System.Text;
+using System.Collections.Generic;
 
 namespace UnityEngine.EventSystems
 {
@@ -36,6 +38,8 @@ namespace UnityEngine.EventSystems
         public RaycastResult pointerCurrentRaycast { get; set; }
         public RaycastResult pointerPressRaycast { get; set; }
 
+        public List<GameObject> hovered = new List<GameObject>();
+
         public bool eligibleForClick { get; set; }
 
         public int pointerId { get; set; }
@@ -44,11 +48,13 @@ namespace UnityEngine.EventSystems
         public Vector2 position { get; set; }
         // Delta since last update
         public Vector2 delta { get; set; }
-        // Delta since the event started being tracked
+        // Position of the press event
         public Vector2 pressPosition { get; set; }
         // World-space position where a ray cast into the screen hits something
+        [Obsolete("Use either pointerCurrentRaycast.worldPosition or pointerPressRaycast.worldPosition")]
         public Vector3 worldPosition { get; set; }
         // World-space normal where a ray cast into the screen hits something
+        [Obsolete("Use either pointerCurrentRaycast.worldNormal or pointerPressRaycast.worldNormal")]
         public Vector3 worldNormal { get; set; }
         // The last time a click event was sent out (used for double-clicks)
         public float clickTime { get; set; }
@@ -69,8 +75,6 @@ namespace UnityEngine.EventSystems
             position = Vector2.zero; // Current position of the mouse or touch event
             delta = Vector2.zero; // Delta since last update
             pressPosition = Vector2.zero; // Delta since the event started being tracked
-            worldPosition = Vector3.zero; // World-space position where a ray cast into the screen hits something
-            worldNormal = Vector3.zero; // World-space normal where a ray cast into the screen hits something
             clickTime = 0.0f; // The last time a click event was sent out (used for double-clicks)
             clickCount = 0; // Number of clicks in a row. 2 for a double-click for example.
 
@@ -124,6 +128,8 @@ namespace UnityEngine.EventSystems
             sb.AppendLine("<b>lastPointerPress</b>: " + lastPress);
             sb.AppendLine("<b>pointerDrag</b>: " + pointerDrag);
             sb.AppendLine("<b>Use Drag Threshold</b>: " + useDragThreshold);
+            sb.AppendLine("Current Rayast:");
+            sb.AppendLine(pointerCurrentRaycast.ToString());
             return sb.ToString();
         }
     }

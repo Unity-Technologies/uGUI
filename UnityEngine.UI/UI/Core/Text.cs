@@ -17,7 +17,6 @@ namespace UnityEngine.UI
         private TextGenerator m_TextCache;
         private TextGenerator m_TextCacheForLayout;
 
-        private static float kEpsilon = 0.0001f;
         static protected Material s_DefaultText = null;
 
         // We use this flag instead of Unregistering/Registering the callback to avoid allocation.
@@ -327,7 +326,7 @@ namespace UnityEngine.UI
             }
         }
 
-        public float  pixelsPerUnit
+        public float pixelsPerUnit
         {
             get
             {
@@ -377,18 +376,17 @@ namespace UnityEngine.UI
         {
             var settings = new TextGenerationSettings();
 
-            // Settings affected by pixels density
-            var pixelsPerUnitCached = pixelsPerUnit;
-            settings.generationExtents = extents * pixelsPerUnitCached + Vector2.one * kEpsilon;
+            settings.generationExtents = extents;
             if (font != null && font.dynamic)
             {
-                settings.fontSize = Mathf.Min(Mathf.FloorToInt(m_FontData.fontSize * pixelsPerUnitCached), 1000);
-                settings.resizeTextMinSize = Mathf.Min(Mathf.FloorToInt(m_FontData.minSize * pixelsPerUnitCached), 1000);
-                settings.resizeTextMaxSize = Mathf.Min(Mathf.FloorToInt(m_FontData.maxSize * pixelsPerUnitCached), 1000);
+                settings.fontSize = m_FontData.fontSize;
+                settings.resizeTextMinSize = m_FontData.minSize;
+                settings.resizeTextMaxSize = m_FontData.maxSize;
             }
 
             // Other settings
             settings.textAnchor = m_FontData.alignment;
+            settings.scaleFactor = pixelsPerUnit;
             settings.color = color;
             settings.font = font;
             settings.pivot = rectTransform.pivot;

@@ -154,8 +154,10 @@ namespace UnityEngine.UI
                         distance = 0;
                     else
                     {
+                        Transform trans = go.transform;
+                        Vector3 transForward = trans.forward;
                         // http://geomalgorithms.com/a06-_intersect-2.html
-                        distance = (Vector3.Dot(go.transform.forward, go.transform.position - ray.origin) / Vector3.Dot(go.transform.forward, ray.direction));
+                        distance = (Vector3.Dot(transForward, trans.position - ray.origin) / Vector3.Dot(transForward, ray.direction));
 
                         // Check to see if the go is behind the camera.
                         if (distance < 0)
@@ -172,7 +174,7 @@ namespace UnityEngine.UI
                         distance = distance,
                         index = resultAppendList.Count,
                         depth = m_RaycastResults[index].depth,
-                        sortingLayer =  canvas.sortingLayerID,
+                        sortingLayer =  canvas.cachedSortingLayerValue,
                         sortingOrder = canvas.sortingOrder
                     };
                     resultAppendList.Add(castResult);

@@ -291,6 +291,22 @@ namespace UnityEngine.UI
 
         #endregion
 
+        protected override void OnCanvasHierarchyChanged()
+        {
+            if (!IsActive())
+                return;
+
+            // Use m_Cavas so we dont auto call CacheCanvas
+            Canvas currentCanvas = m_Canvas;
+            CacheCanvas();
+
+            if (currentCanvas != m_Canvas)
+            {
+                GraphicRegistry.UnregisterGraphicForCanvas(currentCanvas, this);
+                GraphicRegistry.RegisterGraphicForCanvas(canvas, this);
+            }
+        }
+
         public virtual void Rebuild(CanvasUpdate update)
         {
             switch (update)

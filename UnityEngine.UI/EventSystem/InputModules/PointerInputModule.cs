@@ -69,9 +69,8 @@ namespace UnityEngine.EventSystems
             @to.delta = @from.delta;
             @to.scrollDelta = @from.scrollDelta;
             @to.pointerCurrentRaycast = @from.pointerCurrentRaycast;
+            @to.pointerPressRaycast = @from.pointerPressRaycast;
             @to.pointerEnter = @from.pointerEnter;
-            @to.worldPosition = @from.worldPosition;
-            @to.worldNormal = @from.worldNormal;
         }
 
         protected static PointerEventData.FramePressState StateForMouseButton(int buttonId)
@@ -196,7 +195,7 @@ namespace UnityEngine.EventSystems
             leftData.pointerCurrentRaycast = raycast;
             m_RaycastResultCache.Clear();
 
-            // copy the apropriate data into right and middle slots
+            // copy the appropriate data into right and middle slots
             PointerEventData rightData;
             GetPointerData(kMouseRightId, out rightData, true);
             CopyFromTo(leftData, rightData);

@@ -111,10 +111,15 @@ namespace UnityEngine.UI
                 m_MinValue = Mathf.Round(m_MinValue);
                 m_MaxValue = Mathf.Round(m_MaxValue);
             }
-            UpdateCachedReferences();
-            Set(m_Value, false);
-            // Update rects since other things might affect them even if value didn't change.
-            UpdateVisuals();
+
+            //Onvalidate is called before OnEnabled. We need to make sure not to touch any other objects before OnEnable is run.
+            if (IsActive())
+            {
+                UpdateCachedReferences();
+                Set(m_Value, false);
+                // Update rects since other things might affect them even if value didn't change.
+                UpdateVisuals();
+            }
 
             var prefabType = UnityEditor.PrefabUtility.GetPrefabType(this);
             if (prefabType != UnityEditor.PrefabType.Prefab && !Application.isPlaying)
@@ -199,6 +204,11 @@ namespace UnityEngine.UI
         protected override void OnRectTransformDimensionsChange()
         {
             base.OnRectTransformDimensionsChange();
+
+            //This can be invoked before OnEnabled is called. So we shouldn't be accessing other objects, before OnEnable is called.
+            if (!IsActive())
+                return;
+
             UpdateVisuals();
         }
 
@@ -300,7 +310,6 @@ namespace UnityEngine.UI
         {
             if (!MayDrag(eventData))
                 return;
-
             UpdateDrag(eventData, eventData.pressEventCamera);
         }
 

@@ -100,14 +100,29 @@ namespace UnityEngine.EventSystems
         // (but not including the common root).
         protected void HandlePointerExitAndEnter(PointerEventData currentPointerData, GameObject newEnterTarget)
         {
+            // if we have no target / pointerEnter has been deleted
+            // just send exit events to anything we are tracking
+            // then exit
+            if (newEnterTarget == null || currentPointerData.pointerEnter == null)
+            {
+                for (var i = 0; i < currentPointerData.hovered.Count; ++i)
+                    ExecuteEvents.Execute(currentPointerData.hovered[i], currentPointerData, ExecuteEvents.pointerExitHandler);
+
+                currentPointerData.hovered.Clear();
+
+                if (newEnterTarget == null)
+                {
+                    currentPointerData.pointerEnter = newEnterTarget;
+                    return;
+                }
+            }
+
             // if we have not changed hover target
-            if (currentPointerData.pointerEnter == newEnterTarget)
+            if (currentPointerData.pointerEnter == newEnterTarget && newEnterTarget)
                 return;
 
             GameObject commonRoot = FindCommonRoot(currentPointerData.pointerEnter, newEnterTarget);
-#if UNITY_EDITOR
-            //              lastCommonRoot = commonRoot;
-#endif
+
             // and we already an entered object from last time
             if (currentPointerData.pointerEnter != null)
             {
@@ -122,6 +137,7 @@ namespace UnityEngine.EventSystems
                         break;
 
                     ExecuteEvents.Execute(t.gameObject, currentPointerData, ExecuteEvents.pointerExitHandler);
+                    currentPointerData.hovered.Remove(t.gameObject);
                     t = t.parent;
                 }
             }
@@ -129,12 +145,13 @@ namespace UnityEngine.EventSystems
             // now issue the enter call up to but not including the common root
             if (newEnterTarget != null)
             {
-                Transform targetT = newEnterTarget.transform;
+                Transform t = newEnterTarget.transform;
 
-                while (targetT != null && targetT.gameObject != commonRoot)
+                while (t != null && t.gameObject != commonRoot)
                 {
-                    ExecuteEvents.Execute(targetT.gameObject, currentPointerData, ExecuteEvents.pointerEnterHandler);
-                    targetT = targetT.parent;
+                    ExecuteEvents.Execute(t.gameObject, currentPointerData, ExecuteEvents.pointerEnterHandler);
+                    currentPointerData.hovered.Add(t.gameObject);
+                    t = t.parent;
                 }
             }
             currentPointerData.pointerEnter = newEnterTarget;

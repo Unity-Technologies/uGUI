@@ -13,12 +13,12 @@ namespace UnityEngine.UI
         //  - It's possible for the Transform to get nulled from the Native side.
         // We use this struct with the IndexedSet container, which uses a dictionary as part of it's implementation
         // So this struct gets used as a key to a dictionary, so we need to guarantee a constant Hash value.
-        private readonly int m_CachedHasFromTrasnform;
+        private readonly int m_CachedHashFromTransform;
 
         private LayoutRebuilder(RectTransform controller)
         {
             m_ToRebuild = controller;
-            m_CachedHasFromTrasnform = m_ToRebuild.GetHashCode();
+            m_CachedHashFromTransform = m_ToRebuild.GetHashCode();
         }
 
         static LayoutRebuilder()
@@ -182,7 +182,7 @@ namespace UnityEngine.UI
 
         public override int GetHashCode()
         {
-            return m_CachedHasFromTrasnform;
+            return m_CachedHashFromTransform;
         }
 
         public override string ToString()

@@ -58,13 +58,6 @@ namespace UnityEditor.UI
                 {
                     EditorGUILayout.HelpBox("Using Rich Text with input is unsupported.", MessageType.Warning);
                 }
-
-                if (text.alignment != TextAnchor.UpperLeft &&
-                    text.alignment != TextAnchor.UpperCenter &&
-                    text.alignment != TextAnchor.UpperRight)
-                {
-                    EditorGUILayout.HelpBox("Using a non upper alignment with input is unsupported.", MessageType.Warning);
-                }
             }
 
             EditorGUI.BeginDisabledGroup(m_TextComponent == null || m_TextComponent.objectReferenceValue == null);
