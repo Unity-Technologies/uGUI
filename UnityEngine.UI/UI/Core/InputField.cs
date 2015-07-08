@@ -247,8 +247,12 @@ namespace UnityEngine.UI
         {
             get
             {
-                if (m_Keyboard != null && m_Keyboard.active && !InPlaceEditing())
+                // only return keyboard data if it's activated for this input field
+                if (m_Keyboard != null && m_Keyboard.active && !InPlaceEditing() &&
+                    EventSystem.current.currentSelectedGameObject == gameObject)
+                {
                     return m_Keyboard.text;
+                }
 
                 return m_Text;
             }
