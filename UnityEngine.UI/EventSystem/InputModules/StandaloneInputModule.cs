@@ -241,12 +241,21 @@ namespace UnityEngine.EventSystems
 
             // Debug.Log(m_ProcessingEvent.rawType + " axis:" + m_AllowAxisEvents + " value:" + "(" + x + "," + y + ")");
             var axisEventData = GetAxisEventData(movement.x, movement.y, 0.6f);
-            ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, axisEventData, ExecuteEvents.moveHandler);
-            if (!similarDir)
+
+            if (axisEventData.moveDir != MoveDirection.None)
+            {
+                ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, axisEventData, ExecuteEvents.moveHandler);
+                if (!similarDir)
+                    m_ConsecutiveMoveCount = 0;
+                m_ConsecutiveMoveCount++;
+                m_PrevActionTime = time;
+                m_LastMoveVector = movement;
+            }
+            else
+            {
                 m_ConsecutiveMoveCount = 0;
-            m_ConsecutiveMoveCount++;
-            m_PrevActionTime = time;
-            m_LastMoveVector = movement;
+            }
+
             return axisEventData.used;
         }
 
