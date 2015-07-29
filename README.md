@@ -17,8 +17,8 @@ Like the rest of the Unity open source projects, the UI system is released under
 + A folder will be created in the root directory called "Output", the generated dll's will output here in the correct folder structure
     * If you wish to use these dll's
     * Locate your Unity install location
-    * Windows: Copy the contents of Output folder to: `Data\UnityExtensions\Unity\GUISystem\{UNITY_VERSION}`
-    * OSX: Copy the contents of Output folder to: `Unity.app/Contents/UnityExtensions/Unity/GUISystem/{UNITY_VERSION}`
+    * Windows: Copy the contents of Output folder to: `Data\UnityExtensions\Unity\GUISystem\`
+    * OSX: Copy the contents of Output folder to: `Unity.app/Contents/UnityExtensions/Unity/GUISystem/`
 
 + If you want the dll's to copy automatically on build
     + For each visual studio project file
@@ -27,4 +27,4 @@ Like the rest of the Unity open source projects, the UI system is released under
         * Follow the instructions in the comments
 
 ### Will you be taking pull requests? ###
-At this stage the UI system is undergoing further development internally with many design decisions still being debated and implemented. Also, we are waiting to see the volume of pull requests and the time it will take the process them. As such, we are prioritizing first bug fix pull requests and will iterate on this process going forward. 
+At this stage the UI system is undergoing further development internally with many design decisions still being debated and implemented. Also, we are waiting to see the volume of pull requests and the time it will take the process them. As such, we are prioritizing first bug fix pull requests and will iterate on this process going forward.
