@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace UnityEngine.UI
 {
     [AddComponentMenu("UI/Effects/Shadow", 14)]
-    public class Shadow : BaseVertexEffect
+    public class Shadow : BaseMeshEffect
     {
         [SerializeField]
         private Color m_EffectColor = new Color(0f, 0f, 0f, 0.5f);
@@ -73,7 +73,7 @@ namespace UnityEngine.UI
             }
         }
 
-        protected void ApplyShadow(List<UIVertex> verts, Color32 color, int start, int end, float x, float y)
+        protected void ApplyShadowZeroAlloc(List<UIVertex> verts, Color32 color, int start, int end, float x, float y)
         {
             UIVertex vt;
 
@@ -98,12 +98,32 @@ namespace UnityEngine.UI
             }
         }
 
-        public override void ModifyVertices(List<UIVertex> verts)
+        protected void ApplyShadow(List<UIVertex> verts, Color32 color, int start, int end, float x, float y)
+        {
+            var neededCpacity = verts.Count * 2;
+            if (verts.Capacity < neededCpacity)
+                verts.Capacity = neededCpacity;
+
+            ApplyShadowZeroAlloc(verts, color, start, end, x, y);
+        }
+
+        public override void ModifyMesh(Mesh mesh)
         {
             if (!IsActive())
                 return;
 
-            ApplyShadow(verts, effectColor, 0, verts.Count, effectDistance.x, effectDistance.y);
+            List<UIVertex> output = new List<UIVertex>();
+
+            using (var helper = new VertexHelper(mesh))
+                helper.GetUIVertexStream(output);
+
+            ApplyShadow(output, effectColor, 0, output.Count, effectDistance.x, effectDistance.y);
+
+            using (var helper = new VertexHelper())
+            {
+                helper.AddUIVertexTriangleStream(output);
+                helper.FillMesh(mesh);
+            }
         }
     }
 }

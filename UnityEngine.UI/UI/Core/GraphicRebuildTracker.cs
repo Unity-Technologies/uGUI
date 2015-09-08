@@ -1,7 +1,5 @@
 #if UNITY_EDITOR
-using System;
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.UI.Collections;
 
 namespace UnityEngine.UI
@@ -29,6 +27,7 @@ namespace UnityEngine.UI
 
         static void OnRebuildRequested()
         {
+            StencilMaterial.ClearAll();
             for (int i = 0; i < m_Tracked.Count; i++)
             {
                 m_Tracked[i].OnRebuildRequested();

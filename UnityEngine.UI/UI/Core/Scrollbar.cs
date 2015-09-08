@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
-    [AddComponentMenu("UI/Scrollbar", 32)]
+    [AddComponentMenu("UI/Scrollbar", 34)]
     [RequireComponent(typeof(RectTransform))]
     public class Scrollbar : Selectable, IBeginDragHandler, IDragHandler, IInitializePotentialDragHandler, ICanvasElement
     {
@@ -35,7 +35,7 @@ namespace UnityEngine.UI
         // Scroll bar's current value in 0 to 1 range.
         [Range(0f, 1f)]
         [SerializeField]
-        private float m_Value = 1f;
+        private float m_Value;
         public float value
         {
             get

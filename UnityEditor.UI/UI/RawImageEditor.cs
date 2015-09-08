@@ -35,6 +35,7 @@ namespace UnityEditor.UI
 
             EditorGUILayout.PropertyField(m_Texture);
             AppearanceControlsGUI();
+            RaycastControlsGUI();
             EditorGUILayout.PropertyField(m_UVRect, m_UVRectContent);
             SetShowNativeSize(false);
             NativeSizeButtonGUI();

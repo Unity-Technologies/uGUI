@@ -56,6 +56,11 @@ namespace UnityEngine.UI
                 return;
 
             texts.Remove(t);
+
+            if (texts.Count == 0)
+            {
+                m_Tracked.Remove(t.font);
+            }
         }
     }
 }

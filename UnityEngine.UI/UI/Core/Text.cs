@@ -7,7 +7,7 @@ namespace UnityEngine.UI
     /// Labels are graphics that display text.
     /// </summary>
 
-    [AddComponentMenu("UI/Text", 11)]
+    [AddComponentMenu("UI/Text", 10)]
     public class Text : MaskableGraphic, ILayoutElement
     {
         [SerializeField] private FontData m_FontData = FontData.defaultFontData;
@@ -20,7 +20,7 @@ namespace UnityEngine.UI
         static protected Material s_DefaultText = null;
 
         // We use this flag instead of Unregistering/Registering the callback to avoid allocation.
-        [NonSerialized] private bool m_DisableFontTextureRebuiltCallback = false;
+        [NonSerialized] protected bool m_DisableFontTextureRebuiltCallback = false;
 
         protected Text()
         {}
@@ -31,22 +31,12 @@ namespace UnityEngine.UI
 
         public TextGenerator cachedTextGenerator
         {
-            get { return m_TextCache ?? (m_TextCache = m_Text.Length != 0 ? new TextGenerator(m_Text.Length) : new TextGenerator()); }
+            get { return m_TextCache ?? (m_TextCache = (m_Text.Length != 0 ? new TextGenerator(m_Text.Length) : new TextGenerator())); }
         }
 
         public TextGenerator cachedTextGeneratorForLayout
         {
             get { return m_TextCacheForLayout ?? (m_TextCacheForLayout = new TextGenerator()); }
-        }
-
-        public override Material defaultMaterial
-        {
-            get
-            {
-                if (s_DefaultText == null)
-                    s_DefaultText = Canvas.GetDefaultCanvasTextMaterial();
-                return s_DefaultText;
-            }
         }
 
         /// <summary>
@@ -418,16 +408,13 @@ namespace UnityEngine.UI
             }
         }
 
-        /// <summary>
-        /// Draw the Text.
-        /// </summary>
-
-        protected override void OnFillVBO(List<UIVertex> vbo)
+        readonly UIVertex[] m_TempVerts = new UIVertex[4];
+        protected override void OnPopulateMesh(Mesh toFill)
         {
             if (font == null)
                 return;
 
-            // We dont care if we the font Texture changes while we are doing our Update.
+            // We don't care if we the font Texture changes while we are doing our Update.
             // The end result of cachedTextGenerator will be valid for this instance.
             // Otherwise we can get issues like Case 619238.
             m_DisableFontTextureRebuiltCallback = true;
@@ -435,7 +422,7 @@ namespace UnityEngine.UI
             Vector2 extents = rectTransform.rect.size;
 
             var settings = GetGenerationSettings(extents);
-            cachedTextGenerator.Populate(m_Text, settings);
+            cachedTextGenerator.Populate(text, settings);
 
             Rect inputRect = rectTransform.rect;
 
@@ -451,25 +438,36 @@ namespace UnityEngine.UI
             // Apply the offset to the vertices
             IList<UIVertex> verts = cachedTextGenerator.verts;
             float unitsPerPixel = 1 / pixelsPerUnit;
-            if (roundingOffset != Vector2.zero)
+            //Last 4 verts are always a new line...
+            int vertCount = verts.Count - 4;
+
+            using (var vh = new VertexHelper())
             {
-                for (int i = 0; i < verts.Count; i++)
+                if (roundingOffset != Vector2.zero)
                 {
-                    UIVertex uiv = verts[i];
-                    uiv.position *= unitsPerPixel;
-                    uiv.position.x += roundingOffset.x;
-                    uiv.position.y += roundingOffset.y;
-                    vbo.Add(uiv);
+                    for (int i = 0; i < vertCount; ++i)
+                    {
+                        int tempVertsIndex = i & 3;
+                        m_TempVerts[tempVertsIndex] = verts[i];
+                        m_TempVerts[tempVertsIndex].position *= unitsPerPixel;
+                        m_TempVerts[tempVertsIndex].position.x += roundingOffset.x;
+                        m_TempVerts[tempVertsIndex].position.y += roundingOffset.y;
+                        if (tempVertsIndex == 3)
+                            vh.AddUIVertexQuad(m_TempVerts);
+                    }
                 }
-            }
-            else
-            {
-                for (int i = 0; i < verts.Count; i++)
+                else
                 {
-                    UIVertex uiv = verts[i];
-                    uiv.position *= unitsPerPixel;
-                    vbo.Add(uiv);
+                    for (int i = 0; i < vertCount; ++i)
+                    {
+                        int tempVertsIndex = i & 3;
+                        m_TempVerts[tempVertsIndex] = verts[i];
+                        m_TempVerts[tempVertsIndex].position *= unitsPerPixel;
+                        if (tempVertsIndex == 3)
+                            vh.AddUIVertexQuad(m_TempVerts);
+                    }
                 }
+                vh.FillMesh(toFill);
             }
             m_DisableFontTextureRebuiltCallback = false;
         }

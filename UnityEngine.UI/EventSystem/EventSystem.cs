@@ -145,7 +145,13 @@ namespace UnityEngine.EventSystems
             }
 
             if (lhs.sortingLayer != rhs.sortingLayer)
-                return rhs.sortingLayer.CompareTo(lhs.sortingLayer);
+            {
+                // Uses the layer value to properly compare the relative order of the layers.
+                var rid = SortingLayer.GetLayerValueFromID(rhs.sortingLayer);
+                var lid = SortingLayer.GetLayerValueFromID(lhs.sortingLayer);
+                return rid.CompareTo(lid);
+            }
+
 
             if (lhs.sortingOrder != rhs.sortingOrder)
                 return rhs.sortingOrder.CompareTo(lhs.sortingOrder);

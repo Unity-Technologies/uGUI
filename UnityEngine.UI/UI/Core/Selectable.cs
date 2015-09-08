@@ -480,7 +480,7 @@ namespace UnityEngine.UI
 
         void TriggerAnimation(string triggername)
         {
-            if (animator == null || !animator.enabled || !animator.isActiveAndEnabled || animator.runtimeAnimatorController == null || string.IsNullOrEmpty(triggername))
+            if (animator == null || !animator.isActiveAndEnabled || animator.runtimeAnimatorController == null || string.IsNullOrEmpty(triggername))
                 return;
 
             animator.ResetTrigger(m_AnimationTriggers.normalTrigger);

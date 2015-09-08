@@ -1,4 +1,6 @@
+using System;
 using System.Text;
+using UnityEngine.Serialization;
 
 namespace UnityEngine.EventSystems
 {
@@ -12,12 +14,20 @@ namespace UnityEngine.EventSystems
         private Vector2 m_MousePosition;
 
         [SerializeField]
-        private bool m_AllowActivationOnStandalone;
+        [FormerlySerializedAs("m_AllowActivationOnStandalone")]
+        private bool m_ForceModuleActive;
 
+        [Obsolete("allowActivationOnStandalone has been deprecated. Use forceModuleActive instead (UnityUpgradable) -> forceModuleActive")]
         public bool allowActivationOnStandalone
         {
-            get { return m_AllowActivationOnStandalone; }
-            set { m_AllowActivationOnStandalone = value; }
+            get { return m_ForceModuleActive; }
+            set { m_ForceModuleActive = value; }
+        }
+
+        public bool forceModuleActive
+        {
+            get { return m_ForceModuleActive; }
+            set { m_ForceModuleActive = value; }
         }
 
         public override void UpdateModule()
@@ -28,13 +38,16 @@ namespace UnityEngine.EventSystems
 
         public override bool IsModuleSupported()
         {
-            return m_AllowActivationOnStandalone || Input.touchSupported;
+            return forceModuleActive || Input.touchSupported;
         }
 
         public override bool ShouldActivateModule()
         {
             if (!base.ShouldActivateModule())
                 return false;
+
+            if (m_ForceModuleActive)
+                return true;
 
             if (UseFakeInput())
             {
@@ -74,7 +87,7 @@ namespace UnityEngine.EventSystems
         /// </summary>
         private void FakeTouches()
         {
-            var pointerData = GetMousePointerEventData();
+            var pointerData = GetMousePointerEventData(0);
 
             var leftPressData = pointerData.GetButtonState(PointerEventData.InputButton.Left).eventData;
 
@@ -196,7 +209,7 @@ namespace UnityEngine.EventSystems
                 {
                     ExecuteEvents.Execute(pointerEvent.pointerPress, pointerEvent, ExecuteEvents.pointerClickHandler);
                 }
-                else if (pointerEvent.pointerDrag != null)
+                else if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
                 {
                     ExecuteEvents.ExecuteHierarchy(currentOverGo, pointerEvent, ExecuteEvents.dropHandler);
                 }

@@ -8,7 +8,7 @@ namespace UnityEngine.UI
     /// <summary>
     /// Simple toggle -- something that has an 'on' and 'off' states: checkbox, toggle button, radio button, etc.
     /// </summary>
-    [AddComponentMenu("UI/Toggle", 35)]
+    [AddComponentMenu("UI/Toggle", 31)]
     [RequireComponent(typeof(RectTransform))]
     public class Toggle : Selectable, IPointerClickHandler, ISubmitHandler, ICanvasElement
     {
@@ -160,7 +160,7 @@ namespace UnityEngine.UI
 
             // Always send event when toggle is clicked, even if value didn't change
             // due to already active toggle in a toggle group being clicked.
-            // Controls like SelectionList rely on this.
+            // Controls like Dropdown rely on this.
             // It's up to the user to ignore a selection being set to the same value it already was, if desired.
             PlayEffect(toggleTransition == ToggleTransition.None);
             if (sendCallback)

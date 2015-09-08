@@ -92,6 +92,9 @@ namespace UnityEngine.UI
             instance.m_LayoutRebuildQueue.Clear();
             m_PerformingLayoutUpdate = false;
 
+            // now layout is complete do culling...
+            ClipperRegistry.instance.Cull();
+
             m_PerformingGraphicUpdate = true;
             for (var i = (int)CanvasUpdate.PreRender; i < (int)CanvasUpdate.MaxUpdateValue; i++)
             {

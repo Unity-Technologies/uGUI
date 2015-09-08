@@ -180,7 +180,7 @@ namespace UnityEngine.UI
         private TextGenerator m_InputTextCache;
         private CanvasRenderer m_CachedInputRenderer;
         private bool m_PreventFontCallback = false;
-        private readonly List<UIVertex> m_Vbo = new List<UIVertex>();
+        [NonSerialized] protected Mesh m_Mesh;
         private bool m_AllowInput = false;
         private bool m_ShouldActivateNextUpdate = false;
         private bool m_UpdateDrag = false;
@@ -203,6 +203,15 @@ namespace UnityEngine.UI
         protected InputField()
         {}
 
+        protected Mesh mesh
+        {
+            get
+            {
+                if (m_Mesh == null)
+                    m_Mesh = new Mesh();
+                return m_Mesh;
+            }
+        }
 
         protected TextGenerator cachedInputTextGenerator
         {
@@ -247,8 +256,12 @@ namespace UnityEngine.UI
         {
             get
             {
-                if (m_Keyboard != null && m_Keyboard.active && !InPlaceEditing())
+                // only return keyboard data if it's activated for this input field
+                if (m_Keyboard != null && m_Keyboard.active && !InPlaceEditing() &&
+                    EventSystem.current.currentSelectedGameObject == gameObject)
+                {
                     return m_Keyboard.text;
+                }
 
                 return m_Text;
             }
@@ -341,6 +354,11 @@ namespace UnityEngine.UI
         protected int caretPositionInternal { get { return m_CaretPosition + Input.compositionString.Length; } set { m_CaretPosition = value; ClampPos(ref m_CaretPosition); } }
         protected int caretSelectPositionInternal { get { return m_CaretSelectPosition + Input.compositionString.Length; } set { m_CaretSelectPosition = value; ClampPos(ref m_CaretSelectPosition); } }
         private bool hasSelection { get { return caretPositionInternal != caretSelectPositionInternal; } }
+
+#if UNITY_EDITOR
+        [Obsolete("caretSelectPosition has been deprecated. Use selectionFocusPosition instead (UnityUpgradable) -> selectionFocusPosition", true)]
+        public int caretSelectPosition { get { return selectionFocusPosition; } protected set { selectionFocusPosition = value; } }
+#endif
 
         /// <summary>
         /// Get: Returns the focus position as thats the position that moves around even during selection.
@@ -437,7 +455,11 @@ namespace UnityEngine.UI
             CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
 
             if (m_CachedInputRenderer)
-                m_CachedInputRenderer.SetVertices(null, 0);
+                m_CachedInputRenderer.SetMesh(null);
+
+            if (m_Mesh)
+                DestroyImmediate(m_Mesh);
+            m_Mesh = null;
 
             base.OnDisable();
         }
@@ -539,21 +561,15 @@ namespace UnityEngine.UI
             UpdateLabel();
         }
 
-        // TODO: Why doesnt this use GUIUtility.systemCopyBuffer??
         static string clipboard
         {
             get
             {
-                TextEditor te = new TextEditor();
-                te.Paste();
-                return te.content.text;
+                return GUIUtility.systemCopyBuffer;
             }
             set
             {
-                TextEditor te = new TextEditor();
-                te.content = new GUIContent(value);
-                te.OnFocus();
-                te.Copy();
+                GUIUtility.systemCopyBuffer = value;
             }
         }
 
@@ -889,7 +905,10 @@ namespace UnityEngine.UI
                 {
                     if (ctrlOnly)
                     {
-                        clipboard = GetSelectedString();
+                        if (inputType != InputType.Password)
+                            clipboard = GetSelectedString();
+                        else
+                            clipboard = "";
                         return EditState.Continue;
                     }
                     break;
@@ -911,7 +930,10 @@ namespace UnityEngine.UI
                 {
                     if (ctrlOnly)
                     {
-                        clipboard = GetSelectedString();
+                        if (inputType != InputType.Password)
+                            clipboard = GetSelectedString();
+                        else
+                            clipboard = "";
                         Delete();
                         SendOnValueChangedAndUpdateLabel();
                         return EditState.Continue;
@@ -961,11 +983,11 @@ namespace UnityEngine.UI
                 }
             }
 
-            // Dont allow return chars to be entered into single line fields.
-            if (!multiLine && (evt.character == '\t'))
+            char c = evt.character;
+            // Dont allow return chars or tabulator key to be entered into single line fields.
+            if (!multiLine && (c == '\t' || c == '\r' || c == 10))
                 return EditState.Continue;
 
-            char c = evt.character;
             // Convert carriage return and end-of-text characters to newline.
             if (c == '\r' || (int)c == 3)
                 c = '\n';
@@ -1025,6 +1047,20 @@ namespace UnityEngine.UI
                         break;
                     }
                 }
+
+                switch (m_ProcessingEvent.type)
+                {
+                    case EventType.ValidateCommand:
+                    case EventType.ExecuteCommand:
+                        switch (m_ProcessingEvent.commandName)
+                        {
+                            case "SelectAll":
+                                SelectAll();
+                                consumedEvent = true;
+                                break;
+                        }
+                        break;
+                }
             }
 
             if (consumedEvent)
@@ -1049,12 +1085,7 @@ namespace UnityEngine.UI
                 endPos = temp;
             }
 
-            StringBuilder builder = new StringBuilder();
-            for (int i = startPos; i < endPos; ++i)
-            {
-                builder.Append(text[i]);
-            }
-            return builder.ToString();
+            return text.Substring(startPos, endPos - startPos);
         }
 
         private int FindtNextWordBegin()
@@ -1380,6 +1411,21 @@ namespace UnityEngine.UI
         {
             if (m_TextComponent != null && m_TextComponent.font != null && !m_PreventFontCallback)
             {
+                // TextGenerator.Populate invokes a callback that's called for anything
+                // that needs to be updated when the data for that font has changed.
+                // This makes all Text components that use that font update their vertices.
+                // In turn, this makes the InputField that's associated with that Text component
+                // update its label by calling this UpdateLabel method.
+                // This is a recursive call we want to prevent, since it makes the InputField
+                // update based on font data that didn't yet finish executing, or alternatively
+                // hang on infinite recursion, depending on whether the cached value is cached
+                // before or after the calculation.
+                //
+                // This callback also occurs when assigning text to our Text component, i.e.,
+                // m_TextComponent.text = processed;
+
+                m_PreventFontCallback = true;
+
                 string fullText;
                 if (Input.compositionString.Length > 0)
                     fullText = text.Substring(0, m_CaretPosition) + Input.compositionString + text.Substring(m_CaretPosition);
@@ -1415,28 +1461,17 @@ namespace UnityEngine.UI
                     var settings = m_TextComponent.GetGenerationSettings(extents);
                     settings.generateOutOfBounds = true;
 
-                    // TextGenerator.Populate invokes a callback that's called for anything
-                    // that needs to be updated when the data for that font has changed.
-                    // This makes all Text components that use that font update their vertices.
-                    // In turn, this makes the InputField that's associated with that Text component
-                    // update its label by calling this UpdateLabel method.
-                    // This is a recursive call we want to prevent, since it makes the InputField
-                    // update based on font data that didn't yet finish executing, or alternatively
-                    // hang on infinite recursion, depending on whether the cached value is cached
-                    // before or after the calculation.
-                    m_PreventFontCallback = true;
                     cachedInputTextGenerator.Populate(processed, settings);
-                    m_PreventFontCallback = false;
 
-                    SetDrawRangeToContainCaretPosition(cachedInputTextGenerator, caretSelectPositionInternal, ref m_DrawStart, ref m_DrawEnd);
+                    SetDrawRangeToContainCaretPosition(caretSelectPositionInternal);
 
                     processed = processed.Substring(m_DrawStart, Mathf.Min(m_DrawEnd, processed.Length) - m_DrawStart);
 
                     SetCaretVisible();
                 }
                 m_TextComponent.text = processed;
-
                 MarkGeometryAsDirty();
+                m_PreventFontCallback = false;
             }
         }
 
@@ -1465,45 +1500,45 @@ namespace UnityEngine.UI
             return gen.characterCountVisible;
         }
 
-        private void SetDrawRangeToContainCaretPosition(TextGenerator gen, int caretPos, ref int drawStart, ref int drawEnd)
+        private void SetDrawRangeToContainCaretPosition(int caretPos)
         {
             // the extents gets modified by the pixel density, so we need to use the generated extents since that will be in the same 'space' as
             // the values returned by the TextGenerator.lines[x].height for instance.
-            Vector2 extents = gen.rectExtents.size;
+            Vector2 extents = cachedInputTextGenerator.rectExtents.size;
             if (multiLine)
             {
-                var lines = gen.lines;
-                int caretLine = DetermineCharacterLine(caretPos, gen);
+                var lines = cachedInputTextGenerator.lines;
+                int caretLine = DetermineCharacterLine(caretPos, cachedInputTextGenerator);
                 int height = (int)extents.y;
 
                 // Have to compare with less or equal rather than just less.
                 // The reason is that if the caret is between last char of one line and first char of next,
                 // we want to interpret it as being on the next line.
                 // This is also consistent with what DetermineCharacterLine returns.
-                if (drawEnd <= caretPos)
+                if (m_DrawEnd <= caretPos)
                 {
                     // Caret comes after drawEnd, so we need to move drawEnd to a later line end that comes after caret.
-                    drawEnd = GetLineEndPosition(gen, caretLine);
+                    m_DrawEnd = GetLineEndPosition(cachedInputTextGenerator, caretLine);
                     for (int i = caretLine; i >= 0 && i < lines.Count; --i)
                     {
                         height -= lines[i].height;
                         if (height < 0)
                             break;
 
-                        drawStart = GetLineStartPosition(gen, i);
+                        m_DrawStart = GetLineStartPosition(cachedInputTextGenerator, i);
                     }
                 }
                 else
                 {
-                    if (drawStart > caretPos)
+                    if (m_DrawStart > caretPos)
                     {
                         // Caret comes before drawStart, so we need to move drawStart to an earlier line start that comes before caret.
-                        drawStart = GetLineStartPosition(gen, caretLine);
+                        m_DrawStart = GetLineStartPosition(cachedInputTextGenerator, caretLine);
                     }
 
-                    int startLine = DetermineCharacterLine(drawStart, gen);
+                    int startLine = DetermineCharacterLine(m_DrawStart, cachedInputTextGenerator);
                     int endLine = startLine;
-                    drawEnd = GetLineEndPosition(gen, endLine);
+                    m_DrawEnd = GetLineEndPosition(cachedInputTextGenerator, endLine);
                     height -= lines[endLine].height;
                     while (true)
                     {
@@ -1512,7 +1547,7 @@ namespace UnityEngine.UI
                             endLine++;
                             if (height < lines[endLine].height)
                                 break;
-                            drawEnd = GetLineEndPosition(gen, endLine);
+                            m_DrawEnd = GetLineEndPosition(cachedInputTextGenerator, endLine);
                             height -= lines[endLine].height;
                         }
                         else if (startLine > 0)
@@ -1520,7 +1555,7 @@ namespace UnityEngine.UI
                             startLine--;
                             if (height < lines[startLine].height)
                                 break;
-                            drawStart = GetLineStartPosition(gen, startLine);
+                            m_DrawStart = GetLineStartPosition(cachedInputTextGenerator, startLine);
 
                             height -= lines[startLine].height;
                         }
@@ -1531,38 +1566,38 @@ namespace UnityEngine.UI
             }
             else
             {
-                float width = extents.x;
-                var characters = gen.characters;
+                var characters = cachedInputTextGenerator.characters;
+                if (m_DrawEnd > cachedInputTextGenerator.characterCountVisible)
+                    m_DrawEnd = cachedInputTextGenerator.characterCountVisible;
 
-                if (drawEnd <= caretPos)
+                float width = 0.0f;
+                if (caretPos > m_DrawEnd || (caretPos == m_DrawEnd && m_DrawStart > 0))
                 {
-                    drawEnd = Mathf.Min(caretPos, gen.characterCountVisible);
-                    drawStart = 0;
-                    for (int i = drawEnd; i > 0; --i)
+                    // fit characters from the caretPos leftward
+                    m_DrawEnd = caretPos;
+                    for (m_DrawStart = m_DrawEnd - 1; m_DrawStart >= 0; --m_DrawStart)
                     {
-                        width -= characters[i - 1].charWidth;
-                        if (width < 0)
-                        {
-                            drawStart = i;
+                        if (width + characters[m_DrawStart].charWidth > extents.x)
                             break;
-                        }
+
+                        width += characters[m_DrawStart].charWidth;
                     }
+                    ++m_DrawStart;  // move right one to the last character we could fit on the left
                 }
                 else
                 {
-                    if (drawStart > caretPos)
-                        drawStart = caretPos;
+                    if (caretPos < m_DrawStart)
+                        m_DrawStart = caretPos;
 
-                    drawEnd = gen.characterCountVisible;
-                    for (int i = drawStart; i < gen.characterCountVisible; ++i)
-                    {
-                        width -= characters[i].charWidth;
-                        if (width < 0)
-                        {
-                            drawEnd = i;
-                            break;
-                        }
-                    }
+                    m_DrawEnd = m_DrawStart;
+                }
+
+                // fit characters rightward
+                for (; m_DrawEnd < cachedInputTextGenerator.characterCountVisible; ++m_DrawEnd)
+                {
+                    width += characters[m_DrawEnd].charWidth;
+                    if (width > extents.x)
+                        break;
                 }
             }
         }
@@ -1618,14 +1653,8 @@ namespace UnityEngine.UI
             if (m_CachedInputRenderer == null)
                 return;
 
-            OnFillVBO(m_Vbo);
-
-            if (m_Vbo.Count == 0)
-                m_CachedInputRenderer.SetVertices(null, 0);
-            else
-                m_CachedInputRenderer.SetVertices(m_Vbo.ToArray(), m_Vbo.Count);
-
-            m_Vbo.Clear();
+            OnFillVBO(mesh);
+            m_CachedInputRenderer.SetMesh(mesh);
         }
 
         private void AssignPositioningIfNeeded()
@@ -1651,36 +1680,44 @@ namespace UnityEngine.UI
             }
         }
 
-        private void OnFillVBO(List<UIVertex> vbo)
+        private void OnFillVBO(Mesh vbo)
         {
-            if (!isFocused)
-                return;
+            using (var helper = new VertexHelper())
+            {
+                if (!isFocused)
+                {
+                    helper.FillMesh(vbo);
+                    return;
+                }
 
-            Rect inputRect = m_TextComponent.rectTransform.rect;
-            Vector2 extents = inputRect.size;
+                Rect inputRect = m_TextComponent.rectTransform.rect;
+                Vector2 extents = inputRect.size;
 
-            // get the text alignment anchor point for the text in local space
-            Vector2 textAnchorPivot = Text.GetTextAnchorPivot(m_TextComponent.alignment);
-            Vector2 refPoint = Vector2.zero;
-            refPoint.x = Mathf.Lerp(inputRect.xMin, inputRect.xMax, textAnchorPivot.x);
-            refPoint.y = Mathf.Lerp(inputRect.yMin, inputRect.yMax, textAnchorPivot.y);
+                // get the text alignment anchor point for the text in local space
+                Vector2 textAnchorPivot = Text.GetTextAnchorPivot(m_TextComponent.alignment);
+                Vector2 refPoint = Vector2.zero;
+                refPoint.x = Mathf.Lerp(inputRect.xMin, inputRect.xMax, textAnchorPivot.x);
+                refPoint.y = Mathf.Lerp(inputRect.yMin, inputRect.yMax, textAnchorPivot.y);
 
-            // Ajust the anchor point in screen space
-            Vector2 roundedRefPoint = m_TextComponent.PixelAdjustPoint(refPoint);
+                // Ajust the anchor point in screen space
+                Vector2 roundedRefPoint = m_TextComponent.PixelAdjustPoint(refPoint);
 
-            // Determine fraction of pixel to offset text mesh.
-            // This is the rounding in screen space, plus the fraction of a pixel the text anchor pivot is from the corner of the text mesh.
-            Vector2 roundingOffset = roundedRefPoint - refPoint + Vector2.Scale(extents, textAnchorPivot);
-            roundingOffset.x = roundingOffset.x - Mathf.Floor(0.5f + roundingOffset.x);
-            roundingOffset.y = roundingOffset.y - Mathf.Floor(0.5f + roundingOffset.y);
+                // Determine fraction of pixel to offset text mesh.
+                // This is the rounding in screen space, plus the fraction of a pixel the text anchor pivot is from the corner of the text mesh.
+                Vector2 roundingOffset = roundedRefPoint - refPoint + Vector2.Scale(extents, textAnchorPivot);
+                roundingOffset.x = roundingOffset.x - Mathf.Floor(0.5f + roundingOffset.x);
+                roundingOffset.y = roundingOffset.y - Mathf.Floor(0.5f + roundingOffset.y);
 
-            if (!hasSelection)
-                GenerateCursor(vbo, roundingOffset);
-            else
-                GenerateHightlight(vbo, roundingOffset);
+                if (!hasSelection)
+                    GenerateCursor(helper, roundingOffset);
+                else
+                    GenerateHightlight(helper, roundingOffset);
+
+                helper.FillMesh(vbo);
+            }
         }
 
-        private void GenerateCursor(List<UIVertex> vbo, Vector2 roundingOffset)
+        private void GenerateCursor(VertexHelper vbo, Vector2 roundingOffset)
         {
             if (!m_CaretVisible)
                 return;
@@ -1716,6 +1753,10 @@ namespace UnityEngine.UI
             if (startPosition.x > m_TextComponent.rectTransform.rect.xMax)
                 startPosition.x = m_TextComponent.rectTransform.rect.xMax;
 
+            int characterLine = DetermineCharacterLine(adjustedPos, gen);
+            float lineHeights = SumLineHeights(characterLine, gen);
+            startPosition.y = m_TextComponent.rectTransform.rect.yMax - lineHeights / m_TextComponent.pixelsPerUnit;
+
             m_CursorVerts[0].position = new Vector3(startPosition.x, startPosition.y - height, 0.0f);
             m_CursorVerts[1].position = new Vector3(startPosition.x + width, startPosition.y - height, 0.0f);
             m_CursorVerts[2].position = new Vector3(startPosition.x + width, startPosition.y, 0.0f);
@@ -1728,16 +1769,10 @@ namespace UnityEngine.UI
                     UIVertex uiv = m_CursorVerts[i];
                     uiv.position.x += roundingOffset.x;
                     uiv.position.y += roundingOffset.y;
-                    vbo.Add(uiv);
                 }
             }
-            else
-            {
-                for (int i = 0; i < m_CursorVerts.Length; i++)
-                {
-                    vbo.Add(m_CursorVerts[i]);
-                }
-            }
+
+            vbo.AddUIVertexQuad(m_CursorVerts);
 
             startPosition.y = Screen.height - startPosition.y;
             Input.compositionCursorPos = startPosition;
@@ -1766,7 +1801,7 @@ namespace UnityEngine.UI
             return height;
         }
 
-        private void GenerateHightlight(List<UIVertex> vbo, Vector2 roundingOffset)
+        private void GenerateHightlight(VertexHelper vbo, Vector2 roundingOffset)
         {
             int startChar = Mathf.Max(0, caretPositionInternal - m_DrawStart);
             int endChar = Mathf.Max(0, caretSelectPositionInternal - m_DrawStart);
@@ -1812,24 +1847,29 @@ namespace UnityEngine.UI
                 {
                     UICharInfo startCharInfo = gen.characters[startChar];
                     UICharInfo endCharInfo = gen.characters[currentChar];
-                    Vector2 startPosition = new Vector2(startCharInfo.cursorPos.x / m_TextComponent.pixelsPerUnit, startCharInfo.cursorPos.y);
+                    float lineHeights = SumLineHeights(currentLineIndex, gen);
+                    Vector2 startPosition = new Vector2(startCharInfo.cursorPos.x / m_TextComponent.pixelsPerUnit, m_TextComponent.rectTransform.rect.yMax - (lineHeights / m_TextComponent.pixelsPerUnit));
                     Vector2 endPosition = new Vector2((endCharInfo.cursorPos.x + endCharInfo.charWidth) / m_TextComponent.pixelsPerUnit, startPosition.y - height / m_TextComponent.pixelsPerUnit);
 
                     // Checking xMin as well due to text generator not setting possition if char is not rendered.
                     if (endPosition.x > m_TextComponent.rectTransform.rect.xMax || endPosition.x < m_TextComponent.rectTransform.rect.xMin)
                         endPosition.x = m_TextComponent.rectTransform.rect.xMax;
 
+                    var startIndex = vbo.currentVertCount;
                     vert.position = new Vector3(startPosition.x, endPosition.y, 0.0f) + (Vector3)roundingOffset;
-                    vbo.Add(vert);
+                    vbo.AddVert(vert);
 
                     vert.position = new Vector3(endPosition.x, endPosition.y, 0.0f) + (Vector3)roundingOffset;
-                    vbo.Add(vert);
+                    vbo.AddVert(vert);
 
                     vert.position = new Vector3(endPosition.x, startPosition.y, 0.0f) + (Vector3)roundingOffset;
-                    vbo.Add(vert);
+                    vbo.AddVert(vert);
 
                     vert.position = new Vector3(startPosition.x, startPosition.y, 0.0f) + (Vector3)roundingOffset;
-                    vbo.Add(vert);
+                    vbo.AddVert(vert);
+
+                    vbo.AddTriangle(startIndex, startIndex + 1, startIndex + 2);
+                    vbo.AddTriangle(startIndex + 2, startIndex + 3, startIndex + 0);
 
                     startChar = currentChar + 1;
                     currentLineIndex++;

@@ -40,7 +40,13 @@ namespace UnityEngine.UI
 
         static void StripDisabledBehavioursFromList(List<Component> components)
         {
-            components.RemoveAll(e => e is Behaviour && (!(e as Behaviour).enabled || !(e as Behaviour).isActiveAndEnabled));
+            components.RemoveAll(e => e is Behaviour && !((Behaviour)e).isActiveAndEnabled);
+        }
+
+        public static void ForceRebuildLayoutImmediate(RectTransform layoutRoot)
+        {
+            LayoutRebuilder rebuilder = new LayoutRebuilder(layoutRoot);
+            ((ICanvasElement)rebuilder).Rebuild(CanvasUpdate.Layout);
         }
 
         void ICanvasElement.Rebuild(CanvasUpdate executing)
@@ -65,7 +71,7 @@ namespace UnityEngine.UI
             if (rect == null)
                 return;
 
-            var components = ComponentListPool.Get();
+            var components = ListPool<Component>.Get();
             rect.GetComponents(typeof(ILayoutController), components);
             StripDisabledBehavioursFromList(components);
 
@@ -91,7 +97,7 @@ namespace UnityEngine.UI
                     PerformLayoutControl(rect.GetChild(i) as RectTransform, action);
             }
 
-            ComponentListPool.Release(components);
+            ListPool<Component>.Release(components);
         }
 
         private void PerformLayoutCalculation(RectTransform rect, UnityAction<Component> action)
@@ -99,7 +105,7 @@ namespace UnityEngine.UI
             if (rect == null)
                 return;
 
-            var components = ComponentListPool.Get();
+            var components = ListPool<Component>.Get();
             rect.GetComponents(typeof(ILayoutElement), components);
             StripDisabledBehavioursFromList(components);
 
@@ -118,7 +124,7 @@ namespace UnityEngine.UI
                     action(components[i]);
             }
 
-            ComponentListPool.Release(components);
+            ListPool<Component>.Release(components);
         }
 
         public static void MarkLayoutForRebuild(RectTransform rect)
@@ -147,11 +153,11 @@ namespace UnityEngine.UI
         {
             if (parent == null)
                 return false;
-            var comps = ComponentListPool.Get();
+            var comps = ListPool<Component>.Get();
             parent.GetComponents(typeof(ILayoutGroup), comps);
             StripDisabledBehavioursFromList(comps);
             var validCount = comps.Count > 0;
-            ComponentListPool.Release(comps);
+            ListPool<Component>.Release(comps);
             return validCount;
         }
 
@@ -160,11 +166,11 @@ namespace UnityEngine.UI
             if (layoutRoot == null)
                 return false;
 
-            var comps = ComponentListPool.Get();
+            var comps = ListPool<Component>.Get();
             layoutRoot.GetComponents(typeof(ILayoutController), comps);
             StripDisabledBehavioursFromList(comps);
             var valid =  comps.Count > 0;
-            ComponentListPool.Release(comps);
+            ListPool<Component>.Release(comps);
             return valid;
         }
 

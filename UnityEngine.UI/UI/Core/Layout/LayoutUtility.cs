@@ -70,13 +70,13 @@ namespace UnityEngine.UI
                 return 0;
             float min = defaultValue;
             int maxPriority = System.Int32.MinValue;
-            var components = ComponentListPool.Get();
+            var components = ListPool<Component>.Get();
             rect.GetComponents(typeof(ILayoutElement), components);
 
             for (int i = 0; i < components.Count; i++)
             {
                 var layoutComp = components[i] as ILayoutElement;
-                if (layoutComp is Behaviour && (!(layoutComp as Behaviour).enabled || !(layoutComp as Behaviour).isActiveAndEnabled))
+                if (layoutComp is Behaviour && !((Behaviour)layoutComp).isActiveAndEnabled)
                     continue;
 
                 int priority = layoutComp.layoutPriority;
@@ -105,7 +105,7 @@ namespace UnityEngine.UI
                 }
             }
 
-            ComponentListPool.Release(components);
+            ListPool<Component>.Release(components);
             return min;
         }
     }

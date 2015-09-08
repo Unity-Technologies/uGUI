@@ -16,6 +16,7 @@ namespace UnityEditor.UI
         protected SerializedProperty m_Script;
         protected SerializedProperty m_Color;
         protected SerializedProperty m_Material;
+        protected SerializedProperty m_RaycastTarget;
 
         private GUIContent m_CorrectButtonContent;
         protected AnimBool m_ShowNativeSize;
@@ -33,6 +34,7 @@ namespace UnityEditor.UI
             m_Script = serializedObject.FindProperty("m_Script");
             m_Color = serializedObject.FindProperty("m_Color");
             m_Material = serializedObject.FindProperty("m_Material");
+            m_RaycastTarget = serializedObject.FindProperty("m_RaycastTarget");
 
             m_ShowNativeSize = new AnimBool(false);
             m_ShowNativeSize.valueChanged.AddListener(Repaint);
@@ -43,6 +45,7 @@ namespace UnityEditor.UI
             serializedObject.Update();
             EditorGUILayout.PropertyField(m_Script);
             AppearanceControlsGUI();
+            RaycastControlsGUI();
             serializedObject.ApplyModifiedProperties();
         }
 
@@ -80,6 +83,11 @@ namespace UnityEditor.UI
         {
             EditorGUILayout.PropertyField(m_Color);
             EditorGUILayout.PropertyField(m_Material);
+        }
+
+        protected void RaycastControlsGUI()
+        {
+            EditorGUILayout.PropertyField(m_RaycastTarget);
         }
     }
 }

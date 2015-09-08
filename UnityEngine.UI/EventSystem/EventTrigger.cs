@@ -41,7 +41,7 @@ namespace UnityEngine.EventSystems
         [SerializeField]
         private List<Entry> m_Delegates;
 
-        [Obsolete("Please use triggers instead (UnityUpgradable)", true)]
+        [Obsolete("Please use triggers instead (UnityUpgradable) -> triggers", true)]
         public List<Entry> delegates;
 
         protected EventTrigger()

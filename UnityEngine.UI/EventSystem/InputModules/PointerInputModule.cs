@@ -63,13 +63,12 @@ namespace UnityEngine.EventSystems
             return pointerData;
         }
 
-        private void CopyFromTo(PointerEventData @from, PointerEventData @to)
+        protected void CopyFromTo(PointerEventData @from, PointerEventData @to)
         {
             @to.position = @from.position;
             @to.delta = @from.delta;
             @to.scrollDelta = @from.scrollDelta;
             @to.pointerCurrentRaycast = @from.pointerCurrentRaycast;
-            @to.pointerPressRaycast = @from.pointerPressRaycast;
             @to.pointerEnter = @from.pointerEnter;
         }
 
@@ -174,7 +173,13 @@ namespace UnityEngine.EventSystems
         }
 
         private readonly MouseState m_MouseState = new MouseState();
+
         protected virtual MouseState GetMousePointerEventData()
+        {
+            return GetMousePointerEventData(0);
+        }
+
+        protected virtual MouseState GetMousePointerEventData(int id)
         {
             // Populate the left button...
             PointerEventData leftData;
@@ -195,7 +200,7 @@ namespace UnityEngine.EventSystems
             leftData.pointerCurrentRaycast = raycast;
             m_RaycastResultCache.Clear();
 
-            // copy the appropriate data into right and middle slots
+            // copy the apropriate data into right and middle slots
             PointerEventData rightData;
             GetPointerData(kMouseRightId, out rightData, true);
             CopyFromTo(leftData, rightData);

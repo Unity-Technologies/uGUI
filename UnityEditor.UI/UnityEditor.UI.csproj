@@ -37,18 +37,13 @@
     <Reference Include="UnityEditor">
       <HintPath>..\lib\UnityEditor.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine">
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\UnityEngine.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\UnityEngine.UI-Editor\UnityEngine.UI-Editor.csproj">
-      <Project>{e62b51aa-17f8-46f9-96ff-9072c6d47b09}</Project>
-      <Name>UnityEngine.UI-Editor</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EventSystem\EventSystemEditor.cs" />
@@ -64,6 +59,7 @@
     </Compile>
     <Compile Include="UI\CanvasScalerEditor.cs" />
     <Compile Include="UI\ContentSizeFitterEditor.cs" />
+    <Compile Include="UI\DropdownEditor.cs" />
     <Compile Include="UI\GraphicEditor.cs" />
     <Compile Include="UI\GridLayoutGroupEditor.cs" />
     <Compile Include="UI\HorizontalOrVerticalLayoutGroupEditor.cs" />
@@ -89,6 +85,7 @@
     <Compile Include="UI\PropertyDrawers\ColorBlockDrawer.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="UI\PropertyDrawers\DropdownOptionListDrawer.cs" />
     <Compile Include="UI\PropertyDrawers\FontDataDrawer.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -118,6 +115,12 @@
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UnityEngine.UI-Editor\UnityEngine.UI-Editor.csproj">
+      <Project>{e62b51aa-17f8-46f9-96ff-9072c6d47b09}</Project>
+      <Name>UnityEngine.UI-Editor</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
   </PropertyGroup>
@@ -127,6 +130,6 @@
     <Copy Condition="'$(Configuration)' == 'Debug' And '$(OS)' == 'Unix'" SourceFiles="$(TargetDir)$(TargetName).dll.mdb" DestinationFiles="$(ProjectDir)..\Output\Editor\$(TargetName).dll.mdb" />
     <Copy Condition="'$(Configuration)' == 'Debug' And '$(OS)' != 'Unix'" SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFiles="$(ProjectDir)..\Output\Editor\$(TargetName).pdb" />
     <!--Uncomment the block below and change the destination to copy the built dll into your unity install directory-->
-    <!--<Copy SourceFiles="$(TargetDir)$(TargetName).dll" DestinationFiles="C:\Program Files (x86)\Unity\Editor\Data\UnityExtensions\Unity\GUISystem\4.6.0\Editor\$(TargetName).dll"/>-->
+    <!--<Copy SourceFiles="$(TargetDir)$(TargetName).dll" DestinationFiles="C:\Program Files\Unity\Editor\Data\UnityExtensions\Unity\GUISystem\Editor\$(TargetName).dll"/>-->
   </Target>
 </Project>

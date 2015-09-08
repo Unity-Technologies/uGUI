@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
@@ -8,7 +9,7 @@ namespace UnityEngine.UI
     /// Image is a textured element in the UI hierarchy.
     /// </summary>
 
-    [AddComponentMenu("UI/Image", 10)]
+    [AddComponentMenu("UI/Image", 11)]
     public class Image : MaskableGraphic, ISerializationCallbackReceiver, ILayoutElement, ICanvasRaycastFilter
     {
         public enum Type
@@ -228,28 +229,27 @@ namespace UnityEngine.UI
         /// <summary>
         /// Update the UI renderer mesh.
         /// </summary>
-
-        protected override void OnFillVBO(List<UIVertex> vbo)
+        protected override void OnPopulateMesh(Mesh toFill)
         {
             if (overrideSprite == null)
             {
-                base.OnFillVBO(vbo);
+                base.OnPopulateMesh(toFill);
                 return;
             }
 
             switch (type)
             {
                 case Type.Simple:
-                    GenerateSimpleSprite(vbo, m_PreserveAspect);
+                    GenerateSimpleSprite(toFill, m_PreserveAspect);
                     break;
                 case Type.Sliced:
-                    GenerateSlicedSprite(vbo);
+                    GenerateSlicedSprite(toFill);
                     break;
                 case Type.Tiled:
-                    GenerateTiledSprite(vbo);
+                    GenerateTiledSprite(toFill);
                     break;
                 case Type.Filled:
-                    GenerateFilledSprite(vbo, m_PreserveAspect);
+                    GenerateFilledSprite(toFill, m_PreserveAspect);
                     break;
             }
         }
@@ -259,29 +259,24 @@ namespace UnityEngine.UI
         /// Generate vertices for a simple Image.
         /// </summary>
 
-        void GenerateSimpleSprite(List<UIVertex> vbo, bool preserveAspect)
+        void GenerateSimpleSprite(Mesh toFill, bool lPreserveAspect)
         {
-            var vert = UIVertex.simpleVert;
-            vert.color = color;
-
-            Vector4 v = GetDrawingDimensions(preserveAspect);
+            Vector4 v = GetDrawingDimensions(lPreserveAspect);
             var uv = (overrideSprite != null) ? Sprites.DataUtility.GetOuterUV(overrideSprite) : Vector4.zero;
 
-            vert.position = new Vector3(v.x, v.y);
-            vert.uv0 = new Vector2(uv.x, uv.y);
-            vbo.Add(vert);
+            var color32 = color;
+            using (var vh = new VertexHelper())
+            {
+                vh.AddVert(new Vector3(v.x, v.y), color32, new Vector2(uv.x, uv.y));
+                vh.AddVert(new Vector3(v.x, v.w), color32, new Vector2(uv.x, uv.w));
+                vh.AddVert(new Vector3(v.z, v.w), color32, new Vector2(uv.z, uv.w));
+                vh.AddVert(new Vector3(v.z, v.y), color32, new Vector2(uv.z, uv.y));
 
-            vert.position = new Vector3(v.x, v.w);
-            vert.uv0 = new Vector2(uv.x, uv.w);
-            vbo.Add(vert);
+                vh.AddTriangle(0, 1, 2);
+                vh.AddTriangle(2, 3, 0);
 
-            vert.position = new Vector3(v.z, v.w);
-            vert.uv0 = new Vector2(uv.z, uv.w);
-            vbo.Add(vert);
-
-            vert.position = new Vector3(v.z, v.y);
-            vert.uv0 = new Vector2(uv.z, uv.y);
-            vbo.Add(vert);
+                vh.FillMesh(toFill);
+            }
         }
 
         /// <summary>
@@ -290,11 +285,12 @@ namespace UnityEngine.UI
 
         static readonly Vector2[] s_VertScratch = new Vector2[4];
         static readonly Vector2[] s_UVScratch = new Vector2[4];
-        void GenerateSlicedSprite(List<UIVertex> vbo)
+
+        private void GenerateSlicedSprite(Mesh toFill)
         {
             if (!hasBorder)
             {
-                GenerateSimpleSprite(vbo, false);
+                GenerateSimpleSprite(toFill, false);
                 return;
             }
 
@@ -338,27 +334,28 @@ namespace UnityEngine.UI
             s_UVScratch[2] = new Vector2(inner.z, inner.w);
             s_UVScratch[3] = new Vector2(outer.z, outer.w);
 
-            var uiv = UIVertex.simpleVert;
-            uiv.color = color;
-            for (int x = 0; x < 3; ++x)
+            using (var vh = new VertexHelper())
             {
-                int x2 = x + 1;
-
-                for (int y = 0; y < 3; ++y)
+                for (int x = 0; x < 3; ++x)
                 {
-                    if (!m_FillCenter && x == 1 && y == 1)
+                    int x2 = x + 1;
+
+                    for (int y = 0; y < 3; ++y)
                     {
-                        continue;
+                        if (!m_FillCenter && x == 1 && y == 1)
+                            continue;
+
+                        int y2 = y + 1;
+
+                        AddQuad(vh,
+                            new Vector2(s_VertScratch[x].x, s_VertScratch[y].y),
+                            new Vector2(s_VertScratch[x2].x, s_VertScratch[y2].y),
+                            color,
+                            new Vector2(s_UVScratch[x].x, s_UVScratch[y].y),
+                            new Vector2(s_UVScratch[x2].x, s_UVScratch[y2].y));
                     }
-
-                    int y2 = y + 1;
-
-                    AddQuad(vbo, uiv,
-                        new Vector2(s_VertScratch[x].x, s_VertScratch[y].y),
-                        new Vector2(s_VertScratch[x2].x, s_VertScratch[y2].y),
-                        new Vector2(s_UVScratch[x].x, s_UVScratch[y].y),
-                        new Vector2(s_UVScratch[x2].x, s_UVScratch[y2].y));
                 }
+                vh.FillMesh(toFill);
             }
         }
 
@@ -366,7 +363,7 @@ namespace UnityEngine.UI
         /// Generate vertices for a tiled Image.
         /// </summary>
 
-        void GenerateTiledSprite(List<UIVertex> vbo)
+        void GenerateTiledSprite(Mesh toFill)
         {
             Vector4 outer, inner, border;
             Vector2 spriteSize;
@@ -411,19 +408,61 @@ namespace UnityEngine.UI
                 tileHeight = (yMax - yMin) / 100;
             }
 
-            var clipped = uvMax;
-            if (m_FillCenter)
+            using (var vh = new VertexHelper())
             {
-                for (float y1 = yMin; y1 < yMax; y1 += tileHeight)
+                var clipped = uvMax;
+                if (m_FillCenter)
                 {
-                    float y2 = y1 + tileHeight;
-                    if (y2 > yMax)
+                    for (float y1 = yMin; y1 < yMax; y1 += tileHeight)
                     {
-                        clipped.y = uvMin.y + (uvMax.y - uvMin.y) * (yMax - y1) / (y2 - y1);
-                        y2 = yMax;
+                        float y2 = y1 + tileHeight;
+                        if (y2 > yMax)
+                        {
+                            clipped.y = uvMin.y + (uvMax.y - uvMin.y) * (yMax - y1) / (y2 - y1);
+                            y2 = yMax;
+                        }
+
+                        clipped.x = uvMax.x;
+                        for (float x1 = xMin; x1 < xMax; x1 += tileWidth)
+                        {
+                            float x2 = x1 + tileWidth;
+                            if (x2 > xMax)
+                            {
+                                clipped.x = uvMin.x + (uvMax.x - uvMin.x) * (xMax - x1) / (x2 - x1);
+                                x2 = xMax;
+                            }
+                            AddQuad(vh, new Vector2(x1, y1) + rect.position, new Vector2(x2, y2) + rect.position, color, uvMin, clipped);
+                        }
+                    }
+                }
+
+                if (hasBorder)
+                {
+                    clipped = uvMax;
+                    for (float y1 = yMin; y1 < yMax; y1 += tileHeight)
+                    {
+                        float y2 = y1 + tileHeight;
+                        if (y2 > yMax)
+                        {
+                            clipped.y = uvMin.y + (uvMax.y - uvMin.y) * (yMax - y1) / (y2 - y1);
+                            y2 = yMax;
+                        }
+                        AddQuad(vh,
+                            new Vector2(0, y1) + rect.position,
+                            new Vector2(xMin, y2) + rect.position,
+                            color,
+                            new Vector2(outer.x, uvMin.y),
+                            new Vector2(uvMin.x, clipped.y));
+                        AddQuad(vh,
+                            new Vector2(xMax, y1) + rect.position,
+                            new Vector2(rect.width, y2) + rect.position,
+                            color,
+                            new Vector2(uvMax.x, uvMin.y),
+                            new Vector2(outer.z, clipped.y));
                     }
 
-                    clipped.x = uvMax.x;
+                    // Bottom and top tiled border
+                    clipped = uvMax;
                     for (float x1 = xMin; x1 < xMax; x1 += tileWidth)
                     {
                         float x2 = x1 + tileWidth;
@@ -432,98 +471,72 @@ namespace UnityEngine.UI
                             clipped.x = uvMin.x + (uvMax.x - uvMin.x) * (xMax - x1) / (x2 - x1);
                             x2 = xMax;
                         }
-                        AddQuad(vbo, v, new Vector2(x1, y1) + rect.position, new Vector2(x2, y2) + rect.position, uvMin, clipped);
+                        AddQuad(vh,
+                            new Vector2(x1, 0) + rect.position,
+                            new Vector2(x2, yMin) + rect.position,
+                            color,
+                            new Vector2(uvMin.x, outer.y),
+                            new Vector2(clipped.x, uvMin.y));
+                        AddQuad(vh,
+                            new Vector2(x1, yMax) + rect.position,
+                            new Vector2(x2, rect.height) + rect.position,
+                            color,
+                            new Vector2(uvMin.x, uvMax.y),
+                            new Vector2(clipped.x, outer.w));
                     }
+
+                    // Corners
+                    AddQuad(vh,
+                        new Vector2(0, 0) + rect.position,
+                        new Vector2(xMin, yMin) + rect.position,
+                        color,
+                        new Vector2(outer.x, outer.y),
+                        new Vector2(uvMin.x, uvMin.y));
+                    AddQuad(vh,
+                        new Vector2(xMax, 0) + rect.position,
+                        new Vector2(rect.width, yMin) + rect.position,
+                        color,
+                        new Vector2(uvMax.x, outer.y),
+                        new Vector2(outer.z, uvMin.y));
+                    AddQuad(vh,
+                        new Vector2(0, yMax) + rect.position,
+                        new Vector2(xMin, rect.height) + rect.position,
+                        color,
+                        new Vector2(outer.x, uvMax.y),
+                        new Vector2(uvMin.x, outer.w));
+                    AddQuad(vh,
+                        new Vector2(xMax, yMax) + rect.position,
+                        new Vector2(rect.width, rect.height) + rect.position,
+                        color,
+                        new Vector2(uvMax.x, uvMax.y),
+                        new Vector2(outer.z, outer.w));
                 }
+                vh.FillMesh(toFill);
             }
-
-            if (!hasBorder)
-                return;
-
-            // Left and right tiled border
-            clipped = uvMax;
-            for (float y1 = yMin; y1 < yMax; y1 += tileHeight)
-            {
-                float y2 = y1 + tileHeight;
-                if (y2 > yMax)
-                {
-                    clipped.y = uvMin.y + (uvMax.y - uvMin.y) * (yMax - y1) / (y2 - y1);
-                    y2 = yMax;
-                }
-                AddQuad(vbo, v,
-                    new Vector2(0, y1) + rect.position,
-                    new Vector2(xMin, y2) + rect.position,
-                    new Vector2(outer.x, uvMin.y),
-                    new Vector2(uvMin.x, clipped.y));
-                AddQuad(vbo, v,
-                    new Vector2(xMax, y1) + rect.position,
-                    new Vector2(rect.width, y2) + rect.position,
-                    new Vector2(uvMax.x, uvMin.y),
-                    new Vector2(outer.z, clipped.y));
-            }
-
-            // Bottom and top tiled border
-            clipped = uvMax;
-            for (float x1 = xMin; x1 < xMax; x1 += tileWidth)
-            {
-                float x2 = x1 + tileWidth;
-                if (x2 > xMax)
-                {
-                    clipped.x = uvMin.x + (uvMax.x - uvMin.x) * (xMax - x1) / (x2 - x1);
-                    x2 = xMax;
-                }
-                AddQuad(vbo, v,
-                    new Vector2(x1, 0) + rect.position,
-                    new Vector2(x2, yMin) + rect.position,
-                    new Vector2(uvMin.x, outer.y),
-                    new Vector2(clipped.x, uvMin.y));
-                AddQuad(vbo, v,
-                    new Vector2(x1, yMax) + rect.position,
-                    new Vector2(x2, rect.height) + rect.position,
-                    new Vector2(uvMin.x, uvMax.y),
-                    new Vector2(clipped.x, outer.w));
-            }
-
-            // Corners
-            AddQuad(vbo, v,
-                new Vector2(0, 0) + rect.position,
-                new Vector2(xMin, yMin) + rect.position,
-                new Vector2(outer.x, outer.y),
-                new Vector2(uvMin.x, uvMin.y));
-            AddQuad(vbo, v,
-                new Vector2(xMax, 0) + rect.position,
-                new Vector2(rect.width, yMin) + rect.position,
-                new Vector2(uvMax.x, outer.y),
-                new Vector2(outer.z, uvMin.y));
-            AddQuad(vbo, v,
-                new Vector2(0, yMax) + rect.position,
-                new Vector2(xMin, rect.height) + rect.position,
-                new Vector2(outer.x, uvMax.y),
-                new Vector2(uvMin.x, outer.w));
-            AddQuad(vbo, v,
-                new Vector2(xMax, yMax) + rect.position,
-                new Vector2(rect.width, rect.height) + rect.position,
-                new Vector2(uvMax.x, uvMax.y),
-                new Vector2(outer.z, outer.w));
         }
 
-        void AddQuad(List<UIVertex> vbo, UIVertex v, Vector2 posMin, Vector2 posMax, Vector2 uvMin, Vector2 uvMax)
+        static void AddQuad(VertexHelper vh, Vector3[] quadPositions, Color32 color, Vector3[] quadUVs)
         {
-            v.position = new Vector3(posMin.x, posMin.y, 0);
-            v.uv0 = new Vector2(uvMin.x, uvMin.y);
-            vbo.Add(v);
+            int startIndex = vh.currentVertCount;
 
-            v.position = new Vector3(posMin.x, posMax.y, 0);
-            v.uv0 = new Vector2(uvMin.x, uvMax.y);
-            vbo.Add(v);
+            for (int i = 0; i < 4; ++i)
+                vh.AddVert(quadPositions[i], color, quadUVs[i]);
 
-            v.position = new Vector3(posMax.x, posMax.y, 0);
-            v.uv0 = new Vector2(uvMax.x, uvMax.y);
-            vbo.Add(v);
+            vh.AddTriangle(startIndex, startIndex + 1, startIndex + 2);
+            vh.AddTriangle(startIndex + 2, startIndex + 3, startIndex);
+        }
 
-            v.position = new Vector3(posMax.x, posMin.y, 0);
-            v.uv0 = new Vector2(uvMax.x, uvMin.y);
-            vbo.Add(v);
+        static void AddQuad(VertexHelper vh, Vector2 posMin, Vector2 posMax, Color32 color, Vector2 uvMin, Vector2 uvMax)
+        {
+            int startIndex = vh.currentVertCount;
+
+            vh.AddVert(new Vector3(posMin.x, posMin.y, 0), color, new Vector2(uvMin.x, uvMin.y));
+            vh.AddVert(new Vector3(posMin.x, posMax.y, 0), color, new Vector2(uvMin.x, uvMax.y));
+            vh.AddVert(new Vector3(posMax.x, posMax.y, 0), color, new Vector2(uvMax.x, uvMax.y));
+            vh.AddVert(new Vector3(posMax.x, posMin.y, 0), color, new Vector2(uvMax.x, uvMin.y));
+
+            vh.AddTriangle(startIndex, startIndex + 1, startIndex + 2);
+            vh.AddTriangle(startIndex + 2, startIndex + 3, startIndex);
         }
 
         Vector4 GetAdjustedBorders(Vector4 border, Rect rect)
@@ -547,12 +560,18 @@ namespace UnityEngine.UI
         /// Generate vertices for a filled Image.
         /// </summary>
 
-        static readonly Vector2[] s_Xy = new Vector2[4];
-        static readonly Vector2[] s_Uv = new Vector2[4];
-        void GenerateFilledSprite(List<UIVertex> vbo, bool preserveAspect)
+        static readonly Vector3[] s_Xy = new Vector3[4];
+        static readonly Vector3[] s_Uv = new Vector3[4];
+        void GenerateFilledSprite(Mesh toFill, bool preserveAspect)
         {
             if (m_FillAmount < 0.001f)
-                return;
+            {
+                using (var vh = new VertexHelper())
+                {
+                    vh.FillMesh(toFill);
+                    return;
+                }
+            }
 
             Vector4 v = GetDrawingDimensions(preserveAspect);
             Vector4 outer = overrideSprite != null ? Sprites.DataUtility.GetOuterUV(overrideSprite) : Vector4.zero;
@@ -609,135 +628,144 @@ namespace UnityEngine.UI
             s_Uv[2] = new Vector2(tx1, ty1);
             s_Uv[3] = new Vector2(tx1, ty0);
 
-            if (m_FillAmount < 1f)
+
+            using (var vh = new VertexHelper())
             {
-                if (fillMethod == FillMethod.Radial90)
+                if (m_FillAmount < 1f && m_FillMethod != FillMethod.Horizontal && m_FillMethod != FillMethod.Vertical)
                 {
-                    if (RadialCut(s_Xy, s_Uv, m_FillAmount, m_FillClockwise, m_FillOrigin))
+                    if (fillMethod == FillMethod.Radial90)
                     {
-                        for (int i = 0; i < 4; ++i)
-                        {
-                            uiv.position = s_Xy[i];
-                            uiv.uv0 = s_Uv[i];
-                            vbo.Add(uiv);
-                        }
+                        if (RadialCut(s_Xy, s_Uv, m_FillAmount, m_FillClockwise, m_FillOrigin))
+                            AddQuad(vh, s_Xy, color, s_Uv);
                     }
-                    return;
-                }
-
-                if (fillMethod == FillMethod.Radial180)
-                {
-                    for (int side = 0; side < 2; ++side)
+                    else if (fillMethod == FillMethod.Radial180)
                     {
-                        float fx0, fx1, fy0, fy1;
-                        int even = m_FillOrigin > 1 ? 1 : 0;
-
-                        if (m_FillOrigin == 0 || m_FillOrigin == 2)
+                        for (int side = 0; side < 2; ++side)
                         {
-                            fy0 = 0f;
-                            fy1 = 1f;
-                            if (side == even) { fx0 = 0f; fx1 = 0.5f; }
-                            else { fx0 = 0.5f; fx1 = 1f; }
-                        }
-                        else
-                        {
-                            fx0 = 0f;
-                            fx1 = 1f;
-                            if (side == even) { fy0 = 0.5f; fy1 = 1f; }
-                            else { fy0 = 0f; fy1 = 0.5f; }
-                        }
+                            float fx0, fx1, fy0, fy1;
+                            int even = m_FillOrigin > 1 ? 1 : 0;
 
-                        s_Xy[0].x = Mathf.Lerp(v.x, v.z, fx0);
-                        s_Xy[1].x = s_Xy[0].x;
-                        s_Xy[2].x = Mathf.Lerp(v.x, v.z, fx1);
-                        s_Xy[3].x = s_Xy[2].x;
-
-                        s_Xy[0].y = Mathf.Lerp(v.y, v.w, fy0);
-                        s_Xy[1].y = Mathf.Lerp(v.y, v.w, fy1);
-                        s_Xy[2].y = s_Xy[1].y;
-                        s_Xy[3].y = s_Xy[0].y;
-
-                        s_Uv[0].x = Mathf.Lerp(tx0, tx1, fx0);
-                        s_Uv[1].x = s_Uv[0].x;
-                        s_Uv[2].x = Mathf.Lerp(tx0, tx1, fx1);
-                        s_Uv[3].x = s_Uv[2].x;
-
-                        s_Uv[0].y = Mathf.Lerp(ty0, ty1, fy0);
-                        s_Uv[1].y = Mathf.Lerp(ty0, ty1, fy1);
-                        s_Uv[2].y = s_Uv[1].y;
-                        s_Uv[3].y = s_Uv[0].y;
-
-                        float val = m_FillClockwise ? fillAmount * 2f - side : m_FillAmount * 2f - (1 - side);
-
-                        if (RadialCut(s_Xy, s_Uv, Mathf.Clamp01(val), m_FillClockwise, ((side + m_FillOrigin + 3) % 4)))
-                        {
-                            for (int i = 0; i < 4; ++i)
+                            if (m_FillOrigin == 0 || m_FillOrigin == 2)
                             {
-                                uiv.position = s_Xy[i];
-                                uiv.uv0 = s_Uv[i];
-                                vbo.Add(uiv);
+                                fy0 = 0f;
+                                fy1 = 1f;
+                                if (side == even)
+                                {
+                                    fx0 = 0f;
+                                    fx1 = 0.5f;
+                                }
+                                else
+                                {
+                                    fx0 = 0.5f;
+                                    fx1 = 1f;
+                                }
+                            }
+                            else
+                            {
+                                fx0 = 0f;
+                                fx1 = 1f;
+                                if (side == even)
+                                {
+                                    fy0 = 0.5f;
+                                    fy1 = 1f;
+                                }
+                                else
+                                {
+                                    fy0 = 0f;
+                                    fy1 = 0.5f;
+                                }
+                            }
+
+                            s_Xy[0].x = Mathf.Lerp(v.x, v.z, fx0);
+                            s_Xy[1].x = s_Xy[0].x;
+                            s_Xy[2].x = Mathf.Lerp(v.x, v.z, fx1);
+                            s_Xy[3].x = s_Xy[2].x;
+
+                            s_Xy[0].y = Mathf.Lerp(v.y, v.w, fy0);
+                            s_Xy[1].y = Mathf.Lerp(v.y, v.w, fy1);
+                            s_Xy[2].y = s_Xy[1].y;
+                            s_Xy[3].y = s_Xy[0].y;
+
+                            s_Uv[0].x = Mathf.Lerp(tx0, tx1, fx0);
+                            s_Uv[1].x = s_Uv[0].x;
+                            s_Uv[2].x = Mathf.Lerp(tx0, tx1, fx1);
+                            s_Uv[3].x = s_Uv[2].x;
+
+                            s_Uv[0].y = Mathf.Lerp(ty0, ty1, fy0);
+                            s_Uv[1].y = Mathf.Lerp(ty0, ty1, fy1);
+                            s_Uv[2].y = s_Uv[1].y;
+                            s_Uv[3].y = s_Uv[0].y;
+
+                            float val = m_FillClockwise ? fillAmount * 2f - side : m_FillAmount * 2f - (1 - side);
+
+                            if (RadialCut(s_Xy, s_Uv, Mathf.Clamp01(val), m_FillClockwise, ((side + m_FillOrigin + 3) % 4)))
+                            {
+                                AddQuad(vh, s_Xy, color, s_Uv);
                             }
                         }
                     }
-                    return;
-                }
-
-                if (fillMethod == FillMethod.Radial360)
-                {
-                    for (int corner = 0; corner < 4; ++corner)
+                    else if (fillMethod == FillMethod.Radial360)
                     {
-                        float fx0, fx1, fy0, fy1;
-
-                        if (corner < 2) { fx0 = 0f; fx1 = 0.5f; }
-                        else { fx0 = 0.5f; fx1 = 1f; }
-
-                        if (corner == 0 || corner == 3) { fy0 = 0f; fy1 = 0.5f; }
-                        else { fy0 = 0.5f; fy1 = 1f; }
-
-                        s_Xy[0].x = Mathf.Lerp(v.x, v.z, fx0);
-                        s_Xy[1].x = s_Xy[0].x;
-                        s_Xy[2].x = Mathf.Lerp(v.x, v.z, fx1);
-                        s_Xy[3].x = s_Xy[2].x;
-
-                        s_Xy[0].y = Mathf.Lerp(v.y, v.w, fy0);
-                        s_Xy[1].y = Mathf.Lerp(v.y, v.w, fy1);
-                        s_Xy[2].y = s_Xy[1].y;
-                        s_Xy[3].y = s_Xy[0].y;
-
-                        s_Uv[0].x = Mathf.Lerp(tx0, tx1, fx0);
-                        s_Uv[1].x = s_Uv[0].x;
-                        s_Uv[2].x = Mathf.Lerp(tx0, tx1, fx1);
-                        s_Uv[3].x = s_Uv[2].x;
-
-                        s_Uv[0].y = Mathf.Lerp(ty0, ty1, fy0);
-                        s_Uv[1].y = Mathf.Lerp(ty0, ty1, fy1);
-                        s_Uv[2].y = s_Uv[1].y;
-                        s_Uv[3].y = s_Uv[0].y;
-
-                        float val = m_FillClockwise ?
-                            m_FillAmount * 4f - ((corner + m_FillOrigin) % 4) :
-                            m_FillAmount * 4f - (3 - ((corner + m_FillOrigin) % 4));
-
-                        if (RadialCut(s_Xy, s_Uv, Mathf.Clamp01(val), m_FillClockwise, ((corner + 2) % 4)))
+                        for (int corner = 0; corner < 4; ++corner)
                         {
-                            for (int i = 0; i < 4; ++i)
+                            float fx0, fx1, fy0, fy1;
+
+                            if (corner < 2)
                             {
-                                uiv.position = s_Xy[i];
-                                uiv.uv0 = s_Uv[i];
-                                vbo.Add(uiv);
+                                fx0 = 0f;
+                                fx1 = 0.5f;
                             }
+                            else
+                            {
+                                fx0 = 0.5f;
+                                fx1 = 1f;
+                            }
+
+                            if (corner == 0 || corner == 3)
+                            {
+                                fy0 = 0f;
+                                fy1 = 0.5f;
+                            }
+                            else
+                            {
+                                fy0 = 0.5f;
+                                fy1 = 1f;
+                            }
+
+                            s_Xy[0].x = Mathf.Lerp(v.x, v.z, fx0);
+                            s_Xy[1].x = s_Xy[0].x;
+                            s_Xy[2].x = Mathf.Lerp(v.x, v.z, fx1);
+                            s_Xy[3].x = s_Xy[2].x;
+
+                            s_Xy[0].y = Mathf.Lerp(v.y, v.w, fy0);
+                            s_Xy[1].y = Mathf.Lerp(v.y, v.w, fy1);
+                            s_Xy[2].y = s_Xy[1].y;
+                            s_Xy[3].y = s_Xy[0].y;
+
+                            s_Uv[0].x = Mathf.Lerp(tx0, tx1, fx0);
+                            s_Uv[1].x = s_Uv[0].x;
+                            s_Uv[2].x = Mathf.Lerp(tx0, tx1, fx1);
+                            s_Uv[3].x = s_Uv[2].x;
+
+                            s_Uv[0].y = Mathf.Lerp(ty0, ty1, fy0);
+                            s_Uv[1].y = Mathf.Lerp(ty0, ty1, fy1);
+                            s_Uv[2].y = s_Uv[1].y;
+                            s_Uv[3].y = s_Uv[0].y;
+
+                            float val = m_FillClockwise ?
+                                m_FillAmount * 4f - ((corner + m_FillOrigin) % 4) :
+                                m_FillAmount * 4f - (3 - ((corner + m_FillOrigin) % 4));
+
+                            if (RadialCut(s_Xy, s_Uv, Mathf.Clamp01(val), m_FillClockwise, ((corner + 2) % 4)))
+                                AddQuad(vh, s_Xy, color, s_Uv);
                         }
                     }
-                    return;
                 }
-            }
-
-            // Fill the buffer with the quad for the Image
-            for (int i = 0; i < 4; ++i)
-            {
-                uiv.position = s_Xy[i];
-                uiv.uv0 = s_Uv[i];
-                vbo.Add(uiv);
+                else
+                {
+                    AddQuad(vh, s_Xy, color, s_Uv);
+                }
+                vh.FillMesh(toFill);
             }
         }
 
@@ -745,7 +773,7 @@ namespace UnityEngine.UI
         /// Adjust the specified quad, making it be radially filled instead.
         /// </summary>
 
-        static bool RadialCut(Vector2[] xy, Vector2[] uv, float fill, bool invert, int corner)
+        static bool RadialCut(Vector3[] xy, Vector3[] uv, float fill, bool invert, int corner)
         {
             // Nothing to fill
             if (fill < 0.001f) return false;
@@ -774,7 +802,7 @@ namespace UnityEngine.UI
         /// Adjust the specified quad, making it be radially filled instead.
         /// </summary>
 
-        static void RadialCut(Vector2[] xy, float cos, float sin, bool invert, int corner)
+        static void RadialCut(Vector3[] xy, float cos, float sin, bool invert, int corner)
         {
             int i0 = corner;
             int i1 = ((corner + 1) % 4);

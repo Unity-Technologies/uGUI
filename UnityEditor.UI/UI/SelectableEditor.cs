@@ -136,14 +136,12 @@ namespace UnityEditor.UI
                 if (EditorGUILayout.BeginFadeGroup(m_ShowColorTint.faded))
                 {
                     EditorGUILayout.PropertyField(m_ColorBlockProperty);
-                    EditorGUILayout.Space();
                 }
                 EditorGUILayout.EndFadeGroup();
 
                 if (EditorGUILayout.BeginFadeGroup(m_ShowSpriteTrasition.faded))
                 {
                     EditorGUILayout.PropertyField(m_SpriteStateProperty);
-                    EditorGUILayout.Space();
                 }
                 EditorGUILayout.EndFadeGroup();
 

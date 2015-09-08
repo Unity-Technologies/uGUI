@@ -128,8 +128,10 @@ namespace UnityEngine.EventSystems
             sb.AppendLine("<b>lastPointerPress</b>: " + lastPress);
             sb.AppendLine("<b>pointerDrag</b>: " + pointerDrag);
             sb.AppendLine("<b>Use Drag Threshold</b>: " + useDragThreshold);
-            sb.AppendLine("Current Rayast:");
+            sb.AppendLine("<b>Current Rayast:</b>");
             sb.AppendLine(pointerCurrentRaycast.ToString());
+            sb.AppendLine("<b>Press Rayast:</b>");
+            sb.AppendLine(pointerPressRaycast.ToString());
             return sb.ToString();
         }
     }

@@ -36,6 +36,7 @@ namespace UnityEngine.EventSystems
                         distance = Vector3.Distance(eventCamera.transform.position, hits[b].transform.position),
                         worldPosition = hits[b].point,
                         worldNormal = hits[b].normal,
+                        screenPosition = eventData.position,
                         index = resultAppendList.Count,
                         sortingLayer =  sr != null ? sr.sortingLayerID : 0,
                         sortingOrder = sr != null ? sr.sortingOrder : 0

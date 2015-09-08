@@ -110,43 +110,77 @@ namespace UnityEngine.UI.CoroutineTween
             return m_Target != null;
         }
     }
-    /*
-        // Float tween class, receives the
-        // TweenValue callback and then sets
-        // the value on the target.
-        public struct TweenFloat : ITweenValue
+
+    // Float tween class, receives the
+    // TweenValue callback and then sets
+    // the value on the target.
+    internal struct FloatTween : ITweenValue
+    {
+        public class FloatTweenCallback : UnityEvent<float> {}
+
+        private FloatTweenCallback m_Target;
+        private float m_StartValue;
+        private float m_TargetValue;
+
+        private float m_Duration;
+        private bool m_IgnoreTimeScale;
+
+        public float startValue
         {
-            public UnityAction<float> target;
-            public float startAlpha;
-            public float targetAlpha;
+            get { return m_StartValue; }
+            set { m_StartValue = value; }
+        }
 
-            public float duriation;
-            public bool ignoreTimeScale;
+        public float targetValue
+        {
+            get { return m_TargetValue; }
+            set { m_TargetValue = value; }
+        }
 
-            public void TweenValue(float floatPercentage)
-            {
-                if (!ValidTarget())
-                    return;
+        public float duration
+        {
+            get { return m_Duration; }
+            set { m_Duration = value; }
+        }
 
-                var newColor = Mathf.Lerp (startAlpha, targetAlpha, floatPercentage);
-                target.Invoke (newColor);
-            }
+        public bool ignoreTimeScale
+        {
+            get { return m_IgnoreTimeScale; }
+            set { m_IgnoreTimeScale = value; }
+        }
 
-            public bool GetIgnoreTimescale()
-            {
-                return ignoreTimeScale;
-            }
+        public void TweenValue(float floatPercentage)
+        {
+            if (!ValidTarget())
+                return;
 
-            public float GetDuration()
-            {
-                return duriation;
-            }
+            var newValue = Mathf.Lerp(m_StartValue, m_TargetValue, floatPercentage);
+            m_Target.Invoke(newValue);
+        }
 
-            public bool ValidTarget()
-            {
-                return target != null;
-            }
-        }*/
+        public void AddOnChangedCallback(UnityAction<float> callback)
+        {
+            if (m_Target == null)
+                m_Target = new FloatTweenCallback();
+
+            m_Target.AddListener(callback);
+        }
+
+        public bool GetIgnoreTimescale()
+        {
+            return m_IgnoreTimeScale;
+        }
+
+        public float GetDuration()
+        {
+            return m_Duration;
+        }
+
+        public bool ValidTarget()
+        {
+            return m_Target != null;
+        }
+    }
 
     // Tween runner, executes the given tween.
     // The coroutine will live within the given

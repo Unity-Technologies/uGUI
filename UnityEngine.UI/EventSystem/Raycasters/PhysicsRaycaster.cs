@@ -85,6 +85,7 @@ namespace UnityEngine.EventSystems
                         distance = hits[b].distance,
                         worldPosition = hits[b].point,
                         worldNormal = hits[b].normal,
+                        screenPosition = eventData.position,
                         index = resultAppendList.Count,
                         sortingLayer = 0,
                         sortingOrder = 0

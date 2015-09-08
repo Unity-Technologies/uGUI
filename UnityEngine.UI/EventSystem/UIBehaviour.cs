@@ -19,7 +19,7 @@ namespace UnityEngine.EventSystems
 
         public virtual bool IsActive()
         {
-            return enabled && isActiveAndEnabled && gameObject.activeInHierarchy;
+            return isActiveAndEnabled;
         }
 
 #if UNITY_EDITOR

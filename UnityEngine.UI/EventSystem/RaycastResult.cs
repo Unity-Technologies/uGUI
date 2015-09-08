@@ -21,6 +21,8 @@ namespace UnityEngine.EventSystems
         // World-space normal where a ray cast into the screen hits something
         public Vector3 worldNormal;
 
+        public Vector2 screenPosition;
+
         public bool isValid
         {
             get { return module != null && gameObject != null; }
@@ -37,6 +39,7 @@ namespace UnityEngine.EventSystems
             sortingOrder = 0;
             worldNormal = Vector3.up;
             worldPosition = Vector3.zero;
+            screenPosition = Vector2.zero;
         }
 
         public override string ToString()
@@ -52,6 +55,7 @@ namespace UnityEngine.EventSystems
                    "depth: " + depth + "\n" +
                    "worldNormal: " + worldNormal + "\n" +
                    "worldPosition: " + worldPosition + "\n" +
+                   "screenPosition: " + screenPosition + "\n" +
                    "module.sortOrderPriority: " + module.sortOrderPriority + "\n" +
                    "module.renderOrderPriority: " + module.renderOrderPriority + "\n" +
                    "sortingLayer: " + sortingLayer + "\n" +

@@ -1,4 +1,5 @@
 using System;
+using UnityEngine.Serialization;
 
 namespace UnityEngine.EventSystems
 {
@@ -56,12 +57,20 @@ namespace UnityEngine.EventSystems
         private float m_RepeatDelay = 0.5f;
 
         [SerializeField]
-        private bool m_AllowActivationOnMobileDevice;
+        [FormerlySerializedAs("m_AllowActivationOnMobileDevice")]
+        private bool m_ForceModuleActive;
 
+        [Obsolete("allowActivationOnMobileDevice has been deprecated. Use forceModuleActive instead (UnityUpgradable) -> forceModuleActive")]
         public bool allowActivationOnMobileDevice
         {
-            get { return m_AllowActivationOnMobileDevice; }
-            set { m_AllowActivationOnMobileDevice = value; }
+            get { return m_ForceModuleActive; }
+            set { m_ForceModuleActive = value; }
+        }
+
+        public bool forceModuleActive
+        {
+            get { return m_ForceModuleActive; }
+            set { m_ForceModuleActive = value; }
         }
 
         public float inputActionsPerSecond
@@ -117,7 +126,7 @@ namespace UnityEngine.EventSystems
             // Check for mouse presence instead of whether touch is supported,
             // as you can connect mouse to a tablet and in that case we'd want
             // to use StandaloneInputModule for non-touch input events.
-            return m_AllowActivationOnMobileDevice || Input.mousePresent;
+            return m_ForceModuleActive || Input.mousePresent;
         }
 
         public override bool ShouldActivateModule()
@@ -125,7 +134,8 @@ namespace UnityEngine.EventSystems
             if (!base.ShouldActivateModule())
                 return false;
 
-            var shouldActivate = Input.GetButtonDown(m_SubmitButton);
+            var shouldActivate = m_ForceModuleActive;
+            Input.GetButtonDown(m_SubmitButton);
             shouldActivate |= Input.GetButtonDown(m_CancelButton);
             shouldActivate |= !Mathf.Approximately(Input.GetAxisRaw(m_HorizontalAxis), 0.0f);
             shouldActivate |= !Mathf.Approximately(Input.GetAxisRaw(m_VerticalAxis), 0.0f);
@@ -172,7 +182,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Process submit keys.
         /// </summary>
-        private bool SendSubmitEventToSelectedObject()
+        protected bool SendSubmitEventToSelectedObject()
         {
             if (eventSystem.currentSelectedGameObject == null)
                 return false;
@@ -212,7 +222,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Process keyboard events.
         /// </summary>
-        private bool SendMoveEventToSelectedObject()
+        protected bool SendMoveEventToSelectedObject()
         {
             float time = Time.unscaledTime;
 
@@ -241,30 +251,26 @@ namespace UnityEngine.EventSystems
 
             // Debug.Log(m_ProcessingEvent.rawType + " axis:" + m_AllowAxisEvents + " value:" + "(" + x + "," + y + ")");
             var axisEventData = GetAxisEventData(movement.x, movement.y, 0.6f);
-
-            if (axisEventData.moveDir != MoveDirection.None)
-            {
-                ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, axisEventData, ExecuteEvents.moveHandler);
-                if (!similarDir)
-                    m_ConsecutiveMoveCount = 0;
-                m_ConsecutiveMoveCount++;
-                m_PrevActionTime = time;
-                m_LastMoveVector = movement;
-            }
-            else
-            {
+            ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, axisEventData, ExecuteEvents.moveHandler);
+            if (!similarDir)
                 m_ConsecutiveMoveCount = 0;
-            }
-
+            m_ConsecutiveMoveCount++;
+            m_PrevActionTime = time;
+            m_LastMoveVector = movement;
             return axisEventData.used;
+        }
+
+        protected void ProcessMouseEvent()
+        {
+            ProcessMouseEvent(0);
         }
 
         /// <summary>
         /// Process all mouse events.
         /// </summary>
-        private void ProcessMouseEvent()
+        protected void ProcessMouseEvent(int id)
         {
-            var mouseData = GetMousePointerEventData();
+            var mouseData = GetMousePointerEventData(id);
             var leftButtonData = mouseData.GetButtonState(PointerEventData.InputButton.Left).eventData;
 
             // Process the first mouse button fully
@@ -285,7 +291,7 @@ namespace UnityEngine.EventSystems
             }
         }
 
-        private bool SendUpdateEventToSelectedObject()
+        protected bool SendUpdateEventToSelectedObject()
         {
             if (eventSystem.currentSelectedGameObject == null)
                 return false;
@@ -298,7 +304,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Process the current mouse press.
         /// </summary>
-        private void ProcessMousePress(MouseButtonEventData data)
+        protected void ProcessMousePress(MouseButtonEventData data)
         {
             var pointerEvent = data.buttonData;
             var currentOverGo = pointerEvent.pointerCurrentRaycast.gameObject;
@@ -371,7 +377,7 @@ namespace UnityEngine.EventSystems
                 {
                     ExecuteEvents.Execute(pointerEvent.pointerPress, pointerEvent, ExecuteEvents.pointerClickHandler);
                 }
-                else if (pointerEvent.pointerDrag != null)
+                else if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
                 {
                     ExecuteEvents.ExecuteHierarchy(currentOverGo, pointerEvent, ExecuteEvents.dropHandler);
                 }

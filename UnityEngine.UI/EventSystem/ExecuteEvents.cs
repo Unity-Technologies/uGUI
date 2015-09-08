@@ -305,7 +305,7 @@ namespace UnityEngine.EventSystems
 
             var behaviour = component as Behaviour;
             if (behaviour != null)
-                return behaviour.enabled && behaviour.isActiveAndEnabled;
+                return behaviour.isActiveAndEnabled;
             return true;
         }
 
@@ -321,7 +321,7 @@ namespace UnityEngine.EventSystems
             if (go == null || !go.activeInHierarchy)
                 return;
 
-            var components = ComponentListPool.Get();
+            var components = ListPool<Component>.Get();
             go.GetComponents(components);
             for (var i = 0; i < components.Count; i++)
             {
@@ -331,7 +331,7 @@ namespace UnityEngine.EventSystems
                 // Debug.Log(string.Format("{2} found! On {0}.{1}", go, s_GetComponentsScratch[i].GetType(), typeof(T)));
                 results.Add(components[i] as IEventSystemHandler);
             }
-            ComponentListPool.Release(components);
+            ListPool<Component>.Release(components);
             // Debug.LogWarning("end GetEventList<" + typeof(T).Name + ">");
         }
 

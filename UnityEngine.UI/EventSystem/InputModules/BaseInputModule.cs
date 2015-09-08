@@ -143,6 +143,7 @@ namespace UnityEngine.EventSystems
             }
 
             // now issue the enter call up to but not including the common root
+            currentPointerData.pointerEnter = newEnterTarget;
             if (newEnterTarget != null)
             {
                 Transform t = newEnterTarget.transform;
@@ -154,7 +155,6 @@ namespace UnityEngine.EventSystems
                     t = t.parent;
                 }
             }
-            currentPointerData.pointerEnter = newEnterTarget;
         }
 
         protected virtual AxisEventData GetAxisEventData(float x, float y, float moveDeadZone)

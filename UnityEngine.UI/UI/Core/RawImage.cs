@@ -83,10 +83,7 @@ namespace UnityEngine.UI
             }
         }
 
-        /// <summary>
-        /// Update all renderer data.
-        /// </summary>
-        protected override void OnFillVBO(List<UIVertex> vbo)
+        protected override void OnPopulateMesh(Mesh toFill)
         {
             Texture tex = mainTexture;
 
@@ -115,29 +112,18 @@ namespace UnityEngine.UI
                 v.z *= rectTransform.rect.width;
                 v.w *= rectTransform.rect.height;
 
-                vbo.Clear();
+                using (var vh = new VertexHelper())
+                {
+                    var color32 = color;
+                    vh.AddVert(new Vector3(v.x, v.y), color32, new Vector2(m_UVRect.xMin, m_UVRect.yMin));
+                    vh.AddVert(new Vector3(v.x, v.w), color32, new Vector2(m_UVRect.xMin, m_UVRect.yMax));
+                    vh.AddVert(new Vector3(v.z, v.w), color32, new Vector2(m_UVRect.xMax, m_UVRect.yMax));
+                    vh.AddVert(new Vector3(v.z, v.y), color32, new Vector2(m_UVRect.xMax, m_UVRect.yMin));
 
-                var vert = UIVertex.simpleVert;
-
-                vert.position = new Vector2(v.x, v.y);
-                vert.uv0 = new Vector2(m_UVRect.xMin, m_UVRect.yMin);
-                vert.color = color;
-                vbo.Add(vert);
-
-                vert.position = new Vector2(v.x, v.w);
-                vert.uv0 = new Vector2(m_UVRect.xMin, m_UVRect.yMax);
-                vert.color = color;
-                vbo.Add(vert);
-
-                vert.position = new Vector2(v.z, v.w);
-                vert.uv0 = new Vector2(m_UVRect.xMax, m_UVRect.yMax);
-                vert.color = color;
-                vbo.Add(vert);
-
-                vert.position = new Vector2(v.z, v.y);
-                vert.uv0 = new Vector2(m_UVRect.xMax, m_UVRect.yMin);
-                vert.color = color;
-                vbo.Add(vert);
+                    vh.AddTriangle(0, 1, 2);
+                    vh.AddTriangle(2, 3, 0);
+                    vh.FillMesh(toFill);
+                }
             }
         }
     }

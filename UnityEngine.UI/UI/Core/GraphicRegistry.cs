@@ -9,13 +9,12 @@ namespace UnityEngine.UI
 
         private readonly Dictionary<Canvas, IndexedSet<Graphic>> m_Graphics = new Dictionary<Canvas, IndexedSet<Graphic>>();
 
-
         protected GraphicRegistry()
         {
+            // This is needed for AOT on IOS. Without it the compile doesn't get the definition of the Dictionarys
 #pragma warning disable 168
             Dictionary<Graphic, int> emptyGraphicDic;
             Dictionary<ICanvasElement, int> emptyElementDic;
-
 #pragma warning restore 168
         }
 

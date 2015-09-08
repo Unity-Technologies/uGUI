@@ -99,7 +99,10 @@ namespace UnityEngine.UI
 
             if (canvas.renderMode != RenderMode.ScreenSpaceOverlay && blockingObjects != BlockingObjects.None)
             {
-                float dist = eventCamera.farClipPlane - eventCamera.nearClipPlane;
+                float dist = 100.0f;
+
+                if (eventCamera != null)
+                    dist = eventCamera.farClipPlane - eventCamera.nearClipPlane;
 
                 if (blockingObjects == BlockingObjects.ThreeD || blockingObjects == BlockingObjects.All)
                 {
@@ -172,6 +175,7 @@ namespace UnityEngine.UI
                         gameObject = go,
                         module = this,
                         distance = distance,
+                        screenPosition = eventData.position,
                         index = resultAppendList.Count,
                         depth = m_RaycastResults[index].depth,
                         sortingLayer =  canvas.cachedSortingLayerValue,
@@ -209,7 +213,7 @@ namespace UnityEngine.UI
                 Graphic graphic = foundGraphics[i];
 
                 // -1 means it hasn't been processed by the canvas, which means it isn't actually drawn
-                if (graphic.depth == -1)
+                if (graphic.depth == -1 || !graphic.raycastTarget)
                     continue;
 
                 if (!RectTransformUtility.RectangleContainsScreenPoint(graphic.rectTransform, pointerPosition, eventCamera))

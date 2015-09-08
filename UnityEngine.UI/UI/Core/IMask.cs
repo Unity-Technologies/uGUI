@@ -1,7 +1,11 @@
+using System;
+
 namespace UnityEngine.UI
 {
+    [Obsolete("Not supported anymore.", true)]
     public interface IMask
     {
-        bool MaskEnabled();
+        bool Enabled();
+        RectTransform rectTransform { get; }
     }
 }

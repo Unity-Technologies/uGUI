@@ -4,8 +4,15 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
+    [Obsolete("Use BaseMeshEffect instead", true)]
+    public abstract class BaseVertexEffect
+    {
+        [Obsolete("Use BaseMeshEffect.ModifyMeshes instead", true)] //We can't upgrade automatically since the signature changed.
+        public abstract void ModifyVertices(List<UIVertex> vertices);
+    }
+
     [ExecuteInEditMode]
-    public abstract class BaseVertexEffect : UIBehaviour, IVertexModifier
+    public abstract class BaseMeshEffect : UIBehaviour, IMeshModifier
     {
         [NonSerialized]
         private Graphic m_Graphic;
@@ -35,6 +42,13 @@ namespace UnityEngine.UI
             base.OnDisable();
         }
 
+        protected override void OnDidApplyAnimationProperties()
+        {
+            if (graphic != null)
+                graphic.SetVerticesDirty();
+            base.OnDidApplyAnimationProperties();
+        }
+
 #if UNITY_EDITOR
         protected override void OnValidate()
         {
@@ -45,6 +59,6 @@ namespace UnityEngine.UI
 
 #endif
 
-        public abstract void ModifyVertices(List<UIVertex> verts);
+        public abstract void ModifyMesh(Mesh mesh);
     }
 }

@@ -1,5 +1,7 @@
 using System;
-using System.Collections.Generic;
+#if UNITY_EDITOR
+using System.Reflection;
+#endif
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
@@ -35,15 +37,15 @@ namespace UnityEngine.UI
             }
         }
 
-        // Temporary vertex array pool used to avoid memory allocations as much as possible
-        private static readonly ObjectPool<List<UIVertex>> s_VboPool = new ObjectPool<List<UIVertex>>(x => { if (x.Capacity < 300) x.Capacity = 300; }, l => l.Clear());
-
         // Cached and saved values
         [FormerlySerializedAs("m_Mat")]
         [SerializeField] protected Material m_Material;
 
         [SerializeField] private Color m_Color = Color.white;
         public Color color { get { return m_Color; } set { if (SetPropertyUtility.SetColor(ref m_Color, value)) SetVerticesDirty(); } }
+
+        [SerializeField] private bool m_RaycastTarget = true;
+        public bool raycastTarget { get { return m_RaycastTarget; } set { m_RaycastTarget = value; } }
 
         [NonSerialized] private RectTransform m_RectTransform;
         [NonSerialized] private CanvasRenderer m_CanvasRender;
@@ -52,10 +54,11 @@ namespace UnityEngine.UI
         [NonSerialized] private bool m_VertsDirty;
         [NonSerialized] private bool m_MaterialDirty;
 
-
         [NonSerialized] protected UnityAction m_OnDirtyLayoutCallback;
         [NonSerialized] protected UnityAction m_OnDirtyVertsCallback;
         [NonSerialized] protected UnityAction m_OnDirtyMaterialCallback;
+
+        [NonSerialized] protected static Mesh s_Mesh;
 
         // Tween controls for the Graphic
         [NonSerialized]
@@ -168,11 +171,11 @@ namespace UnityEngine.UI
 
         private void CacheCanvas()
         {
-            var list = CanvasListPool.Get();
+            var list = ListPool<Canvas>.Get();
             gameObject.GetComponentsInParent(false, list);
             if (list.Count > 0)
                 m_Canvas = list[0];
-            CanvasListPool.Release(list);
+            ListPool<Canvas>.Release(list);
         }
 
         /// <summary>
@@ -216,13 +219,13 @@ namespace UnityEngine.UI
         {
             get
             {
-                var components = ComponentListPool.Get();
+                var components = ListPool<Component>.Get();
                 GetComponents(typeof(IMaterialModifier), components);
 
                 var currentMat = material;
                 for (var i = 0; i < components.Count; i++)
                     currentMat = (components[i] as IMaterialModifier).GetModifiedMaterial(currentMat);
-                ComponentListPool.Release(components);
+                ListPool<Component>.Release(components);
                 return currentMat;
             }
         }
@@ -255,8 +258,6 @@ namespace UnityEngine.UI
                 s_WhiteTexture = Texture2D.whiteTexture;
 
             SetAllDirty();
-
-            SendGraphicEnabledDisabled();
         }
 
         /// <summary>
@@ -274,28 +275,13 @@ namespace UnityEngine.UI
                 canvasRenderer.Clear();
 
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
-            SendGraphicEnabledDisabled();
             base.OnDisable();
-        }
-
-        private void SendGraphicEnabledDisabled()
-        {
-            var components = ComponentListPool.Get();
-            GetComponents(typeof(IGraphicEnabledDisabled), components);
-
-            for (int i = 0; i < components.Count; i++)
-                ((IGraphicEnabledDisabled)components[i]).OnSiblingGraphicEnabledDisabled();
-
-            ComponentListPool.Release(components);
         }
 
         #endregion
 
         protected override void OnCanvasHierarchyChanged()
         {
-            if (!IsActive())
-                return;
-
             // Use m_Cavas so we dont auto call CacheCanvas
             Canvas currentCanvas = m_Canvas;
             CacheCanvas();
@@ -309,6 +295,9 @@ namespace UnityEngine.UI
 
         public virtual void Rebuild(CanvasUpdate update)
         {
+            if (canvasRenderer.cull)
+                return;
+
             switch (update)
             {
                 case CanvasUpdate.PreRender:
@@ -327,73 +316,96 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Update the renderer's vertices.
-        /// </summary>
-        protected virtual void UpdateGeometry()
-        {
-            var vbo = s_VboPool.Get();
-
-            if (rectTransform != null && rectTransform.rect.width >= 0 && rectTransform.rect.height >= 0)
-                OnFillVBO(vbo);
-
-
-            var components = ComponentListPool.Get();
-            GetComponents(typeof(IVertexModifier), components);
-
-            for (var i = 0; i < components.Count; i++)
-                (components[i] as IVertexModifier).ModifyVertices(vbo);
-            ComponentListPool.Release(components);
-
-            canvasRenderer.SetVertices(vbo);
-            s_VboPool.Release(vbo);
-        }
-
-        /// <summary>
         /// Update the renderer's material.
         /// </summary>
         protected virtual void UpdateMaterial()
         {
-            if (IsActive())
-                canvasRenderer.SetMaterial(materialForRendering, mainTexture);
+            if (!IsActive())
+                return;
+
+            canvasRenderer.materialCount = 1;
+            canvasRenderer.SetMaterial(materialForRendering, 0);
+            canvasRenderer.SetTexture(mainTexture);
         }
+
+        /// <summary>
+        /// Update the renderer's vertices.
+        /// </summary>
+        protected virtual void UpdateGeometry()
+        {
+            if (rectTransform != null && rectTransform.rect.width >= 0 && rectTransform.rect.height >= 0)
+                OnPopulateMesh(workerMesh);
+
+            var components = ListPool<Component>.Get();
+            GetComponents(typeof(IMeshModifier), components);
+
+            for (var i = 0; i < components.Count; i++)
+                ((IMeshModifier)components[i]).ModifyMesh(workerMesh);
+
+            ListPool<Component>.Release(components);
+
+            canvasRenderer.SetMesh(workerMesh);
+        }
+
+        protected static Mesh workerMesh
+        {
+            get
+            {
+                if (s_Mesh == null)
+                {
+                    s_Mesh = new Mesh();
+                    s_Mesh.name = "Shared UI Mesh";
+                    s_Mesh.hideFlags = HideFlags.HideAndDontSave;
+                }
+                return s_Mesh;
+            }
+        }
+
+        [Obsolete("Use OnPopulateMesh instead.", true)]
+        protected virtual void OnFillVBO(System.Collections.Generic.List<UIVertex> vbo) {}
 
         /// <summary>
         /// Fill the vertex buffer data.
         /// </summary>
-        protected virtual void OnFillVBO(List<UIVertex> vbo)
+        protected virtual void OnPopulateMesh(Mesh m)
         {
             var r = GetPixelAdjustedRect();
             var v = new Vector4(r.x, r.y, r.x + r.width, r.y + r.height);
 
-            var vert = UIVertex.simpleVert;
-            vert.color = color;
+            Color32 color32 = color;
+            using (var vh = new VertexHelper())
+            {
+                vh.AddVert(new Vector3(v.x, v.y), color32, new Vector2(0f, 0f));
+                vh.AddVert(new Vector3(v.x, v.w), color32, new Vector2(0f, 1f));
+                vh.AddVert(new Vector3(v.z, v.w), color32, new Vector2(1f, 1f));
+                vh.AddVert(new Vector3(v.z, v.y), color32, new Vector2(1f, 0f));
 
-            vert.position = new Vector3(v.x, v.y);
-            vert.uv0 = new Vector2(0f, 0f);
-            vbo.Add(vert);
-
-            vert.position = new Vector3(v.x, v.w);
-            vert.uv0 = new Vector2(0f, 1f);
-            vbo.Add(vert);
-
-            vert.position = new Vector3(v.z, v.w);
-            vert.uv0 = new Vector2(1f, 1f);
-            vbo.Add(vert);
-
-            vert.position = new Vector3(v.z, v.y);
-            vert.uv0 = new Vector2(1f, 0f);
-            vbo.Add(vert);
+                vh.AddTriangle(0, 1, 2);
+                vh.AddTriangle(2, 3, 0);
+                vh.FillMesh(m);
+            }
         }
 
 #if UNITY_EDITOR
         public virtual void OnRebuildRequested()
         {
-            SetAllDirty();
+            // when rebuild is requested we need to rebuild all the graphics /
+            // and associated components... The correct way to do this is by
+            // calling OnValidate... Becasue MB's dont' have a common base class
+            // we do this via reflection. It's nasty and ugly... Editor only.
+            var mbs = gameObject.GetComponents<MonoBehaviour>();
+            foreach (var mb in mbs)
+            {
+                var methodInfo = mb.GetType().GetMethod("OnValidate", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                if (methodInfo != null)
+                    methodInfo.Invoke(mb, null);
+            }
         }
 
 #endif
 
         // Call from unity if animation properties have changed
+
         protected override void OnDidApplyAnimationProperties()
         {
             SetAllDirty();
@@ -405,8 +417,11 @@ namespace UnityEngine.UI
         public virtual void SetNativeSize() {}
         public virtual bool Raycast(Vector2 sp, Camera eventCamera)
         {
+            if (!isActiveAndEnabled)
+                return false;
+
             var t = transform;
-            var components = ComponentListPool.Get();
+            var components = ListPool<Component>.Get();
 
             bool ignoreParentGroups = false;
 
@@ -440,13 +455,13 @@ namespace UnityEngine.UI
 
                     if (!raycastValid)
                     {
-                        ComponentListPool.Release(components);
+                        ListPool<Component>.Release(components);
                         return false;
                     }
                 }
                 t = t.parent;
             }
-            ComponentListPool.Release(components);
+            ListPool<Component>.Release(components);
             return true;
         }
 

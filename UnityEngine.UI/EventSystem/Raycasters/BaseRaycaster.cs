@@ -24,6 +24,14 @@ namespace UnityEngine.EventSystems
             get { return int.MinValue; }
         }
 
+        public override string ToString()
+        {
+            return "Name: " + gameObject + "\n" +
+                   "eventCamera: " + eventCamera + "\n" +
+                   "sortOrderPriority: " + sortOrderPriority + "\n" +
+                   "renderOrderPriority: " + renderOrderPriority;
+        }
+
         #region Unity Lifetime calls
 
         protected override void OnEnable()
