@@ -6,24 +6,17 @@ namespace UnityEngine.UI
     public class PositionAsUV1 : BaseMeshEffect
     {
         protected PositionAsUV1()
-        {}
+        { }
 
-        public override void ModifyMesh(Mesh mesh)
+        public override void ModifyMesh(VertexHelper vh)
         {
-            if (!IsActive())
-                return;
-
-            var verts = mesh.vertices.ToList();
-            var uvs = ListPool<Vector2>.Get();
-
-            for (int i = 0; i < verts.Count; i++)
+            UIVertex vert = new UIVertex();
+            for (int i = 0; i < vh.currentVertCount; i++)
             {
-                var vert = verts[i];
-                uvs.Add(new Vector2(verts[i].x, verts[i].y));
-                verts[i] = vert;
+                vh.PopulateUIVertex(ref vert, i);
+                vert.uv1 =  new Vector2(vert.position.x, vert.position.y);
+                vh.SetUIVertex(vert, i);
             }
-            mesh.SetUVs(1, uvs);
-            ListPool<Vector2>.Release(uvs);
         }
     }
 }

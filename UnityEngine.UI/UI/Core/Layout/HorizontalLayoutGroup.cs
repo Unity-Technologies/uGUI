@@ -4,7 +4,7 @@ namespace UnityEngine.UI
     public class HorizontalLayoutGroup : HorizontalOrVerticalLayoutGroup
     {
         protected HorizontalLayoutGroup()
-        {}
+        { }
 
         public override void CalculateLayoutInputHorizontal()
         {

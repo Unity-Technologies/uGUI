@@ -8,7 +8,7 @@ using UnityEngine.UI.CoroutineTween;
 namespace UnityEngine.UI
 {
     [AddComponentMenu("UI/Dropdown", 35)]
-    [RequireComponent(typeof(RectTransform))]
+    [RequireComponent (typeof (RectTransform))]
     public class Dropdown : Selectable, IPointerClickHandler, ISubmitHandler, ICancelHandler
     {
         protected internal class DropdownItem : MonoBehaviour, IPointerEnterHandler, ICancelHandler
@@ -22,10 +22,10 @@ namespace UnityEngine.UI
             [SerializeField]
             private Toggle m_Toggle;
 
-            public Text          text          { get { return m_Text; } set { m_Text = value; } }
-            public Image         image         { get { return m_Image; } set { m_Image = value; } }
-            public RectTransform rectTransform { get { return m_RectTransform; } set { m_RectTransform = value; } }
-            public Toggle        toggle        { get { return m_Toggle; } set { m_Toggle = value; } }
+            public Text          text          { get { return m_Text;          } set { m_Text = value;           } }
+            public Image         image         { get { return m_Image;         } set { m_Image = value;          } }
+            public RectTransform rectTransform { get { return m_RectTransform; } set { m_RectTransform = value;  } }
+            public Toggle        toggle        { get { return m_Toggle;        } set { m_Toggle = value;         } }
 
             public virtual void OnPointerEnter(PointerEventData eventData)
             {
@@ -48,24 +48,24 @@ namespace UnityEngine.UI
             [SerializeField]
             private Sprite m_Image;
 
-            public string text  { get { return m_Text; }  set { m_Text = value; } }
+            public string text  { get { return m_Text; }  set { m_Text = value;  } }
             public Sprite image { get { return m_Image; } set { m_Image = value; } }
 
-            public OptionData()
+            public OptionData ()
             {
             }
 
-            public OptionData(string text)
+            public OptionData (string text)
             {
                 this.text = text;
             }
 
-            public OptionData(Sprite image)
+            public OptionData (Sprite image)
             {
                 this.image = image;
             }
 
-            public OptionData(string text, Sprite image)
+            public OptionData (string text, Sprite image)
             {
                 this.text = text;
                 this.image = image;
@@ -80,14 +80,14 @@ namespace UnityEngine.UI
             public List<OptionData> options { get { return m_Options; } set { m_Options = value; } }
 
 
-            public OptionDataList()
+            public OptionDataList ()
             {
-                options = new List<OptionData>();
+                options = new List<OptionData> ();
             }
         }
 
         [Serializable]
-        public class DropdownEvent : UnityEvent<int> {}
+        public class DropdownEvent : UnityEvent<int> { }
 
         // Template used to create the dropdown.
         [SerializeField]
@@ -123,7 +123,7 @@ namespace UnityEngine.UI
         // Items that will be visible when the dropdown is shown.
         // We box this into its own class so we can use a Property Drawer for it.
         [SerializeField]
-        private OptionDataList m_Options = new OptionDataList();
+        private OptionDataList m_Options = new OptionDataList ();
         public List<OptionData> options
         {
             get { return m_Options.options; }
@@ -134,7 +134,7 @@ namespace UnityEngine.UI
 
         // Notification triggered when the dropdown changes.
         [SerializeField]
-        private DropdownEvent m_OnValueChanged = new DropdownEvent();
+        private DropdownEvent m_OnValueChanged = new DropdownEvent ();
         public DropdownEvent onValueChanged { get { return m_OnValueChanged; } set { m_OnValueChanged = value; } }
 
         private GameObject m_Dropdown;
@@ -155,18 +155,18 @@ namespace UnityEngine.UI
                 if (Application.isPlaying && (value == m_Value || options.Count == 0))
                     return;
 
-                m_Value = Mathf.Clamp(value, 0, options.Count - 1);
+                m_Value = Mathf.Clamp (value, 0, options.Count-1);
                 Refresh();
 
                 // Notify all listeners
-                m_OnValueChanged.Invoke(m_Value);
+                m_OnValueChanged.Invoke (m_Value);
             }
         }
 
         protected Dropdown()
         {}
 
-        protected override void Awake()
+        protected override void Awake ()
         {
             #if UNITY_EDITOR
             if (!Application.isPlaying)
@@ -184,7 +184,7 @@ namespace UnityEngine.UI
         }
 
         #if UNITY_EDITOR
-        protected override void OnValidate()
+        protected override void OnValidate ()
         {
             base.OnValidate();
 
@@ -193,7 +193,6 @@ namespace UnityEngine.UI
 
             Refresh();
         }
-
         #endif
 
         void Refresh()
@@ -201,7 +200,7 @@ namespace UnityEngine.UI
             if (options.Count == 0)
                 return;
 
-            OptionData data = options[Mathf.Clamp(m_Value, 0, options.Count - 1)];
+            OptionData data = options[Mathf.Clamp (m_Value, 0, options.Count - 1)];
 
             if (m_CaptionText)
             {
@@ -227,7 +226,7 @@ namespace UnityEngine.UI
 
             if (!m_Template)
             {
-                Debug.LogError("The dropdown template is not assigned. The template needs to be assigned and must have a child GameObject with a Toggle component serving as the item.", this);
+                Debug.LogError ("The dropdown template is not assigned. The template needs to be assigned and must have a child GameObject with a Toggle component serving as the item.", this);
                 return;
             }
 
@@ -280,7 +279,7 @@ namespace UnityEngine.UI
             validTemplate = true;
         }
 
-        private static T GetOrAddComponent<T>(GameObject go) where T: Component
+        private static T GetOrAddComponent<T> (GameObject go) where T : Component
         {
             T comp = go.GetComponent<T>();
             if (!comp)
@@ -290,17 +289,17 @@ namespace UnityEngine.UI
 
         public virtual void OnPointerClick(PointerEventData eventData)
         {
-            Show();
+            Show ();
         }
 
         public virtual void OnSubmit(BaseEventData eventData)
         {
-            Show();
+            Show ();
         }
 
         public virtual void OnCancel(BaseEventData eventData)
         {
-            Hide();
+            Hide ();
         }
 
         // Show the dropdown.
@@ -311,9 +310,9 @@ namespace UnityEngine.UI
         // This is always valid for screen space canvas modes.
         // For world space canvases we don't know how it's used, but it could be e.g. for an in-game monitor.
         // We consider it a fair constraint that the canvas must be big enough to contains dropdowns.
-        public void Show()
+        public void Show ()
         {
-            if (!IsActive() || !IsInteractable() || m_Dropdown != null)
+            if (!IsActive () || !IsInteractable () || m_Dropdown != null)
                 return;
 
             if (!validTemplate)
@@ -331,21 +330,21 @@ namespace UnityEngine.UI
             Canvas rootCanvas = list[0];
             ListPool<Canvas>.Release(list);
 
-            m_Template.gameObject.SetActive(true);
+            m_Template.gameObject.SetActive (true);
 
             // Instantiate the drop-down template
             m_Dropdown = CreateDropdownList(m_Template.gameObject);
             m_Dropdown.name = "Dropdown List";
-            m_Dropdown.SetActive(true);
+            m_Dropdown.SetActive (true);
 
             // Make drop-down RectTransform have same values as original.
             RectTransform dropdownRectTransform = m_Dropdown.transform as RectTransform;
-            dropdownRectTransform.SetParent(m_Template.transform.parent, false);
+            dropdownRectTransform.SetParent (m_Template.transform.parent, false);
 
             // Instantiate the drop-down list items
 
             // Find the dropdown item and disable it.
-            DropdownItem itemTemplate = m_Dropdown.GetComponentInChildren<DropdownItem>();
+            DropdownItem itemTemplate = m_Dropdown.GetComponentInChildren<DropdownItem> ();
 
             GameObject content = itemTemplate.rectTransform.parent.gameObject;
             RectTransform contentRectTransform = content.transform as RectTransform;
@@ -413,7 +412,7 @@ namespace UnityEngine.UI
             dropdownRectTransform.GetWorldCorners(corners);
             bool outside = false;
             RectTransform rootCanvasRectTransform = rootCanvas.transform as RectTransform;
-            for (int i = 0; i < 4; i++)
+            for (int i=0; i<4; i++)
             {
                 Vector3 corner = rootCanvasRectTransform.InverseTransformPoint(corners[i]);
                 if (!rootCanvasRectTransform.rect.Contains(corner))
@@ -428,7 +427,7 @@ namespace UnityEngine.UI
                 RectTransformUtility.FlipLayoutOnAxis(dropdownRectTransform, 1, false, false);
             }
 
-            for (int i = 0; i < m_Items.Count; i++)
+            for (int i=0; i<m_Items.Count; i++)
             {
                 RectTransform itemRect = m_Items[i].rectTransform;
                 itemRect.anchorMin = new Vector2(itemRect.anchorMin.x, 0);
@@ -438,7 +437,7 @@ namespace UnityEngine.UI
             }
 
             // Fade in the popup
-            AlphaFadeList(0.15f, 0f, 1f);
+            AlphaFadeList (0.15f, 0f, 1f);
 
             // Make drop-down template and item template inactive
             m_Template.gameObject.SetActive(false);
@@ -512,7 +511,7 @@ namespace UnityEngine.UI
             DropdownItem item = CreateItem(itemTemplate);
             item.rectTransform.SetParent(itemTemplate.rectTransform.parent, false);
 
-            item.gameObject.SetActive(true);
+            item.gameObject.SetActive (true);
             item.gameObject.name = "Item " + items.Count + (data.text != null ? ": " + data.text : "");
 
             if (item.toggle != null)
@@ -533,13 +532,13 @@ namespace UnityEngine.UI
             return item;
         }
 
-        private void AlphaFadeList(float duration, float alpha)
+        private void AlphaFadeList (float duration, float alpha)
         {
             CanvasGroup group = m_Dropdown.GetComponent<CanvasGroup>();
             AlphaFadeList(duration, group.alpha, alpha);
         }
 
-        private void AlphaFadeList(float duration, float start, float end)
+        private void AlphaFadeList (float duration, float start, float end)
         {
             if (end.Equals(start))
                 return;
@@ -550,7 +549,7 @@ namespace UnityEngine.UI
             m_AlphaTweenRunner.StartTween(tween);
         }
 
-        private void SetAlpha(float alpha)
+        private void SetAlpha (float alpha)
         {
             if (!m_Dropdown)
                 return;
@@ -559,11 +558,11 @@ namespace UnityEngine.UI
         }
 
         // Hide the dropdown.
-        public void Hide()
+        public void Hide ()
         {
             if (m_Dropdown != null)
             {
-                AlphaFadeList(0.15f, 0f);
+                AlphaFadeList (0.15f, 0f);
                 StartCoroutine(DelayedDestroyDropdownList(0.15f));
             }
             if (m_Blocker != null)
@@ -572,10 +571,10 @@ namespace UnityEngine.UI
             Select();
         }
 
-        private IEnumerator DelayedDestroyDropdownList(float delay)
+        private IEnumerator DelayedDestroyDropdownList (float delay)
         {
             yield return new WaitForSeconds(delay);
-            for (int i = 0; i < m_Items.Count; i++)
+            for (int i=0; i<m_Items.Count; i++)
             {
                 if (m_Items[i] != null)
                     DestroyItem(m_Items[i]);
@@ -587,7 +586,7 @@ namespace UnityEngine.UI
         }
 
         // Change the value and hide the dropdown.
-        private void OnSelectItem(Toggle toggle)
+        private void OnSelectItem (Toggle toggle)
         {
             if (!toggle.isOn)
                 toggle.isOn = true;
@@ -595,12 +594,12 @@ namespace UnityEngine.UI
             int selectedIndex = -1;
             Transform tr = toggle.transform;
             Transform parent = tr.parent;
-            for (int i = 0; i < parent.childCount; i++)
+            for (int i=0; i<parent.childCount; i++)
             {
-                if (parent.GetChild(i) == tr)
+                if (parent.GetChild (i) == tr)
                 {
                     // Subtract one to account for template child.
-                    selectedIndex = i - 1;
+                    selectedIndex = i-1;
                     break;
                 }
             }
@@ -609,7 +608,7 @@ namespace UnityEngine.UI
                 return;
 
             value = selectedIndex;
-            Hide();
+            Hide ();
         }
     }
 }

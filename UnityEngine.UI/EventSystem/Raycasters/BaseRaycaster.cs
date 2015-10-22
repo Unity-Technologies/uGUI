@@ -29,7 +29,7 @@ namespace UnityEngine.EventSystems
             return "Name: " + gameObject + "\n" +
                    "eventCamera: " + eventCamera + "\n" +
                    "sortOrderPriority: " + sortOrderPriority + "\n" +
-                   "renderOrderPriority: " + renderOrderPriority;
+                   "renderOrderPriority: " + renderOrderPriority ;
         }
 
         #region Unity Lifetime calls

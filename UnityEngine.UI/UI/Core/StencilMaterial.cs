@@ -27,8 +27,8 @@ namespace UnityEngine.UI
 
         private static List<MatEntry> m_List = new List<MatEntry>();
 
-        [Obsolete("Use Material.Add instead.", true)]
-        public static Material Add(Material baseMat, int stencilID) { return null; }
+        [Obsolete("Use Material.Add instead.",true)]
+        public static Material Add(Material baseMat, int stencilID) { return  null; }
 
         /// <summary>
         /// Add a new material using the specified base and stencil ID.
@@ -45,7 +45,7 @@ namespace UnityEngine.UI
         {
             if ((stencilID <= 0 && colorWriteMask == ColorWriteMask.All) || baseMat == null)
                 return baseMat;
-
+            
             if (!baseMat.HasProperty("_Stencil"))
             {
                 Debug.LogWarning("Material " + baseMat.name + " doesn't have _Stencil property", baseMat);
@@ -81,9 +81,9 @@ namespace UnityEngine.UI
             {
                 MatEntry ent = m_List[i];
 
-                if (ent.baseMat == baseMat
-                    && ent.stencilId == stencilID
-                    && ent.operation == operation
+                if (ent.baseMat == baseMat 
+                    && ent.stencilId == stencilID 
+                    && ent.operation == operation 
                     && ent.compareFunction == compareFunction
                     && ent.readMask == readMask
                     && ent.writeMask == writeMask
@@ -108,7 +108,7 @@ namespace UnityEngine.UI
             newEnt.useAlphaClip = operation != StencilOp.Keep && writeMask > 0;
 
             newEnt.customMat.name = string.Format("Stencil Id:{0}, Op:{1}, Comp:{2}, WriteMask:{3}, ReadMask:{4}, ColorMask:{5} AlphaClip:{6} ({7})", stencilID, operation, compareFunction, writeMask, readMask, colorWriteMask, newEnt.useAlphaClip, baseMat.name);
-
+            
 
             newEnt.customMat.SetInt("_Stencil", stencilID);
             newEnt.customMat.SetInt("_StencilOp", (int)operation);

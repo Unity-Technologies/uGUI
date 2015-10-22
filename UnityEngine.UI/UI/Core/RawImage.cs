@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine.Serialization;
 
@@ -16,7 +17,9 @@ namespace UnityEngine.UI
         [SerializeField] Rect m_UVRect = new Rect(0f, 0f, 1f, 1f);
 
         protected RawImage()
-        {}
+        {
+            useLegacyMeshGeneration = false;
+        }
 
         /// <summary>
         /// Returns the texture used to draw this Graphic.
@@ -25,7 +28,16 @@ namespace UnityEngine.UI
         {
             get
             {
-                return m_Texture == null ? s_WhiteTexture : m_Texture;
+                if (m_Texture == null)
+                {
+                    if (material != null && material.mainTexture != null)
+                    {
+                        return material.mainTexture;
+                    }
+                    return s_WhiteTexture;
+                }
+
+                return m_Texture;
             }
         }
 
@@ -83,36 +95,15 @@ namespace UnityEngine.UI
             }
         }
 
-        protected override void OnPopulateMesh(Mesh toFill)
+        protected override void OnPopulateMesh(VertexHelper vh)
         {
             Texture tex = mainTexture;
-
+            vh.Clear();
             if (tex != null)
             {
-                Vector4 v = Vector4.zero;
+                var r = GetPixelAdjustedRect();
+                var v = new Vector4(r.x, r.y, r.x + r.width, r.y + r.height);
 
-                int w = Mathf.RoundToInt(tex.width * uvRect.width);
-                int h = Mathf.RoundToInt(tex.height * uvRect.height);
-
-                float paddedW = ((w & 1) == 0) ? w : w + 1;
-                float paddedH = ((h & 1) == 0) ? h : h + 1;
-
-                v.x = 0f;
-                v.y = 0f;
-                v.z = w / paddedW;
-                v.w = h / paddedH;
-
-                v.x -= rectTransform.pivot.x;
-                v.y -= rectTransform.pivot.y;
-                v.z -= rectTransform.pivot.x;
-                v.w -= rectTransform.pivot.y;
-
-                v.x *= rectTransform.rect.width;
-                v.y *= rectTransform.rect.height;
-                v.z *= rectTransform.rect.width;
-                v.w *= rectTransform.rect.height;
-
-                using (var vh = new VertexHelper())
                 {
                     var color32 = color;
                     vh.AddVert(new Vector3(v.x, v.y), color32, new Vector2(m_UVRect.xMin, m_UVRect.yMin));
@@ -122,7 +113,6 @@ namespace UnityEngine.UI
 
                     vh.AddTriangle(0, 1, 2);
                     vh.AddTriangle(2, 3, 0);
-                    vh.FillMesh(toFill);
                 }
             }
         }

@@ -30,9 +30,24 @@ namespace UnityEngine.UI
             m_Indicies.AddRange(m.GetIndices(0));
         }
 
+        public void Clear()
+        {
+            m_Positions.Clear();
+            m_Colors.Clear();
+            m_Uv0S.Clear();
+            m_Uv1S.Clear();
+            m_Normals.Clear();
+            m_Tangents.Clear();
+            m_Indicies.Clear();
+        }
+
         public int currentVertCount
         {
             get { return m_Positions.Count; }
+        }
+        public int currentIndexCount
+        {
+            get { return m_Indicies.Count; }
         }
 
         public void PopulateUIVertex(ref UIVertex vertex, int i)
@@ -45,9 +60,23 @@ namespace UnityEngine.UI
             vertex.tangent = m_Tangents[i];
         }
 
+        public void SetUIVertex(UIVertex vertex, int i)
+        {
+            m_Positions[i] = vertex.position;
+            m_Colors[i] = vertex.color;
+            m_Uv0S[i] = vertex.uv0;
+            m_Uv1S[i] = vertex.uv1;
+            m_Normals[i] = vertex.normal;
+            m_Tangents[i] = vertex.tangent;
+        }
+
         public void FillMesh(Mesh mesh)
         {
             mesh.Clear();
+
+            if (m_Positions.Count >= 65000)
+                throw new ArgumentException("Mesh can not have more than 65000 verticies");
+
             mesh.SetVertices(m_Positions);
             mesh.SetColors(m_Colors);
             mesh.SetUVs(0, m_Uv0S);
@@ -115,29 +144,27 @@ namespace UnityEngine.UI
             AddTriangle(startIndex + 2, startIndex + 3, startIndex);
         }
 
+        public void AddUIVertexStream(List<UIVertex> verts, List<int> indicies)
+        {
+            if (verts != null)
+            {
+                CanvasRenderer.AddUIVertexStream(verts, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Normals, m_Tangents);
+            }
+
+            if (indicies != null)
+            {
+                m_Indicies.AddRange(indicies);
+            }
+        }
+
         public void AddUIVertexTriangleStream(List<UIVertex> verts)
         {
-            for (int i = 0; i < verts.Count; i += 3)
-            {
-                int startIndex = currentVertCount;
-                for (int j = 0; j < 3; j++)
-                {
-                    AddVert(verts[i + j].position, verts[i + j].color, verts[i + j].uv0, verts[i + j].uv1, verts[i + j].normal, verts[i + j].tangent);
-                }
-
-                AddTriangle(startIndex, startIndex + 1, startIndex + 2);
-            }
+            CanvasRenderer.SplitUIVertexStreams(verts, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Normals, m_Tangents, m_Indicies);
         }
 
         public void GetUIVertexStream(List<UIVertex> stream)
         {
-            stream.Clear();
-            var vertex = new UIVertex();
-            for (int i = 0; i < m_Indicies.Count; ++i)
-            {
-                PopulateUIVertex(ref vertex, m_Indicies[i]);
-                stream.Add(vertex);
-            }
+            CanvasRenderer.CreateUIVertexStream(stream, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Normals, m_Tangents, m_Indicies);
         }
     }
 }

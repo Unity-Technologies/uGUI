@@ -105,7 +105,9 @@ namespace UnityEngine.UI
         public float eventAlphaThreshold { get { return m_EventAlphaThreshold; } set { m_EventAlphaThreshold = value; } }
 
         protected Image()
-        {}
+        {
+            useLegacyMeshGeneration = false;
+        }
 
         /// <summary>
         /// Image's texture comes from the UnityEngine.Image.
@@ -114,7 +116,16 @@ namespace UnityEngine.UI
         {
             get
             {
-                return overrideSprite == null ? s_WhiteTexture : overrideSprite.texture;
+                if (overrideSprite == null)
+                {
+                    if (material != null && material.mainTexture != null)
+                    {
+                        return material.mainTexture;
+                    }
+                    return s_WhiteTexture;
+                }
+
+                return overrideSprite.texture;
             }
         }
 
@@ -151,7 +162,7 @@ namespace UnityEngine.UI
             }
         }
 
-        public virtual void OnBeforeSerialize() {}
+        public virtual void OnBeforeSerialize() { }
 
         public virtual void OnAfterDeserialize()
         {
@@ -229,7 +240,7 @@ namespace UnityEngine.UI
         /// <summary>
         /// Update the UI renderer mesh.
         /// </summary>
-        protected override void OnPopulateMesh(Mesh toFill)
+        protected override void OnPopulateMesh(VertexHelper toFill)
         {
             if (overrideSprite == null)
             {
@@ -258,25 +269,20 @@ namespace UnityEngine.UI
         /// <summary>
         /// Generate vertices for a simple Image.
         /// </summary>
-
-        void GenerateSimpleSprite(Mesh toFill, bool lPreserveAspect)
+        void GenerateSimpleSprite(VertexHelper vh, bool lPreserveAspect)
         {
             Vector4 v = GetDrawingDimensions(lPreserveAspect);
             var uv = (overrideSprite != null) ? Sprites.DataUtility.GetOuterUV(overrideSprite) : Vector4.zero;
 
             var color32 = color;
-            using (var vh = new VertexHelper())
-            {
-                vh.AddVert(new Vector3(v.x, v.y), color32, new Vector2(uv.x, uv.y));
-                vh.AddVert(new Vector3(v.x, v.w), color32, new Vector2(uv.x, uv.w));
-                vh.AddVert(new Vector3(v.z, v.w), color32, new Vector2(uv.z, uv.w));
-                vh.AddVert(new Vector3(v.z, v.y), color32, new Vector2(uv.z, uv.y));
+            vh.Clear();
+            vh.AddVert(new Vector3(v.x, v.y), color32, new Vector2(uv.x, uv.y));
+            vh.AddVert(new Vector3(v.x, v.w), color32, new Vector2(uv.x, uv.w));
+            vh.AddVert(new Vector3(v.z, v.w), color32, new Vector2(uv.z, uv.w));
+            vh.AddVert(new Vector3(v.z, v.y), color32, new Vector2(uv.z, uv.y));
 
-                vh.AddTriangle(0, 1, 2);
-                vh.AddTriangle(2, 3, 0);
-
-                vh.FillMesh(toFill);
-            }
+            vh.AddTriangle(0, 1, 2);
+            vh.AddTriangle(2, 3, 0);
         }
 
         /// <summary>
@@ -286,7 +292,7 @@ namespace UnityEngine.UI
         static readonly Vector2[] s_VertScratch = new Vector2[4];
         static readonly Vector2[] s_UVScratch = new Vector2[4];
 
-        private void GenerateSlicedSprite(Mesh toFill)
+        private void GenerateSlicedSprite(VertexHelper toFill)
         {
             if (!hasBorder)
             {
@@ -334,28 +340,26 @@ namespace UnityEngine.UI
             s_UVScratch[2] = new Vector2(inner.z, inner.w);
             s_UVScratch[3] = new Vector2(outer.z, outer.w);
 
-            using (var vh = new VertexHelper())
+            toFill.Clear();
+
+            for (int x = 0; x < 3; ++x)
             {
-                for (int x = 0; x < 3; ++x)
+                int x2 = x + 1;
+
+                for (int y = 0; y < 3; ++y)
                 {
-                    int x2 = x + 1;
+                    if (!m_FillCenter && x == 1 && y == 1)
+                        continue;
 
-                    for (int y = 0; y < 3; ++y)
-                    {
-                        if (!m_FillCenter && x == 1 && y == 1)
-                            continue;
+                    int y2 = y + 1;
 
-                        int y2 = y + 1;
-
-                        AddQuad(vh,
-                            new Vector2(s_VertScratch[x].x, s_VertScratch[y].y),
-                            new Vector2(s_VertScratch[x2].x, s_VertScratch[y2].y),
-                            color,
-                            new Vector2(s_UVScratch[x].x, s_UVScratch[y].y),
-                            new Vector2(s_UVScratch[x2].x, s_UVScratch[y2].y));
-                    }
+                    AddQuad(toFill,
+                        new Vector2(s_VertScratch[x].x, s_VertScratch[y].y),
+                        new Vector2(s_VertScratch[x2].x, s_VertScratch[y2].y),
+                        color,
+                        new Vector2(s_UVScratch[x].x, s_UVScratch[y].y),
+                        new Vector2(s_UVScratch[x2].x, s_UVScratch[y2].y));
                 }
-                vh.FillMesh(toFill);
             }
         }
 
@@ -363,7 +367,7 @@ namespace UnityEngine.UI
         /// Generate vertices for a tiled Image.
         /// </summary>
 
-        void GenerateTiledSprite(Mesh toFill)
+        void GenerateTiledSprite(VertexHelper toFill)
         {
             Vector4 outer, inner, border;
             Vector2 spriteSize;
@@ -400,69 +404,28 @@ namespace UnityEngine.UI
             float yMin = border.y;
             float yMax = rect.height - border.w;
 
-            // Safety check. Useful so Unity doesn't run out of memory if the sprites are too small.
-            // Max tiles are 100 x 100.
-            if ((xMax - xMin) > tileWidth * 100 || (yMax - yMin) > tileHeight * 100)
+            toFill.Clear();
+            var clipped = uvMax;
+
+            // if either with is zero we cant tile so just assume it was the full width.
+            if (tileWidth == 0)
+                tileWidth = xMax - xMin;
+
+            if (tileHeight == 0)
+                tileHeight = yMax - yMin;
+
+            if (m_FillCenter)
             {
-                tileWidth = (xMax - xMin) / 100;
-                tileHeight = (yMax - yMin) / 100;
-            }
-
-            using (var vh = new VertexHelper())
-            {
-                var clipped = uvMax;
-                if (m_FillCenter)
+                for (float y1 = yMin; y1 < yMax; y1 += tileHeight)
                 {
-                    for (float y1 = yMin; y1 < yMax; y1 += tileHeight)
+                    float y2 = y1 + tileHeight;
+                    if (y2 > yMax)
                     {
-                        float y2 = y1 + tileHeight;
-                        if (y2 > yMax)
-                        {
-                            clipped.y = uvMin.y + (uvMax.y - uvMin.y) * (yMax - y1) / (y2 - y1);
-                            y2 = yMax;
-                        }
-
-                        clipped.x = uvMax.x;
-                        for (float x1 = xMin; x1 < xMax; x1 += tileWidth)
-                        {
-                            float x2 = x1 + tileWidth;
-                            if (x2 > xMax)
-                            {
-                                clipped.x = uvMin.x + (uvMax.x - uvMin.x) * (xMax - x1) / (x2 - x1);
-                                x2 = xMax;
-                            }
-                            AddQuad(vh, new Vector2(x1, y1) + rect.position, new Vector2(x2, y2) + rect.position, color, uvMin, clipped);
-                        }
-                    }
-                }
-
-                if (hasBorder)
-                {
-                    clipped = uvMax;
-                    for (float y1 = yMin; y1 < yMax; y1 += tileHeight)
-                    {
-                        float y2 = y1 + tileHeight;
-                        if (y2 > yMax)
-                        {
-                            clipped.y = uvMin.y + (uvMax.y - uvMin.y) * (yMax - y1) / (y2 - y1);
-                            y2 = yMax;
-                        }
-                        AddQuad(vh,
-                            new Vector2(0, y1) + rect.position,
-                            new Vector2(xMin, y2) + rect.position,
-                            color,
-                            new Vector2(outer.x, uvMin.y),
-                            new Vector2(uvMin.x, clipped.y));
-                        AddQuad(vh,
-                            new Vector2(xMax, y1) + rect.position,
-                            new Vector2(rect.width, y2) + rect.position,
-                            color,
-                            new Vector2(uvMax.x, uvMin.y),
-                            new Vector2(outer.z, clipped.y));
+                        clipped.y = uvMin.y + (uvMax.y - uvMin.y) * (yMax - y1) / (y2 - y1);
+                        y2 = yMax;
                     }
 
-                    // Bottom and top tiled border
-                    clipped = uvMax;
+                    clipped.x = uvMax.x;
                     for (float x1 = xMin; x1 < xMax; x1 += tileWidth)
                     {
                         float x2 = x1 + tileWidth;
@@ -471,72 +434,110 @@ namespace UnityEngine.UI
                             clipped.x = uvMin.x + (uvMax.x - uvMin.x) * (xMax - x1) / (x2 - x1);
                             x2 = xMax;
                         }
-                        AddQuad(vh,
-                            new Vector2(x1, 0) + rect.position,
-                            new Vector2(x2, yMin) + rect.position,
-                            color,
-                            new Vector2(uvMin.x, outer.y),
-                            new Vector2(clipped.x, uvMin.y));
-                        AddQuad(vh,
-                            new Vector2(x1, yMax) + rect.position,
-                            new Vector2(x2, rect.height) + rect.position,
-                            color,
-                            new Vector2(uvMin.x, uvMax.y),
-                            new Vector2(clipped.x, outer.w));
+                        AddQuad(toFill, new Vector2(x1, y1) + rect.position, new Vector2(x2, y2) + rect.position, color, uvMin, clipped);
                     }
-
-                    // Corners
-                    AddQuad(vh,
-                        new Vector2(0, 0) + rect.position,
-                        new Vector2(xMin, yMin) + rect.position,
-                        color,
-                        new Vector2(outer.x, outer.y),
-                        new Vector2(uvMin.x, uvMin.y));
-                    AddQuad(vh,
-                        new Vector2(xMax, 0) + rect.position,
-                        new Vector2(rect.width, yMin) + rect.position,
-                        color,
-                        new Vector2(uvMax.x, outer.y),
-                        new Vector2(outer.z, uvMin.y));
-                    AddQuad(vh,
-                        new Vector2(0, yMax) + rect.position,
-                        new Vector2(xMin, rect.height) + rect.position,
-                        color,
-                        new Vector2(outer.x, uvMax.y),
-                        new Vector2(uvMin.x, outer.w));
-                    AddQuad(vh,
-                        new Vector2(xMax, yMax) + rect.position,
-                        new Vector2(rect.width, rect.height) + rect.position,
-                        color,
-                        new Vector2(uvMax.x, uvMax.y),
-                        new Vector2(outer.z, outer.w));
                 }
-                vh.FillMesh(toFill);
+            }
+
+            if (hasBorder)
+            {
+                clipped = uvMax;
+                for (float y1 = yMin; y1 < yMax; y1 += tileHeight)
+                {
+                    float y2 = y1 + tileHeight;
+                    if (y2 > yMax)
+                    {
+                        clipped.y = uvMin.y + (uvMax.y - uvMin.y) * (yMax - y1) / (y2 - y1);
+                        y2 = yMax;
+                    }
+                    AddQuad(toFill,
+                        new Vector2(0, y1) + rect.position,
+                        new Vector2(xMin, y2) + rect.position,
+                        color,
+                        new Vector2(outer.x, uvMin.y),
+                        new Vector2(uvMin.x, clipped.y));
+                    AddQuad(toFill,
+                        new Vector2(xMax, y1) + rect.position,
+                        new Vector2(rect.width, y2) + rect.position,
+                        color,
+                        new Vector2(uvMax.x, uvMin.y),
+                        new Vector2(outer.z, clipped.y));
+                }
+
+                // Bottom and top tiled border
+                clipped = uvMax;
+                for (float x1 = xMin; x1 < xMax; x1 += tileWidth)
+                {
+                    float x2 = x1 + tileWidth;
+                    if (x2 > xMax)
+                    {
+                        clipped.x = uvMin.x + (uvMax.x - uvMin.x) * (xMax - x1) / (x2 - x1);
+                        x2 = xMax;
+                    }
+                    AddQuad(toFill,
+                        new Vector2(x1, 0) + rect.position,
+                        new Vector2(x2, yMin) + rect.position,
+                        color,
+                        new Vector2(uvMin.x, outer.y),
+                        new Vector2(clipped.x, uvMin.y));
+                    AddQuad(toFill,
+                        new Vector2(x1, yMax) + rect.position,
+                        new Vector2(x2, rect.height) + rect.position,
+                        color,
+                        new Vector2(uvMin.x, uvMax.y),
+                        new Vector2(clipped.x, outer.w));
+                }
+
+                // Corners
+                AddQuad(toFill,
+                    new Vector2(0, 0) + rect.position,
+                    new Vector2(xMin, yMin) + rect.position,
+                    color,
+                    new Vector2(outer.x, outer.y),
+                    new Vector2(uvMin.x, uvMin.y));
+                AddQuad(toFill,
+                    new Vector2(xMax, 0) + rect.position,
+                    new Vector2(rect.width, yMin) + rect.position,
+                    color,
+                    new Vector2(uvMax.x, outer.y),
+                    new Vector2(outer.z, uvMin.y));
+                AddQuad(toFill,
+                    new Vector2(0, yMax) + rect.position,
+                    new Vector2(xMin, rect.height) + rect.position,
+                    color,
+                    new Vector2(outer.x, uvMax.y),
+                    new Vector2(uvMin.x, outer.w));
+                AddQuad(toFill,
+                    new Vector2(xMax, yMax) + rect.position,
+                    new Vector2(rect.width, rect.height) + rect.position,
+                    color,
+                    new Vector2(uvMax.x, uvMax.y),
+                    new Vector2(outer.z, outer.w));
             }
         }
 
-        static void AddQuad(VertexHelper vh, Vector3[] quadPositions, Color32 color, Vector3[] quadUVs)
+        static void AddQuad(VertexHelper vertexHelper, Vector3[] quadPositions, Color32 color, Vector3[] quadUVs)
         {
-            int startIndex = vh.currentVertCount;
+            int startIndex = vertexHelper.currentVertCount;
 
             for (int i = 0; i < 4; ++i)
-                vh.AddVert(quadPositions[i], color, quadUVs[i]);
+                vertexHelper.AddVert(quadPositions[i], color, quadUVs[i]);
 
-            vh.AddTriangle(startIndex, startIndex + 1, startIndex + 2);
-            vh.AddTriangle(startIndex + 2, startIndex + 3, startIndex);
+            vertexHelper.AddTriangle(startIndex, startIndex + 1, startIndex + 2);
+            vertexHelper.AddTriangle(startIndex + 2, startIndex + 3, startIndex);
         }
 
-        static void AddQuad(VertexHelper vh, Vector2 posMin, Vector2 posMax, Color32 color, Vector2 uvMin, Vector2 uvMax)
+        static void AddQuad(VertexHelper vertexHelper, Vector2 posMin, Vector2 posMax, Color32 color, Vector2 uvMin, Vector2 uvMax)
         {
-            int startIndex = vh.currentVertCount;
+            int startIndex = vertexHelper.currentVertCount;
 
-            vh.AddVert(new Vector3(posMin.x, posMin.y, 0), color, new Vector2(uvMin.x, uvMin.y));
-            vh.AddVert(new Vector3(posMin.x, posMax.y, 0), color, new Vector2(uvMin.x, uvMax.y));
-            vh.AddVert(new Vector3(posMax.x, posMax.y, 0), color, new Vector2(uvMax.x, uvMax.y));
-            vh.AddVert(new Vector3(posMax.x, posMin.y, 0), color, new Vector2(uvMax.x, uvMin.y));
+            vertexHelper.AddVert(new Vector3(posMin.x, posMin.y, 0), color, new Vector2(uvMin.x, uvMin.y));
+            vertexHelper.AddVert(new Vector3(posMin.x, posMax.y, 0), color, new Vector2(uvMin.x, uvMax.y));
+            vertexHelper.AddVert(new Vector3(posMax.x, posMax.y, 0), color, new Vector2(uvMax.x, uvMax.y));
+            vertexHelper.AddVert(new Vector3(posMax.x, posMin.y, 0), color, new Vector2(uvMax.x, uvMin.y));
 
-            vh.AddTriangle(startIndex, startIndex + 1, startIndex + 2);
-            vh.AddTriangle(startIndex + 2, startIndex + 3, startIndex);
+            vertexHelper.AddTriangle(startIndex, startIndex + 1, startIndex + 2);
+            vertexHelper.AddTriangle(startIndex + 2, startIndex + 3, startIndex);
         }
 
         Vector4 GetAdjustedBorders(Vector4 border, Rect rect)
@@ -562,16 +563,12 @@ namespace UnityEngine.UI
 
         static readonly Vector3[] s_Xy = new Vector3[4];
         static readonly Vector3[] s_Uv = new Vector3[4];
-        void GenerateFilledSprite(Mesh toFill, bool preserveAspect)
+        void GenerateFilledSprite(VertexHelper toFill, bool preserveAspect)
         {
+            toFill.Clear();
+
             if (m_FillAmount < 0.001f)
-            {
-                using (var vh = new VertexHelper())
-                {
-                    vh.FillMesh(toFill);
-                    return;
-                }
-            }
+                return;
 
             Vector4 v = GetDrawingDimensions(preserveAspect);
             Vector4 outer = overrideSprite != null ? Sprites.DataUtility.GetOuterUV(overrideSprite) : Vector4.zero;
@@ -628,15 +625,13 @@ namespace UnityEngine.UI
             s_Uv[2] = new Vector2(tx1, ty1);
             s_Uv[3] = new Vector2(tx1, ty0);
 
-
-            using (var vh = new VertexHelper())
             {
                 if (m_FillAmount < 1f && m_FillMethod != FillMethod.Horizontal && m_FillMethod != FillMethod.Vertical)
                 {
                     if (fillMethod == FillMethod.Radial90)
                     {
                         if (RadialCut(s_Xy, s_Uv, m_FillAmount, m_FillClockwise, m_FillOrigin))
-                            AddQuad(vh, s_Xy, color, s_Uv);
+                            AddQuad(toFill, s_Xy, color, s_Uv);
                     }
                     else if (fillMethod == FillMethod.Radial180)
                     {
@@ -700,7 +695,7 @@ namespace UnityEngine.UI
 
                             if (RadialCut(s_Xy, s_Uv, Mathf.Clamp01(val), m_FillClockwise, ((side + m_FillOrigin + 3) % 4)))
                             {
-                                AddQuad(vh, s_Xy, color, s_Uv);
+                                AddQuad(toFill, s_Xy, color, s_Uv);
                             }
                         }
                     }
@@ -757,15 +752,14 @@ namespace UnityEngine.UI
                                 m_FillAmount * 4f - (3 - ((corner + m_FillOrigin) % 4));
 
                             if (RadialCut(s_Xy, s_Uv, Mathf.Clamp01(val), m_FillClockwise, ((corner + 2) % 4)))
-                                AddQuad(vh, s_Xy, color, s_Uv);
+                                AddQuad(toFill, s_Xy, color, s_Uv);
                         }
                     }
                 }
                 else
                 {
-                    AddQuad(vh, s_Xy, color, s_Uv);
+                    AddQuad(toFill, s_Xy, color, s_Uv);
                 }
-                vh.FillMesh(toFill);
             }
         }
 
@@ -879,8 +873,8 @@ namespace UnityEngine.UI
 
         #endregion
 
-        public virtual void CalculateLayoutInputHorizontal() {}
-        public virtual void CalculateLayoutInputVertical() {}
+        public virtual void CalculateLayoutInputHorizontal() { }
+        public virtual void CalculateLayoutInputVertical() { }
 
         public virtual float minWidth { get { return 0; } }
 

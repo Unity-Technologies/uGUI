@@ -13,9 +13,10 @@ namespace UnityEngine.UI
         {
             // This is needed for AOT on IOS. Without it the compile doesn't get the definition of the Dictionarys
 #pragma warning disable 168
-            Dictionary<Graphic, int> emptyGraphicDic;
-            Dictionary<ICanvasElement, int> emptyElementDic;
+    		Dictionary<Graphic, int> emptyGraphicDic;
+			Dictionary<ICanvasElement, int> emptyElementDic;
 #pragma warning restore 168
+
         }
 
         public static GraphicRegistry instance

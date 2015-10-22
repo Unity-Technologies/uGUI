@@ -6,17 +6,16 @@ namespace UnityEngine.UI
     public class Outline : Shadow
     {
         protected Outline()
-        {}
+        { }
 
-        public override void ModifyMesh(Mesh mesh)
+        public override void ModifyMesh(VertexHelper vh)
         {
             if (!IsActive())
                 return;
 
-            List<UIVertex> verts = new List<UIVertex>();
-            using (var helper = new VertexHelper(mesh))
-                helper.GetUIVertexStream(verts);
-
+            var verts = ListPool<UIVertex>.Get();
+            vh.GetUIVertexStream(verts);
+            
             var neededCpacity = verts.Count * 5;
             if (verts.Capacity < neededCpacity)
                 verts.Capacity = neededCpacity;
@@ -37,11 +36,9 @@ namespace UnityEngine.UI
             end = verts.Count;
             ApplyShadowZeroAlloc(verts, effectColor, start, verts.Count, -effectDistance.x, -effectDistance.y);
 
-            using (var helper = new VertexHelper())
-            {
-                helper.AddUIVertexTriangleStream(verts);
-                helper.FillMesh(mesh);
-            }
+            vh.Clear();
+            vh.AddUIVertexTriangleStream(verts);
+            ListPool<UIVertex>.Release(verts);
         }
     }
 }

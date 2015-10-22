@@ -42,12 +42,12 @@ namespace UnityEngine.UI
             base.OnDisable();
         }
 
-        protected override void OnDidApplyAnimationProperties()
-        {
-            if (graphic != null)
-                graphic.SetVerticesDirty();
-            base.OnDidApplyAnimationProperties();
-        }
+		protected override void OnDidApplyAnimationProperties()
+		{
+			if (graphic != null)
+				graphic.SetVerticesDirty();
+			base.OnDidApplyAnimationProperties();
+		}
 
 #if UNITY_EDITOR
         protected override void OnValidate()
@@ -59,6 +59,15 @@ namespace UnityEngine.UI
 
 #endif
 
-        public abstract void ModifyMesh(Mesh mesh);
+        public virtual void ModifyMesh(Mesh mesh)
+        {
+            using (var vh = new VertexHelper(mesh))
+            {
+                ModifyMesh(vh);
+                vh.FillMesh(mesh);
+            }
+        }
+
+        public abstract void ModifyMesh(VertexHelper vh);
     }
 }

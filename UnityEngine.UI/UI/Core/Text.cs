@@ -23,7 +23,9 @@ namespace UnityEngine.UI
         [NonSerialized] protected bool m_DisableFontTextureRebuiltCallback = false;
 
         protected Text()
-        {}
+        {
+            useLegacyMeshGeneration = false;
+        }
 
         /// <summary>
         /// Get or set the material used by this Text.
@@ -409,7 +411,7 @@ namespace UnityEngine.UI
         }
 
         readonly UIVertex[] m_TempVerts = new UIVertex[4];
-        protected override void OnPopulateMesh(Mesh toFill)
+        protected override void OnPopulateMesh(VertexHelper toFill)
         {
             if (font == null)
                 return;
@@ -438,42 +440,39 @@ namespace UnityEngine.UI
             // Apply the offset to the vertices
             IList<UIVertex> verts = cachedTextGenerator.verts;
             float unitsPerPixel = 1 / pixelsPerUnit;
-            //Last 4 verts are always a new line...
+            //Last 4 verts are always a new line... 
             int vertCount = verts.Count - 4;
 
-            using (var vh = new VertexHelper())
+            toFill.Clear();
+            if (roundingOffset != Vector2.zero)
             {
-                if (roundingOffset != Vector2.zero)
+                for (int i = 0; i < vertCount; ++i)
                 {
-                    for (int i = 0; i < vertCount; ++i)
-                    {
-                        int tempVertsIndex = i & 3;
-                        m_TempVerts[tempVertsIndex] = verts[i];
-                        m_TempVerts[tempVertsIndex].position *= unitsPerPixel;
-                        m_TempVerts[tempVertsIndex].position.x += roundingOffset.x;
-                        m_TempVerts[tempVertsIndex].position.y += roundingOffset.y;
-                        if (tempVertsIndex == 3)
-                            vh.AddUIVertexQuad(m_TempVerts);
-                    }
+                    int tempVertsIndex = i & 3;
+                    m_TempVerts[tempVertsIndex] = verts[i];
+                    m_TempVerts[tempVertsIndex].position *= unitsPerPixel;
+                    m_TempVerts[tempVertsIndex].position.x += roundingOffset.x;
+                    m_TempVerts[tempVertsIndex].position.y += roundingOffset.y;
+                    if (tempVertsIndex == 3)
+                        toFill.AddUIVertexQuad(m_TempVerts);
                 }
-                else
+            }
+            else
+            {
+                for (int i = 0; i < vertCount; ++i)
                 {
-                    for (int i = 0; i < vertCount; ++i)
-                    {
-                        int tempVertsIndex = i & 3;
-                        m_TempVerts[tempVertsIndex] = verts[i];
-                        m_TempVerts[tempVertsIndex].position *= unitsPerPixel;
-                        if (tempVertsIndex == 3)
-                            vh.AddUIVertexQuad(m_TempVerts);
-                    }
+                    int tempVertsIndex = i & 3;
+                    m_TempVerts[tempVertsIndex] = verts[i];
+                    m_TempVerts[tempVertsIndex].position *= unitsPerPixel;
+                    if (tempVertsIndex == 3)
+                        toFill.AddUIVertexQuad(m_TempVerts);
                 }
-                vh.FillMesh(toFill);
             }
             m_DisableFontTextureRebuiltCallback = false;
         }
 
-        public virtual void CalculateLayoutInputHorizontal() {}
-        public virtual void CalculateLayoutInputVertical() {}
+        public virtual void CalculateLayoutInputHorizontal() { }
+        public virtual void CalculateLayoutInputVertical() { }
 
         public virtual float minWidth
         {

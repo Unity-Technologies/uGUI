@@ -26,18 +26,17 @@ namespace UnityEngine.UI
         public Constraint constraint { get { return m_Constraint; } set { SetProperty(ref m_Constraint, value); } }
 
         [SerializeField] protected int m_ConstraintCount = 2;
-        public int constraintCount { get { return m_ConstraintCount; } set { SetProperty(ref m_ConstraintCount, Mathf.Max(1, value)); } }
+        public int constraintCount { get { return m_ConstraintCount; } set { SetProperty(ref m_ConstraintCount, Mathf.Max (1, value)); } }
 
         protected GridLayoutGroup()
-        {}
-
+        { }
+        
         #if UNITY_EDITOR
-        protected override void OnValidate()
+        protected override void OnValidate ()
         {
             base.OnValidate();
             constraintCount = constraintCount;
         }
-
         #endif
 
         public override void CalculateLayoutInputHorizontal()
@@ -146,7 +145,7 @@ namespace UnityEngine.UI
                     cellCountX = int.MaxValue;
                 else
                     cellCountX = Mathf.Max(1, Mathf.FloorToInt((width - padding.horizontal + spacing.x + 0.001f) / (cellSize.x + spacing.x)));
-
+                
                 if (cellSize.y + spacing.y <= 0)
                     cellCountY = int.MaxValue;
                 else

@@ -59,10 +59,13 @@ namespace UnityEngine.UI
         [NonSerialized] protected UnityAction m_OnDirtyMaterialCallback;
 
         [NonSerialized] protected static Mesh s_Mesh;
+        [NonSerialized] private static readonly VertexHelper s_VertexHelper = new VertexHelper();
 
         // Tween controls for the Graphic
         [NonSerialized]
         private readonly TweenRunner<ColorTween> m_ColorTweenRunner;
+
+        protected bool useLegacyMeshGeneration { get; set; }
 
         // Called by Unity prior to deserialization,
         // should not be called by users
@@ -71,6 +74,7 @@ namespace UnityEngine.UI
             if (m_ColorTweenRunner == null)
                 m_ColorTweenRunner = new TweenRunner<ColorTween>();
             m_ColorTweenRunner.Init(this);
+            useLegacyMeshGeneration = true;
         }
 
         public virtual void SetAllDirty()
@@ -138,6 +142,8 @@ namespace UnityEngine.UI
 
         protected override void OnTransformParentChanged()
         {
+            base.OnTransformParentChanged();
+
             if (!IsActive())
                 return;
 
@@ -296,7 +302,7 @@ namespace UnityEngine.UI
         public virtual void Rebuild(CanvasUpdate update)
         {
             if (canvasRenderer.cull)
-                return;
+               return;
 
             switch (update)
             {
@@ -314,6 +320,12 @@ namespace UnityEngine.UI
                     break;
             }
         }
+
+        public virtual void LayoutComplete()
+        {}
+
+        public virtual void GraphicUpdateComplete()
+        {}
 
         /// <summary>
         /// Update the renderer's material.
@@ -333,17 +345,56 @@ namespace UnityEngine.UI
         /// </summary>
         protected virtual void UpdateGeometry()
         {
+
+            if (useLegacyMeshGeneration)
+                DoLegacyMeshGeneration();
+            else
+                DoMeshGeneration();
+        }
+
+        private void DoMeshGeneration()
+        {
             if (rectTransform != null && rectTransform.rect.width >= 0 && rectTransform.rect.height >= 0)
-                OnPopulateMesh(workerMesh);
+                OnPopulateMesh(s_VertexHelper);
+            else
+                s_VertexHelper.Clear(); // clear the vertex helper so invalid graphics dont draw.
 
             var components = ListPool<Component>.Get();
             GetComponents(typeof(IMeshModifier), components);
 
             for (var i = 0; i < components.Count; i++)
-                ((IMeshModifier)components[i]).ModifyMesh(workerMesh);
+                ((IMeshModifier)components[i]).ModifyMesh(s_VertexHelper);
 
             ListPool<Component>.Release(components);
 
+            s_VertexHelper.FillMesh(workerMesh);
+            canvasRenderer.SetMesh(workerMesh);
+        }
+
+        private void DoLegacyMeshGeneration()
+        {
+            if (rectTransform != null && rectTransform.rect.width >= 0 && rectTransform.rect.height >= 0)
+            {
+#pragma warning disable 618
+                OnPopulateMesh(workerMesh);
+#pragma warning restore 618
+            }
+            else
+            {
+                workerMesh.Clear();
+            }
+
+            var components = ListPool<Component>.Get();
+            GetComponents(typeof(IMeshModifier), components);
+
+            for (var i = 0; i < components.Count; i++)
+            {
+#pragma warning disable 618
+                ((IMeshModifier) components[i]).ModifyMesh(workerMesh);
+#pragma warning restore 618
+            }
+
+            ListPool<Component>.Release(components);
             canvasRenderer.SetMesh(workerMesh);
         }
 
@@ -362,28 +413,32 @@ namespace UnityEngine.UI
         }
 
         [Obsolete("Use OnPopulateMesh instead.", true)]
-        protected virtual void OnFillVBO(System.Collections.Generic.List<UIVertex> vbo) {}
+        protected virtual void OnFillVBO(System.Collections.Generic.List<UIVertex> vbo) { }
+
+        [Obsolete("Use OnPopulateMesh(VertexHelper vh) instead.", false)]
+        protected virtual void OnPopulateMesh(Mesh m)
+        {
+            OnPopulateMesh(s_VertexHelper);
+            s_VertexHelper.FillMesh(m);
+        }
 
         /// <summary>
         /// Fill the vertex buffer data.
         /// </summary>
-        protected virtual void OnPopulateMesh(Mesh m)
+        protected virtual void OnPopulateMesh(VertexHelper vh)
         {
             var r = GetPixelAdjustedRect();
             var v = new Vector4(r.x, r.y, r.x + r.width, r.y + r.height);
 
             Color32 color32 = color;
-            using (var vh = new VertexHelper())
-            {
-                vh.AddVert(new Vector3(v.x, v.y), color32, new Vector2(0f, 0f));
-                vh.AddVert(new Vector3(v.x, v.w), color32, new Vector2(0f, 1f));
-                vh.AddVert(new Vector3(v.z, v.w), color32, new Vector2(1f, 1f));
-                vh.AddVert(new Vector3(v.z, v.y), color32, new Vector2(1f, 0f));
+            vh.Clear();
+            vh.AddVert(new Vector3(v.x, v.y), color32, new Vector2(0f, 0f));
+            vh.AddVert(new Vector3(v.x, v.w), color32, new Vector2(0f, 1f));
+            vh.AddVert(new Vector3(v.z, v.w), color32, new Vector2(1f, 1f));
+            vh.AddVert(new Vector3(v.z, v.y), color32, new Vector2(1f, 0f));
 
-                vh.AddTriangle(0, 1, 2);
-                vh.AddTriangle(2, 3, 0);
-                vh.FillMesh(m);
-            }
+            vh.AddTriangle(0,1,2);
+            vh.AddTriangle(2,3,0);
         }
 
 #if UNITY_EDITOR
@@ -401,7 +456,6 @@ namespace UnityEngine.UI
                     methodInfo.Invoke(mb, null);
             }
         }
-
 #endif
 
         // Call from unity if animation properties have changed
@@ -414,7 +468,7 @@ namespace UnityEngine.UI
         /// <summary>
         /// Make the Graphic have the native size of its content.
         /// </summary>
-        public virtual void SetNativeSize() {}
+        public virtual void SetNativeSize() { }
         public virtual bool Raycast(Vector2 sp, Camera eventCamera)
         {
             if (!isActiveAndEnabled)

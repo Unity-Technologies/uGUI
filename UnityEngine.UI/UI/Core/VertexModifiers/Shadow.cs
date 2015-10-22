@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEditor;
 
 namespace UnityEngine.UI
 {
@@ -15,7 +16,7 @@ namespace UnityEngine.UI
         private bool m_UseGraphicAlpha = true;
 
         protected Shadow()
-        {}
+        { }
 
 #if UNITY_EDITOR
         protected override void OnValidate()
@@ -107,23 +108,18 @@ namespace UnityEngine.UI
             ApplyShadowZeroAlloc(verts, color, start, end, x, y);
         }
 
-        public override void ModifyMesh(Mesh mesh)
+        public override void ModifyMesh(VertexHelper vh)
         {
             if (!IsActive())
                 return;
 
-            List<UIVertex> output = new List<UIVertex>();
-
-            using (var helper = new VertexHelper(mesh))
-                helper.GetUIVertexStream(output);
+            var output = ListPool<UIVertex>.Get();
+            vh.GetUIVertexStream(output);
 
             ApplyShadow(output, effectColor, 0, output.Count, effectDistance.x, effectDistance.y);
-
-            using (var helper = new VertexHelper())
-            {
-                helper.AddUIVertexTriangleStream(output);
-                helper.FillMesh(mesh);
-            }
+            vh.Clear();
+            vh.AddUIVertexTriangleStream(output);
+            ListPool<UIVertex>.Release(output);
         }
     }
 }

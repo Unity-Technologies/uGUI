@@ -39,16 +39,32 @@ namespace UnityEngine.UI
         public virtual void CalculateLayoutInputHorizontal()
         {
             m_RectChildren.Clear();
+            var toIgnoreList = ListPool<Component>.Get();
             for (int i = 0; i < rectTransform.childCount; i++)
             {
-                RectTransform rect = rectTransform.GetChild(i) as RectTransform;
-                if (rect == null)
+                var rect = rectTransform.GetChild(i) as RectTransform;
+                if (rect == null || !rect.gameObject.activeInHierarchy)
                     continue;
-                ILayoutIgnorer ignorer = rect.GetComponent(typeof(ILayoutIgnorer)) as ILayoutIgnorer;
-                if (rect.gameObject.activeInHierarchy && !(ignorer != null && ignorer.ignoreLayout))
-                    m_RectChildren.Add(rect);
-            }
 
+                rect.GetComponents(typeof (ILayoutIgnorer), toIgnoreList);
+
+                if (toIgnoreList.Count == 0)
+                {
+                    m_RectChildren.Add(rect);
+                    continue;
+                }
+
+                for (int j = 0; j < toIgnoreList.Count; j++)
+                {
+                    var ignorer = (ILayoutIgnorer) toIgnoreList[j];
+                    if (!ignorer.ignoreLayout)
+                    {
+                        m_RectChildren.Add(rect);
+                        break;
+                    }
+                }
+            }
+            ListPool<Component>.Release(toIgnoreList);
             m_Tracker.Clear();
         }
 

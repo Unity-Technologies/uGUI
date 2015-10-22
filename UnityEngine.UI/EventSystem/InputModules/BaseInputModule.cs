@@ -105,9 +105,9 @@ namespace UnityEngine.EventSystems
             // then exit
             if (newEnterTarget == null || currentPointerData.pointerEnter == null)
             {
-                for (var i = 0; i < currentPointerData.hovered.Count; ++i)
+                for (var i = 0; i < currentPointerData.hovered.Count; ++i)     
                     ExecuteEvents.Execute(currentPointerData.hovered[i], currentPointerData, ExecuteEvents.pointerExitHandler);
-
+                
                 currentPointerData.hovered.Clear();
 
                 if (newEnterTarget == null)
@@ -188,13 +188,13 @@ namespace UnityEngine.EventSystems
         }
 
         public virtual void DeactivateModule()
-        {}
+        { }
 
         public virtual void ActivateModule()
-        {}
+        { }
 
         public virtual void UpdateModule()
-        {}
+        { }
 
         public virtual bool IsModuleSupported()
         {

@@ -7,8 +7,9 @@ namespace UnityEngine.UI
     [AddComponentMenu("UI/Scroll Rect", 37)]
     [SelectionBase]
     [ExecuteInEditMode]
+    [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
-    public class ScrollRect : UIBehaviour, IInitializePotentialDragHandler, IBeginDragHandler, IEndDragHandler, IDragHandler, IScrollHandler, ICanvasElement, ILayoutGroup
+    public class ScrollRect : UIBehaviour, IInitializePotentialDragHandler, IBeginDragHandler, IEndDragHandler, IDragHandler, IScrollHandler, ICanvasElement, ILayoutElement, ILayoutGroup
     {
         public enum MovementType
         {
@@ -25,7 +26,7 @@ namespace UnityEngine.UI
         }
 
         [Serializable]
-        public class ScrollRectEvent : UnityEvent<Vector2> {}
+        public class ScrollRectEvent : UnityEvent<Vector2> { }
 
         [SerializeField]
         private RectTransform m_Content;
@@ -152,12 +153,12 @@ namespace UnityEngine.UI
         private Bounds m_PrevViewBounds;
         [NonSerialized]
         private bool m_HasRebuiltLayout = false;
-
+        
         private bool m_HSliderExpand;
         private bool m_VSliderExpand;
         private float m_HSliderHeight;
         private float m_VSliderWidth;
-
+        
         [System.NonSerialized] private RectTransform m_Rect;
         private RectTransform rectTransform
         {
@@ -168,14 +169,16 @@ namespace UnityEngine.UI
                 return m_Rect;
             }
         }
-
+        
         private RectTransform m_HorizontalScrollbarRect;
         private RectTransform m_VerticalScrollbarRect;
-
+        
         private DrivenRectTransformTracker m_Tracker;
 
         protected ScrollRect()
-        {}
+        {
+            flexibleWidth = -1;
+        }
 
         public virtual void Rebuild(CanvasUpdate executing)
         {
@@ -183,29 +186,35 @@ namespace UnityEngine.UI
             {
                 UpdateCachedData();
             }
-
+            
             if (executing == CanvasUpdate.PostLayout)
             {
                 UpdateBounds();
                 UpdateScrollbars(Vector2.zero);
                 UpdatePrevData();
-
+                
                 m_HasRebuiltLayout = true;
             }
         }
+
+        public virtual void LayoutComplete()
+        {}
+
+        public virtual void GraphicUpdateComplete()
+        {}
 
         void UpdateCachedData()
         {
             Transform transform = this.transform;
             m_HorizontalScrollbarRect = m_HorizontalScrollbar == null ? null : m_HorizontalScrollbar.transform as RectTransform;
             m_VerticalScrollbarRect = m_VerticalScrollbar == null ? null : m_VerticalScrollbar.transform as RectTransform;
-
+            
             // These are true if either the elements are children, or they don't exist at all.
             bool viewIsChild = (viewRect.parent == transform);
             bool hScrollbarIsChild = (!m_HorizontalScrollbarRect || m_HorizontalScrollbarRect.parent == transform);
             bool vScrollbarIsChild = (!m_VerticalScrollbarRect || m_VerticalScrollbarRect.parent == transform);
             bool allAreChildren = (viewIsChild && hScrollbarIsChild && vScrollbarIsChild);
-
+            
             m_HSliderExpand = allAreChildren && m_HorizontalScrollbarRect && horizontalScrollbarVisibility == ScrollbarVisibility.AutoHideAndExpandViewport;
             m_VSliderExpand = allAreChildren && m_VerticalScrollbarRect && verticalScrollbarVisibility == ScrollbarVisibility.AutoHideAndExpandViewport;
             m_HSliderHeight = (m_HorizontalScrollbarRect == null ? 0 : m_HorizontalScrollbarRect.rect.height);
@@ -235,6 +244,7 @@ namespace UnityEngine.UI
 
             m_HasRebuiltLayout = false;
             m_Tracker.Clear();
+            m_Velocity = Vector2.zero;
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
             base.OnDisable();
         }
@@ -369,7 +379,7 @@ namespace UnityEngine.UI
         {
             if (!m_Content)
                 return;
-
+            
             EnsureLayoutHasRebuilt();
             UpdateScrollbarVisibility();
             UpdateBounds();
@@ -533,7 +543,7 @@ namespace UnityEngine.UI
         {
             return (1 - (1 / ((Mathf.Abs(overStretching) * 0.55f / viewSize) + 1))) * viewSize * Mathf.Sign(overStretching);
         }
-
+        
         protected override void OnRectTransformDimensionsChange()
         {
             SetDirty();
@@ -558,41 +568,54 @@ namespace UnityEngine.UI
             }
         }
 
+        public virtual void CalculateLayoutInputHorizontal() {}
+        public virtual void CalculateLayoutInputVertical() {}
+
+        public virtual float minWidth { get { return -1; } }
+        public virtual float preferredWidth { get { return -1; } }
+        public virtual float flexibleWidth { get; private set; }
+
+        public virtual float minHeight { get { return -1; } }
+        public virtual float preferredHeight { get { return -1; } }
+        public virtual float flexibleHeight { get { return -1; } }
+
+        public virtual int layoutPriority { get { return -1; } }
+
         public virtual void SetLayoutHorizontal()
         {
             m_Tracker.Clear();
-
+            
             if (m_HSliderExpand || m_VSliderExpand)
             {
                 m_Tracker.Add(this, viewRect,
                     DrivenTransformProperties.Anchors |
                     DrivenTransformProperties.SizeDelta |
                     DrivenTransformProperties.AnchoredPosition);
-
+                
                 // Make view full size to see if content fits.
                 viewRect.anchorMin = Vector2.zero;
                 viewRect.anchorMax = Vector2.one;
                 viewRect.sizeDelta = Vector2.zero;
                 viewRect.anchoredPosition = Vector2.zero;
-
+                
                 // Recalculate content layout with this size to see if it fits when there are no scrollbars.
                 LayoutRebuilder.ForceRebuildLayoutImmediate(content);
                 m_ViewBounds = new Bounds(viewRect.rect.center, viewRect.rect.size);
                 m_ContentBounds = GetBounds();
             }
-
+            
             // If it doesn't fit vertically, enable vertical scrollbar and shrink view horizontally to make room for it.
             if (m_VSliderExpand && vScrollingNeeded)
             {
                 viewRect.sizeDelta = new Vector2(-(m_VSliderWidth + m_VerticalScrollbarSpacing), viewRect.sizeDelta.y);
-
+                
                 // Recalculate content layout with this size to see if it fits vertically
                 // when there is a vertical scrollbar (which may reflowed the content to make it taller).
                 LayoutRebuilder.ForceRebuildLayoutImmediate(content);
                 m_ViewBounds = new Bounds(viewRect.rect.center, viewRect.rect.size);
                 m_ContentBounds = GetBounds();
             }
-
+            
             // If it doesn't fit horizontally, enable horizontal scrollbar and shrink view vertically to make room for it.
             if (m_HSliderExpand && hScrollingNeeded)
             {
@@ -600,7 +623,7 @@ namespace UnityEngine.UI
                 m_ViewBounds = new Bounds(viewRect.rect.center, viewRect.rect.size);
                 m_ContentBounds = GetBounds();
             }
-
+            
             // If the vertical slider didn't kick in the first time, and the horizontal one did,
             // we need to check again if the vertical slider now needs to kick in.
             // If it doesn't fit vertically, enable vertical scrollbar and shrink view horizontally to make room for it.
@@ -609,32 +632,32 @@ namespace UnityEngine.UI
                 viewRect.sizeDelta = new Vector2(-(m_VSliderWidth + m_VerticalScrollbarSpacing), viewRect.sizeDelta.y);
             }
         }
-
+        
         public virtual void SetLayoutVertical()
         {
             UpdateScrollbarLayout();
             m_ViewBounds = new Bounds(viewRect.rect.center, viewRect.rect.size);
             m_ContentBounds = GetBounds();
         }
-
-        void UpdateScrollbarVisibility()
+        
+        void UpdateScrollbarVisibility ()
         {
             if (m_VerticalScrollbar && m_VerticalScrollbarVisibility != ScrollbarVisibility.Permanent && m_VerticalScrollbar.gameObject.activeSelf != vScrollingNeeded)
                 m_VerticalScrollbar.gameObject.SetActive(vScrollingNeeded);
-
+            
             if (m_HorizontalScrollbar && m_HorizontalScrollbarVisibility != ScrollbarVisibility.Permanent && m_HorizontalScrollbar.gameObject.activeSelf != hScrollingNeeded)
                 m_HorizontalScrollbar.gameObject.SetActive(hScrollingNeeded);
         }
-
-        void UpdateScrollbarLayout()
+        
+        void UpdateScrollbarLayout ()
         {
             if (m_VSliderExpand && m_HorizontalScrollbar)
             {
                 m_Tracker.Add(this, m_HorizontalScrollbarRect,
-                    DrivenTransformProperties.AnchorMinX |
-                    DrivenTransformProperties.AnchorMaxX |
-                    DrivenTransformProperties.SizeDeltaX |
-                    DrivenTransformProperties.AnchoredPositionX);
+                              DrivenTransformProperties.AnchorMinX |
+                              DrivenTransformProperties.AnchorMaxX |
+                              DrivenTransformProperties.SizeDeltaX |
+                              DrivenTransformProperties.AnchoredPositionX);
                 m_HorizontalScrollbarRect.anchorMin = new Vector2(0, m_HorizontalScrollbarRect.anchorMin.y);
                 m_HorizontalScrollbarRect.anchorMax = new Vector2(1, m_HorizontalScrollbarRect.anchorMax.y);
                 m_HorizontalScrollbarRect.anchoredPosition = new Vector2(0, m_HorizontalScrollbarRect.anchoredPosition.y);
@@ -643,14 +666,14 @@ namespace UnityEngine.UI
                 else
                     m_HorizontalScrollbarRect.sizeDelta = new Vector2(0, m_HorizontalScrollbarRect.sizeDelta.y);
             }
-
+            
             if (m_HSliderExpand && m_VerticalScrollbar)
             {
                 m_Tracker.Add(this, m_VerticalScrollbarRect,
-                    DrivenTransformProperties.AnchorMinY |
-                    DrivenTransformProperties.AnchorMaxY |
-                    DrivenTransformProperties.SizeDeltaY |
-                    DrivenTransformProperties.AnchoredPositionY);
+                              DrivenTransformProperties.AnchorMinY |
+                              DrivenTransformProperties.AnchorMaxY |
+                              DrivenTransformProperties.SizeDeltaY |
+                              DrivenTransformProperties.AnchoredPositionY);
                 m_VerticalScrollbarRect.anchorMin = new Vector2(m_VerticalScrollbarRect.anchorMin.x, 0);
                 m_VerticalScrollbarRect.anchorMax = new Vector2(m_VerticalScrollbarRect.anchorMax.x, 1);
                 m_VerticalScrollbarRect.anchoredPosition = new Vector2(m_VerticalScrollbarRect.anchoredPosition.x, 0);
@@ -660,7 +683,7 @@ namespace UnityEngine.UI
                     m_VerticalScrollbarRect.sizeDelta = new Vector2(m_VerticalScrollbarRect.sizeDelta.x, 0);
             }
         }
-
+        
         private void UpdateBounds()
         {
             m_ViewBounds = new Bounds(viewRect.rect.center, viewRect.rect.size);
@@ -748,30 +771,30 @@ namespace UnityEngine.UI
 
             return offset;
         }
-
+        
         protected void SetDirty()
         {
             if (!IsActive())
                 return;
-
+            
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
         }
-
+        
         protected void SetDirtyCaching()
         {
             if (!IsActive())
                 return;
-
+            
             CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(this);
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
         }
-
+        
         #if UNITY_EDITOR
         protected override void OnValidate()
         {
             SetDirtyCaching();
         }
-
+        
         #endif
     }
 }

@@ -17,7 +17,7 @@ namespace UnityEngine.UI
         }
 
         [Serializable]
-        public class SliderEvent : UnityEvent<float> {}
+        public class SliderEvent : UnityEvent<float> { }
 
         [SerializeField]
         private RectTransform m_FillRect;
@@ -99,7 +99,7 @@ namespace UnityEngine.UI
         float stepSize { get { return wholeNumbers ? 1 : (maxValue - minValue) * 0.1f; } }
 
         protected Slider()
-        {}
+        { }
 
 #if UNITY_EDITOR
         protected override void OnValidate()
@@ -136,6 +136,12 @@ namespace UnityEngine.UI
 #endif
         }
 
+        public virtual void LayoutComplete()
+        {}
+
+        public virtual void GraphicUpdateComplete()
+        {}
+
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -151,27 +157,27 @@ namespace UnityEngine.UI
             base.OnDisable();
         }
 
-        protected override void OnDidApplyAnimationProperties()
-        {
-            // Has value changed? Various elements of the slider have the old normalisedValue assigned, we can use this to perform a comparison.
-            // We also need to ensure the value stays within min/max.
-            m_Value = ClampValue(m_Value);
-            float oldNormalizedValue = normalizedValue;
-            if (m_FillContainerRect != null)
-            {
-                if (m_FillImage != null && m_FillImage.type == Image.Type.Filled)
-                    oldNormalizedValue = m_FillImage.fillAmount;
-                else
-                    oldNormalizedValue = (reverseValue ? 1 - m_FillRect.anchorMin[(int)axis] : m_FillRect.anchorMax[(int)axis]);
-            }
-            else if (m_HandleContainerRect != null)
-                oldNormalizedValue = (reverseValue ? 1 - m_HandleRect.anchorMin[(int)axis] : m_HandleRect.anchorMin[(int)axis]);
+		protected override void OnDidApplyAnimationProperties()
+		{
+			// Has value changed? Various elements of the slider have the old normalisedValue assigned, we can use this to perform a comparison.
+			// We also need to ensure the value stays within min/max.
+			m_Value = ClampValue(m_Value);
+			float oldNormalizedValue = normalizedValue;
+			if (m_FillContainerRect != null)
+			{
+				if (m_FillImage != null && m_FillImage.type == Image.Type.Filled)
+					oldNormalizedValue = m_FillImage.fillAmount;
+				else
+					oldNormalizedValue = (reverseValue ? 1 - m_FillRect.anchorMin[(int)axis] : m_FillRect.anchorMax[(int)axis]);
+			}
+			else if (m_HandleContainerRect != null)
+				oldNormalizedValue = (reverseValue ? 1 - m_HandleRect.anchorMin[(int)axis] : m_HandleRect.anchorMin[(int)axis]);
 
-            UpdateVisuals();
+			UpdateVisuals();
 
-            if (oldNormalizedValue != normalizedValue)
-                onValueChanged.Invoke(m_Value);
-        }
+			if (oldNormalizedValue != normalizedValue)
+				onValueChanged.Invoke(m_Value);
+		}
 
         void UpdateCachedReferences()
         {
@@ -200,15 +206,15 @@ namespace UnityEngine.UI
             }
         }
 
-        float ClampValue(float input)
-        {
-            float newValue = Mathf.Clamp(input, minValue, maxValue);
-            if (wholeNumbers)
-                newValue = Mathf.Round(newValue);
-            return newValue;
-        }
+		float ClampValue(float input)
+		{
+			float newValue = Mathf.Clamp(input, minValue, maxValue);
+			if (wholeNumbers)
+				newValue = Mathf.Round(newValue);
+			return newValue;
+		}
 
-        // Set the valueUpdate the visible Image.
+	    // Set the valueUpdate the visible Image.
         void Set(float input)
         {
             Set(input, true);
@@ -217,7 +223,7 @@ namespace UnityEngine.UI
         protected virtual void Set(float input, bool sendCallback)
         {
             // Clamp the input
-            float newValue = ClampValue(input);
+			float newValue = ClampValue(input);
 
             // If the stepped value doesn't match the last one, it's time to update
             if (m_Value == newValue)

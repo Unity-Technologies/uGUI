@@ -1,11 +1,11 @@
-using UnityEditorInternal;
+﻿using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace UnityEditor.UI
 {
     [CustomPropertyDrawer(typeof(Dropdown.OptionDataList), true)]
-    class DropdownOptionListDrawer : PropertyDrawer
+    class DropdownOptionListDrawer: PropertyDrawer
     {
         private ReorderableList m_ReorderableList;
 
@@ -24,9 +24,9 @@ namespace UnityEditor.UI
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            Init(property);
+            Init (property);
 
-            m_ReorderableList.DoList(position);
+            m_ReorderableList.DoList (position);
         }
 
         private void DrawHeader(Rect rect)
@@ -40,7 +40,7 @@ namespace UnityEditor.UI
             SerializedProperty itemText = itemData.FindPropertyRelative("m_Text");
             SerializedProperty itemImage = itemData.FindPropertyRelative("m_Image");
 
-            RectOffset offset = new RectOffset(0, 0, -1, -3);
+            RectOffset offset = new RectOffset(0,0,-1,-3);
             rect = offset.Add(rect);
             rect.height = EditorGUIUtility.singleLineHeight;
 
@@ -53,7 +53,7 @@ namespace UnityEditor.UI
         {
             Init(property);
 
-            return m_ReorderableList.GetHeight();
+            return m_ReorderableList.GetHeight ();
         }
     }
 }

@@ -73,7 +73,7 @@ namespace UnityEditor.UI
             else
                 a.target = value;
         }
-
+        
         void CalculateCachedValues()
         {
             m_ViewportIsNotChild = false;
@@ -123,9 +123,9 @@ namespace UnityEditor.UI
             EditorGUILayout.EndFadeGroup();
 
             EditorGUILayout.PropertyField(m_ScrollSensitivity);
-
+            
             EditorGUILayout.Space();
-
+            
             EditorGUILayout.PropertyField(m_Viewport);
 
             EditorGUILayout.PropertyField(m_HorizontalScrollbar);
@@ -133,15 +133,15 @@ namespace UnityEditor.UI
             {
                 EditorGUI.indentLevel++;
                 EditorGUILayout.PropertyField(m_HorizontalScrollbarVisibility, new GUIContent("Visibility"));
-
+                
                 if ((ScrollRect.ScrollbarVisibility)m_HorizontalScrollbarVisibility.enumValueIndex == ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport
                     && !m_HorizontalScrollbarVisibility.hasMultipleDifferentValues)
                 {
                     if (m_ViewportIsNotChild || m_HScrollbarIsNotChild)
-                        EditorGUILayout.HelpBox(s_HError, MessageType.Error);
+                        EditorGUILayout.HelpBox (s_HError, MessageType.Error);
                     EditorGUILayout.PropertyField(m_HorizontalScrollbarSpacing, new GUIContent("Spacing"));
                 }
-
+                
                 EditorGUI.indentLevel--;
             }
 
@@ -150,15 +150,15 @@ namespace UnityEditor.UI
             {
                 EditorGUI.indentLevel++;
                 EditorGUILayout.PropertyField(m_VerticalScrollbarVisibility, new GUIContent("Visibility"));
-
+                
                 if ((ScrollRect.ScrollbarVisibility)m_VerticalScrollbarVisibility.enumValueIndex == ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport
                     && !m_VerticalScrollbarVisibility.hasMultipleDifferentValues)
                 {
                     if (m_ViewportIsNotChild || m_VScrollbarIsNotChild)
-                        EditorGUILayout.HelpBox(s_VError, MessageType.Error);
+                        EditorGUILayout.HelpBox (s_VError, MessageType.Error);
                     EditorGUILayout.PropertyField(m_VerticalScrollbarSpacing, new GUIContent("Spacing"));
                 }
-
+                
                 EditorGUI.indentLevel--;
             }
 

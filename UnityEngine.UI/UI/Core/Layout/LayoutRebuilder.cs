@@ -1,24 +1,31 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine.Events;
 
 namespace UnityEngine.UI
 {
-    public struct LayoutRebuilder : ICanvasElement, IEquatable<LayoutRebuilder>
+    public class LayoutRebuilder : ICanvasElement
     {
-        private readonly RectTransform m_ToRebuild;
+        private RectTransform m_ToRebuild;
         //There are a few of reasons we need to cache the Hash fromt he transform:
         //  - This is a ValueType (struct) and .Net calculates Hash from the Value Type fields.
         //  - The key of a Dictionary should have a constant Hash value.
         //  - It's possible for the Transform to get nulled from the Native side.
         // We use this struct with the IndexedSet container, which uses a dictionary as part of it's implementation
         // So this struct gets used as a key to a dictionary, so we need to guarantee a constant Hash value.
-        private readonly int m_CachedHashFromTransform;
+        private int m_CachedHashFromTransform;
 
-        private LayoutRebuilder(RectTransform controller)
+        static ObjectPool<LayoutRebuilder> s_Rebuilders = new ObjectPool<LayoutRebuilder>(null, x => x.Clear()); 
+
+        private void Initialize(RectTransform controller)
         {
             m_ToRebuild = controller;
-            m_CachedHashFromTransform = m_ToRebuild.GetHashCode();
+            m_CachedHashFromTransform = controller.GetHashCode();
+        }
+
+        private void Clear()
+        {
+            m_ToRebuild = null;
+            m_CachedHashFromTransform = 0;
         }
 
         static LayoutRebuilder()
@@ -45,11 +52,13 @@ namespace UnityEngine.UI
 
         public static void ForceRebuildLayoutImmediate(RectTransform layoutRoot)
         {
-            LayoutRebuilder rebuilder = new LayoutRebuilder(layoutRoot);
-            ((ICanvasElement)rebuilder).Rebuild(CanvasUpdate.Layout);
+            var rebuilder = s_Rebuilders.Get();
+            rebuilder.Initialize(layoutRoot);
+            rebuilder.Rebuild(CanvasUpdate.Layout);
+            s_Rebuilders.Release(rebuilder);
         }
 
-        void ICanvasElement.Rebuild(CanvasUpdate executing)
+        public void Rebuild(CanvasUpdate executing)
         {
             switch (executing)
             {
@@ -173,22 +182,34 @@ namespace UnityEngine.UI
             ListPool<Component>.Release(comps);
             return valid;
         }
-
+        
         private static void MarkLayoutRootForRebuild(RectTransform controller)
         {
             if (controller == null)
                 return;
-            CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(new LayoutRebuilder(controller));
+
+            var rebuilder = s_Rebuilders.Get();
+            rebuilder.Initialize(controller);
+            if (!CanvasUpdateRegistry.TryRegisterCanvasElementForLayoutRebuild(rebuilder))
+                s_Rebuilders.Release(rebuilder);
         }
 
-        public bool Equals(LayoutRebuilder other)
+        public void LayoutComplete()
         {
-            return m_ToRebuild == other.m_ToRebuild;
+            s_Rebuilders.Release(this);
         }
+
+        public void GraphicUpdateComplete()
+        {}
 
         public override int GetHashCode()
         {
             return m_CachedHashFromTransform;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj.GetHashCode() == GetHashCode();
         }
 
         public override string ToString()

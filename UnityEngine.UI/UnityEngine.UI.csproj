@@ -34,94 +34,256 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\UnityEngine.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EventSystem\EventData\AxisEventData.cs" />
-    <Compile Include="EventSystem\EventData\BaseEventData.cs" />
-    <Compile Include="EventSystem\EventData\PointerEventData.cs" />
-    <Compile Include="EventSystem\EventHandle.cs" />
-    <Compile Include="EventSystem\EventInterfaces.cs" />
-    <Compile Include="EventSystem\EventSystem.cs" />
-    <Compile Include="EventSystem\EventTrigger.cs" />
-    <Compile Include="EventSystem\EventTriggerType.cs" />
-    <Compile Include="EventSystem\ExecuteEvents.cs" />
-    <Compile Include="EventSystem\InputModules\BaseInputModule.cs" />
-    <Compile Include="EventSystem\InputModules\PointerInputModule.cs" />
-    <Compile Include="EventSystem\InputModules\StandaloneInputModule.cs" />
-    <Compile Include="EventSystem\InputModules\TouchInputModule.cs" />
-    <Compile Include="EventSystem\MoveDirection.cs" />
-    <Compile Include="EventSystem\RaycasterManager.cs" />
-    <Compile Include="EventSystem\Raycasters\BaseRaycaster.cs" />
-    <Compile Include="EventSystem\Raycasters\Physics2DRaycaster.cs" />
-    <Compile Include="EventSystem\Raycasters\PhysicsRaycaster.cs" />
-    <Compile Include="EventSystem\RaycastResult.cs" />
-    <Compile Include="EventSystem\UIBehaviour.cs" />
+    <Compile Include="EventSystem\EventData\AxisEventData.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\EventData\BaseEventData.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\EventData\PointerEventData.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\EventHandle.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\EventInterfaces.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\EventSystem.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\EventTrigger.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\EventTriggerType.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\ExecuteEvents.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\InputModules\BaseInputModule.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\InputModules\PointerInputModule.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\InputModules\StandaloneInputModule.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\InputModules\TouchInputModule.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\MoveDirection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\RaycasterManager.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\Raycasters\BaseRaycaster.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\Raycasters\Physics2DRaycaster.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\Raycasters\PhysicsRaycaster.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\RaycastResult.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\UIBehaviour.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\Animation\CoroutineTween.cs" />
-    <Compile Include="UI\Core\AnimationTriggers.cs" />
-    <Compile Include="UI\Core\Button.cs" />
-    <Compile Include="UI\Core\CanvasUpdateRegistry.cs" />
-    <Compile Include="UI\Core\ColorBlock.cs" />
-    <Compile Include="UI\Core\Culling\ClipperRegistry.cs" />
-    <Compile Include="UI\Core\Culling\Clipping.cs" />
-    <Compile Include="UI\Core\Culling\IClipRegion.cs" />
-    <Compile Include="UI\Core\Culling\RectangularVertexClipper.cs" />
-    <Compile Include="UI\Core\DefaultControls.cs" />
-    <Compile Include="UI\Core\Dropdown.cs" />
-    <Compile Include="UI\Core\FontData.cs" />
-    <Compile Include="UI\Core\FontUpdateTracker.cs" />
-    <Compile Include="UI\Core\Graphic.cs" />
-    <Compile Include="UI\Core\GraphicRaycaster.cs" />
+    <Compile Include="UI\Animation\CoroutineTween.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\AnimationTriggers.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Button.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\CanvasUpdateRegistry.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\ColorBlock.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Culling\ClipperRegistry.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Culling\Clipping.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Culling\IClipRegion.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Culling\RectangularVertexClipper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\DefaultControls.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Dropdown.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\FontData.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\FontUpdateTracker.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Graphic.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\GraphicRaycaster.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="UI\Core\GraphicRebuildTracker.cs" />
-    <Compile Include="UI\Core\GraphicRegistry.cs" />
-    <Compile Include="UI\Core\IGraphicEnabledDisabled.cs" />
-    <Compile Include="UI\Core\Image.cs" />
-    <Compile Include="UI\Core\IMask.cs" />
-    <Compile Include="UI\Core\IMaskable.cs" />
-    <Compile Include="UI\Core\InputField.cs" />
-    <Compile Include="UI\Core\Layout\AspectRatioFitter.cs" />
-    <Compile Include="UI\Core\Layout\CanvasScaler.cs" />
-    <Compile Include="UI\Core\Layout\ContentSizeFitter.cs" />
-    <Compile Include="UI\Core\Layout\GridLayoutGroup.cs" />
-    <Compile Include="UI\Core\Layout\HorizontalLayoutGroup.cs" />
-    <Compile Include="UI\Core\Layout\HorizontalOrVerticalLayoutGroup.cs" />
-    <Compile Include="UI\Core\Layout\ILayoutElement.cs" />
-    <Compile Include="UI\Core\Layout\LayoutElement.cs" />
-    <Compile Include="UI\Core\Layout\LayoutGroup.cs" />
-    <Compile Include="UI\Core\Layout\LayoutRebuilder.cs" />
-    <Compile Include="UI\Core\Layout\LayoutUtility.cs" />
-    <Compile Include="UI\Core\Layout\VerticalLayoutGroup.cs" />
-    <Compile Include="UI\Core\Mask.cs" />
-    <Compile Include="UI\Core\MaskableGraphic.cs" />
-    <Compile Include="UI\Core\MaskUtilities.cs" />
-    <Compile Include="UI\Core\MaterialModifiers\IMaterialModifier.cs" />
-    <Compile Include="UI\Core\Misc.cs" />
-    <Compile Include="UI\Core\Navigation.cs" />
-    <Compile Include="UI\Core\RawImage.cs" />
-    <Compile Include="UI\Core\RectMask2D.cs" />
-    <Compile Include="UI\Core\Scrollbar.cs" />
-    <Compile Include="UI\Core\ScrollRect.cs" />
-    <Compile Include="UI\Core\Selectable.cs" />
-    <Compile Include="UI\Core\SetPropertyUtility.cs" />
-    <Compile Include="UI\Core\Slider.cs" />
-    <Compile Include="UI\Core\SpecializedCollections\IndexedSet.cs" />
-    <Compile Include="UI\Core\SpriteState.cs" />
-    <Compile Include="UI\Core\StencilMaterial.cs" />
-    <Compile Include="UI\Core\Text.cs" />
-    <Compile Include="UI\Core\Toggle.cs" />
-    <Compile Include="UI\Core\ToggleGroup.cs" />
-    <Compile Include="UI\Core\Utility\ListPool.cs" />
-    <Compile Include="UI\Core\Utility\ObjectPool.cs" />
-    <Compile Include="UI\Core\Utility\VertexHelper.cs" />
-    <Compile Include="UI\Core\VertexModifiers\BaseMeshEffect.cs" />
-    <Compile Include="UI\Core\VertexModifiers\IMeshModifier.cs" />
-    <Compile Include="UI\Core\VertexModifiers\Outline.cs" />
-    <Compile Include="UI\Core\VertexModifiers\PositionAsUV1.cs" />
-    <Compile Include="UI\Core\VertexModifiers\Shadow.cs" />
+    <Compile Include="UI\Core\GraphicRegistry.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\IGraphicEnabledDisabled.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Image.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\IMask.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\IMaskable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\InputField.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\AspectRatioFitter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\CanvasScaler.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\ContentSizeFitter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\GridLayoutGroup.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\HorizontalLayoutGroup.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\HorizontalOrVerticalLayoutGroup.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\ILayoutElement.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\LayoutElement.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\LayoutGroup.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\LayoutRebuilder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\LayoutUtility.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Layout\VerticalLayoutGroup.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Mask.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\MaskableGraphic.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\MaskUtilities.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\MaterialModifiers\IMaterialModifier.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Misc.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Navigation.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\RawImage.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\RectMask2D.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Scrollbar.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\ScrollRect.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Selectable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\SetPropertyUtility.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Slider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\SpecializedCollections\IndexedSet.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\SpriteState.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\StencilMaterial.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Text.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Toggle.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\ToggleGroup.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Utility\ListPool.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Utility\ObjectPool.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Utility\VertexHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\VertexModifiers\BaseMeshEffect.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\VertexModifiers\IMeshModifier.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\VertexModifiers\Outline.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\VertexModifiers\PositionAsUV1.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\VertexModifiers\Shadow.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Projects\CSharp\UnityEngine.csproj">
+      <Project>{f0499708-3eb6-4026-8362-97e6ffc4e7c8}</Project>
+      <Name>UnityEngine</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
@@ -132,6 +294,6 @@
     <Copy Condition="'$(Configuration)' == 'Debug' And '$(OS)' == 'Unix'" SourceFiles="$(TargetDir)$(TargetName).dll.mdb" DestinationFiles="$(ProjectDir)..\Output\Standalone\$(TargetName).dll.mdb" />
     <Copy Condition="'$(Configuration)' == 'Debug' And '$(OS)' != 'Unix'" SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFiles="$(ProjectDir)..\Output\Standalone\$(TargetName).pdb" />
     <!--Uncomment the block below and change the destination to copy the built dll into your unity install directory-->
-    <!--<Copy SourceFiles="$(TargetDir)$(TargetName).dll" DestinationFiles="C:\Program Files\Unity\Editor\Data\UnityExtensions\Unity\GUISystem\Standalone\$(TargetName).dll"/>-->
+    <!--<Copy SourceFiles="$(TargetDir)$(TargetName).dll" DestinationFiles="C:\Program Files (x86)\Unity\Editor\Data\UnityExtensions\Unity\GUISystem\4.6.0\Standalone\$(TargetName).dll"/>-->
   </Target>
 </Project>

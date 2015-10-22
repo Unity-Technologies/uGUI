@@ -18,6 +18,8 @@ namespace UnityEngine.UI
     {
         void Rebuild(CanvasUpdate executing);
         Transform transform { get; }
+        void LayoutComplete();
+        void GraphicUpdateComplete();
         // due to unity overriding null check
         // we need this as something may not be null
         // but may be destroyed
@@ -60,16 +62,51 @@ namespace UnityEngine.UI
             return valid;
         }
 
-        private static readonly Comparison<ICanvasElement> s_SortLayoutFunction = SortLayoutList;
-        private void PerformUpdate()
+        private void CleanInvalidItems()
         {
             // So MB's override the == operator for null equality, which checks
             // if they are destroyed. This is fine if you are looking at a concrete
             // mb, but in this case we are looking at a list of ICanvasElement
             // this won't forward the == operator to the MB, but just check if the
             // interface is null. IsDestroyed will return if the backend is destroyed.
-            m_LayoutRebuildQueue.RemoveAll(x => x == null || x.IsDestroyed());
-            m_GraphicRebuildQueue.RemoveAll(x => x == null || x.IsDestroyed());
+
+            for (int i = m_LayoutRebuildQueue.Count-1; i >= 0; --i)
+            {
+                var item = m_LayoutRebuildQueue[i];
+                if (item == null)
+                {
+                    m_LayoutRebuildQueue.RemoveAt(i);
+                    continue;
+                }
+
+                if (item.IsDestroyed())
+                {
+                    m_LayoutRebuildQueue.RemoveAt(i);
+                    item.LayoutComplete();
+                }
+            }
+
+            for (int i = m_GraphicRebuildQueue.Count-1; i >= 0; --i)
+            {
+                var item = m_GraphicRebuildQueue[i];
+                if (item == null)
+                {
+                    m_GraphicRebuildQueue.RemoveAt(i);
+                    continue;
+                }
+
+                if (item.IsDestroyed())
+                {
+                    m_GraphicRebuildQueue.RemoveAt(i);
+                    item.GraphicUpdateComplete();
+                }
+            }
+        }
+
+        private static readonly Comparison<ICanvasElement> s_SortLayoutFunction = SortLayoutList;
+        private void PerformUpdate()
+        {
+            CleanInvalidItems();
 
             m_PerformingLayoutUpdate = true;
 
@@ -78,17 +115,22 @@ namespace UnityEngine.UI
             {
                 for (int j = 0; j < m_LayoutRebuildQueue.Count; j++)
                 {
+                    var rebuild = instance.m_LayoutRebuildQueue[j];
                     try
                     {
-                        if (ObjectValidForUpdate(instance.m_LayoutRebuildQueue[j]))
-                            instance.m_LayoutRebuildQueue[j].Rebuild((CanvasUpdate)i);
+                        if (ObjectValidForUpdate(rebuild))
+                            rebuild.Rebuild((CanvasUpdate)i);
                     }
                     catch (Exception e)
                     {
-                        Debug.LogException(e, instance.m_LayoutRebuildQueue[j].transform);
+                        Debug.LogException(e, rebuild.transform);
                     }
                 }
             }
+
+            for (int i = 0; i < m_LayoutRebuildQueue.Count; ++i)
+                m_LayoutRebuildQueue[i].LayoutComplete();
+
             instance.m_LayoutRebuildQueue.Clear();
             m_PerformingLayoutUpdate = false;
 
@@ -112,6 +154,10 @@ namespace UnityEngine.UI
                     }
                 }
             }
+            
+            for (int i = 0; i < m_GraphicRebuildQueue.Count; ++i)
+                m_GraphicRebuildQueue[i].LayoutComplete();
+
             instance.m_GraphicRebuildQueue.Clear();
             m_PerformingGraphicUpdate = false;
         }
@@ -144,24 +190,43 @@ namespace UnityEngine.UI
             instance.InternalRegisterCanvasElementForLayoutRebuild(element);
         }
 
-        private void InternalRegisterCanvasElementForLayoutRebuild(ICanvasElement element)
+        public static bool TryRegisterCanvasElementForLayoutRebuild(ICanvasElement element)
         {
-            m_LayoutRebuildQueue.Add(element);
+            return instance.InternalRegisterCanvasElementForLayoutRebuild(element);
         }
 
+        private bool InternalRegisterCanvasElementForLayoutRebuild(ICanvasElement element)
+        {
+            if (m_LayoutRebuildQueue.Contains(element))
+                return false;
+
+            m_LayoutRebuildQueue.Add(element);
+            return true;
+        }
+ 
         public static void RegisterCanvasElementForGraphicRebuild(ICanvasElement element)
         {
             instance.InternalRegisterCanvasElementForGraphicRebuild(element);
         }
 
-        private void InternalRegisterCanvasElementForGraphicRebuild(ICanvasElement element)
+        public static bool TryRegisterCanvasElementForGraphicRebuild(ICanvasElement element)
+        {
+            return instance.InternalRegisterCanvasElementForGraphicRebuild(element);
+        }
+
+        private bool InternalRegisterCanvasElementForGraphicRebuild(ICanvasElement element)
         {
             if (m_PerformingGraphicUpdate)
             {
                 Debug.LogError(string.Format("Trying to add {0} for graphic rebuild while we are already inside a graphic rebuild loop. This is not supported.", element));
-                return;
+                return false;
             }
+
+            if (m_GraphicRebuildQueue.Contains(element))
+                return false;
+
             m_GraphicRebuildQueue.Add(element);
+            return true;
         }
 
         public static void UnRegisterCanvasElementForRebuild(ICanvasElement element)
@@ -178,6 +243,7 @@ namespace UnityEngine.UI
                 return;
             }
 
+            element.LayoutComplete();
             instance.m_LayoutRebuildQueue.Remove(element);
         }
 
@@ -188,7 +254,7 @@ namespace UnityEngine.UI
                 Debug.LogError(string.Format("Trying to remove {0} from rebuild list while we are already inside a rebuild loop. This is not supported.", element));
                 return;
             }
-
+            element.GraphicUpdateComplete();
             instance.m_GraphicRebuildQueue.Remove(element);
         }
 

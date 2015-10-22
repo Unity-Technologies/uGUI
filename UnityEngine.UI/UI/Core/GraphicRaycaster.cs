@@ -59,7 +59,7 @@ namespace UnityEngine.UI
         private Canvas m_Canvas;
 
         protected GraphicRaycaster()
-        {}
+        { }
 
         private Canvas canvas
         {
@@ -178,7 +178,7 @@ namespace UnityEngine.UI
                         screenPosition = eventData.position,
                         index = resultAppendList.Count,
                         depth = m_RaycastResults[index].depth,
-                        sortingLayer =  canvas.cachedSortingLayerValue,
+                        sortingLayer =  canvas.sortingLayerID,
                         sortingOrder = canvas.sortingOrder
                     };
                     resultAppendList.Add(castResult);
@@ -207,7 +207,6 @@ namespace UnityEngine.UI
             // Debug.Log("ttt" + pointerPoision + ":::" + camera);
             // Necessary for the event system
             var foundGraphics = GraphicRegistry.GetGraphicsForCanvas(canvas);
-            s_SortedGraphics.Clear();
             for (int i = 0; i < foundGraphics.Count; ++i)
             {
                 Graphic graphic = foundGraphics[i];
@@ -226,10 +225,12 @@ namespace UnityEngine.UI
             }
 
             s_SortedGraphics.Sort((g1, g2) => g2.depth.CompareTo(g1.depth));
-            //      StringBuilder cast = new StringBuilder();
+            //		StringBuilder cast = new StringBuilder();
             for (int i = 0; i < s_SortedGraphics.Count; ++i)
                 results.Add(s_SortedGraphics[i]);
-            //      Debug.Log (cast.ToString());
+            //		Debug.Log (cast.ToString());
+
+            s_SortedGraphics.Clear();
         }
     }
 }

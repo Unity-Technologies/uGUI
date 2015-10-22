@@ -5,9 +5,9 @@ namespace UnityEngine.UI
         readonly Vector3[] m_WorldCorners = new Vector3[4];
         readonly Vector3[] m_CanvasCorners = new Vector3[4];
 
-        public Rect GetCanvasRect(RectTransform t, Canvas c)
+        public Rect GetCanvasRect (RectTransform t, Canvas c)
         {
-            t.GetWorldCorners(m_WorldCorners);
+			t.GetWorldCorners(m_WorldCorners);
             var canvasTransform = c.GetComponent<Transform>();
             for (int i = 0; i < 4; ++i)
                 m_CanvasCorners[i] = canvasTransform.InverseTransformPoint(m_WorldCorners[i]);

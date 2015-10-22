@@ -45,7 +45,7 @@ namespace UnityEngine.EventSystems
         public override string ToString()
         {
             if (!isValid)
-                return "";
+              return "";
 
             return "Name: " + gameObject + "\n" +
                    "module: " + module + "\n" +

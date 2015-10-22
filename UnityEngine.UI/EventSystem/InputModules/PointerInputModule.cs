@@ -303,7 +303,7 @@ namespace UnityEngine.EventSystems
             }
             return sb.ToString();
         }
-
+         
         protected void DeselectIfSelectionChanged(GameObject currentOverGo, BaseEventData pointerEvent)
         {
             // Selection tracking

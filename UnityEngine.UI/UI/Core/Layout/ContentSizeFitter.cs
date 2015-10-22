@@ -34,7 +34,7 @@ namespace UnityEngine.UI
         private DrivenRectTransformTracker m_Tracker;
 
         protected ContentSizeFitter()
-        {}
+        { }
 
         #region Unity Lifetime calls
 
