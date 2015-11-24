@@ -18,8 +18,8 @@ namespace UnityEngine.UI
 
         public virtual bool ignoreLayout { get { return m_IgnoreLayout; } set { if (SetPropertyUtility.SetStruct(ref m_IgnoreLayout, value)) SetDirty(); } }
 
-        public virtual void CalculateLayoutInputHorizontal() { }
-        public virtual void CalculateLayoutInputVertical() { }
+        public virtual void CalculateLayoutInputHorizontal() {}
+        public virtual void CalculateLayoutInputVertical() {}
         public virtual float minWidth { get { return m_MinWidth; } set { if (SetPropertyUtility.SetStruct(ref m_MinWidth, value)) SetDirty(); } }
         public virtual float minHeight { get { return m_MinHeight; } set { if (SetPropertyUtility.SetStruct(ref m_MinHeight, value)) SetDirty(); } }
         public virtual float preferredWidth { get { return m_PreferredWidth; } set { if (SetPropertyUtility.SetStruct(ref m_PreferredWidth, value)) SetDirty(); } }
@@ -30,7 +30,7 @@ namespace UnityEngine.UI
 
 
         protected LayoutElement()
-        { }
+        {}
 
         #region Unity Lifetime calls
 

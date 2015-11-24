@@ -20,7 +20,7 @@ namespace UnityEngine.UI
 
         [Serializable]
         public class ToggleEvent : UnityEvent<bool>
-        { }
+        {}
 
         /// <summary>
         /// Transition type.
@@ -64,7 +64,7 @@ namespace UnityEngine.UI
         private bool m_IsOn;
 
         protected Toggle()
-        { }
+        {}
 
 #if UNITY_EDITOR
         protected override void OnValidate()
@@ -107,22 +107,22 @@ namespace UnityEngine.UI
             base.OnDisable();
         }
 
-		protected override void OnDidApplyAnimationProperties()
-		{
-			// Check if isOn has been changed by the animation.
-			// Unfortunately there is no way to check if we don�t have a graphic.
-			if (graphic != null)
-			{
-				bool oldValue = !Mathf.Approximately(graphic.canvasRenderer.GetColor().a, 0);
-				if(m_IsOn != oldValue)
-				{
-					m_IsOn = oldValue;
-					Set(!oldValue);
-				}
-			}
+        protected override void OnDidApplyAnimationProperties()
+        {
+            // Check if isOn has been changed by the animation.
+            // Unfortunately there is no way to check if we don�t have a graphic.
+            if (graphic != null)
+            {
+                bool oldValue = !Mathf.Approximately(graphic.canvasRenderer.GetColor().a, 0);
+                if (m_IsOn != oldValue)
+                {
+                    m_IsOn = oldValue;
+                    Set(!oldValue);
+                }
+            }
 
-			base.OnDidApplyAnimationProperties();
-		}
+            base.OnDidApplyAnimationProperties();
+        }
 
         private void SetToggleGroup(ToggleGroup newGroup, bool setMemberValue)
         {

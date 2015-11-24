@@ -440,7 +440,7 @@ namespace UnityEngine.UI
             // Apply the offset to the vertices
             IList<UIVertex> verts = cachedTextGenerator.verts;
             float unitsPerPixel = 1 / pixelsPerUnit;
-            //Last 4 verts are always a new line... 
+            //Last 4 verts are always a new line...
             int vertCount = verts.Count - 4;
 
             toFill.Clear();
@@ -471,8 +471,8 @@ namespace UnityEngine.UI
             m_DisableFontTextureRebuiltCallback = false;
         }
 
-        public virtual void CalculateLayoutInputHorizontal() { }
-        public virtual void CalculateLayoutInputVertical() { }
+        public virtual void CalculateLayoutInputHorizontal() {}
+        public virtual void CalculateLayoutInputVertical() {}
 
         public virtual float minWidth
         {

@@ -50,8 +50,8 @@ namespace UnityEngine.UI
         [SerializeField]
         private BlockingObjects m_BlockingObjects = BlockingObjects.None;
 
-        public bool ignoreReversedGraphics { get {return m_IgnoreReversedGraphics; } set{ m_IgnoreReversedGraphics = value; } }
-        public BlockingObjects blockingObjects { get {return m_BlockingObjects; } set{ m_BlockingObjects = value; } }
+        public bool ignoreReversedGraphics { get {return m_IgnoreReversedGraphics; } set { m_IgnoreReversedGraphics = value; } }
+        public BlockingObjects blockingObjects { get {return m_BlockingObjects; } set { m_BlockingObjects = value; } }
 
         [SerializeField]
         protected LayerMask m_BlockingMask = kNoEventMaskSet;
@@ -59,7 +59,7 @@ namespace UnityEngine.UI
         private Canvas m_Canvas;
 
         protected GraphicRaycaster()
-        { }
+        {}
 
         private Canvas canvas
         {

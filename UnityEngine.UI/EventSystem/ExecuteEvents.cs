@@ -261,7 +261,7 @@ namespace UnityEngine.EventSystems
                 {
                     var temp = internalHandlers[i];
                     Debug.LogException(new Exception(string.Format("Type {0} expected {1} received.", typeof(T).Name, temp.GetType().Name), e));
-                    continue;;
+                    continue;
                 }
 
                 try

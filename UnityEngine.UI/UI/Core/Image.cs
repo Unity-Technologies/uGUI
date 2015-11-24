@@ -162,7 +162,7 @@ namespace UnityEngine.UI
             }
         }
 
-        public virtual void OnBeforeSerialize() { }
+        public virtual void OnBeforeSerialize() {}
 
         public virtual void OnAfterDeserialize()
         {
@@ -873,8 +873,8 @@ namespace UnityEngine.UI
 
         #endregion
 
-        public virtual void CalculateLayoutInputHorizontal() { }
-        public virtual void CalculateLayoutInputVertical() { }
+        public virtual void CalculateLayoutInputHorizontal() {}
+        public virtual void CalculateLayoutInputVertical() {}
 
         public virtual float minWidth { get { return 0; } }
 

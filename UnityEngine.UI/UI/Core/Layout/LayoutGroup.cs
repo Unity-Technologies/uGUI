@@ -46,7 +46,7 @@ namespace UnityEngine.UI
                 if (rect == null || !rect.gameObject.activeInHierarchy)
                     continue;
 
-                rect.GetComponents(typeof (ILayoutIgnorer), toIgnoreList);
+                rect.GetComponents(typeof(ILayoutIgnorer), toIgnoreList);
 
                 if (toIgnoreList.Count == 0)
                 {
@@ -56,7 +56,7 @@ namespace UnityEngine.UI
 
                 for (int j = 0; j < toIgnoreList.Count; j++)
                 {
-                    var ignorer = (ILayoutIgnorer) toIgnoreList[j];
+                    var ignorer = (ILayoutIgnorer)toIgnoreList[j];
                     if (!ignorer.ignoreLayout)
                     {
                         m_RectChildren.Add(rect);

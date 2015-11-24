@@ -27,7 +27,7 @@ namespace UnityEngine.UI.CoroutineTween
             Alpha
         }
 
-        public class ColorTweenCallback : UnityEvent<Color> { }
+        public class ColorTweenCallback : UnityEvent<Color> {}
 
         private ColorTweenCallback m_Target;
         private Color m_StartColor;
@@ -116,7 +116,7 @@ namespace UnityEngine.UI.CoroutineTween
     // the value on the target.
     internal struct FloatTween : ITweenValue
     {
-        public class FloatTweenCallback : UnityEvent<float> { }
+        public class FloatTweenCallback : UnityEvent<float> {}
 
         private FloatTweenCallback m_Target;
         private float m_StartValue;

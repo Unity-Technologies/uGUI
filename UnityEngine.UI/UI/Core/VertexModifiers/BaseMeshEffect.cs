@@ -42,12 +42,12 @@ namespace UnityEngine.UI
             base.OnDisable();
         }
 
-		protected override void OnDidApplyAnimationProperties()
-		{
-			if (graphic != null)
-				graphic.SetVerticesDirty();
-			base.OnDidApplyAnimationProperties();
-		}
+        protected override void OnDidApplyAnimationProperties()
+        {
+            if (graphic != null)
+                graphic.SetVerticesDirty();
+            base.OnDidApplyAnimationProperties();
+        }
 
 #if UNITY_EDITOR
         protected override void OnValidate()

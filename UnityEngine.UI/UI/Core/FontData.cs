@@ -7,12 +7,12 @@ namespace UnityEngine.UI
     /// Labels reference specific font data used to draw them. This class contains that data.
     /// </summary>
 
-	[Serializable]
-	public class FontData : ISerializationCallbackReceiver
-	{
-		[SerializeField]
-		[FormerlySerializedAs("font")]
-		private Font m_Font;
+    [Serializable]
+    public class FontData : ISerializationCallbackReceiver
+    {
+        [SerializeField]
+        [FormerlySerializedAs("font")]
+        private Font m_Font;
 
         [SerializeField]
         [FormerlySerializedAs("fontSize")]
@@ -136,7 +136,7 @@ namespace UnityEngine.UI
         }
 
         void ISerializationCallbackReceiver.OnBeforeSerialize()
-        { }
+        {}
 
         void ISerializationCallbackReceiver.OnAfterDeserialize()
         {

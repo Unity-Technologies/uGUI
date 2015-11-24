@@ -11,7 +11,7 @@ namespace UnityEngine.UI
 
         protected ClipperRegistry()
         {
-        // This is needed for AOT platforms. Without it the compile doesn't get the definition of the Dictionarys
+            // This is needed for AOT platforms. Without it the compile doesn't get the definition of the Dictionarys
 #pragma warning disable 168
             Dictionary<IClipper, int> emptyIClipperDic;
 #pragma warning restore 168

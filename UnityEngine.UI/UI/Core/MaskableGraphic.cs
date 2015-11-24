@@ -29,7 +29,7 @@ namespace UnityEngine.UI
         protected bool m_IncludeForMasking = false;
 
         [Serializable]
-        public class CullStateChangedEvent : UnityEvent <bool> { }
+        public class CullStateChangedEvent : UnityEvent<bool> {}
 
         // Event delegates triggered on click.
         [SerializeField]
@@ -135,6 +135,7 @@ namespace UnityEngine.UI
             UpdateClipParent();
             SetMaterialDirty();
         }
+
 #endif
 
         protected override void OnTransformParentChanged()
@@ -146,7 +147,7 @@ namespace UnityEngine.UI
         }
 
         [Obsolete("Not used anymore.", true)]
-        public virtual void ParentMaskStateChanged() { }
+        public virtual void ParentMaskStateChanged() {}
 
         protected override void OnCanvasHierarchyChanged()
         {

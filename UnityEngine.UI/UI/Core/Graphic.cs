@@ -302,7 +302,7 @@ namespace UnityEngine.UI
         public virtual void Rebuild(CanvasUpdate update)
         {
             if (canvasRenderer.cull)
-               return;
+                return;
 
             switch (update)
             {
@@ -345,7 +345,6 @@ namespace UnityEngine.UI
         /// </summary>
         protected virtual void UpdateGeometry()
         {
-
             if (useLegacyMeshGeneration)
                 DoLegacyMeshGeneration();
             else
@@ -390,7 +389,7 @@ namespace UnityEngine.UI
             for (var i = 0; i < components.Count; i++)
             {
 #pragma warning disable 618
-                ((IMeshModifier) components[i]).ModifyMesh(workerMesh);
+                ((IMeshModifier)components[i]).ModifyMesh(workerMesh);
 #pragma warning restore 618
             }
 
@@ -413,7 +412,7 @@ namespace UnityEngine.UI
         }
 
         [Obsolete("Use OnPopulateMesh instead.", true)]
-        protected virtual void OnFillVBO(System.Collections.Generic.List<UIVertex> vbo) { }
+        protected virtual void OnFillVBO(System.Collections.Generic.List<UIVertex> vbo) {}
 
         [Obsolete("Use OnPopulateMesh(VertexHelper vh) instead.", false)]
         protected virtual void OnPopulateMesh(Mesh m)
@@ -437,8 +436,8 @@ namespace UnityEngine.UI
             vh.AddVert(new Vector3(v.z, v.w), color32, new Vector2(1f, 1f));
             vh.AddVert(new Vector3(v.z, v.y), color32, new Vector2(1f, 0f));
 
-            vh.AddTriangle(0,1,2);
-            vh.AddTriangle(2,3,0);
+            vh.AddTriangle(0, 1, 2);
+            vh.AddTriangle(2, 3, 0);
         }
 
 #if UNITY_EDITOR
@@ -456,6 +455,7 @@ namespace UnityEngine.UI
                     methodInfo.Invoke(mb, null);
             }
         }
+
 #endif
 
         // Call from unity if animation properties have changed
@@ -468,7 +468,7 @@ namespace UnityEngine.UI
         /// <summary>
         /// Make the Graphic have the native size of its content.
         /// </summary>
-        public virtual void SetNativeSize() { }
+        public virtual void SetNativeSize() {}
         public virtual bool Raycast(Vector2 sp, Camera eventCamera)
         {
             if (!isActiveAndEnabled)

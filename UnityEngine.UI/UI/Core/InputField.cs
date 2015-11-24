@@ -64,10 +64,10 @@ namespace UnityEngine.UI
         public delegate char OnValidateInput(string text, int charIndex, char addedChar);
 
         [Serializable]
-        public class SubmitEvent : UnityEvent<string> { }
+        public class SubmitEvent : UnityEvent<string> {}
 
         [Serializable]
-        public class OnChangeEvent : UnityEvent<string> { }
+        public class OnChangeEvent : UnityEvent<string> {}
 
         protected TouchScreenKeyboard m_Keyboard;
         static private readonly char[] kSeparators = { ' ', '.', ',' };
@@ -201,7 +201,7 @@ namespace UnityEngine.UI
         const string kEmailSpecialCharacters = "!#$%&'*+-/=?^_`{|}~";
 
         protected InputField()
-        { }
+        {}
 
         protected Mesh mesh
         {
@@ -416,14 +416,13 @@ namespace UnityEngine.UI
             base.OnValidate();
             EnforceContentType();
 
-             //This can be invoked before OnEnabled is called. So we shouldn't be accessing other objects, before OnEnable is called.
+            //This can be invoked before OnEnabled is called. So we shouldn't be accessing other objects, before OnEnable is called.
             if (!IsActive())
                 return;
 
             UpdateLabel();
             if (m_AllowInput)
                 SetCaretActive();
-
         }
 
     #endif // if UNITY_EDITOR
@@ -457,7 +456,7 @@ namespace UnityEngine.UI
             CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
 
             if (m_CachedInputRenderer)
-                 m_CachedInputRenderer.SetMesh(null);
+                m_CachedInputRenderer.SetMesh(null);
 
             if (m_Mesh)
                 DestroyImmediate(m_Mesh);
@@ -510,7 +509,7 @@ namespace UnityEngine.UI
 
             if (m_CaretBlinkRate > 0.0f)
             {
-                if (m_BlinkCoroutine == null )
+                if (m_BlinkCoroutine == null)
                     m_BlinkCoroutine = StartCoroutine(CaretBlink());
             }
             else
@@ -600,7 +599,7 @@ namespace UnityEngine.UI
                 m_ShouldActivateNextUpdate = false;
             }
 
-            if (InPlaceEditing () || !isFocused)
+            if (InPlaceEditing() || !isFocused)
                 return;
 
             AssignPositioningIfNeeded();
@@ -1584,7 +1583,7 @@ namespace UnityEngine.UI
 
                         width += characters[m_DrawStart].charWidth;
                     }
-                    ++m_DrawStart;	// move right one to the last character we could fit on the left
+                    ++m_DrawStart;  // move right one to the last character we could fit on the left
                 }
                 else
                 {
@@ -1864,16 +1863,16 @@ namespace UnityEngine.UI
                         endPosition.x = m_TextComponent.rectTransform.rect.xMax;
 
                     var startIndex = vbo.currentVertCount;
-                    vert.position = new Vector3(startPosition.x, endPosition.y, 0.0f) + (Vector3) roundingOffset;
+                    vert.position = new Vector3(startPosition.x, endPosition.y, 0.0f) + (Vector3)roundingOffset;
                     vbo.AddVert(vert);
 
-                    vert.position = new Vector3(endPosition.x, endPosition.y, 0.0f) + (Vector3) roundingOffset;
+                    vert.position = new Vector3(endPosition.x, endPosition.y, 0.0f) + (Vector3)roundingOffset;
                     vbo.AddVert(vert);
 
-                    vert.position = new Vector3(endPosition.x, startPosition.y, 0.0f) + (Vector3) roundingOffset;
+                    vert.position = new Vector3(endPosition.x, startPosition.y, 0.0f) + (Vector3)roundingOffset;
                     vbo.AddVert(vert);
 
-                    vert.position = new Vector3(startPosition.x, startPosition.y, 0.0f) + (Vector3) roundingOffset;
+                    vert.position = new Vector3(startPosition.x, startPosition.y, 0.0f) + (Vector3)roundingOffset;
                     vbo.AddVert(vert);
 
                     vbo.AddTriangle(startIndex, startIndex + 1, startIndex + 2);

@@ -14,7 +14,7 @@ namespace UnityEngine.UI
         // So this struct gets used as a key to a dictionary, so we need to guarantee a constant Hash value.
         private int m_CachedHashFromTransform;
 
-        static ObjectPool<LayoutRebuilder> s_Rebuilders = new ObjectPool<LayoutRebuilder>(null, x => x.Clear()); 
+        static ObjectPool<LayoutRebuilder> s_Rebuilders = new ObjectPool<LayoutRebuilder>(null, x => x.Clear());
 
         private void Initialize(RectTransform controller)
         {
@@ -182,7 +182,7 @@ namespace UnityEngine.UI
             ListPool<Component>.Release(comps);
             return valid;
         }
-        
+
         private static void MarkLayoutRootForRebuild(RectTransform controller)
         {
             if (controller == null)

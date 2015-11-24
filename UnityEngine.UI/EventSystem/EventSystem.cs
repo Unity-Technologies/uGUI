@@ -63,7 +63,7 @@ namespace UnityEngine.EventSystems
         }
 
         protected EventSystem()
-        { }
+        {}
 
         public void UpdateModules()
         {
@@ -151,7 +151,7 @@ namespace UnityEngine.EventSystems
                 var lid = SortingLayer.GetLayerValueFromID(lhs.sortingLayer);
                 return rid.CompareTo(lid);
             }
-                
+
 
             if (lhs.sortingOrder != rhs.sortingOrder)
                 return rhs.sortingOrder.CompareTo(lhs.sortingOrder);

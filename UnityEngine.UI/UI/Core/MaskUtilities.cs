@@ -70,7 +70,7 @@ namespace UnityEngine.UI
                 t.GetComponents(typeof(Mask), components);
                 for (var i = 0; i < components.Count; ++i)
                 {
-                    if (components[i] != null && ((Mask) components[i]).IsActive() && ((Mask) components[i]).graphic.IsActive())
+                    if (components[i] != null && ((Mask)components[i]).IsActive() && ((Mask)components[i]).graphic.IsActive())
                     {
                         ++depth;
                         break;
@@ -81,24 +81,23 @@ namespace UnityEngine.UI
                     break;
 
                 t = t.parent;
-
             }
             ListPool<Component>.Release(components);
             return depth;
         }
 
-        public static RectMask2D GetRectMaskForClippable (IClippable transform)
+        public static RectMask2D GetRectMaskForClippable(IClippable transform)
         {
             var t = transform.rectTransform.parent;
             var components = ListPool<Component>.Get();
             while (t != null)
             {
-                t.GetComponents(typeof (RectMask2D), components);
+                t.GetComponents(typeof(RectMask2D), components);
                 for (var i = 0; i < components.Count; ++i)
                 {
-                    if (components[i] != null && ((RectMask2D) components[i]).IsActive())
+                    if (components[i] != null && ((RectMask2D)components[i]).IsActive())
                     {
-                        var result = (RectMask2D) components[i];
+                        var result = (RectMask2D)components[i];
                         ListPool<Component>.Release(components);
                         return result;
                     }
@@ -112,7 +111,8 @@ namespace UnityEngine.UI
             ListPool<Component>.Release(components);
             return null;
         }
-        public static void GetRectMasksForClip (RectMask2D clipper, List<RectMask2D> masks)
+
+        public static void GetRectMasksForClip(RectMask2D clipper, List<RectMask2D> masks)
         {
             masks.Clear();
 
@@ -120,11 +120,11 @@ namespace UnityEngine.UI
             var components = ListPool<Component>.Get();
             while (t != null)
             {
-                t.GetComponents(typeof (RectMask2D), components);
+                t.GetComponents(typeof(RectMask2D), components);
                 for (var i = 0; i < components.Count; ++i)
                 {
-                    if (components[i] != null && ((RectMask2D) components[i]).IsActive())
-                        masks.Add((RectMask2D) components[i]);
+                    if (components[i] != null && ((RectMask2D)components[i]).IsActive())
+                        masks.Add((RectMask2D)components[i]);
                 }
 
                 var canvas = t.GetComponent<Canvas>();

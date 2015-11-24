@@ -6,7 +6,7 @@ namespace UnityEngine.UI
     public class Outline : Shadow
     {
         protected Outline()
-        { }
+        {}
 
         public override void ModifyMesh(VertexHelper vh)
         {
@@ -15,7 +15,7 @@ namespace UnityEngine.UI
 
             var verts = ListPool<UIVertex>.Get();
             vh.GetUIVertexStream(verts);
-            
+
             var neededCpacity = verts.Count * 5;
             if (verts.Capacity < neededCpacity)
                 verts.Capacity = neededCpacity;

@@ -11,7 +11,7 @@ namespace UnityEditor.UI
     static internal class MenuOptions
     {
         private const string kUILayerName = "UI";
-        
+
         private const string kStandardSpritePath       = "UI/Skin/UISprite.psd";
         private const string kBackgroundSpritePath     = "UI/Skin/Background.psd";
         private const string kInputFieldBackgroundPath = "UI/Skin/InputFieldBackground.psd";
@@ -19,9 +19,9 @@ namespace UnityEditor.UI
         private const string kCheckmarkPath            = "UI/Skin/Checkmark.psd";
         private const string kDropdownArrowPath        = "UI/Skin/DropdownArrow.psd";
         private const string kMaskPath                 = "UI/Skin/UIMask.psd";
-        
+
         static private DefaultControls.Resources s_StandardResources;
-        
+
         static private DefaultControls.Resources GetStandardResources()
         {
             if (s_StandardResources.standard == null)
@@ -36,7 +36,7 @@ namespace UnityEditor.UI
             }
             return s_StandardResources;
         }
-        
+
         private static void SetPositionVisibleinSceneView(RectTransform canvasRTransform, RectTransform itemTransform)
         {
             // Find the best scene view
@@ -81,7 +81,7 @@ namespace UnityEditor.UI
             itemTransform.localRotation = Quaternion.identity;
             itemTransform.localScale = Vector3.one;
         }
-        
+
         private static void PlaceUIElementRoot(GameObject element, MenuCommand menuCommand)
         {
             GameObject parent = menuCommand.context as GameObject;
@@ -89,7 +89,7 @@ namespace UnityEditor.UI
             {
                 parent = GetOrCreateCanvasGameObject();
             }
-            
+
             string uniqueName = GameObjectUtility.GetUniqueNameForSibling(parent.transform, element.name);
             element.name = uniqueName;
             Undo.RegisterCreatedObjectUndo(element, "Create " + element.name);
@@ -97,7 +97,7 @@ namespace UnityEditor.UI
             GameObjectUtility.SetParentAndAlign(element, parent);
             if (parent != menuCommand.context) // not a context click, so center in sceneview
                 SetPositionVisibleinSceneView(parent.GetComponent<RectTransform>(), element.GetComponent<RectTransform>());
-            
+
             Selection.activeGameObject = element;
         }
 
@@ -125,7 +125,7 @@ namespace UnityEditor.UI
         }
 
         // Controls
-        
+
         // Button and toggle are controls you just click on.
 
         [MenuItem("GameObject/UI/Button", false, 2030)]
@@ -197,7 +197,7 @@ namespace UnityEditor.UI
         {
             GameObject go = DefaultControls.CreatePanel(GetStandardResources());
             PlaceUIElementRoot(go, menuCommand);
-            
+
             // Panel is special, we need to ensure there's no padding after repositioning.
             RectTransform rect = go.GetComponent<RectTransform>();
             rect.anchoredPosition = Vector2.zero;

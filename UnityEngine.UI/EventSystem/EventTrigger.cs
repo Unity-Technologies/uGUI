@@ -28,7 +28,7 @@ namespace UnityEngine.EventSystems
     {
         [Serializable]
         public class TriggerEvent : UnityEvent<BaseEventData>
-        { }
+        {}
 
         [Serializable]
         public class Entry
@@ -41,11 +41,11 @@ namespace UnityEngine.EventSystems
         [SerializeField]
         private List<Entry> m_Delegates;
 
-        [Obsolete("Please use triggers instead (UnityUpgradable) -> triggers",true)]
+        [Obsolete("Please use triggers instead (UnityUpgradable) -> triggers", true)]
         public List<Entry> delegates;
 
         protected EventTrigger()
-        { }
+        {}
 
         public List<Entry> triggers
         {

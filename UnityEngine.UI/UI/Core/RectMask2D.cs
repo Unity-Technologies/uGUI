@@ -4,7 +4,6 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
-
     [AddComponentMenu("UI/2D Rect Mask", 13)]
     [ExecuteInEditMode]
     [DisallowMultipleComponent]
@@ -30,7 +29,7 @@ namespace UnityEngine.UI
         private Rect m_LastClipRectCanvasSpace;
         [NonSerialized]
         private bool m_LastClipRectValid;
-        
+
         public Rect canvasRect
         {
             get
@@ -52,7 +51,7 @@ namespace UnityEngine.UI
         }
 
         protected RectMask2D()
-        { }
+        {}
 
         protected override void OnEnable()
         {
@@ -86,13 +85,14 @@ namespace UnityEngine.UI
 
             MaskUtilities.Notify2DMaskStateChanged(this);
         }
+
 #endif
 
         public virtual bool IsRaycastLocationValid(Vector2 sp, Camera eventCamera)
         {
             if (!isActiveAndEnabled)
                 return true;
-            
+
             return RectTransformUtility.RectangleContainsScreenPoint(rectTransform, sp, eventCamera);
         }
 
@@ -113,7 +113,6 @@ namespace UnityEngine.UI
             Rect clipRect = Clipping.FindCullAndClipWorldRect(m_Clippers, out validRect);
             if (clipRect != m_LastClipRectCanvasSpace)
             {
-
                 for (int i = 0; i < m_ClipTargets.Count; ++i)
                     m_ClipTargets[i].SetClipRect(clipRect, validRect);
 

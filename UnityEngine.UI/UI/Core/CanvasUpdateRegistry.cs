@@ -70,7 +70,7 @@ namespace UnityEngine.UI
             // this won't forward the == operator to the MB, but just check if the
             // interface is null. IsDestroyed will return if the backend is destroyed.
 
-            for (int i = m_LayoutRebuildQueue.Count-1; i >= 0; --i)
+            for (int i = m_LayoutRebuildQueue.Count - 1; i >= 0; --i)
             {
                 var item = m_LayoutRebuildQueue[i];
                 if (item == null)
@@ -86,7 +86,7 @@ namespace UnityEngine.UI
                 }
             }
 
-            for (int i = m_GraphicRebuildQueue.Count-1; i >= 0; --i)
+            for (int i = m_GraphicRebuildQueue.Count - 1; i >= 0; --i)
             {
                 var item = m_GraphicRebuildQueue[i];
                 if (item == null)
@@ -154,7 +154,7 @@ namespace UnityEngine.UI
                     }
                 }
             }
-            
+
             for (int i = 0; i < m_GraphicRebuildQueue.Count; ++i)
                 m_GraphicRebuildQueue[i].LayoutComplete();
 
@@ -203,7 +203,7 @@ namespace UnityEngine.UI
             m_LayoutRebuildQueue.Add(element);
             return true;
         }
- 
+
         public static void RegisterCanvasElementForGraphicRebuild(ICanvasElement element)
         {
             instance.InternalRegisterCanvasElementForGraphicRebuild(element);

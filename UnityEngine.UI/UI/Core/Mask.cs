@@ -5,7 +5,6 @@ using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
-
     [AddComponentMenu("UI/Mask", 13)]
     [ExecuteInEditMode]
     [RequireComponent(typeof(RectTransform))]
@@ -50,13 +49,13 @@ namespace UnityEngine.UI
         private Material m_UnmaskMaterial;
 
         protected Mask()
-        { }
+        {}
 
         [Obsolete("use Mask.enabled instead", true)]
         public virtual bool MaskEnabled() { throw new NotSupportedException(); }
 
         [Obsolete("Not used anymore.")]
-        public virtual void OnSiblingGraphicEnabledDisabled() { }
+        public virtual void OnSiblingGraphicEnabledDisabled() {}
 
         protected override void OnEnable()
         {
@@ -105,13 +104,14 @@ namespace UnityEngine.UI
 
             MaskUtilities.NotifyStencilStateChanged(this);
         }
+
 #endif
 
         public virtual bool IsRaycastLocationValid(Vector2 sp, Camera eventCamera)
         {
             if (!isActiveAndEnabled)
                 return true;
-            
+
             return RectTransformUtility.RectangleContainsScreenPoint(rectTransform, sp, eventCamera);
         }
 

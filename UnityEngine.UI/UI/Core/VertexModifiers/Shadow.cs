@@ -16,7 +16,7 @@ namespace UnityEngine.UI
         private bool m_UseGraphicAlpha = true;
 
         protected Shadow()
-        { }
+        {}
 
 #if UNITY_EDITOR
         protected override void OnValidate()
