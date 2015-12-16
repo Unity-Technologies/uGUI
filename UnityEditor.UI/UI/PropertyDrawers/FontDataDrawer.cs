@@ -32,7 +32,7 @@ namespace UnityEditor.UI
             {
                 m_EncodingContent = new GUIContent("Rich Text", "Use emoticons and colors");
 
-                // Horizontal Aligment Icons
+                // Horizontal Alignment Icons
                 m_LeftAlignText = EditorGUIUtility.IconContent(@"GUISystem/align_horizontally_left", "Left Align");
                 m_CenterAlignText = EditorGUIUtility.IconContent(@"GUISystem/align_horizontally_center", "Center Align");
                 m_RightAlignText = EditorGUIUtility.IconContent(@"GUISystem/align_horizontally_right", "Right Align");
@@ -40,7 +40,7 @@ namespace UnityEditor.UI
                 m_CenterAlignTextActive = EditorGUIUtility.IconContent(@"GUISystem/align_horizontally_center_active", "Center Align");
                 m_RightAlignTextActive = EditorGUIUtility.IconContent(@"GUISystem/align_horizontally_right_active", "Right Align");
 
-                // Vertical Aligment Icons
+                // Vertical Alignment Icons
                 m_TopAlignText = EditorGUIUtility.IconContent(@"GUISystem/align_vertically_top", "Top Align");
                 m_MiddleAlignText = EditorGUIUtility.IconContent(@"GUISystem/align_vertically_center", "Middle Align");
                 m_BottomAlignText = EditorGUIUtility.IconContent(@"GUISystem/align_vertically_bottom", "Bottom Align");
@@ -90,6 +90,7 @@ namespace UnityEditor.UI
         private SerializedProperty m_HorizontalOverflow;
         private SerializedProperty m_VerticalOverflow;
         private SerializedProperty m_Alignment;
+        private SerializedProperty m_AlignByGeometry;
 
         private float m_FontFieldfHeight = 0f;
         private float m_FontStyleHeight = 0f;
@@ -101,6 +102,7 @@ namespace UnityEditor.UI
         private float m_ResizeTextMaxSizeHeight = 0f;
         private float m_HorizontalOverflowHeight = 0f;
         private float m_VerticalOverflowHeight = 0f;
+        private float m_AlignByGeometryHeight = 0f;
 
         protected void Init(SerializedProperty property)
         {
@@ -115,6 +117,7 @@ namespace UnityEditor.UI
             m_HorizontalOverflow = property.FindPropertyRelative("m_HorizontalOverflow");
             m_VerticalOverflow = property.FindPropertyRelative("m_VerticalOverflow");
             m_Alignment = property.FindPropertyRelative("m_Alignment");
+            m_AlignByGeometry = property.FindPropertyRelative("m_AlignByGeometry");
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
@@ -130,6 +133,7 @@ namespace UnityEditor.UI
             m_ResizeTextMaxSizeHeight = EditorGUI.GetPropertyHeight(m_ResizeTextMaxSize);
             m_HorizontalOverflowHeight = EditorGUI.GetPropertyHeight(m_HorizontalOverflow);
             m_VerticalOverflowHeight = EditorGUI.GetPropertyHeight(m_VerticalOverflow);
+            m_AlignByGeometryHeight = EditorGUI.GetPropertyHeight(m_AlignByGeometry);
 
             var height = m_FontFieldfHeight
                 + m_FontStyleHeight
@@ -140,7 +144,8 @@ namespace UnityEditor.UI
                 + m_HorizontalOverflowHeight
                 + m_VerticalOverflowHeight
                 + EditorGUIUtility.singleLineHeight * 3
-                + EditorGUIUtility.standardVerticalSpacing * 10;
+                + EditorGUIUtility.standardVerticalSpacing * 10
+                + m_AlignByGeometryHeight;
 
             if (m_ResizeTextForBestFit.boolValue)
             {
@@ -204,6 +209,10 @@ namespace UnityEditor.UI
 
                 rect.y += rect.height + EditorGUIUtility.standardVerticalSpacing;
                 rect.height = m_HorizontalOverflowHeight;
+                EditorGUI.PropertyField(rect, m_AlignByGeometry);
+
+                rect.y += rect.height + EditorGUIUtility.standardVerticalSpacing;
+                rect.height = m_HorizontalOverflowHeight;
                 EditorGUI.PropertyField(rect, m_HorizontalOverflow);
 
                 rect.y += rect.height + EditorGUIUtility.standardVerticalSpacing;
@@ -256,7 +265,7 @@ namespace UnityEditor.UI
         private static void DoHorizontalAligmentControl(Rect position, SerializedProperty alignment)
         {
             TextAnchor ta = (TextAnchor)alignment.intValue;
-            HorizontalTextAligment horizontalAlignment = GetHorizontalAlgiment(ta);
+            HorizontalTextAligment horizontalAlignment = GetHorizontalAlignment(ta);
 
             bool leftAlign = (horizontalAlignment == HorizontalTextAligment.Left);
             bool centerAlign = (horizontalAlignment == HorizontalTextAligment.Center);
@@ -267,7 +276,7 @@ namespace UnityEditor.UI
                 foreach (var obj in alignment.serializedObject.targetObjects)
                 {
                     Text text = obj as Text;
-                    horizontalAlignment = GetHorizontalAlgiment(text.alignment);
+                    horizontalAlignment = GetHorizontalAlignment(text.alignment);
                     leftAlign = leftAlign || (horizontalAlignment == HorizontalTextAligment.Left);
                     centerAlign = centerAlign || (horizontalAlignment == HorizontalTextAligment.Center);
                     rightAlign = rightAlign || (horizontalAlignment == HorizontalTextAligment.Right);
@@ -303,7 +312,7 @@ namespace UnityEditor.UI
         private static void DoVerticalAligmentControl(Rect position, SerializedProperty alignment)
         {
             TextAnchor ta = (TextAnchor)alignment.intValue;
-            VerticalTextAligment verticalTextAligment = GetVerticalAlgiment(ta);
+            VerticalTextAligment verticalTextAligment = GetVerticalAlignment(ta);
 
             bool topAlign = (verticalTextAligment == VerticalTextAligment.Top);
             bool middleAlign = (verticalTextAligment == VerticalTextAligment.Middle);
@@ -315,7 +324,7 @@ namespace UnityEditor.UI
                 {
                     Text text = obj as Text;
                     TextAnchor textAlignment = text.alignment;
-                    verticalTextAligment = GetVerticalAlgiment(textAlignment);
+                    verticalTextAligment = GetVerticalAlignment(textAlignment);
                     topAlign = topAlign || (verticalTextAligment == VerticalTextAligment.Top);
                     middleAlign = middleAlign || (verticalTextAligment == VerticalTextAligment.Middle);
                     bottomAlign = bottomAlign || (verticalTextAligment == VerticalTextAligment.Bottom);
@@ -376,7 +385,7 @@ namespace UnityEditor.UI
             return returnValue;
         }
 
-        private static HorizontalTextAligment GetHorizontalAlgiment(TextAnchor ta)
+        private static HorizontalTextAligment GetHorizontalAlignment(TextAnchor ta)
         {
             switch (ta)
             {
@@ -399,7 +408,7 @@ namespace UnityEditor.UI
             return HorizontalTextAligment.Left;
         }
 
-        private static VerticalTextAligment GetVerticalAlgiment(TextAnchor ta)
+        private static VerticalTextAligment GetVerticalAlignment(TextAnchor ta)
         {
             switch (ta)
             {
@@ -422,13 +431,13 @@ namespace UnityEditor.UI
             return VerticalTextAligment.Top;
         }
 
-        // We can't go through serialzied properties here since we're showing two controls for a single SerializzedProperty.
+        // We can't go through serialized properties here since we're showing two controls for a single SerializzedProperty.
         private static void SetHorizontalAlignment(SerializedProperty alignment, HorizontalTextAligment horizontalAlignment)
         {
             foreach (var obj in alignment.serializedObject.targetObjects)
             {
                 Text text = obj as Text;
-                VerticalTextAligment currentVerticalAligment = GetVerticalAlgiment(text.alignment);
+                VerticalTextAligment currentVerticalAligment = GetVerticalAlignment(text.alignment);
                 Undo.RecordObject(text, "Horizontal Alignment");
                 text.alignment = GetAnchor(currentVerticalAligment, horizontalAlignment);
                 EditorUtility.SetDirty(obj);
@@ -440,7 +449,7 @@ namespace UnityEditor.UI
             foreach (var obj in alignment.serializedObject.targetObjects)
             {
                 Text text = obj as Text;
-                HorizontalTextAligment currentHorizontalAligment = GetHorizontalAlgiment(text.alignment);
+                HorizontalTextAligment currentHorizontalAligment = GetHorizontalAlignment(text.alignment);
                 Undo.RecordObject(text, "Vertical Alignment");
                 text.alignment = GetAnchor(verticalAlignment, currentHorizontalAligment);
                 EditorUtility.SetDirty(obj);

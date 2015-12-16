@@ -109,14 +109,22 @@ namespace UnityEngine.UI
 
             newEnt.customMat.name = string.Format("Stencil Id:{0}, Op:{1}, Comp:{2}, WriteMask:{3}, ReadMask:{4}, ColorMask:{5} AlphaClip:{6} ({7})", stencilID, operation, compareFunction, writeMask, readMask, colorWriteMask, newEnt.useAlphaClip, baseMat.name);
 
-
             newEnt.customMat.SetInt("_Stencil", stencilID);
             newEnt.customMat.SetInt("_StencilOp", (int)operation);
             newEnt.customMat.SetInt("_StencilComp", (int)compareFunction);
             newEnt.customMat.SetInt("_StencilReadMask", readMask);
             newEnt.customMat.SetInt("_StencilWriteMask", writeMask);
             newEnt.customMat.SetInt("_ColorMask", (int)colorWriteMask);
-            newEnt.customMat.SetInt("_UseAlphaClip", newEnt.useAlphaClip ? 1 : 0);
+
+            // left for backwards compatability
+            if (newEnt.customMat.HasProperty("_UseAlphaClip"))
+                newEnt.customMat.SetInt("_UseAlphaClip", newEnt.useAlphaClip ? 1 : 0);
+
+            if (newEnt.useAlphaClip)
+                newEnt.customMat.EnableKeyword("UNITY_UI_ALPHACLIP");
+            else
+                newEnt.customMat.DisableKeyword("UNITY_UI_ALPHACLIP");
+
             m_List.Add(newEnt);
             return newEnt.customMat;
         }

@@ -25,11 +25,19 @@ namespace UnityEngine.UI.Collections
 
         public void Add(T item)
         {
+            m_List.Add(item);
+            m_Dictionary.Add(item, m_List.Count - 1);
+        }
+
+        public bool AddUnique(T item)
+        {
             if (m_Dictionary.ContainsKey(item))
-                return;
+                return false;
 
             m_List.Add(item);
             m_Dictionary.Add(item, m_List.Count - 1);
+
+            return true;
         }
 
         public bool Remove(T item)

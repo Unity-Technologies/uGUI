@@ -21,7 +21,6 @@ namespace UnityEditor.EventSystems
             if (GUILayout.Button("Add Default Input Modules"))
             {
                 Undo.AddComponent<StandaloneInputModule>(eventSystem.gameObject);
-                Undo.AddComponent<TouchInputModule>(eventSystem.gameObject);
             }
         }
 

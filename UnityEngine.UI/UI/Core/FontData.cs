@@ -36,6 +36,9 @@ namespace UnityEngine.UI
         private TextAnchor m_Alignment;
 
         [SerializeField]
+        private bool m_AlignByGeometry;
+
+        [SerializeField]
         [FormerlySerializedAs("richText")]
         private bool m_RichText;
 
@@ -63,7 +66,8 @@ namespace UnityEngine.UI
                     m_Alignment = TextAnchor.UpperLeft,
                     m_HorizontalOverflow = HorizontalWrapMode.Wrap,
                     m_VerticalOverflow = VerticalWrapMode.Truncate,
-                    m_RichText  = true
+                    m_RichText  = true,
+                    m_AlignByGeometry = false
                 };
                 return fontData;
             }
@@ -111,6 +115,12 @@ namespace UnityEngine.UI
             set { m_Alignment = value; }
         }
 
+        public bool alignByGeometry
+        {
+            get { return m_AlignByGeometry; }
+            set { m_AlignByGeometry = value; }
+        }
+
         public bool richText
         {
             get { return m_RichText; }
@@ -141,9 +151,8 @@ namespace UnityEngine.UI
         void ISerializationCallbackReceiver.OnAfterDeserialize()
         {
             m_FontSize = Mathf.Clamp(m_FontSize, 0, 300);
-
-            m_MinSize = Mathf.Clamp(m_MinSize, 0, 300);
-            m_MaxSize = Mathf.Clamp(m_MaxSize, 0, 300);
+            m_MinSize = Mathf.Clamp(m_MinSize, 0, m_FontSize);
+            m_MaxSize = Mathf.Clamp(m_MaxSize, m_FontSize, 300);
         }
     }
 }

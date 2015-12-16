@@ -6,7 +6,7 @@ namespace UnityEngine.UI
 {
     public static class GraphicRebuildTracker
     {
-        static IList<Graphic> m_Tracked = new IndexedSet<Graphic>();
+        static IndexedSet<Graphic> m_Tracked = new IndexedSet<Graphic>();
         static bool s_Initialized;
 
         public static void TrackGraphic(Graphic g)
@@ -17,7 +17,7 @@ namespace UnityEngine.UI
                 s_Initialized = true;
             }
 
-            m_Tracked.Add(g);
+            m_Tracked.AddUnique(g);
         }
 
         public static void UnTrackGraphic(Graphic g)

@@ -229,6 +229,22 @@ namespace UnityEngine.UI
             }
         }
 
+        public bool alignByGeometry
+        {
+            get
+            {
+                return m_FontData.alignByGeometry;
+            }
+            set
+            {
+                if (m_FontData.alignByGeometry == value)
+                    return;
+                m_FontData.alignByGeometry = value;
+
+                SetVerticesDirty();
+            }
+        }
+
         public int fontSize
         {
             get
@@ -378,6 +394,7 @@ namespace UnityEngine.UI
 
             // Other settings
             settings.textAnchor = m_FontData.alignment;
+            settings.alignByGeometry = m_FontData.alignByGeometry;
             settings.scaleFactor = pixelsPerUnit;
             settings.color = color;
             settings.font = font;
@@ -431,8 +448,8 @@ namespace UnityEngine.UI
             // get the text alignment anchor point for the text in local space
             Vector2 textAnchorPivot = GetTextAnchorPivot(m_FontData.alignment);
             Vector2 refPoint = Vector2.zero;
-            refPoint.x = (textAnchorPivot.x == 1 ? inputRect.xMax : inputRect.xMin);
-            refPoint.y = (textAnchorPivot.y == 0 ? inputRect.yMin : inputRect.yMax);
+            refPoint.x = Mathf.Lerp(inputRect.xMin, inputRect.xMax, textAnchorPivot.x);
+            refPoint.y = Mathf.Lerp(inputRect.yMin, inputRect.yMax, textAnchorPivot.y);
 
             // Determine fraction of pixel to offset text mesh.
             Vector2 roundingOffset = PixelAdjustPoint(refPoint) - refPoint;

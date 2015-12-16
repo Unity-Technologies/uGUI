@@ -15,6 +15,8 @@ namespace UnityEngine.UI
         [SerializeField]
         private bool m_UseGraphicAlpha = true;
 
+        private const float kMaxEffectDistance = 600f;
+
         protected Shadow()
         {}
 
@@ -43,15 +45,15 @@ namespace UnityEngine.UI
             get { return m_EffectDistance; }
             set
             {
-                if (value.x > 600)
-                    value.x = 600;
-                if (value.x < -600)
-                    value.x = -600;
+                if (value.x > kMaxEffectDistance)
+                    value.x = kMaxEffectDistance;
+                if (value.x < -kMaxEffectDistance)
+                    value.x = -kMaxEffectDistance;
 
-                if (value.y > 600)
-                    value.y = 600;
-                if (value.y < -600)
-                    value.y = -600;
+                if (value.y > kMaxEffectDistance)
+                    value.y = kMaxEffectDistance;
+                if (value.y < -kMaxEffectDistance)
+                    value.y = -kMaxEffectDistance;
 
                 if (m_EffectDistance == value)
                     return;

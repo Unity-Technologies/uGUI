@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace UnityEngine.EventSystems
@@ -7,14 +8,15 @@ namespace UnityEngine.EventSystems
     public class StandaloneInputModule : PointerInputModule
     {
         private float m_PrevActionTime;
-        Vector2 m_LastMoveVector;
-        int m_ConsecutiveMoveCount = 0;
+        private Vector2 m_LastMoveVector;
+        private int m_ConsecutiveMoveCount = 0;
 
         private Vector2 m_LastMousePosition;
         private Vector2 m_MousePosition;
 
         protected StandaloneInputModule()
-        {}
+        {
+        }
 
         [Obsolete("Mode is no longer needed on input module as it handles both mouse and keyboard simultaneously.", false)]
         public enum InputMode
@@ -123,10 +125,7 @@ namespace UnityEngine.EventSystems
 
         public override bool IsModuleSupported()
         {
-            // Check for mouse presence instead of whether touch is supported,
-            // as you can connect mouse to a tablet and in that case we'd want
-            // to use StandaloneInputModule for non-touch input events.
-            return m_ForceModuleActive || Input.mousePresent;
+            return m_ForceModuleActive || Input.mousePresent || Input.touchSupported;
         }
 
         public override bool ShouldActivateModule()
@@ -141,6 +140,16 @@ namespace UnityEngine.EventSystems
             shouldActivate |= !Mathf.Approximately(Input.GetAxisRaw(m_VerticalAxis), 0.0f);
             shouldActivate |= (m_MousePosition - m_LastMousePosition).sqrMagnitude > 0.0f;
             shouldActivate |= Input.GetMouseButtonDown(0);
+
+
+            for (int i = 0; i < Input.touchCount; ++i)
+            {
+                Touch input = Input.GetTouch(i);
+
+                shouldActivate |= input.phase == TouchPhase.Began
+                    || input.phase == TouchPhase.Moved
+                    || input.phase == TouchPhase.Stationary;
+            }
             return shouldActivate;
         }
 
@@ -176,7 +185,137 @@ namespace UnityEngine.EventSystems
                     SendSubmitEventToSelectedObject();
             }
 
-            ProcessMouseEvent();
+            // touch needs to take precedence because of the mouse emulation layer
+            if (!ProcessTouchEvents())
+                ProcessMouseEvent();
+        }
+
+        private bool ProcessTouchEvents()
+        {
+            for (int i = 0; i < Input.touchCount; ++i)
+            {
+                Touch input = Input.GetTouch(i);
+
+                bool released;
+                bool pressed;
+                var pointer = GetTouchPointerEventData(input, out pressed, out released);
+
+                ProcessTouchPress(pointer, pressed, released);
+
+                if (!released)
+                {
+                    ProcessMove(pointer);
+                    ProcessDrag(pointer);
+                }
+                else
+                    RemovePointerData(pointer);
+            }
+            return Input.touchCount > 0;
+        }
+
+        private void ProcessTouchPress(PointerEventData pointerEvent, bool pressed, bool released)
+        {
+            var currentOverGo = pointerEvent.pointerCurrentRaycast.gameObject;
+
+            // PointerDown notification
+            if (pressed)
+            {
+                pointerEvent.eligibleForClick = true;
+                pointerEvent.delta = Vector2.zero;
+                pointerEvent.dragging = false;
+                pointerEvent.useDragThreshold = true;
+                pointerEvent.pressPosition = pointerEvent.position;
+                pointerEvent.pointerPressRaycast = pointerEvent.pointerCurrentRaycast;
+
+                DeselectIfSelectionChanged(currentOverGo, pointerEvent);
+
+                if (pointerEvent.pointerEnter != currentOverGo)
+                {
+                    // send a pointer enter to the touched element if it isn't the one to select...
+                    HandlePointerExitAndEnter(pointerEvent, currentOverGo);
+                    pointerEvent.pointerEnter = currentOverGo;
+                }
+
+                // search for the control that will receive the press
+                // if we can't find a press handler set the press
+                // handler to be what would receive a click.
+                var newPressed = ExecuteEvents.ExecuteHierarchy(currentOverGo, pointerEvent, ExecuteEvents.pointerDownHandler);
+
+                // didnt find a press handler... search for a click handler
+                if (newPressed == null)
+                    newPressed = ExecuteEvents.GetEventHandler<IPointerClickHandler>(currentOverGo);
+
+                // Debug.Log("Pressed: " + newPressed);
+
+                float time = Time.unscaledTime;
+
+                if (newPressed == pointerEvent.lastPress)
+                {
+                    var diffTime = time - pointerEvent.clickTime;
+                    if (diffTime < 0.3f)
+                        ++pointerEvent.clickCount;
+                    else
+                        pointerEvent.clickCount = 1;
+
+                    pointerEvent.clickTime = time;
+                }
+                else
+                {
+                    pointerEvent.clickCount = 1;
+                }
+
+                pointerEvent.pointerPress = newPressed;
+                pointerEvent.rawPointerPress = currentOverGo;
+
+                pointerEvent.clickTime = time;
+
+                // Save the drag handler as well
+                pointerEvent.pointerDrag = ExecuteEvents.GetEventHandler<IDragHandler>(currentOverGo);
+
+                if (pointerEvent.pointerDrag != null)
+                    ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.initializePotentialDrag);
+            }
+
+            // PointerUp notification
+            if (released)
+            {
+                // Debug.Log("Executing pressup on: " + pointer.pointerPress);
+                ExecuteEvents.Execute(pointerEvent.pointerPress, pointerEvent, ExecuteEvents.pointerUpHandler);
+
+                // Debug.Log("KeyCode: " + pointer.eventData.keyCode);
+
+                // see if we mouse up on the same element that we clicked on...
+                var pointerUpHandler = ExecuteEvents.GetEventHandler<IPointerClickHandler>(currentOverGo);
+
+                // PointerClick and Drop events
+                if (pointerEvent.pointerPress == pointerUpHandler && pointerEvent.eligibleForClick)
+                {
+                    ExecuteEvents.Execute(pointerEvent.pointerPress, pointerEvent, ExecuteEvents.pointerClickHandler);
+                }
+                else if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
+                {
+                    ExecuteEvents.ExecuteHierarchy(currentOverGo, pointerEvent, ExecuteEvents.dropHandler);
+                }
+
+                pointerEvent.eligibleForClick = false;
+                pointerEvent.pointerPress = null;
+                pointerEvent.rawPointerPress = null;
+
+                if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
+                    ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.endDragHandler);
+
+                pointerEvent.dragging = false;
+                pointerEvent.pointerDrag = null;
+
+                if (pointerEvent.pointerDrag != null)
+                    ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.endDragHandler);
+
+                pointerEvent.pointerDrag = null;
+
+                // send exit events as we need to simulate this on touch up on touch device
+                ExecuteEvents.ExecuteHierarchy(pointerEvent.pointerEnter, pointerEvent, ExecuteEvents.pointerExitHandler);
+                pointerEvent.pointerEnter = null;
+            }
         }
 
         /// <summary>

@@ -176,9 +176,7 @@ namespace UnityEngine.UI
         private DrivenRectTransformTracker m_Tracker;
 
         protected ScrollRect()
-        {
-            flexibleWidth = -1;
-        }
+        {}
 
         public virtual void Rebuild(CanvasUpdate executing)
         {
@@ -573,7 +571,7 @@ namespace UnityEngine.UI
 
         public virtual float minWidth { get { return -1; } }
         public virtual float preferredWidth { get { return -1; } }
-        public virtual float flexibleWidth { get; private set; }
+        public virtual float flexibleWidth { get { return -1; } }
 
         public virtual float minHeight { get { return -1; } }
         public virtual float preferredHeight { get { return -1; } }

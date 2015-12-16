@@ -82,7 +82,17 @@ namespace UnityEngine.UI
             // Convert to view space
             Vector2 pos;
             if (eventCamera == null)
-                pos = new Vector2(eventData.position.x / Screen.width, eventData.position.y / Screen.height);
+            {
+                int displayIndex = canvas.targetDisplay;
+                float w = Screen.width;
+                float h = Screen.height;
+                if (Screen.fullScreen && displayIndex < Display.displays.Length)
+                {
+                    w = Display.displays[displayIndex].systemWidth;
+                    h = Display.displays[displayIndex].systemHeight;
+                }
+                pos = new Vector2(eventData.position.x / w, eventData.position.y / h);
+            }
             else
                 pos = eventCamera.ScreenToViewportPoint(eventData.position);
 

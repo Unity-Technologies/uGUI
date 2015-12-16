@@ -13,7 +13,7 @@ namespace UnityEditor.Events
         protected class ComponentInterceptedEvents
         {
             public GUIContent componentName;
-            public GUIContent[] interceptedEvents;
+            public int[] interceptedEvents;
         }
 
         class Styles
@@ -45,24 +45,27 @@ namespace UnityEditor.Events
             }
         }
 
-        private Dictionary<GameObject, ComponentInterceptedEvents[]> m_TargetEvents;
+        private Dictionary<GameObject, List<ComponentInterceptedEvents>> m_TargetEvents;
         private bool m_InterceptsAnyEvent = false;
         private GUIContent m_Title;
         private Styles m_Styles = new Styles();
 
         public override void Initialize(UnityEngine.Object[] targets)
         {
+            Profiler.BeginSample("ComponentInterceptedEvents.Initialize");
+
             base.Initialize(targets);
-            m_TargetEvents = new Dictionary<GameObject, ComponentInterceptedEvents[]>(targets.Count());
+            m_TargetEvents = new Dictionary<GameObject, List<ComponentInterceptedEvents>>(targets.Count());
             m_InterceptsAnyEvent = false;
-            foreach (var t in targets)
+            for (int i = 0; i < targets.Length; ++i)
             {
-                GameObject go = t as GameObject;
-                ComponentInterceptedEvents[] interceptedEvents = GetEventsInfo(go);
+                GameObject go = targets[i] as GameObject;
+                List<ComponentInterceptedEvents> interceptedEvents = GetEventsInfo(go);
                 m_TargetEvents.Add(go, interceptedEvents);
                 if (interceptedEvents.Any())
                     m_InterceptsAnyEvent = true;
             }
+            Profiler.EndSample();
         }
 
         public override GUIContent GetPreviewTitle()
@@ -83,6 +86,8 @@ namespace UnityEditor.Events
         {
             if (Event.current.type != EventType.Repaint)
                 return;
+            Profiler.BeginSample("InterceptedEventsPreview.OnPreviewGUI");
+
 
             if (m_Styles == null)
                 m_Styles = new Styles();
@@ -90,13 +95,14 @@ namespace UnityEditor.Events
             Vector2 maxEventLabelSize = Vector2.zero;
             int totalInterceptedEvents = 0;
 
-            ComponentInterceptedEvents[] componentIncerceptedEvents = m_TargetEvents[target as GameObject];
+            List<ComponentInterceptedEvents> componentIncerceptedEvents = m_TargetEvents[target as GameObject];
 
             // Find out the maximum size needed for any given label.
             foreach (ComponentInterceptedEvents componentInterceptedEvents in componentIncerceptedEvents)
             {
-                foreach (GUIContent eventContent in componentInterceptedEvents.interceptedEvents)
+                foreach (int eventIndex in componentInterceptedEvents.interceptedEvents)
                 {
+                    GUIContent eventContent = s_PossibleEvents[eventIndex];
                     ++totalInterceptedEvents;
                     Vector2 labelSize = m_Styles.labelStyle.CalcSize(eventContent);
                     if (maxEventLabelSize.x < labelSize.x)
@@ -116,7 +122,7 @@ namespace UnityEditor.Events
 
             // Figure out how many rows and columns we can/should have
             int columns = Mathf.Max(Mathf.FloorToInt(r.width / maxEventLabelSize.x), 1);
-            int rows = Mathf.Max(totalInterceptedEvents / columns, 1) + componentIncerceptedEvents.Length;
+            int rows = Mathf.Max(totalInterceptedEvents / columns, 1) + componentIncerceptedEvents.Count;
 
             // Centering
             float initialX = r.x + Mathf.Max(0, (r.width - (maxEventLabelSize.x * columns)) / 2);
@@ -129,8 +135,9 @@ namespace UnityEditor.Events
                 GUI.Label(labelRect, componentInterceptedEvents.componentName, m_Styles.componentName);
                 labelRect.y += labelRect.height;
                 labelRect.x = initialX;
-                foreach (GUIContent eventContent in componentInterceptedEvents.interceptedEvents)
+                foreach (int eventIndex in componentInterceptedEvents.interceptedEvents)
                 {
+                    GUIContent eventContent = s_PossibleEvents[eventIndex];
                     GUI.Label(labelRect, eventContent, m_Styles.labelStyle);
                     if (currentColumn < columns - 1)
                     {
@@ -151,67 +158,116 @@ namespace UnityEditor.Events
                     labelRect.x = initialX;
                 }
             }
+            Profiler.EndSample();
         }
 
-        protected static ComponentInterceptedEvents[] GetEventsInfo(GameObject gameObject)
+        //Lookup cache to avoid recalculating which types uses which events:
+        //Caches all interfaces that inherit from IEventSystemHandler
+        static List<Type> s_EventSystemInterfaces = null;
+        //Caches all GUIContents in a single list to avoid creating too much GUIContent and strings.
+        private static List<GUIContent> s_PossibleEvents = null;
+        //Caches all events used by each interface
+        static Dictionary<Type, List<int>> s_InterfaceEventSystemEvents = null;
+        //Caches each concrete type and it's events
+        static readonly Dictionary<Type, ComponentInterceptedEvents> s_ComponentEvents2 = new Dictionary<Type, ComponentInterceptedEvents>();
+
+
+        protected static List<ComponentInterceptedEvents> GetEventsInfo(GameObject gameObject)
         {
-            // TODO: could this becached somewhere?
-            List<Type> interfaces = new List<Type>();
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                Type[] types = assembly.GetTypes();
-                foreach (var type in types)
-                {
-                    if (!type.IsInterface)
-                        continue;
-
-                    if (!typeof(IEventSystemHandler).IsAssignableFrom(type))
-                        continue;
-
-                    interfaces.Add(type);
-                }
-            }
+            InitializeEvetnsInterfaceCacheIfNeeded();
 
             List<ComponentInterceptedEvents> componentEvents = new List<ComponentInterceptedEvents>();
-            List<GUIContent> events = new List<GUIContent>();
+
             MonoBehaviour[] mbs = gameObject.GetComponents<MonoBehaviour>();
 
             for (int i = 0, imax = mbs.Length; i < imax; ++i)
             {
+                ComponentInterceptedEvents componentEvent = null;
+
                 MonoBehaviour mb = mbs[i];
                 if (mb == null)
                     continue;
 
                 Type type = mb.GetType();
 
-
-                if (typeof(IEventSystemHandler).IsAssignableFrom(type))
+                if (!s_ComponentEvents2.ContainsKey(type))
                 {
-                    foreach (var eventInterface in interfaces)
+                    List<int> events = null;
+                    Profiler.BeginSample("ComponentInterceptedEvents.GetEventsInfo.NewType");
+                    if (typeof(IEventSystemHandler).IsAssignableFrom(type))
                     {
-                        if (!eventInterface.IsAssignableFrom(type))
-                            continue;
-
-                        MethodInfo[] methodInfos = eventInterface.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                        foreach (MethodInfo methodInfo in methodInfos)
+                        for (int index = 0; index < s_EventSystemInterfaces.Count; index++)
                         {
-                            events.Add(new GUIContent(methodInfo.Name));
+                            var eventInterface = s_EventSystemInterfaces[index];
+                            if (!eventInterface.IsAssignableFrom(type))
+                                continue;
+
+                            if (events == null)
+                                events = new List<int>();
+
+                            events.AddRange(s_InterfaceEventSystemEvents[eventInterface]);
                         }
                     }
+
+                    if (events != null)
+                    {
+                        componentEvent = new ComponentInterceptedEvents();
+                        componentEvent.componentName = new GUIContent(type.Name);
+                        componentEvent.interceptedEvents = events.OrderBy(index => s_PossibleEvents[index].text).ToArray();
+                    }
+                    s_ComponentEvents2.Add(type, componentEvent);
+
+                    Profiler.EndSample();
+                }
+                else
+                {
+                    componentEvent = s_ComponentEvents2[type];
                 }
 
-                if (events.Count > 0)
-                {
-                    ComponentInterceptedEvents componentEvent = new ComponentInterceptedEvents();
-                    componentEvent.componentName = new GUIContent(type.Name);
-                    componentEvent.interceptedEvents = events.OrderBy(e => e.text).ToArray();
-                    componentEvents.Add(componentEvent);
 
-                    events.Clear();
+                if (componentEvent != null)
+                {
+                    componentEvents.Add(componentEvent);
                 }
             }
 
-            return componentEvents.ToArray();
+            return componentEvents;
+        }
+
+        private static void InitializeEvetnsInterfaceCacheIfNeeded()
+        {
+            if (s_EventSystemInterfaces != null)
+                return;
+
+            s_EventSystemInterfaces = new List<Type>();
+            s_PossibleEvents = new List<GUIContent>();
+            s_InterfaceEventSystemEvents = new Dictionary<Type, List<int>>();
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            for (int i = 0; i < assemblies.Length; ++i)
+            {
+                Type[] types = assemblies[i].GetTypes();
+                for (int ti = 0; ti < types.Length; ++ti)
+                {
+                    var type = types[ti];
+                    if (!type.IsInterface)
+                        continue;
+
+                    if (!typeof(IEventSystemHandler).IsAssignableFrom(type))
+                        continue;
+
+                    s_EventSystemInterfaces.Add(type);
+                    List<int> eventIndexList = new List<int>();
+
+                    MethodInfo[] methodInfos = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                    for (int mi = 0; mi < methodInfos.Length; mi++)
+                    {
+                        MethodInfo methodInfo = methodInfos[mi];
+                        eventIndexList.Add(s_PossibleEvents.Count);
+                        s_PossibleEvents.Add(new GUIContent(methodInfo.Name));
+                    }
+                    s_InterfaceEventSystemEvents.Add(type, eventIndexList);
+                }
+            }
         }
     }
 }

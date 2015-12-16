@@ -11,7 +11,7 @@ namespace UnityEngine.UI
         private List<Vector2> m_Uv1S = ListPool<Vector2>.Get();
         private List<Vector3> m_Normals = ListPool<Vector3>.Get();
         private List<Vector4> m_Tangents = ListPool<Vector4>.Get();
-        private List<int> m_Indicies = ListPool<int>.Get();
+        private List<int> m_Indices = ListPool<int>.Get();
 
         private static readonly Vector4 s_DefaultTangent = new Vector4(1.0f, 0.0f, 0.0f, -1.0f);
         private static readonly Vector3 s_DefaultNormal = Vector3.back;
@@ -27,7 +27,7 @@ namespace UnityEngine.UI
             m_Uv1S.AddRange(m.uv2);
             m_Normals.AddRange(m.normals);
             m_Tangents.AddRange(m.tangents);
-            m_Indicies.AddRange(m.GetIndices(0));
+            m_Indices.AddRange(m.GetIndices(0));
         }
 
         public void Clear()
@@ -38,7 +38,7 @@ namespace UnityEngine.UI
             m_Uv1S.Clear();
             m_Normals.Clear();
             m_Tangents.Clear();
-            m_Indicies.Clear();
+            m_Indices.Clear();
         }
 
         public int currentVertCount
@@ -47,7 +47,7 @@ namespace UnityEngine.UI
         }
         public int currentIndexCount
         {
-            get { return m_Indicies.Count; }
+            get { return m_Indices.Count; }
         }
 
         public void PopulateUIVertex(ref UIVertex vertex, int i)
@@ -75,7 +75,7 @@ namespace UnityEngine.UI
             mesh.Clear();
 
             if (m_Positions.Count >= 65000)
-                throw new ArgumentException("Mesh can not have more than 65000 verticies");
+                throw new ArgumentException("Mesh can not have more than 65000 vertices");
 
             mesh.SetVertices(m_Positions);
             mesh.SetColors(m_Colors);
@@ -83,7 +83,7 @@ namespace UnityEngine.UI
             mesh.SetUVs(1, m_Uv1S);
             mesh.SetNormals(m_Normals);
             mesh.SetTangents(m_Tangents);
-            mesh.SetTriangles(m_Indicies, 0);
+            mesh.SetTriangles(m_Indices, 0);
             mesh.RecalculateBounds();
         }
 
@@ -95,7 +95,7 @@ namespace UnityEngine.UI
             ListPool<Vector2>.Release(m_Uv1S);
             ListPool<Vector3>.Release(m_Normals);
             ListPool<Vector4>.Release(m_Tangents);
-            ListPool<int>.Release(m_Indicies);
+            ListPool<int>.Release(m_Indices);
 
             m_Positions = null;
             m_Colors = null;
@@ -103,7 +103,7 @@ namespace UnityEngine.UI
             m_Uv1S = null;
             m_Normals = null;
             m_Tangents = null;
-            m_Indicies = null;
+            m_Indices = null;
         }
 
         public void AddVert(Vector3 position, Color32 color, Vector2 uv0, Vector2 uv1, Vector3 normal, Vector4 tangent)
@@ -128,9 +128,9 @@ namespace UnityEngine.UI
 
         public void AddTriangle(int idx0, int idx1, int idx2)
         {
-            m_Indicies.Add(idx0);
-            m_Indicies.Add(idx1);
-            m_Indicies.Add(idx2);
+            m_Indices.Add(idx0);
+            m_Indices.Add(idx1);
+            m_Indices.Add(idx2);
         }
 
         public void AddUIVertexQuad(UIVertex[] verts)
@@ -144,27 +144,27 @@ namespace UnityEngine.UI
             AddTriangle(startIndex + 2, startIndex + 3, startIndex);
         }
 
-        public void AddUIVertexStream(List<UIVertex> verts, List<int> indicies)
+        public void AddUIVertexStream(List<UIVertex> verts, List<int> indices)
         {
             if (verts != null)
             {
                 CanvasRenderer.AddUIVertexStream(verts, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Normals, m_Tangents);
             }
 
-            if (indicies != null)
+            if (indices != null)
             {
-                m_Indicies.AddRange(indicies);
+                m_Indices.AddRange(indices);
             }
         }
 
         public void AddUIVertexTriangleStream(List<UIVertex> verts)
         {
-            CanvasRenderer.SplitUIVertexStreams(verts, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Normals, m_Tangents, m_Indicies);
+            CanvasRenderer.SplitUIVertexStreams(verts, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Normals, m_Tangents, m_Indices);
         }
 
         public void GetUIVertexStream(List<UIVertex> stream)
         {
-            CanvasRenderer.CreateUIVertexStream(stream, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Normals, m_Tangents, m_Indicies);
+            CanvasRenderer.CreateUIVertexStream(stream, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Normals, m_Tangents, m_Indices);
         }
     }
 }

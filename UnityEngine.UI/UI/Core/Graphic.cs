@@ -180,7 +180,19 @@ namespace UnityEngine.UI
             var list = ListPool<Canvas>.Get();
             gameObject.GetComponentsInParent(false, list);
             if (list.Count > 0)
-                m_Canvas = list[0];
+            {
+                // Find the first active and enabled canvas.
+                for (int i = 0; i < list.Count; ++i)
+                {
+                    if (list[i].isActiveAndEnabled)
+                    {
+                        m_Canvas = list[i];
+                        break;
+                    }
+                }
+            }
+            else
+                m_Canvas = null;
             ListPool<Canvas>.Release(list);
         }
 

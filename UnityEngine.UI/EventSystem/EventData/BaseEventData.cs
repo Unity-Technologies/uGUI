@@ -1,30 +1,31 @@
-using System;
-
 namespace UnityEngine.EventSystems
 {
-    public class BaseEventData
+    public abstract class AbstractEventData
     {
-        private readonly EventSystem m_EventSystem;
-        private bool m_Used;
+        protected bool m_Used;
 
-        public BaseEventData(EventSystem eventSystem)
-        {
-            m_EventSystem = eventSystem;
-        }
-
-        public void Reset()
+        public virtual void Reset()
         {
             m_Used = false;
         }
 
-        public void Use()
+        public virtual void Use()
         {
             m_Used = true;
         }
 
-        public bool used
+        public virtual bool used
         {
             get { return m_Used; }
+        }
+    }
+
+    public class BaseEventData : AbstractEventData
+    {
+        private readonly EventSystem m_EventSystem;
+        public BaseEventData(EventSystem eventSystem)
+        {
+            m_EventSystem = eventSystem;
         }
 
         public BaseInputModule currentInputModule

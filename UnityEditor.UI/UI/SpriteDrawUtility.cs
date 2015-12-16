@@ -112,8 +112,8 @@ namespace UnityEditor.UI
         {
             // Create the texture rectangle that is centered inside rect.
             Rect outerRect = drawArea;
-            outerRect.width = outer.width;
-            outerRect.height = outer.height;
+            outerRect.width = Mathf.Abs(outer.width);
+            outerRect.height = Mathf.Abs(outer.height);
 
             if (outerRect.width > 0f)
             {

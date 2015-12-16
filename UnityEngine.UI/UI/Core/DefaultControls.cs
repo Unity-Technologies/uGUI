@@ -417,7 +417,6 @@ namespace UnityEngine.UI
 
             Text labelText = label.AddComponent<Text>();
             SetDefaultTextValues(labelText);
-            labelText.text = "Option A";
             labelText.alignment = TextAnchor.MiddleLeft;
 
             Image arrowImage = arrow.AddComponent<Image>();
@@ -440,6 +439,7 @@ namespace UnityEngine.UI
             dropdown.options.Add(new Dropdown.OptionData {text = "Option A"});
             dropdown.options.Add(new Dropdown.OptionData {text = "Option B"});
             dropdown.options.Add(new Dropdown.OptionData {text = "Option C"});
+            dropdown.RefreshShownValue();
 
             // Set up RectTransforms.
 

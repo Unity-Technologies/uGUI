@@ -4,6 +4,7 @@ using UnityEngine.Serialization;
 
 namespace UnityEngine.EventSystems
 {
+    [Obsolete("TouchInputModule is no longer required as Touch input is now handled in StandaloneInputModule.")]
     [AddComponentMenu("Event/Touch Input Module")]
     public class TouchInputModule : PointerInputModule
     {

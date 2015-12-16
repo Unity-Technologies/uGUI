@@ -31,7 +31,22 @@ namespace UnityEngine.UI
 
         [Tooltip("The resolution the UI layout is designed for. If the screen resolution is larger, the UI will be scaled up, and if it's smaller, the UI will be scaled down. This is done in accordance with the Screen Match Mode.")]
         [SerializeField] protected Vector2 m_ReferenceResolution = new Vector2(800, 600);
-        public Vector2 referenceResolution { get { return m_ReferenceResolution; } set { m_ReferenceResolution = value; } }
+        public Vector2 referenceResolution
+        {
+            get
+            {
+                return m_ReferenceResolution;
+            }
+            set
+            {
+                m_ReferenceResolution = value;
+
+                const float k_MinimumResolution = 0.00001f;
+
+                if (m_ReferenceResolution.x > -k_MinimumResolution && m_ReferenceResolution.x < k_MinimumResolution) m_ReferenceResolution.x = k_MinimumResolution * Mathf.Sign(m_ReferenceResolution.x);
+                if (m_ReferenceResolution.y > -k_MinimumResolution && m_ReferenceResolution.y < k_MinimumResolution) m_ReferenceResolution.y = k_MinimumResolution * Mathf.Sign(m_ReferenceResolution.y);
+            }
+        }
 
         [Tooltip("A mode used to scale the canvas area if the aspect ratio of the current resolution doesn't fit the reference resolution.")]
         [SerializeField] protected ScreenMatchMode m_ScreenMatchMode = ScreenMatchMode.MatchWidthOrHeight;
@@ -134,6 +149,12 @@ namespace UnityEngine.UI
         protected virtual void HandleScaleWithScreenSize()
         {
             Vector2 screenSize = new Vector2(Screen.width, Screen.height);
+
+            if (Screen.fullScreen && m_Canvas.targetDisplay < Display.displays.Length)
+            {
+                Display disp = Display.displays[m_Canvas.targetDisplay];
+                screenSize = new Vector2(disp.renderingWidth, disp.renderingHeight);
+            }
 
             float scaleFactor = 0;
             switch (m_ScreenMatchMode)

@@ -37,7 +37,6 @@ namespace UnityEditor.UI
 
             switch (navMode)
             {
-                case Navigation.Mode.None: return;
                 case Navigation.Mode.Explicit:
                 {
                     SerializedProperty selectOnUp = prop.FindPropertyRelative("m_SelectOnUp");

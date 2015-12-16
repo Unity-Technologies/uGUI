@@ -25,6 +25,7 @@ namespace UnityEditor.UI
             public GUIContent matchContent;
             public GUIContent widthContent;
             public GUIContent heightContent;
+            public GUIContent uiScaleModeContent;
             public GUIStyle leftAlignedLabel;
             public GUIStyle rightAlignedLabel;
 
@@ -33,6 +34,7 @@ namespace UnityEditor.UI
                 matchContent = new GUIContent("Match");
                 widthContent = new GUIContent("Width");
                 heightContent = new GUIContent("Height");
+                uiScaleModeContent = new GUIContent("UI Scale Mode");
 
                 leftAlignedLabel = new GUIStyle(EditorStyles.label);
                 rightAlignedLabel = new GUIStyle(EditorStyles.label);
@@ -91,11 +93,11 @@ namespace UnityEditor.UI
             EditorGUI.BeginDisabledGroup(showWorld || showWorldDiffers);
             if (showWorld || showWorldDiffers)
             {
-                EditorGUILayout.Popup(m_UiScaleMode.displayName, 0, new string[] { "World" });
+                EditorGUILayout.Popup(s_Styles.uiScaleModeContent.text, 0, new[] { "World" });
             }
             else
             {
-                EditorGUILayout.PropertyField(m_UiScaleMode);
+                EditorGUILayout.PropertyField(m_UiScaleMode, s_Styles.uiScaleModeContent);
             }
             EditorGUI.EndDisabledGroup();
             EditorGUI.showMixedValue = false;

@@ -141,45 +141,47 @@ namespace UnityEngine.UI
             if (rect == null)
                 return;
 
+            var comps = ListPool<Component>.Get();
             RectTransform layoutRoot = rect;
             while (true)
             {
                 var parent = layoutRoot.parent as RectTransform;
-                if (!ValidLayoutGroup(parent))
+                if (!ValidLayoutGroup(parent, comps))
                     break;
                 layoutRoot = parent;
             }
 
             // We know the layout root is valid if it's not the same as the rect,
             // since we checked that above. But if they're the same we still need to check.
-            if (layoutRoot == rect && !ValidController(layoutRoot))
+            if (layoutRoot == rect && !ValidController(layoutRoot, comps))
+            {
+                ListPool<Component>.Release(comps);
                 return;
+            }
 
             MarkLayoutRootForRebuild(layoutRoot);
+            ListPool<Component>.Release(comps);
         }
 
-        private static bool ValidLayoutGroup(RectTransform parent)
+        private static bool ValidLayoutGroup(RectTransform parent, List<Component> comps)
         {
             if (parent == null)
                 return false;
-            var comps = ListPool<Component>.Get();
+
             parent.GetComponents(typeof(ILayoutGroup), comps);
             StripDisabledBehavioursFromList(comps);
             var validCount = comps.Count > 0;
-            ListPool<Component>.Release(comps);
             return validCount;
         }
 
-        private static bool ValidController(RectTransform layoutRoot)
+        private static bool ValidController(RectTransform layoutRoot, List<Component> comps)
         {
             if (layoutRoot == null)
                 return false;
 
-            var comps = ListPool<Component>.Get();
             layoutRoot.GetComponents(typeof(ILayoutController), comps);
             StripDisabledBehavioursFromList(comps);
             var valid =  comps.Count > 0;
-            ListPool<Component>.Release(comps);
             return valid;
         }
 

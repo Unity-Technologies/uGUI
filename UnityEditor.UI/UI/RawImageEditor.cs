@@ -48,6 +48,16 @@ namespace UnityEditor.UI
             base.SetShowNativeSize(m_Texture.objectReferenceValue != null, instant);
         }
 
+        private static Rect Outer(RawImage rawImage)
+        {
+            Rect outer = rawImage.uvRect;
+            outer.xMin *= rawImage.rectTransform.rect.width;
+            outer.xMax *= rawImage.rectTransform.rect.width;
+            outer.yMin *= rawImage.rectTransform.rect.height;
+            outer.yMax *= rawImage.rectTransform.rect.height;
+            return outer;
+        }
+
         /// <summary>
         /// Allow the texture to be previewed.
         /// </summary>
@@ -55,7 +65,11 @@ namespace UnityEditor.UI
         public override bool HasPreviewGUI()
         {
             RawImage rawImage = target as RawImage;
-            return rawImage != null;
+            if (rawImage == null)
+                return false;
+
+            var outer = Outer(rawImage);
+            return outer.width > 0 && outer.height > 0;
         }
 
         /// <summary>
@@ -70,12 +84,7 @@ namespace UnityEditor.UI
             if (tex == null)
                 return;
 
-            Rect outer = rawImage.uvRect;
-            outer.xMin *= rawImage.rectTransform.rect.width;
-            outer.xMax *= rawImage.rectTransform.rect.width;
-            outer.yMin *= rawImage.rectTransform.rect.height;
-            outer.yMax *= rawImage.rectTransform.rect.height;
-
+            var outer = Outer(rawImage);
             SpriteDrawUtility.DrawSprite(tex, rect, outer, rawImage.uvRect, rawImage.canvasRenderer.GetColor());
         }
 

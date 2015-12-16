@@ -200,8 +200,13 @@ namespace UnityEngine.UI
             if (m_LayoutRebuildQueue.Contains(element))
                 return false;
 
-            m_LayoutRebuildQueue.Add(element);
-            return true;
+            if (m_PerformingLayoutUpdate)
+            {
+                Debug.LogError(string.Format("Trying to add {0} for layout rebuild while we are already inside a layout rebuild loop. This is not supported.", element));
+                return false;
+            }
+
+            return m_LayoutRebuildQueue.AddUnique(element);
         }
 
         public static void RegisterCanvasElementForGraphicRebuild(ICanvasElement element)
@@ -222,11 +227,7 @@ namespace UnityEngine.UI
                 return false;
             }
 
-            if (m_GraphicRebuildQueue.Contains(element))
-                return false;
-
-            m_GraphicRebuildQueue.Add(element);
-            return true;
+            return m_GraphicRebuildQueue.AddUnique(element);
         }
 
         public static void UnRegisterCanvasElementForRebuild(ICanvasElement element)

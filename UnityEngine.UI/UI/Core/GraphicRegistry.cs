@@ -38,10 +38,11 @@ namespace UnityEngine.UI
 
             if (graphics != null)
             {
-                graphics.Add(graphic);
+                graphics.AddUnique(graphic);
                 return;
             }
 
+            // Dont need to AddUnique as we know its the only item in the list
             graphics = new IndexedSet<Graphic>();
             graphics.Add(graphic);
             instance.m_Graphics.Add(c, graphics);

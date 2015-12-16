@@ -92,26 +92,26 @@ namespace UnityEngine.UI
         // Template used to create the dropdown.
         [SerializeField]
         private RectTransform m_Template;
-        public RectTransform template { get { return m_Template; } set { m_Template = value; Refresh(); } }
+        public RectTransform template { get { return m_Template; } set { m_Template = value; RefreshShownValue(); } }
 
         // Text to be used as a caption for the current value. It's not required, but it's kept here for convenience.
         [SerializeField]
         private Text m_CaptionText;
-        public Text captionText { get { return m_CaptionText; } set { m_CaptionText = value; Refresh(); } }
+        public Text captionText { get { return m_CaptionText; } set { m_CaptionText = value; RefreshShownValue(); } }
 
         [SerializeField]
         private Image m_CaptionImage;
-        public Image captionImage { get { return m_CaptionImage; } set { m_CaptionImage = value; Refresh(); } }
+        public Image captionImage { get { return m_CaptionImage; } set { m_CaptionImage = value; RefreshShownValue(); } }
 
         [Space]
 
         [SerializeField]
         private Text m_ItemText;
-        public Text itemText { get { return m_ItemText; } set { m_ItemText = value; Refresh(); } }
+        public Text itemText { get { return m_ItemText; } set { m_ItemText = value; RefreshShownValue(); } }
 
         [SerializeField]
         private Image m_ItemImage;
-        public Image itemImage { get { return m_ItemImage; } set { m_ItemImage = value; Refresh(); } }
+        public Image itemImage { get { return m_ItemImage; } set { m_ItemImage = value; RefreshShownValue(); } }
 
         [Space]
 
@@ -127,7 +127,7 @@ namespace UnityEngine.UI
         public List<OptionData> options
         {
             get { return m_Options.options; }
-            set { m_Options.options = value; Refresh(); }
+            set { m_Options.options = value; RefreshShownValue(); }
         }
 
         [Space]
@@ -143,6 +143,8 @@ namespace UnityEngine.UI
         private TweenRunner<FloatTween> m_AlphaTweenRunner;
         private bool validTemplate = false;
 
+        private static OptionData s_NoOptionData = new OptionData();
+
         // Current value.
         public int value
         {
@@ -156,7 +158,7 @@ namespace UnityEngine.UI
                     return;
 
                 m_Value = Mathf.Clamp(value, 0, options.Count - 1);
-                Refresh();
+                RefreshShownValue();
 
                 // Notify all listeners
                 m_OnValueChanged.Invoke(m_Value);
@@ -191,17 +193,17 @@ namespace UnityEngine.UI
             if (!IsActive())
                 return;
 
-            Refresh();
+            RefreshShownValue();
         }
 
         #endif
 
-        void Refresh()
+        public void RefreshShownValue()
         {
-            if (options.Count == 0)
-                return;
+            OptionData data = s_NoOptionData;
 
-            OptionData data = options[Mathf.Clamp(m_Value, 0, options.Count - 1)];
+            if (options.Count > 0)
+                data = options[Mathf.Clamp(m_Value, 0, options.Count - 1)];
 
             if (m_CaptionText)
             {
@@ -219,6 +221,32 @@ namespace UnityEngine.UI
                     m_CaptionImage.sprite = null;
                 m_CaptionImage.enabled = (m_CaptionImage.sprite != null);
             }
+        }
+
+        public void AddOptions(List<OptionData> options)
+        {
+            this.options.AddRange(options);
+            RefreshShownValue();
+        }
+
+        public void AddOptions(List<string> options)
+        {
+            for (int i = 0; i < options.Count; i++)
+                this.options.Add(new OptionData(options[i]));
+            RefreshShownValue();
+        }
+
+        public void AddOptions(List<Sprite> options)
+        {
+            for (int i = 0; i < options.Count; i++)
+                this.options.Add(new OptionData(options[i]));
+            RefreshShownValue();
+        }
+
+        public void ClearOptions()
+        {
+            options.Clear();
+            RefreshShownValue();
         }
 
         private void SetupTemplate()
@@ -411,21 +439,23 @@ namespace UnityEngine.UI
             // but it works as inversion regardless of initial setup.
             Vector3[] corners = new Vector3[4];
             dropdownRectTransform.GetWorldCorners(corners);
-            bool outside = false;
+
             RectTransform rootCanvasRectTransform = rootCanvas.transform as RectTransform;
-            for (int i = 0; i < 4; i++)
+            Rect rootCanvasRect = rootCanvasRectTransform.rect;
+            for (int axis = 0; axis < 2; axis++)
             {
-                Vector3 corner = rootCanvasRectTransform.InverseTransformPoint(corners[i]);
-                if (!rootCanvasRectTransform.rect.Contains(corner))
+                bool outside = false;
+                for (int i = 0; i < 4; i++)
                 {
-                    outside = true;
-                    break;
+                    Vector3 corner = rootCanvasRectTransform.InverseTransformPoint(corners[i]);
+                    if (corner[axis] < rootCanvasRect.min[axis] || corner[axis] > rootCanvasRect.max[axis])
+                    {
+                        outside = true;
+                        break;
+                    }
                 }
-            }
-            if (outside)
-            {
-                RectTransformUtility.FlipLayoutOnAxis(dropdownRectTransform, 0, false, false);
-                RectTransformUtility.FlipLayoutOnAxis(dropdownRectTransform, 1, false, false);
+                if (outside)
+                    RectTransformUtility.FlipLayoutOnAxis(dropdownRectTransform, axis, false, false);
             }
 
             for (int i = 0; i < m_Items.Count; i++)

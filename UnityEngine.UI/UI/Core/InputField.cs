@@ -23,6 +23,7 @@ namespace UnityEngine.UI
         ISubmitHandler,
         ICanvasElement
     {
+        // Setting the content type acts as a shortcut for setting a combination of InputType, CharacterValidation, LineType, and TouchScreenKeyboardType
         public enum ContentType
         {
             Standard,
@@ -138,15 +139,17 @@ namespace UnityEngine.UI
         /// </summary>
         [FormerlySerializedAs("onSubmit")]
         [FormerlySerializedAs("m_OnSubmit")]
+        [FormerlySerializedAs("m_EndEdit")]
         [SerializeField]
-        private SubmitEvent m_EndEdit = new SubmitEvent();
+        private SubmitEvent m_OnEndEdit = new SubmitEvent();
 
         /// <summary>
         /// Event delegates triggered when the input field changes its data.
         /// </summary>
         [FormerlySerializedAs("onValueChange")]
+        [FormerlySerializedAs("m_OnValueChange")]
         [SerializeField]
-        private OnChangeEvent m_OnValueChange = new OnChangeEvent();
+        private OnChangeEvent m_OnValueChanged = new OnChangeEvent();
 
         /// <summary>
         /// Custom validation callback.
@@ -154,6 +157,12 @@ namespace UnityEngine.UI
         [FormerlySerializedAs("onValidateInput")]
         [SerializeField]
         private OnValidateInput m_OnValidateInput;
+
+        [SerializeField]
+        private Color m_CaretColor = new Color(50f / 255f, 50f / 255f, 50f / 255f, 1f);
+
+        [SerializeField]
+        private bool m_CustomCaretColor = false;
 
         [FormerlySerializedAs("selectionColor")]
         [SerializeField]
@@ -170,6 +179,13 @@ namespace UnityEngine.UI
         [SerializeField]
         [Range(0f, 4f)]
         private float m_CaretBlinkRate = 0.85f;
+
+        [SerializeField]
+        [Range(1, 5)]
+        private int m_CaretWidth = 1;
+
+        [SerializeField]
+        private bool m_ReadOnly = false;
 
         #endregion
 
@@ -309,19 +325,28 @@ namespace UnityEngine.UI
             }
         }
 
+        public int caretWidth { get { return m_CaretWidth; } set { if (SetPropertyUtility.SetStruct(ref m_CaretWidth, value)) MarkGeometryAsDirty(); } }
+
         public Text textComponent { get { return m_TextComponent; } set { SetPropertyUtility.SetClass(ref m_TextComponent, value); } }
 
         public Graphic placeholder { get { return m_Placeholder; } set { SetPropertyUtility.SetClass(ref m_Placeholder, value); } }
 
-        public Color selectionColor { get { return m_SelectionColor; } set { SetPropertyUtility.SetColor(ref m_SelectionColor, value); } }
+        public Color caretColor { get { return customCaretColor ? m_CaretColor : textComponent.color; } set { if (SetPropertyUtility.SetColor(ref m_CaretColor, value)) MarkGeometryAsDirty(); } }
 
-        public SubmitEvent onEndEdit { get { return m_EndEdit; } set { SetPropertyUtility.SetClass(ref m_EndEdit, value); } }
+        public bool customCaretColor { get { return m_CustomCaretColor; } set { if (m_CustomCaretColor != value) { m_CustomCaretColor = value; MarkGeometryAsDirty(); } } }
 
-        public OnChangeEvent onValueChange { get { return m_OnValueChange; } set { SetPropertyUtility.SetClass(ref m_OnValueChange, value); } }
+        public Color selectionColor { get { return m_SelectionColor; } set { if (SetPropertyUtility.SetColor(ref m_SelectionColor, value)) MarkGeometryAsDirty(); } }
+
+        public SubmitEvent onEndEdit { get { return m_OnEndEdit; } set { SetPropertyUtility.SetClass(ref m_OnEndEdit, value); } }
+
+        [Obsolete("onValueChange has been renamed to onValueChanged")]
+        public OnChangeEvent onValueChange { get { return onValueChanged; } set { onValueChanged = value; } }
+
+        public OnChangeEvent onValueChanged { get { return m_OnValueChanged; } set { SetPropertyUtility.SetClass(ref m_OnValueChanged, value); } }
 
         public OnValidateInput onValidateInput { get { return m_OnValidateInput; } set { SetPropertyUtility.SetClass(ref m_OnValidateInput, value); } }
 
-        public int characterLimit { get { return m_CharacterLimit; } set { SetPropertyUtility.SetStruct(ref m_CharacterLimit, value); } }
+        public int characterLimit { get { return m_CharacterLimit; } set { if (SetPropertyUtility.SetStruct(ref m_CharacterLimit, Math.Max(0, value))) UpdateLabel(); } }
 
         // Content Type related
 
@@ -335,10 +360,12 @@ namespace UnityEngine.UI
 
         public CharacterValidation characterValidation { get { return m_CharacterValidation; } set { if (SetPropertyUtility.SetStruct(ref m_CharacterValidation, value)) SetToCustom(); } }
 
+        public bool readOnly { get { return m_ReadOnly; } set { m_ReadOnly = value; } }
+
         // Derived property
         public bool multiLine { get { return m_LineType == LineType.MultiLineNewline || lineType == LineType.MultiLineSubmit; } }
         // Not shown in Inspector.
-        public char asteriskChar { get { return m_AsteriskChar; } set { SetPropertyUtility.SetStruct(ref m_AsteriskChar, value); } }
+        public char asteriskChar { get { return m_AsteriskChar; } set { if (SetPropertyUtility.SetStruct(ref m_AsteriskChar, value)) UpdateLabel(); } }
         public bool wasCanceled { get { return m_WasCanceled; } }
 
         protected void ClampPos(ref int pos)
@@ -416,6 +443,8 @@ namespace UnityEngine.UI
             base.OnValidate();
             EnforceContentType();
 
+            m_CharacterLimit = Math.Max(0, m_CharacterLimit);
+
             //This can be invoked before OnEnabled is called. So we shouldn't be accessing other objects, before OnEnable is called.
             if (!IsActive())
                 return;
@@ -434,6 +463,11 @@ namespace UnityEngine.UI
                 m_Text = string.Empty;
             m_DrawStart = 0;
             m_DrawEnd = m_Text.Length;
+
+            // If we have a cached renderer then we had OnDisable called so just restore the material.
+            if (m_CachedInputRenderer != null)
+                m_CachedInputRenderer.SetMaterial(Graphic.defaultGraphicMaterial, Texture2D.whiteTexture);
+
             if (m_TextComponent != null)
             {
                 m_TextComponent.RegisterDirtyVerticesCallback(MarkGeometryAsDirty);
@@ -455,10 +489,11 @@ namespace UnityEngine.UI
             }
             CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
 
-            if (m_CachedInputRenderer)
-                m_CachedInputRenderer.SetMesh(null);
+            // Clear needs to be called otherwise sync never happens as the object is disabled.
+            if (m_CachedInputRenderer != null)
+                m_CachedInputRenderer.Clear();
 
-            if (m_Mesh)
+            if (m_Mesh != null)
                 DestroyImmediate(m_Mesh);
             m_Mesh = null;
 
@@ -481,7 +516,8 @@ namespace UnityEngine.UI
                 if (m_CaretVisible != blinkState)
                 {
                     m_CaretVisible = blinkState;
-                    UpdateGeometry();
+                    if (!hasSelection)
+                        MarkGeometryAsDirty();
                 }
 
                 // Then wait again.
@@ -606,8 +642,14 @@ namespace UnityEngine.UI
 
             if (m_Keyboard == null || !m_Keyboard.active)
             {
-                if (m_Keyboard != null && m_Keyboard.wasCanceled)
-                    m_WasCanceled = true;
+                if (m_Keyboard != null)
+                {
+                    if (!m_ReadOnly)
+                        text = m_Keyboard.text;
+
+                    if (m_Keyboard.wasCanceled)
+                        m_WasCanceled = true;
+                }
 
                 OnDeselect(null);
                 return;
@@ -617,43 +659,51 @@ namespace UnityEngine.UI
 
             if (m_Text != val)
             {
-                m_Text = "";
-
-                for (int i = 0; i < val.Length; ++i)
+                if (m_ReadOnly)
                 {
-                    char c = val[i];
+                    m_Keyboard.text = m_Text;
+                }
+                else
+                {
+                    m_Text = "";
 
-                    if (c == '\r' || (int)c == 3)
-                        c = '\n';
-
-                    if (onValidateInput != null)
-                        c = onValidateInput(m_Text, m_Text.Length, c);
-                    else if (characterValidation != CharacterValidation.None)
-                        c = Validate(m_Text, m_Text.Length, c);
-
-                    if (lineType == LineType.MultiLineSubmit && c == '\n')
+                    for (int i = 0; i < val.Length; ++i)
                     {
-                        m_Keyboard.text = m_Text;
+                        char c = val[i];
 
-                        OnDeselect(null);
-                        return;
+                        if (c == '\r' || (int)c == 3)
+                            c = '\n';
+
+                        if (onValidateInput != null)
+                            c = onValidateInput(m_Text, m_Text.Length, c);
+                        else if (characterValidation != CharacterValidation.None)
+                            c = Validate(m_Text, m_Text.Length, c);
+
+                        if (lineType == LineType.MultiLineSubmit && c == '\n')
+                        {
+                            m_Keyboard.text = m_Text;
+
+                            OnDeselect(null);
+                            return;
+                        }
+
+                        if (c != 0)
+                            m_Text += c;
                     }
 
-                    if (c != 0)
-                        m_Text += c;
+                    if (characterLimit > 0 && m_Text.Length > characterLimit)
+                        m_Text = m_Text.Substring(0, characterLimit);
+                    caretPositionInternal = caretSelectPositionInternal = m_Text.Length;
+
+                    // Set keyboard text before updating label, as we might have changed it with validation
+                    // and update label will take the old value from keyboard if we don't change it here
+                    if (m_Text != val)
+                        m_Keyboard.text = m_Text;
+
+                    SendOnValueChangedAndUpdateLabel();
                 }
-
-                if (characterLimit > 0 && m_Text.Length > characterLimit)
-                    m_Text = m_Text.Substring(0, characterLimit);
-                caretPositionInternal = caretSelectPositionInternal = m_Text.Length;
-
-                // Set keyboard text before updating label, as we might have changed it with validation
-                // and update label will take the old value from keyboard if we don't change it here
-                if (m_Text != val)
-                    m_Keyboard.text = m_Text;
-
-                SendOnValueChangedAndUpdateLabel();
             }
+
 
             if (m_Keyboard.done)
             {
@@ -691,18 +741,30 @@ namespace UnityEngine.UI
             if (!multiLine)
                 return 0;
 
-            float height = m_TextComponent.rectTransform.rect.yMax;
-
-            // Position is above first line.
-            if (pos.y > height)
-                return -1;
+            // transform y to local scale
+            float y = pos.y * m_TextComponent.pixelsPerUnit;
+            float lastBottomY = 0.0f;
 
             for (int i = 0; i < generator.lineCount; ++i)
             {
-                float lineHeight = generator.lines[i].height / m_TextComponent.pixelsPerUnit;
-                if (pos.y <= height && pos.y > (height - lineHeight))
+                float topY = generator.lines[i].topY;
+                float bottomY = topY - generator.lines[i].height;
+
+                // pos is somewhere in the leading above this line
+                if (y > topY)
+                {
+                    // determine which line we're closer to
+                    float leading = topY - lastBottomY;
+                    if (y > topY - 0.5f * leading)
+                        return i - 1;
+                    else
+                        return i;
+                }
+
+                if (y > bottomY)
                     return i;
-                height -= lineHeight;
+
+                lastBottomY = bottomY;
             }
 
             // Position is after last line.
@@ -985,7 +1047,7 @@ namespace UnityEngine.UI
             }
 
             char c = evt.character;
-            // Dont allow return chars or tabulator key to be entered into single line fields.
+            // Don't allow return chars or tabulator key to be entered into single line fields.
             if (!multiLine && (c == '\t' || c == '\r' || c == 10))
                 return EditState.Continue;
 
@@ -1165,9 +1227,6 @@ namespace UnityEngine.UI
 
         private int DetermineCharacterLine(int charPos, TextGenerator generator)
         {
-            if (!multiLine)
-                return 0;
-
             for (int i = 0; i < generator.lineCount - 1; ++i)
             {
                 if (generator.lines[i + 1].startCharIdx > charPos)
@@ -1189,10 +1248,9 @@ namespace UnityEngine.UI
             UICharInfo originChar = cachedInputTextGenerator.characters[originalPos];
             int originLine = DetermineCharacterLine(originalPos, cachedInputTextGenerator);
 
-            // We are on the last line return last character
+            // We are on the first line return first character
             if (originLine - 1 < 0)
                 return goToFirstChar ? 0 : originalPos;
-
 
             int endCharIdx = cachedInputTextGenerator.lines[originLine].startCharIdx - 1;
 
@@ -1277,6 +1335,9 @@ namespace UnityEngine.UI
 
         private void Delete()
         {
+            if (m_ReadOnly)
+                return;
+
             if (caretPositionInternal == caretSelectPositionInternal)
                 return;
 
@@ -1294,6 +1355,9 @@ namespace UnityEngine.UI
 
         private void ForwardSpace()
         {
+            if (m_ReadOnly)
+                return;
+
             if (hasSelection)
             {
                 Delete();
@@ -1311,6 +1375,9 @@ namespace UnityEngine.UI
 
         private void Backspace()
         {
+            if (m_ReadOnly)
+                return;
+
             if (hasSelection)
             {
                 Delete();
@@ -1330,6 +1397,9 @@ namespace UnityEngine.UI
         // Insert the character and update the label.
         private void Insert(char c)
         {
+            if (m_ReadOnly)
+                return;
+
             string replaceString = c.ToString();
             Delete();
 
@@ -1351,8 +1421,8 @@ namespace UnityEngine.UI
 
         private void SendOnValueChanged()
         {
-            if (onValueChange != null)
-                onValueChange.Invoke(text);
+            if (onValueChanged != null)
+                onValueChanged.Invoke(text);
         }
 
         /// <summary>
@@ -1371,6 +1441,9 @@ namespace UnityEngine.UI
 
         protected virtual void Append(string input)
         {
+            if (m_ReadOnly)
+                return;
+
             if (!InPlaceEditing())
                 return;
 
@@ -1378,7 +1451,7 @@ namespace UnityEngine.UI
             {
                 char c = input[i];
 
-                if (c >= ' ')
+                if (c >= ' ' || c == '\t' || c == '\r' || c == 10 || c == '\n')
                 {
                     Append(c);
                 }
@@ -1387,6 +1460,9 @@ namespace UnityEngine.UI
 
         protected virtual void Append(char input)
         {
+            if (m_ReadOnly)
+                return;
+
             if (!InPlaceEditing())
                 return;
 
@@ -1442,7 +1518,7 @@ namespace UnityEngine.UI
                 bool isEmpty = string.IsNullOrEmpty(fullText);
 
                 if (m_Placeholder != null)
-                    m_Placeholder.enabled = isEmpty;
+                    m_Placeholder.enabled = isEmpty && !isFocused;
 
                 // If not currently editing the text, set the visible range to the whole text.
                 // The UpdateLabel method will then truncate it to the part that fits inside the Text area.
@@ -1503,6 +1579,10 @@ namespace UnityEngine.UI
 
         private void SetDrawRangeToContainCaretPosition(int caretPos)
         {
+            // We dont have any generated lines generation is not valid.
+            if (cachedInputTextGenerator.lineCount <= 0)
+                return;
+
             // the extents gets modified by the pixel density, so we need to use the generated extents since that will be in the same 'space' as
             // the values returned by the TextGenerator.lines[x].height for instance.
             Vector2 extents = cachedInputTextGenerator.rectExtents.size;
@@ -1601,6 +1681,11 @@ namespace UnityEngine.UI
                         break;
                 }
             }
+        }
+
+        public void ForceLabelUpdate()
+        {
+            UpdateLabel();
         }
 
         private void MarkGeometryAsDirty()
@@ -1703,10 +1788,11 @@ namespace UnityEngine.UI
                 // get the text alignment anchor point for the text in local space
                 Vector2 textAnchorPivot = Text.GetTextAnchorPivot(m_TextComponent.alignment);
                 Vector2 refPoint = Vector2.zero;
+
                 refPoint.x = Mathf.Lerp(inputRect.xMin, inputRect.xMax, textAnchorPivot.x);
                 refPoint.y = Mathf.Lerp(inputRect.yMin, inputRect.yMax, textAnchorPivot.y);
 
-                // Ajust the anchor point in screen space
+                // Adjust the anchor point in screen space
                 Vector2 roundedRefPoint = m_TextComponent.PixelAdjustPoint(refPoint);
 
                 // Determine fraction of pixel to offset text mesh.
@@ -1716,7 +1802,7 @@ namespace UnityEngine.UI
                 roundingOffset.y = roundingOffset.y - Mathf.Floor(0.5f + roundingOffset.y);
 
                 if (!hasSelection)
-                    GenerateCursor(helper, roundingOffset);
+                    GenerateCaret(helper, roundingOffset);
                 else
                     GenerateHightlight(helper, roundingOffset);
 
@@ -1724,7 +1810,7 @@ namespace UnityEngine.UI
             }
         }
 
-        private void GenerateCursor(VertexHelper vbo, Vector2 roundingOffset)
+        private void GenerateCaret(VertexHelper vbo, Vector2 roundingOffset)
         {
             if (!m_CaretVisible)
                 return;
@@ -1734,16 +1820,15 @@ namespace UnityEngine.UI
                 CreateCursorVerts();
             }
 
-            float width = 1f;
-            float height = m_TextComponent.fontSize;
+            float width = m_CaretWidth;
             int adjustedPos = Mathf.Max(0, caretPositionInternal - m_DrawStart);
             TextGenerator gen = m_TextComponent.cachedTextGenerator;
 
             if (gen == null)
                 return;
 
-            if (m_TextComponent.resizeTextForBestFit)
-                height = gen.fontSizeUsedForBestFit / m_TextComponent.pixelsPerUnit;
+            if (gen.lineCount == 0)
+                return;
 
             Vector2 startPosition = Vector2.zero;
 
@@ -1752,7 +1837,6 @@ namespace UnityEngine.UI
             {
                 UICharInfo cursorChar = gen.characters[adjustedPos];
                 startPosition.x = cursorChar.cursorPos.x;
-                startPosition.y = cursorChar.cursorPos.y;
             }
             startPosition.x /= m_TextComponent.pixelsPerUnit;
 
@@ -1761,8 +1845,11 @@ namespace UnityEngine.UI
                 startPosition.x = m_TextComponent.rectTransform.rect.xMax;
 
             int characterLine = DetermineCharacterLine(adjustedPos, gen);
-            float lineHeights = SumLineHeights(characterLine, gen);
-            startPosition.y = m_TextComponent.rectTransform.rect.yMax - lineHeights / m_TextComponent.pixelsPerUnit;
+            startPosition.y = gen.lines[characterLine].topY / m_TextComponent.pixelsPerUnit;
+            float height = gen.lines[characterLine].height / m_TextComponent.pixelsPerUnit;
+
+            for (int i = 0; i < m_CursorVerts.Length; i++)
+                m_CursorVerts[i].color = caretColor;
 
             m_CursorVerts[0].position = new Vector3(startPosition.x, startPosition.y - height, 0.0f);
             m_CursorVerts[1].position = new Vector3(startPosition.x + width, startPosition.y - height, 0.0f);
@@ -1781,7 +1868,12 @@ namespace UnityEngine.UI
 
             vbo.AddUIVertexQuad(m_CursorVerts);
 
-            startPosition.y = Screen.height - startPosition.y;
+            int screenHeight = Screen.height;
+            int displayIndex = m_TextComponent.canvas.targetDisplay;
+            if (Screen.fullScreen && displayIndex < Display.displays.Length)
+                screenHeight = Display.displays[displayIndex].renderingHeight;
+
+            startPosition.y = screenHeight - startPosition.y;
             Input.compositionCursorPos = startPosition;
         }
 
@@ -1792,20 +1884,8 @@ namespace UnityEngine.UI
             for (int i = 0; i < m_CursorVerts.Length; i++)
             {
                 m_CursorVerts[i] = UIVertex.simpleVert;
-                m_CursorVerts[i].color = m_TextComponent.color;
                 m_CursorVerts[i].uv0 = Vector2.zero;
             }
-        }
-
-        private float SumLineHeights(int endLine, TextGenerator generator)
-        {
-            float height = 0.0f;
-            for (int i = 0; i < endLine; ++i)
-            {
-                height += generator.lines[i].height;
-            }
-
-            return height;
         }
 
         private void GenerateHightlight(VertexHelper vbo, Vector2 roundingOffset)
@@ -1824,22 +1904,10 @@ namespace UnityEngine.UI
             endChar -= 1;
             TextGenerator gen = m_TextComponent.cachedTextGenerator;
 
+            if (gen.lineCount <= 0)
+                return;
+
             int currentLineIndex = DetermineCharacterLine(startChar, gen);
-            float height = m_TextComponent.fontSize;
-
-            if (m_TextComponent.resizeTextForBestFit)
-                height = gen.fontSizeUsedForBestFit / m_TextComponent.pixelsPerUnit;
-
-            if (cachedInputTextGenerator != null && cachedInputTextGenerator.lines.Count > 0)
-            {
-                // TODO: deal with multiple lines with different line heights.
-                height = cachedInputTextGenerator.lines[0].height;
-            }
-
-            if (m_TextComponent.resizeTextForBestFit && cachedInputTextGenerator != null)
-            {
-                height = cachedInputTextGenerator.fontSizeUsedForBestFit;
-            }
 
             int nextLineStartIdx = GetLineEndPosition(gen, currentLineIndex);
 
@@ -1854,11 +1922,10 @@ namespace UnityEngine.UI
                 {
                     UICharInfo startCharInfo = gen.characters[startChar];
                     UICharInfo endCharInfo = gen.characters[currentChar];
-                    float lineHeights = SumLineHeights(currentLineIndex, gen);
-                    Vector2 startPosition = new Vector2(startCharInfo.cursorPos.x / m_TextComponent.pixelsPerUnit, m_TextComponent.rectTransform.rect.yMax - (lineHeights / m_TextComponent.pixelsPerUnit));
-                    Vector2 endPosition = new Vector2((endCharInfo.cursorPos.x + endCharInfo.charWidth) / m_TextComponent.pixelsPerUnit, startPosition.y - height / m_TextComponent.pixelsPerUnit);
+                    Vector2 startPosition = new Vector2(startCharInfo.cursorPos.x / m_TextComponent.pixelsPerUnit, gen.lines[currentLineIndex].topY / m_TextComponent.pixelsPerUnit);
+                    Vector2 endPosition = new Vector2((endCharInfo.cursorPos.x + endCharInfo.charWidth) / m_TextComponent.pixelsPerUnit, startPosition.y - gen.lines[currentLineIndex].height / m_TextComponent.pixelsPerUnit);
 
-                    // Checking xMin as well due to text generator not setting possition if char is not rendered.
+                    // Checking xMin as well due to text generator not setting position if char is not rendered.
                     if (endPosition.x > m_TextComponent.rectTransform.rect.xMax || endPosition.x < m_TextComponent.rectTransform.rect.xMin)
                         endPosition.x = m_TextComponent.rectTransform.rect.xMax;
 
@@ -1901,10 +1968,11 @@ namespace UnityEngine.UI
             {
                 // Integer and decimal
                 bool cursorBeforeDash = (pos == 0 && text.Length > 0 && text[0] == '-');
+                bool selectionAtStart = caretPositionInternal == 0 || caretSelectPositionInternal == 0;
                 if (!cursorBeforeDash)
                 {
                     if (ch >= '0' && ch <= '9') return ch;
-                    if (ch == '-' && pos == 0) return ch;
+                    if (ch == '-' && (pos == 0 || selectionAtStart)) return ch;
                     if (ch == '.' && characterValidation == CharacterValidation.Decimal && !text.Contains(".")) return ch;
                 }
             }
@@ -2004,6 +2072,10 @@ namespace UnityEngine.UI
                 m_Keyboard = (inputType == InputType.Password) ?
                     TouchScreenKeyboard.Open(m_Text, keyboardType, false, multiLine, true) :
                     TouchScreenKeyboard.Open(m_Text, keyboardType, inputType == InputType.AutoCorrect, multiLine);
+
+                // Mimics OnFocus but as mobile doesn't properly support select all
+                // just set it to the end of the text (where it would move when typing starts)
+                MoveTextEnd(false);
             }
             else
             {

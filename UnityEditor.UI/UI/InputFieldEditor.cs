@@ -1,3 +1,4 @@
+using UnityEditor.AnimatedValues;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,11 +17,17 @@ namespace UnityEditor.UI
         SerializedProperty m_KeyboardType;
         SerializedProperty m_CharacterLimit;
         SerializedProperty m_CaretBlinkRate;
+        SerializedProperty m_CaretWidth;
+        SerializedProperty m_CaretColor;
+        SerializedProperty m_CustomCaretColor;
         SerializedProperty m_SelectionColor;
         SerializedProperty m_HideMobileInput;
         SerializedProperty m_Placeholder;
-        SerializedProperty m_OnValueChange;
-        SerializedProperty m_EndEdit;
+        SerializedProperty m_OnValueChanged;
+        SerializedProperty m_OnEndEdit;
+        SerializedProperty m_ReadOnly;
+
+        AnimBool m_CustomColor;
 
         protected override void OnEnable()
         {
@@ -34,11 +41,24 @@ namespace UnityEditor.UI
             m_KeyboardType = serializedObject.FindProperty("m_KeyboardType");
             m_CharacterLimit = serializedObject.FindProperty("m_CharacterLimit");
             m_CaretBlinkRate = serializedObject.FindProperty("m_CaretBlinkRate");
+            m_CaretWidth = serializedObject.FindProperty("m_CaretWidth");
+            m_CaretColor = serializedObject.FindProperty("m_CaretColor");
+            m_CustomCaretColor = serializedObject.FindProperty("m_CustomCaretColor");
             m_SelectionColor = serializedObject.FindProperty("m_SelectionColor");
             m_HideMobileInput = serializedObject.FindProperty("m_HideMobileInput");
             m_Placeholder = serializedObject.FindProperty("m_Placeholder");
-            m_OnValueChange = serializedObject.FindProperty("m_OnValueChange");
-            m_EndEdit = serializedObject.FindProperty("m_EndEdit");
+            m_OnValueChanged = serializedObject.FindProperty("m_OnValueChanged");
+            m_OnEndEdit = serializedObject.FindProperty("m_OnEndEdit");
+            m_ReadOnly = serializedObject.FindProperty("m_ReadOnly");
+
+            m_CustomColor = new AnimBool(m_CustomCaretColor.boolValue);
+            m_CustomColor.valueChanged.AddListener(Repaint);
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            m_CustomColor.valueChanged.RemoveListener(Repaint);
         }
 
         public override void OnInspectorGUI()
@@ -91,13 +111,26 @@ namespace UnityEditor.UI
 
             EditorGUILayout.PropertyField(m_Placeholder);
             EditorGUILayout.PropertyField(m_CaretBlinkRate);
+            EditorGUILayout.PropertyField(m_CaretWidth);
+
+            EditorGUILayout.PropertyField(m_CustomCaretColor);
+
+            m_CustomColor.target = m_CustomCaretColor.boolValue;
+
+            if (EditorGUILayout.BeginFadeGroup(m_CustomColor.faded))
+            {
+                EditorGUILayout.PropertyField(m_CaretColor);
+            }
+            EditorGUILayout.EndFadeGroup();
+
             EditorGUILayout.PropertyField(m_SelectionColor);
             EditorGUILayout.PropertyField(m_HideMobileInput);
+            EditorGUILayout.PropertyField(m_ReadOnly);
 
             EditorGUILayout.Space();
 
-            EditorGUILayout.PropertyField(m_OnValueChange);
-            EditorGUILayout.PropertyField(m_EndEdit);
+            EditorGUILayout.PropertyField(m_OnValueChanged);
+            EditorGUILayout.PropertyField(m_OnEndEdit);
 
             EditorGUI.EndDisabledGroup();
 

@@ -39,7 +39,7 @@ namespace UnityEngine.UI
         {
             if (c == null)
                 return;
-            instance.m_Clippers.Add(c);
+            instance.m_Clippers.AddUnique(c);
         }
 
         public static void Unregister(IClipper c)
