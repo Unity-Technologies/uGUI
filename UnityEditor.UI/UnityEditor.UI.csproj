@@ -34,19 +34,17 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="UnityEditor">
+      <HintPath>..\lib\UnityEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\lib\UnityEngine.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Projects\CSharp\UnityEditor.csproj">
-      <Project>{016c8d73-3641-47fb-8d33-7a015a7ec7db}</Project>
-      <Name>UnityEditor</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Projects\CSharp\UnityEngine.csproj">
-      <Project>{f0499708-3eb6-4026-8362-97e6ffc4e7c8}</Project>
-      <Name>UnityEngine</Name>
-    </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI-Editor\UnityEngine.UI-Editor.csproj">
       <Project>{e62b51aa-17f8-46f9-96ff-9072c6d47b09}</Project>
       <Name>UnityEngine.UI-Editor</Name>

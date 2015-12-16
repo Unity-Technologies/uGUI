@@ -34,16 +34,12 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Projects\CSharp\UnityEditor.csproj">
-      <Project>{016C8D73-3641-47FB-8D33-7A015A7EC7DB}</Project>
-      <Name>UnityEditor</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Projects\CSharp\UnityEngine.csproj">
-      <Project>{F0499708-3EB6-4026-8362-97E6FFC4E7C8}</Project>
-      <Name>UnityEngine</Name>
-    </ProjectReference>
+    <Reference Include="UnityEditor">
+      <HintPath>..\lib\UnityEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\lib\UnityEngine.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
@@ -203,8 +199,6 @@
     </Compile>
     <Compile Include="..\UnityEngine.UI\UI\Core\GraphicRebuildTracker.cs">
       <Link>UI\Core\GraphicRebuildTracker.cs</Link>
-      <SubType>
-      </SubType>
     </Compile>
     <Compile Include="..\UnityEngine.UI\UI\Core\GraphicRegistry.cs">
       <Link>UI\Core\GraphicRegistry.cs</Link>

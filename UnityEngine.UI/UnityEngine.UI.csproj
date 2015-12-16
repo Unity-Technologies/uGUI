@@ -34,6 +34,12 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="UnityEditor">
+      <HintPath>..\lib\UnityEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\lib\UnityEngine.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EventSystem\EventData\AxisEventData.cs">
@@ -278,12 +284,6 @@
     <Compile Include="UI\Core\VertexModifiers\Shadow.cs">
       <SubType>Code</SubType>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Projects\CSharp\UnityEngine.csproj">
-      <Project>{f0499708-3eb6-4026-8362-97e6ffc4e7c8}</Project>
-      <Name>UnityEngine</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
