@@ -17,19 +17,16 @@ namespace UnityEngine.UI
             m_Tracked.TryGetValue(t.font, out exists);
             if (exists == null)
             {
+                // The textureRebuilt event is global for all fonts, so we add our delegate the first time we register *any* Text
+                if (m_Tracked.Count == 0)
+                    Font.textureRebuilt += RebuildForFont;
+
                 exists = new List<Text>();
                 m_Tracked.Add(t.font, exists);
-
-                Font.textureRebuilt += RebuildForFont;
             }
 
-            for (int i = 0; i < exists.Count; i++)
-            {
-                if (exists[i] == t)
-                    return;
-            }
-
-            exists.Add(t);
+            if (!exists.Contains(t))
+                exists.Add(t);
         }
 
         private static void RebuildForFont(Font f)
@@ -60,6 +57,10 @@ namespace UnityEngine.UI
             if (texts.Count == 0)
             {
                 m_Tracked.Remove(t.font);
+
+                // There is a global textureRebuilt event for all fonts, so once the last Text reference goes away, remove our delegate
+                if (m_Tracked.Count == 0)
+                    Font.textureRebuilt -= RebuildForFont;
             }
         }
     }
