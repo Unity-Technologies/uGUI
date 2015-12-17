@@ -32,7 +32,7 @@ If you want to contribute patches back, please keep it under the unmodified MIT 
         * Locate the section: <Target Name="AfterBuild">
         * Follow the instructions in the comments
 
-### Unity is at version X but the repo is only at version Y why isn't it updated already ###
+### Unity is at version X but the repo is only at version Y why isn't it updated already? ###
 
 Unity's release schedule doesn't always happen at convenient times for us to drop everything and update our public repo. We will try to always have the repo updated within a week of a public release but sometimes things happen and more time is needed. Please note that we will NOT be updating the repo for patch releases due to the time it takes to update the repo at this time.
 
