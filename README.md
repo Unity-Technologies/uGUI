@@ -32,5 +32,9 @@ If you want to contribute patches back, please keep it under the unmodified MIT 
         * Locate the section: <Target Name="AfterBuild">
         * Follow the instructions in the comments
 
+### Unity is at version X but the repo is only at version Y why isn't it updated already ###
+
+Unity's release schedule doesn't always happen at convenient times for us to drop everything and update our public repo. We will try to always have the repo updated within a week of a public release but sometimes things happen and more time is needed. Please note that we will NOT be updating the repo for patch releases due to the time it takes to update the repo at this time.
+
 ### Will you be taking pull requests? ###
-At this stage the UI system is undergoing further development internally with many design decisions still being debated and implemented. Also, we are waiting to see the volume of pull requests and the time it will take the process them. As such, we are prioritizing first bug fix pull requests and will iterate on this process going forward.
+At this stage the UI system is undergoing further development internally with many design decisions still being debated and implemented. We will be accepting pull requests when the team has time to process them. Due to the current set up where development actually happens on a internal repo, changes are pushed in a batch when public releases are done. Whether a pull request is accepted or not will be declined locally with a comment of Accepted. This makes for less merge conflicted during the batch pushes as well as ensuring a fix will make it out in the official unity release for everyone.
