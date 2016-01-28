@@ -258,10 +258,19 @@ namespace UnityEngine.UI
                     case RuntimePlatform.BlackBerryPlayer:
                     case RuntimePlatform.IPhonePlayer:
                     case RuntimePlatform.TizenPlayer:
+                    case RuntimePlatform.tvOS:
                         return m_HideMobileInput;
                 }
 
                 return true;
+            }
+        }
+
+        bool shouldActivateOnSelect
+        {
+            get
+            {
+                return Application.platform != RuntimePlatform.tvOS;
             }
         }
 
@@ -2093,7 +2102,9 @@ namespace UnityEngine.UI
         public override void OnSelect(BaseEventData eventData)
         {
             base.OnSelect(eventData);
-            ActivateInputField();
+
+            if (shouldActivateOnSelect)
+                ActivateInputField();
         }
 
         public virtual void OnPointerClick(PointerEventData eventData)

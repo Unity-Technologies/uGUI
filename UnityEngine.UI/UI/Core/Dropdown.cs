@@ -604,7 +604,13 @@ namespace UnityEngine.UI
 
         private IEnumerator DelayedDestroyDropdownList(float delay)
         {
-            yield return new WaitForSeconds(delay);
+            // We can't use WaitForSeconds as it uses scaled time(would not work if timeScale == 0)
+            float waitTime = Time.realtimeSinceStartup + delay;
+            while (Time.realtimeSinceStartup < waitTime)
+            {
+                yield return null;
+            }
+
             for (int i = 0; i < m_Items.Count; i++)
             {
                 if (m_Items[i] != null)

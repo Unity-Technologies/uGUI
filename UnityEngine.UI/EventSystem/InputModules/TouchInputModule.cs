@@ -115,6 +115,9 @@ namespace UnityEngine.EventSystems
             {
                 Touch input = Input.GetTouch(i);
 
+                if (input.type == TouchType.Indirect)
+                    continue;
+
                 bool released;
                 bool pressed;
                 var pointer = GetTouchPointerEventData(input, out pressed, out released);

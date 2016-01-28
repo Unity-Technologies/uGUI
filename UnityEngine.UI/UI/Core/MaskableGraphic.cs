@@ -90,7 +90,7 @@ namespace UnityEngine.UI
             if (!canvasRenderer.hasMoved)
                 return;
 
-            var cull = !validRect || !clipRect.Overlaps(canvasRect);
+            var cull = !validRect || !clipRect.Overlaps(canvasRect, true);
             var cullingChanged = canvasRenderer.cull != cull;
             canvasRenderer.cull = cull;
 
