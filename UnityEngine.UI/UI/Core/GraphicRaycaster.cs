@@ -83,14 +83,15 @@ namespace UnityEngine.UI
             Vector2 pos;
             if (eventCamera == null)
             {
-                int displayIndex = canvas.targetDisplay;
+                // Removed multiple display support until it supports none native resolutions(case 741751)
+                //int displayIndex = canvas.targetDisplay;
                 float w = Screen.width;
                 float h = Screen.height;
-                if (Screen.fullScreen && displayIndex < Display.displays.Length)
-                {
-                    w = Display.displays[displayIndex].systemWidth;
-                    h = Display.displays[displayIndex].systemHeight;
-                }
+                //if (Screen.fullScreen && displayIndex < Display.displays.Length)
+                //{
+                //    w = Display.displays[displayIndex].systemWidth;
+                //    h = Display.displays[displayIndex].systemHeight;
+                //}
                 pos = new Vector2(eventData.position.x / w, eventData.position.y / h);
             }
             else

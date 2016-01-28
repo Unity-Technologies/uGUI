@@ -150,11 +150,12 @@ namespace UnityEngine.UI
         {
             Vector2 screenSize = new Vector2(Screen.width, Screen.height);
 
-            if (Screen.fullScreen && m_Canvas.targetDisplay < Display.displays.Length)
-            {
-                Display disp = Display.displays[m_Canvas.targetDisplay];
-                screenSize = new Vector2(disp.renderingWidth, disp.renderingHeight);
-            }
+            // Removed multiple display support until it supports none native resolutions(case 741751)
+            //if (Screen.fullScreen && m_Canvas.targetDisplay < Display.displays.Length )
+            //{
+            //    Display disp = Display.displays[m_Canvas.targetDisplay];
+            //    screenSize = new Vector2 (disp.renderingWidth, disp.renderingHeight);
+            //}
 
             float scaleFactor = 0;
             switch (m_ScreenMatchMode)

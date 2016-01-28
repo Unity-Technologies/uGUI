@@ -1878,9 +1878,10 @@ namespace UnityEngine.UI
             vbo.AddUIVertexQuad(m_CursorVerts);
 
             int screenHeight = Screen.height;
-            int displayIndex = m_TextComponent.canvas.targetDisplay;
-            if (Screen.fullScreen && displayIndex < Display.displays.Length)
-                screenHeight = Display.displays[displayIndex].renderingHeight;
+            // Removed multiple display support until it supports none native resolutions(case 741751)
+            //int displayIndex = m_TextComponent.canvas.targetDisplay;
+            //if (Screen.fullScreen && displayIndex < Display.displays.Length)
+            //    screenHeight = Display.displays[displayIndex].renderingHeight;
 
             startPosition.y = screenHeight - startPosition.y;
             Input.compositionCursorPos = startPosition;
@@ -2123,6 +2124,9 @@ namespace UnityEngine.UI
 
             m_HasDoneFocusTransition = false;
             m_AllowInput = false;
+
+            if (m_Placeholder != null)
+                m_Placeholder.enabled = string.IsNullOrEmpty(m_Text);
 
             if (m_TextComponent != null && IsInteractable())
             {
