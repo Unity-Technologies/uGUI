@@ -72,13 +72,25 @@ namespace UnityEngine.UI
 
         private SelectionState m_CurrentSelectionState;
 
-        public Navigation        navigation        { get { return m_Navigation; } set { if (SetPropertyUtility.SetStruct(ref m_Navigation, value))        OnSetProperty(); } }
+        public Navigation        navigation        { get { return m_Navigation; } set { if (SetPropertyUtility.SetEquatableStruct(ref m_Navigation, value))        OnSetProperty(); } }
         public Transition        transition        { get { return m_Transition; } set { if (SetPropertyUtility.SetStruct(ref m_Transition, value))        OnSetProperty(); } }
-        public ColorBlock        colors            { get { return m_Colors; } set { if (SetPropertyUtility.SetStruct(ref m_Colors, value))            OnSetProperty(); } }
-        public SpriteState       spriteState       { get { return m_SpriteState; } set { if (SetPropertyUtility.SetStruct(ref m_SpriteState, value))       OnSetProperty(); } }
+        public ColorBlock        colors            { get { return m_Colors; } set { if (SetPropertyUtility.SetEquatableStruct(ref m_Colors, value))            OnSetProperty(); } }
+        public SpriteState       spriteState       { get { return m_SpriteState; } set { if (SetPropertyUtility.SetEquatableStruct(ref m_SpriteState, value))       OnSetProperty(); } }
         public AnimationTriggers animationTriggers { get { return m_AnimationTriggers; } set { if (SetPropertyUtility.SetClass(ref m_AnimationTriggers, value)) OnSetProperty(); } }
         public Graphic           targetGraphic     { get { return m_TargetGraphic; } set { if (SetPropertyUtility.SetClass(ref m_TargetGraphic, value))     OnSetProperty(); } }
-        public bool              interactable      { get { return m_Interactable; } set { if (SetPropertyUtility.SetStruct(ref m_Interactable, value))      OnSetProperty(); } }
+        public bool              interactable
+        {
+            get { return m_Interactable; }
+            set
+            {
+                if (SetPropertyUtility.SetStruct(ref m_Interactable, value))
+                {
+                    if (m_Interactable && EventSystem.current.currentSelectedGameObject == gameObject)
+                        EventSystem.current.SetSelectedGameObject(null);
+                    OnSetProperty();
+                }
+            }
+        }
 
         private bool             isPointerInside   { get; set; }
         private bool             isPointerDown     { get; set; }
@@ -204,6 +216,8 @@ namespace UnityEngine.UI
             // OnSetProperty potentially access Animator or Graphics. (case 618186)
             if (isActiveAndEnabled)
             {
+                if (!interactable && EventSystem.current != null && EventSystem.current.currentSelectedGameObject == gameObject)
+                    EventSystem.current.SetSelectedGameObject(null);
                 // Need to clear out the override image on the target...
                 DoSpriteSwap(null);
 

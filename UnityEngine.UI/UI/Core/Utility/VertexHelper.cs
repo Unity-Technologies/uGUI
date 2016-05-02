@@ -159,11 +159,16 @@ namespace UnityEngine.UI
 
         public void AddUIVertexTriangleStream(List<UIVertex> verts)
         {
+            if (verts == null)
+                return;
             CanvasRenderer.SplitUIVertexStreams(verts, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Normals, m_Tangents, m_Indices);
         }
 
         public void GetUIVertexStream(List<UIVertex> stream)
         {
+            if (stream == null)
+                return;
+
             CanvasRenderer.CreateUIVertexStream(stream, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Normals, m_Tangents, m_Indices);
         }
     }

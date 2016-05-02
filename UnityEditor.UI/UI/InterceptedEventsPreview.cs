@@ -242,30 +242,60 @@ namespace UnityEditor.Events
             s_EventSystemInterfaces = new List<Type>();
             s_PossibleEvents = new List<GUIContent>();
             s_InterfaceEventSystemEvents = new Dictionary<Type, List<int>>();
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            for (int i = 0; i < assemblies.Length; ++i)
+
+            foreach (var type in GetAccessibleTypesInLoadedAssemblies())
             {
-                Type[] types = assemblies[i].GetTypes();
-                for (int ti = 0; ti < types.Length; ++ti)
+                if (!type.IsInterface)
+                    continue;
+
+                if (!typeof(IEventSystemHandler).IsAssignableFrom(type))
+                    continue;
+
+                s_EventSystemInterfaces.Add(type);
+                List<int> eventIndexList = new List<int>();
+
+                MethodInfo[] methodInfos = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                for (int mi = 0; mi < methodInfos.Length; mi++)
                 {
-                    var type = types[ti];
-                    if (!type.IsInterface)
+                    MethodInfo methodInfo = methodInfos[mi];
+                    eventIndexList.Add(s_PossibleEvents.Count);
+                    s_PossibleEvents.Add(new GUIContent(methodInfo.Name));
+                }
+                s_InterfaceEventSystemEvents.Add(type, eventIndexList);
+            }
+        }
+
+        private static IEnumerable<Type> GetAccessibleTypesInLoadedAssemblies()
+        {
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            for (var i = 0; i < assemblies.Length; ++i)
+            {
+                Type[] types;
+                var assembly = assemblies[i];
+
+                if (assembly == null)
+                    continue;
+
+                try
+                {
+                    types = assembly.GetTypes();
+                }
+                catch (ReflectionTypeLoadException e)
+                {
+                    // assembly.GetTypes() might fail in case the Assembly cannot resolve all its references,
+                    // or in case it was built targetting a newer version of .NET.
+                    // In case the resolution fails for some types, we can still access the ones that have been
+                    // properly loaded.
+                    types = e.Types;
+                }
+
+                for (var j = 0; j < types.Length; ++j)
+                {
+                    var type = types[j];
+                    if (type == null)
                         continue;
 
-                    if (!typeof(IEventSystemHandler).IsAssignableFrom(type))
-                        continue;
-
-                    s_EventSystemInterfaces.Add(type);
-                    List<int> eventIndexList = new List<int>();
-
-                    MethodInfo[] methodInfos = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                    for (int mi = 0; mi < methodInfos.Length; mi++)
-                    {
-                        MethodInfo methodInfo = methodInfos[mi];
-                        eventIndexList.Add(s_PossibleEvents.Count);
-                        s_PossibleEvents.Add(new GUIContent(methodInfo.Name));
-                    }
-                    s_InterfaceEventSystemEvents.Add(type, eventIndexList);
+                    yield return type;
                 }
             }
         }

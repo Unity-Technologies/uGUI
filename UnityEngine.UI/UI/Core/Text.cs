@@ -12,6 +12,11 @@ namespace UnityEngine.UI
     {
         [SerializeField] private FontData m_FontData = FontData.defaultFontData;
 
+#if UNITY_EDITOR
+        // needed to track font changes from the inspector
+        private Font m_LastTrackedFont;
+#endif
+
         [TextArea(3, 10)][SerializeField] protected string m_Text = String.Empty;
 
         private TextGenerator m_TextCache;
@@ -101,6 +106,11 @@ namespace UnityEngine.UI
                 m_FontData.font = value;
 
                 FontUpdateTracker.TrackText(this);
+
+#if UNITY_EDITOR
+                // needed to track font changes from the inspector
+                m_LastTrackedFont = value;
+#endif
 
                 SetAllDirty();
             }
@@ -538,6 +548,23 @@ namespace UnityEngine.UI
             cachedTextGenerator.Invalidate();
 
             base.OnRebuildRequested();
+        }
+
+        // The Text inspector editor can change the font, and we need a way to track changes so that we get the appropriate rebuild callbacks
+        // We can intercept changes in OnValidate, and keep track of the previous font reference
+        protected override void OnValidate()
+        {
+            if (m_FontData.font != m_LastTrackedFont)
+            {
+                Font newFont = m_FontData.font;
+                m_FontData.font = m_LastTrackedFont;
+                FontUpdateTracker.UntrackText(this);
+                m_FontData.font = newFont;
+                FontUpdateTracker.TrackText(this);
+
+                m_LastTrackedFont = newFont;
+            }
+            base.OnValidate();
         }
 
 #endif // if UNITY_EDITOR

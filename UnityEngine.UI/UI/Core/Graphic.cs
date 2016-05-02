@@ -144,6 +144,8 @@ namespace UnityEngine.UI
         {
             base.OnTransformParentChanged();
 
+            m_Canvas = null;
+
             if (!IsActive())
                 return;
 
@@ -293,6 +295,7 @@ namespace UnityEngine.UI
                 canvasRenderer.Clear();
 
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
+
             base.OnDisable();
         }
 
@@ -302,12 +305,23 @@ namespace UnityEngine.UI
         {
             // Use m_Cavas so we dont auto call CacheCanvas
             Canvas currentCanvas = m_Canvas;
+
+            // Clear the cached canvas. Will be fetched below if active.
+            m_Canvas = null;
+
+            if (!IsActive())
+                return;
+
             CacheCanvas();
 
             if (currentCanvas != m_Canvas)
             {
                 GraphicRegistry.UnregisterGraphicForCanvas(currentCanvas, this);
-                GraphicRegistry.RegisterGraphicForCanvas(canvas, this);
+
+                // Only register if we are active and enabled as OnCanvasHierarchyChanged can get called
+                // during object destruction and we dont want to register ourself and then become null.
+                if (IsActive())
+                    GraphicRegistry.RegisterGraphicForCanvas(canvas, this);
             }
         }
 
@@ -490,12 +504,17 @@ namespace UnityEngine.UI
             var components = ListPool<Component>.Get();
 
             bool ignoreParentGroups = false;
+            bool continueTraversal = true;
 
             while (t != null)
             {
                 t.GetComponents(components);
                 for (var i = 0; i < components.Count; i++)
                 {
+                    var canvas = components[i] as Canvas;
+                    if (canvas != null && canvas.overrideSorting)
+                        continueTraversal = false;
+
                     var filter = components[i] as ICanvasRaycastFilter;
 
                     if (filter == null)
@@ -525,7 +544,7 @@ namespace UnityEngine.UI
                         return false;
                     }
                 }
-                t = t.parent;
+                t = continueTraversal ? t.parent : null;
             }
             ListPool<Component>.Release(components);
             return true;

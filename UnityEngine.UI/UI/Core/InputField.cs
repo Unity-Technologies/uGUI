@@ -71,7 +71,7 @@ namespace UnityEngine.UI
         public class OnChangeEvent : UnityEvent<string> {}
 
         protected TouchScreenKeyboard m_Keyboard;
-        static private readonly char[] kSeparators = { ' ', '.', ',' };
+        static private readonly char[] kSeparators = { ' ', '.', ',', '\t', '\r', '\n' };
 
         #region Exposed properties
         /// <summary>
@@ -723,6 +723,7 @@ namespace UnityEngine.UI
             }
         }
 
+        [Obsolete("This function is no longer used. Please use RectTransformUtility.ScreenPointToLocalPointInRectangle() instead.")]
         public Vector2 ScreenToLocal(Vector2 screen)
         {
             var theCanvas = m_TextComponent.canvas;
@@ -912,8 +913,10 @@ namespace UnityEngine.UI
             // Otherwise it will overwrite the select all on focus.
             if (hadFocusBefore)
             {
-                Vector2 pos = ScreenToLocal(eventData.position);
-                caretSelectPositionInternal = caretPositionInternal = GetCharacterIndexFromPosition(pos) + m_DrawStart;
+                Vector2 localMousePos;
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(textComponent.rectTransform, eventData.position, eventData.pressEventCamera, out localMousePos);
+
+                caretSelectPositionInternal = caretPositionInternal = GetCharacterIndexFromPosition(localMousePos) + m_DrawStart;
             }
             UpdateLabel();
             eventData.Use();
@@ -1251,14 +1254,14 @@ namespace UnityEngine.UI
 
         private int LineUpCharacterPosition(int originalPos, bool goToFirstChar)
         {
-            if (originalPos >= cachedInputTextGenerator.characterCountVisible)
+            if (originalPos > cachedInputTextGenerator.characterCountVisible)
                 return 0;
 
             UICharInfo originChar = cachedInputTextGenerator.characters[originalPos];
             int originLine = DetermineCharacterLine(originalPos, cachedInputTextGenerator);
 
             // We are on the first line return first character
-            if (originLine - 1 < 0)
+            if (originLine <= 0)
                 return goToFirstChar ? 0 : originalPos;
 
             int endCharIdx = cachedInputTextGenerator.lines[originLine].startCharIdx - 1;
@@ -1582,13 +1585,13 @@ namespace UnityEngine.UI
         {
             line = Mathf.Max(line, 0);
             if (line + 1 < gen.lines.Count)
-                return gen.lines[line + 1].startCharIdx;
+                return gen.lines[line + 1].startCharIdx - 1;
             return gen.characterCountVisible;
         }
 
         private void SetDrawRangeToContainCaretPosition(int caretPos)
         {
-            // We dont have any generated lines generation is not valid.
+            // We don't have any generated lines generation is not valid.
             if (cachedInputTextGenerator.lineCount <= 0)
                 return;
 
@@ -1599,28 +1602,25 @@ namespace UnityEngine.UI
             {
                 var lines = cachedInputTextGenerator.lines;
                 int caretLine = DetermineCharacterLine(caretPos, cachedInputTextGenerator);
-                int height = (int)extents.y;
 
-                // Have to compare with less or equal rather than just less.
-                // The reason is that if the caret is between last char of one line and first char of next,
-                // we want to interpret it as being on the next line.
-                // This is also consistent with what DetermineCharacterLine returns.
-                if (m_DrawEnd <= caretPos)
+                if (caretPos > m_DrawEnd)
                 {
-                    // Caret comes after drawEnd, so we need to move drawEnd to a later line end that comes after caret.
+                    // Caret comes after drawEnd, so we need to move drawEnd to the end of the line with the caret
                     m_DrawEnd = GetLineEndPosition(cachedInputTextGenerator, caretLine);
-                    for (int i = caretLine; i >= 0 && i < lines.Count; --i)
+                    float bottomY = lines[caretLine].topY - lines[caretLine].height;
+                    int startLine = caretLine;
+                    while (startLine > 0)
                     {
-                        height -= lines[i].height;
-                        if (height < 0)
+                        float topY = lines[startLine - 1].topY;
+                        if (topY - bottomY > extents.y)
                             break;
-
-                        m_DrawStart = GetLineStartPosition(cachedInputTextGenerator, i);
+                        startLine--;
                     }
+                    m_DrawStart = GetLineStartPosition(cachedInputTextGenerator, startLine);
                 }
                 else
                 {
-                    if (m_DrawStart > caretPos)
+                    if (caretPos < m_DrawStart)
                     {
                         // Caret comes before drawStart, so we need to move drawStart to an earlier line start that comes before caret.
                         m_DrawStart = GetLineStartPosition(cachedInputTextGenerator, caretLine);
@@ -1628,30 +1628,27 @@ namespace UnityEngine.UI
 
                     int startLine = DetermineCharacterLine(m_DrawStart, cachedInputTextGenerator);
                     int endLine = startLine;
-                    m_DrawEnd = GetLineEndPosition(cachedInputTextGenerator, endLine);
-                    height -= lines[endLine].height;
-                    while (true)
-                    {
-                        if (endLine < lines.Count - 1)
-                        {
-                            endLine++;
-                            if (height < lines[endLine].height)
-                                break;
-                            m_DrawEnd = GetLineEndPosition(cachedInputTextGenerator, endLine);
-                            height -= lines[endLine].height;
-                        }
-                        else if (startLine > 0)
-                        {
-                            startLine--;
-                            if (height < lines[startLine].height)
-                                break;
-                            m_DrawStart = GetLineStartPosition(cachedInputTextGenerator, startLine);
 
-                            height -= lines[startLine].height;
-                        }
-                        else
+                    float topY = lines[startLine].topY;
+                    float bottomY = lines[endLine].topY - lines[endLine].height;
+
+                    while (endLine < lines.Count - 1)
+                    {
+                        bottomY = lines[endLine + 1].topY - lines[endLine + 1].height;
+                        if (topY - bottomY > extents.y)
                             break;
+                        ++endLine;
                     }
+                    m_DrawEnd = GetLineEndPosition(cachedInputTextGenerator, endLine);
+
+                    while (startLine > 0)
+                    {
+                        topY = lines[startLine - 1].topY;
+                        if (topY - bottomY > extents.y)
+                            break;
+                        startLine--;
+                    }
+                    m_DrawStart = GetLineStartPosition(cachedInputTextGenerator, startLine);
                 }
             }
             else
@@ -1842,7 +1839,7 @@ namespace UnityEngine.UI
             Vector2 startPosition = Vector2.zero;
 
             // Calculate startPosition
-            if (gen.characterCountVisible + 1 > adjustedPos || adjustedPos == 0)
+            if (adjustedPos < gen.characters.Count)
             {
                 UICharInfo cursorChar = gen.characters[adjustedPos];
                 startPosition.x = cursorChar.cursorPos.x;
@@ -1919,16 +1916,16 @@ namespace UnityEngine.UI
 
             int currentLineIndex = DetermineCharacterLine(startChar, gen);
 
-            int nextLineStartIdx = GetLineEndPosition(gen, currentLineIndex);
+            int lastCharInLineIndex = GetLineEndPosition(gen, currentLineIndex);
 
             UIVertex vert = UIVertex.simpleVert;
             vert.uv0 = Vector2.zero;
             vert.color = selectionColor;
 
             int currentChar = startChar;
-            while (currentChar <= endChar && currentChar < gen.characterCountVisible)
+            while (currentChar <= endChar && currentChar < gen.characterCount)
             {
-                if (currentChar + 1 == nextLineStartIdx || currentChar == endChar)
+                if (currentChar == lastCharInLineIndex || currentChar == endChar)
                 {
                     UICharInfo startCharInfo = gen.characters[startChar];
                     UICharInfo endCharInfo = gen.characters[currentChar];
@@ -1958,7 +1955,7 @@ namespace UnityEngine.UI
                     startChar = currentChar + 1;
                     currentLineIndex++;
 
-                    nextLineStartIdx = GetLineEndPosition(gen, currentLineIndex);
+                    lastCharInLineIndex = GetLineEndPosition(gen, currentLineIndex);
                 }
                 currentChar++;
             }
@@ -2069,6 +2066,9 @@ namespace UnityEngine.UI
 
         private void ActivateInputFieldInternal()
         {
+            if (EventSystem.current == null)
+                return;
+
             if (EventSystem.current.currentSelectedGameObject != gameObject)
                 EventSystem.current.SetSelectedGameObject(gameObject);
 

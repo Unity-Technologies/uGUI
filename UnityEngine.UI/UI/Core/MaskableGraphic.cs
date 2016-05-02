@@ -115,6 +115,11 @@ namespace UnityEngine.UI
             m_ShouldRecalculateStencil = true;
             UpdateClipParent();
             SetMaterialDirty();
+
+            if (GetComponent<Mask>() != null)
+            {
+                MaskUtilities.NotifyStencilStateChanged(this);
+            }
         }
 
         protected override void OnDisable()
@@ -125,6 +130,11 @@ namespace UnityEngine.UI
             UpdateClipParent();
             StencilMaterial.Remove(m_MaskMaterial);
             m_MaskMaterial = null;
+
+            if (GetComponent<Mask>() != null)
+            {
+                MaskUtilities.NotifyStencilStateChanged(this);
+            }
         }
 
 #if UNITY_EDITOR
@@ -141,6 +151,10 @@ namespace UnityEngine.UI
         protected override void OnTransformParentChanged()
         {
             base.OnTransformParentChanged();
+
+            if (!isActiveAndEnabled)
+                return;
+
             m_ShouldRecalculateStencil = true;
             UpdateClipParent();
             SetMaterialDirty();
@@ -152,6 +166,10 @@ namespace UnityEngine.UI
         protected override void OnCanvasHierarchyChanged()
         {
             base.OnCanvasHierarchyChanged();
+
+            if (!isActiveAndEnabled)
+                return;
+
             m_ShouldRecalculateStencil = true;
             UpdateClipParent();
             SetMaterialDirty();

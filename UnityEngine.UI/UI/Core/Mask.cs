@@ -118,7 +118,7 @@ namespace UnityEngine.UI
         /// Stencil calculation time!
         public virtual Material GetModifiedMaterial(Material baseMaterial)
         {
-            if (graphic == null)
+            if (graphic == null || !isActiveAndEnabled)
                 return baseMaterial;
 
             var rootSortCanvas = MaskUtilities.FindRootSortOverrideCanvas(transform);

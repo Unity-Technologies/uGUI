@@ -4,7 +4,7 @@ using UnityEngine.Serialization;
 namespace UnityEngine.UI
 {
     [Serializable]
-    public struct ColorBlock
+    public struct ColorBlock : IEquatable<ColorBlock>
     {
         [FormerlySerializedAs("normalColor")]
         [SerializeField]
@@ -53,6 +53,39 @@ namespace UnityEngine.UI
                 };
                 return c;
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is ColorBlock))
+                return false;
+
+            return Equals((ColorBlock)obj);
+        }
+
+        public bool Equals(ColorBlock other)
+        {
+            return normalColor == other.normalColor &&
+                   highlightedColor == other.highlightedColor &&
+                   pressedColor == other.pressedColor &&
+                   disabledColor == other.disabledColor &&
+                   colorMultiplier == other.colorMultiplier &&
+                   fadeDuration == other.fadeDuration;
+        }
+
+        public static bool operator ==(ColorBlock point1, ColorBlock point2)
+        {
+            return point1.Equals(point2);
+        }
+
+        public static bool operator !=(ColorBlock point1, ColorBlock point2)
+        {
+            return !point1.Equals(point2);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 }

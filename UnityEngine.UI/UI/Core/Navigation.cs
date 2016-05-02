@@ -4,7 +4,7 @@ using UnityEngine.Serialization;
 namespace UnityEngine.UI
 {
     [Serializable]
-    public struct Navigation
+    public struct Navigation : IEquatable<Navigation>
     {
         /*
          * This looks like it's not flags, but it is flags,
@@ -60,6 +60,15 @@ namespace UnityEngine.UI
                 defaultNav.m_Mode = Mode.Automatic;
                 return defaultNav;
             }
+        }
+
+        public bool Equals(Navigation other)
+        {
+            return mode == other.mode &&
+                   selectOnUp == other.selectOnUp &&
+                   selectOnDown == other.selectOnDown &&
+                   selectOnLeft == other.selectOnLeft &&
+                   selectOnRight == other.selectOnRight;
         }
     }
 }

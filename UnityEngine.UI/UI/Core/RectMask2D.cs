@@ -28,7 +28,9 @@ namespace UnityEngine.UI
         [NonSerialized]
         private Rect m_LastClipRectCanvasSpace;
         [NonSerialized]
-        private bool m_LastClipRectValid;
+        private bool m_LastValidClipRect;
+        [NonSerialized]
+        private bool m_ForceClip;
 
         public Rect canvasRect
         {
@@ -38,7 +40,7 @@ namespace UnityEngine.UI
                 var list = ListPool<Canvas>.Get();
                 gameObject.GetComponentsInParent(false, list);
                 if (list.Count > 0)
-                    canvas = list[0];
+                    canvas = list[list.Count - 1];
                 ListPool<Canvas>.Release(list);
 
                 return m_VertexClipper.GetCanvasRect(rectTransform, canvas);
@@ -111,17 +113,17 @@ namespace UnityEngine.UI
             // the clippers that are valid
             bool validRect = true;
             Rect clipRect = Clipping.FindCullAndClipWorldRect(m_Clippers, out validRect);
-            if (clipRect != m_LastClipRectCanvasSpace)
+            if (clipRect != m_LastClipRectCanvasSpace || m_ForceClip)
             {
                 for (int i = 0; i < m_ClipTargets.Count; ++i)
                     m_ClipTargets[i].SetClipRect(clipRect, validRect);
 
                 m_LastClipRectCanvasSpace = clipRect;
-                m_LastClipRectValid = validRect;
+                m_LastValidClipRect = validRect;
             }
 
             for (int i = 0; i < m_ClipTargets.Count; ++i)
-                m_ClipTargets[i].Cull(m_LastClipRectCanvasSpace, m_LastClipRectValid);
+                m_ClipTargets[i].Cull(m_LastClipRectCanvasSpace, m_LastValidClipRect);
         }
 
         public void AddClippable(IClippable clippable)
@@ -132,8 +134,7 @@ namespace UnityEngine.UI
             if (!m_ClipTargets.Contains(clippable))
                 m_ClipTargets.Add(clippable);
 
-            clippable.SetClipRect(m_LastClipRectCanvasSpace, m_LastClipRectValid);
-            clippable.Cull(m_LastClipRectCanvasSpace, m_LastClipRectValid);
+            m_ForceClip = true;
         }
 
         public void RemoveClippable(IClippable clippable)
@@ -143,6 +144,8 @@ namespace UnityEngine.UI
 
             clippable.SetClipRect(new Rect(), false);
             m_ClipTargets.Remove(clippable);
+
+            m_ForceClip = true;
         }
 
         protected override void OnTransformParentChanged()

@@ -2,26 +2,27 @@ using UnityEngine.UI;
 
 namespace UnityEditor.UI
 {
-    /*
-[CustomEditor(typeof(Mask), true)]
-[CanEditMultipleObjects]
-public class MaskEditor : ImageEditor
-{
-    SerializedProperty m_DrawImage;
-
-    protected override void OnEnable ()
+    [CustomEditor(typeof(Mask), true)]
+    [CanEditMultipleObjects]
+    public class MaskEditor : Editor
     {
-        base.OnEnable();
-        m_DrawImage = serializedObject.FindProperty("m_DrawImage");
-    }
+        SerializedProperty m_ShowMaskGraphic;
 
-    public override void OnInspectorGUI ()
-    {
-        base.OnInspectorGUI ();
+        protected virtual void OnEnable()
+        {
+            m_ShowMaskGraphic = serializedObject.FindProperty("m_ShowMaskGraphic");
+        }
 
-        serializedObject.Update();
-        EditorGUILayout.PropertyField (m_DrawImage);
-        serializedObject.ApplyModifiedProperties();
+        public override void OnInspectorGUI()
+        {
+            var graphic = (target as Mask).GetComponent<Graphic>();
+
+            if (graphic && !graphic.IsActive())
+                EditorGUILayout.HelpBox("Masking disabled due to Graphic component being disabled.", MessageType.Warning);
+
+            serializedObject.Update();
+            EditorGUILayout.PropertyField(m_ShowMaskGraphic);
+            serializedObject.ApplyModifiedProperties();
+        }
     }
-}*/
 }

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine.Events;
 
 namespace UnityEngine.UI
@@ -7,6 +8,15 @@ namespace UnityEngine.UI
         public static bool SetColor(ref Color currentValue, Color newValue)
         {
             if (currentValue.r == newValue.r && currentValue.g == newValue.g && currentValue.b == newValue.b && currentValue.a == newValue.a)
+                return false;
+
+            currentValue = newValue;
+            return true;
+        }
+
+        public static bool SetEquatableStruct<T>(ref T currentValue, T newValue) where T : IEquatable<T>
+        {
+            if (currentValue.Equals(newValue))
                 return false;
 
             currentValue = newValue;

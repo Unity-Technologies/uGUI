@@ -134,7 +134,7 @@ namespace UnityEngine.EventSystems
                 return false;
 
             var shouldActivate = m_ForceModuleActive;
-            Input.GetButtonDown(m_SubmitButton);
+            shouldActivate |= Input.GetButtonDown(m_SubmitButton);
             shouldActivate |= Input.GetButtonDown(m_CancelButton);
             shouldActivate |= !Mathf.Approximately(Input.GetAxisRaw(m_HorizontalAxis), 0.0f);
             shouldActivate |= !Mathf.Approximately(Input.GetAxisRaw(m_VerticalAxis), 0.0f);

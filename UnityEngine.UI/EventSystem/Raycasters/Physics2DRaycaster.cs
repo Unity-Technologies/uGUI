@@ -21,7 +21,7 @@ namespace UnityEngine.EventSystems
 
             float dist = eventCamera.farClipPlane - eventCamera.nearClipPlane;
 
-            var hits = Physics2D.RaycastAll(ray.origin, ray.direction, dist, finalEventMask);
+            var hits = Physics2D.GetRayIntersectionAll(ray, dist, finalEventMask);
 
             if (hits.Length != 0)
             {

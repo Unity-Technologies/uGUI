@@ -80,9 +80,9 @@ namespace UnityEngine.UI
         {
             UIVertex vt;
 
-            var neededCpacity = verts.Count * 2;
-            if (verts.Capacity < neededCpacity)
-                verts.Capacity = neededCpacity;
+            var neededCapacity = verts.Count + end - start;
+            if (verts.Capacity < neededCapacity)
+                verts.Capacity = neededCapacity;
 
             for (int i = start; i < end; ++i)
             {
@@ -103,10 +103,6 @@ namespace UnityEngine.UI
 
         protected void ApplyShadow(List<UIVertex> verts, Color32 color, int start, int end, float x, float y)
         {
-            var neededCpacity = verts.Count * 2;
-            if (verts.Capacity < neededCpacity)
-                verts.Capacity = neededCpacity;
-
             ApplyShadowZeroAlloc(verts, color, start, end, x, y);
         }
 

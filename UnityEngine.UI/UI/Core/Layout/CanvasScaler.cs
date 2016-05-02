@@ -22,7 +22,7 @@ namespace UnityEngine.UI
 
         [Tooltip("Scales all UI elements in the Canvas by this factor.")]
         [SerializeField] protected float m_ScaleFactor = 1;
-        public float scaleFactor { get { return m_ScaleFactor; } set { m_ScaleFactor = value; } }
+        public float scaleFactor { get { return m_ScaleFactor; } set { m_ScaleFactor = Mathf.Max(0.01f, value); } }
 
 
         // Scale With Screen Size settings
@@ -225,5 +225,13 @@ namespace UnityEngine.UI
             m_Canvas.referencePixelsPerUnit = referencePixelsPerUnit;
             m_PrevReferencePixelsPerUnit = referencePixelsPerUnit;
         }
+
+#if UNITY_EDITOR
+        protected override void OnValidate()
+        {
+            m_ScaleFactor = Mathf.Max(0.01f, m_ScaleFactor);
+        }
+
+#endif
     }
 }

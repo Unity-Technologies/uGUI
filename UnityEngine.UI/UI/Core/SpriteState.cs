@@ -4,7 +4,7 @@ using UnityEngine.Serialization;
 namespace UnityEngine.UI
 {
     [Serializable]
-    public struct SpriteState
+    public struct SpriteState : IEquatable<SpriteState>
     {
         [FormerlySerializedAs("highlightedSprite")]
         [FormerlySerializedAs("m_SelectedSprite")]
@@ -22,5 +22,12 @@ namespace UnityEngine.UI
         public Sprite highlightedSprite    { get { return m_HighlightedSprite; } set { m_HighlightedSprite = value; } }
         public Sprite pressedSprite     { get { return m_PressedSprite; } set { m_PressedSprite = value; } }
         public Sprite disabledSprite    { get { return m_DisabledSprite; } set { m_DisabledSprite = value; } }
+
+        public bool Equals(SpriteState other)
+        {
+            return highlightedSprite == other.highlightedSprite &&
+                   pressedSprite == other.pressedSprite &&
+                   disabledSprite == other.disabledSprite;
+        }
     }
 }
