@@ -200,11 +200,12 @@ namespace UnityEngine.UI
             if (m_LayoutRebuildQueue.Contains(element))
                 return false;
 
+            /* TODO: this likely should be here but causes the error to show just resizing the game view (case 739376)
             if (m_PerformingLayoutUpdate)
             {
                 Debug.LogError(string.Format("Trying to add {0} for layout rebuild while we are already inside a layout rebuild loop. This is not supported.", element));
                 return false;
-            }
+            }*/
 
             return m_LayoutRebuildQueue.AddUnique(element);
         }
