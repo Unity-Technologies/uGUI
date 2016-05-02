@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
-    [AddComponentMenu("UI/2D Rect Mask", 13)]
+    [AddComponentMenu("UI/Rect Mask 2D", 13)]
     [ExecuteInEditMode]
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
@@ -17,7 +17,7 @@ namespace UnityEngine.UI
         private RectTransform m_RectTransform;
 
         [NonSerialized]
-        private List<IClippable> m_ClipTargets = new List<IClippable>();
+        private HashSet<IClippable> m_ClipTargets = new HashSet<IClippable>();
 
         [NonSerialized]
         private bool m_ShouldRecalculateClipRects;
@@ -115,15 +115,15 @@ namespace UnityEngine.UI
             Rect clipRect = Clipping.FindCullAndClipWorldRect(m_Clippers, out validRect);
             if (clipRect != m_LastClipRectCanvasSpace || m_ForceClip)
             {
-                for (int i = 0; i < m_ClipTargets.Count; ++i)
-                    m_ClipTargets[i].SetClipRect(clipRect, validRect);
+                foreach (IClippable clipTarget in m_ClipTargets)
+                    clipTarget.SetClipRect(clipRect, validRect);
 
                 m_LastClipRectCanvasSpace = clipRect;
                 m_LastValidClipRect = validRect;
             }
 
-            for (int i = 0; i < m_ClipTargets.Count; ++i)
-                m_ClipTargets[i].Cull(m_LastClipRectCanvasSpace, m_LastValidClipRect);
+            foreach (IClippable clipTarget in m_ClipTargets)
+                clipTarget.Cull(m_LastClipRectCanvasSpace, m_LastValidClipRect);
         }
 
         public void AddClippable(IClippable clippable)

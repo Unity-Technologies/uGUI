@@ -91,6 +91,11 @@ namespace UnityEngine.UI
                 return;
 
             var cull = !validRect || !clipRect.Overlaps(canvasRect, true);
+            UpdateCull(cull);
+        }
+
+        private void UpdateCull(bool cull)
+        {
             var cullingChanged = canvasRenderer.cull != cull;
             canvasRenderer.cull = cull;
 
@@ -197,7 +202,10 @@ namespace UnityEngine.UI
             var newParent = (maskable && IsActive()) ? MaskUtilities.GetRectMaskForClippable(this) : null;
 
             if (newParent != m_ParentMask && m_ParentMask != null)
+            {
                 m_ParentMask.RemoveClippable(this);
+                UpdateCull(false);
+            }
 
             if (newParent != null)
                 newParent.AddClippable(this);

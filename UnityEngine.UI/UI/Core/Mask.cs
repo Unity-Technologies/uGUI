@@ -51,8 +51,7 @@ namespace UnityEngine.UI
         protected Mask()
         {}
 
-        [Obsolete("use Mask.enabled instead", true)]
-        public virtual bool MaskEnabled() { throw new NotSupportedException(); }
+        public virtual bool MaskEnabled() { return IsActive() && graphic != null; }
 
         [Obsolete("Not used anymore.")]
         public virtual void OnSiblingGraphicEnabledDisabled() {}
@@ -118,7 +117,7 @@ namespace UnityEngine.UI
         /// Stencil calculation time!
         public virtual Material GetModifiedMaterial(Material baseMaterial)
         {
-            if (graphic == null || !isActiveAndEnabled)
+            if (!MaskEnabled())
                 return baseMaterial;
 
             var rootSortCanvas = MaskUtilities.FindRootSortOverrideCanvas(transform);

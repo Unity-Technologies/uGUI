@@ -42,10 +42,10 @@ namespace UnityEngine.UI
         [SerializeField] protected Material m_Material;
 
         [SerializeField] private Color m_Color = Color.white;
-        public Color color { get { return m_Color; } set { if (SetPropertyUtility.SetColor(ref m_Color, value)) SetVerticesDirty(); } }
+        public virtual Color color { get { return m_Color; } set { if (SetPropertyUtility.SetColor(ref m_Color, value)) SetVerticesDirty(); } }
 
         [SerializeField] private bool m_RaycastTarget = true;
-        public bool raycastTarget { get { return m_RaycastTarget; } set { m_RaycastTarget = value; } }
+        public virtual bool raycastTarget { get { return m_RaycastTarget; } set { m_RaycastTarget = value; } }
 
         [NonSerialized] private RectTransform m_RectTransform;
         [NonSerialized] private CanvasRenderer m_CanvasRender;
@@ -317,11 +317,7 @@ namespace UnityEngine.UI
             if (currentCanvas != m_Canvas)
             {
                 GraphicRegistry.UnregisterGraphicForCanvas(currentCanvas, this);
-
-                // Only register if we are active and enabled as OnCanvasHierarchyChanged can get called
-                // during object destruction and we dont want to register ourself and then become null.
-                if (IsActive())
-                    GraphicRegistry.RegisterGraphicForCanvas(canvas, this);
+                GraphicRegistry.RegisterGraphicForCanvas(canvas, this);
             }
         }
 
@@ -476,6 +472,8 @@ namespace UnityEngine.UI
             var mbs = gameObject.GetComponents<MonoBehaviour>();
             foreach (var mb in mbs)
             {
+                if (mb == null)
+                    continue;
                 var methodInfo = mb.GetType().GetMethod("OnValidate", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                 if (methodInfo != null)
                     methodInfo.Invoke(mb, null);
@@ -587,7 +585,10 @@ namespace UnityEngine.UI
 
             Color currentColor = canvasRenderer.GetColor();
             if (currentColor.Equals(targetColor))
+            {
+                m_ColorTweenRunner.StopTween();
                 return;
+            }
 
             ColorTween.ColorTweenMode mode = (useRGB && useAlpha ?
                                               ColorTween.ColorTweenMode.All :

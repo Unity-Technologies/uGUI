@@ -95,9 +95,6 @@ namespace UnityEditor.UI
         {
             serializedObject.Update();
 
-            if (!IsDerivedSelectableEditor())
-                EditorGUILayout.PropertyField(m_Script);
-
             EditorGUILayout.PropertyField(m_InteractableProperty);
 
             var trans = GetTransition(m_TransitionProperty);

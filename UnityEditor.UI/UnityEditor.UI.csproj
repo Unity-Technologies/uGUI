@@ -129,6 +129,7 @@
     <Compile Include="UI\RawImageEditor.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="UI\RectMask2DEditor.cs" />
     <Compile Include="UI\ScrollbarEditor.cs">
       <SubType>Code</SubType>
     </Compile>

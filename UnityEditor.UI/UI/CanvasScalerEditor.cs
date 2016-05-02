@@ -90,16 +90,17 @@ namespace UnityEditor.UI
             serializedObject.Update();
 
             EditorGUI.showMixedValue = showWorldDiffers;
-            EditorGUI.BeginDisabledGroup(showWorld || showWorldDiffers);
-            if (showWorld || showWorldDiffers)
+            using (new EditorGUI.DisabledScope(showWorld || showWorldDiffers))
             {
-                EditorGUILayout.Popup(s_Styles.uiScaleModeContent.text, 0, new[] { "World" });
+                if (showWorld || showWorldDiffers)
+                {
+                    EditorGUILayout.Popup(s_Styles.uiScaleModeContent.text, 0, new[] { "World" });
+                }
+                else
+                {
+                    EditorGUILayout.PropertyField(m_UiScaleMode, s_Styles.uiScaleModeContent);
+                }
             }
-            else
-            {
-                EditorGUILayout.PropertyField(m_UiScaleMode, s_Styles.uiScaleModeContent);
-            }
-            EditorGUI.EndDisabledGroup();
             EditorGUI.showMixedValue = false;
 
             if (!showWorldDiffers && !(!showWorld && m_UiScaleMode.hasMultipleDifferentValues))

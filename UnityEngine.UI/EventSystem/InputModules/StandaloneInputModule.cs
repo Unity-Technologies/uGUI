@@ -141,15 +141,9 @@ namespace UnityEngine.EventSystems
             shouldActivate |= (m_MousePosition - m_LastMousePosition).sqrMagnitude > 0.0f;
             shouldActivate |= Input.GetMouseButtonDown(0);
 
+            if (Input.touchCount > 0)
+                shouldActivate = true;
 
-            for (int i = 0; i < Input.touchCount; ++i)
-            {
-                Touch input = Input.GetTouch(i);
-
-                shouldActivate |= input.phase == TouchPhase.Began
-                    || input.phase == TouchPhase.Moved
-                    || input.phase == TouchPhase.Stationary;
-            }
             return shouldActivate;
         }
 
@@ -393,21 +387,12 @@ namespace UnityEngine.EventSystems
 
             // Debug.Log(m_ProcessingEvent.rawType + " axis:" + m_AllowAxisEvents + " value:" + "(" + x + "," + y + ")");
             var axisEventData = GetAxisEventData(movement.x, movement.y, 0.6f);
-
-            if (axisEventData.moveDir != MoveDirection.None)
-            {
-                ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, axisEventData, ExecuteEvents.moveHandler);
-                if (!similarDir)
-                    m_ConsecutiveMoveCount = 0;
-                m_ConsecutiveMoveCount++;
-                m_PrevActionTime = time;
-                m_LastMoveVector = movement;
-            }
-            else
-            {
+            ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, axisEventData, ExecuteEvents.moveHandler);
+            if (!similarDir)
                 m_ConsecutiveMoveCount = 0;
-            }
-
+            m_ConsecutiveMoveCount++;
+            m_PrevActionTime = time;
+            m_LastMoveVector = movement;
             return axisEventData.used;
         }
 

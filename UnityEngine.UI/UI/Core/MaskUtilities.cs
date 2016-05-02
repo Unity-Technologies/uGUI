@@ -69,7 +69,7 @@ namespace UnityEngine.UI
                 t.GetComponents<Mask>(components);
                 for (var i = 0; i < components.Count; ++i)
                 {
-                    if (components[i] != null && components[i].IsActive() && components[i].graphic != null && components[i].graphic.IsActive())
+                    if (components[i] != null && components[i].MaskEnabled() && components[i].graphic.IsActive())
                     {
                         ++depth;
                         break;

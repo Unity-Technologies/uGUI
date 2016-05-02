@@ -220,11 +220,7 @@ namespace UnityEngine.UI.CoroutineTween
                 return;
             }
 
-            if (m_Tween != null)
-            {
-                m_CoroutineContainer.StopCoroutine(m_Tween);
-                m_Tween = null;
-            }
+            StopTween();
 
             if (!m_CoroutineContainer.gameObject.activeInHierarchy)
             {
@@ -234,6 +230,15 @@ namespace UnityEngine.UI.CoroutineTween
 
             m_Tween = Start(info);
             m_CoroutineContainer.StartCoroutine(m_Tween);
+        }
+
+        public void StopTween()
+        {
+            if (m_Tween != null)
+            {
+                m_CoroutineContainer.StopCoroutine(m_Tween);
+                m_Tween = null;
+            }
         }
     }
 }

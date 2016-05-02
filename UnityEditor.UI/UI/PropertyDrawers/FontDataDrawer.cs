@@ -180,9 +180,10 @@ namespace UnityEditor.UI
 
                 rect.y += rect.height + EditorGUIUtility.standardVerticalSpacing;
                 rect.height = m_FontStyleHeight;
-                EditorGUI.BeginDisabledGroup(!m_Font.hasMultipleDifferentValues && font != null && !font.dynamic);
-                EditorGUI.PropertyField(rect, m_FontStyle);
-                EditorGUI.EndDisabledGroup();
+                using (new EditorGUI.DisabledScope(!m_Font.hasMultipleDifferentValues && font != null && !font.dynamic))
+                {
+                    EditorGUI.PropertyField(rect, m_FontStyle);
+                }
 
                 rect.y += rect.height + EditorGUIUtility.standardVerticalSpacing;
                 rect.height = m_FontSizeHeight;

@@ -80,59 +80,58 @@ namespace UnityEditor.UI
                 }
             }
 
-            EditorGUI.BeginDisabledGroup(m_TextComponent == null || m_TextComponent.objectReferenceValue == null);
-
-            EditorGUILayout.PropertyField(m_Text);
-            EditorGUILayout.PropertyField(m_CharacterLimit);
-
-            EditorGUILayout.Space();
-
-            EditorGUILayout.PropertyField(m_ContentType);
-            if (!m_ContentType.hasMultipleDifferentValues)
+            using (new EditorGUI.DisabledScope(m_TextComponent == null || m_TextComponent.objectReferenceValue == null))
             {
-                EditorGUI.indentLevel++;
+                EditorGUILayout.PropertyField(m_Text);
+                EditorGUILayout.PropertyField(m_CharacterLimit);
 
-                if (m_ContentType.enumValueIndex == (int)InputField.ContentType.Standard ||
-                    m_ContentType.enumValueIndex == (int)InputField.ContentType.Autocorrected ||
-                    m_ContentType.enumValueIndex == (int)InputField.ContentType.Custom)
-                    EditorGUILayout.PropertyField(m_LineType);
+                EditorGUILayout.Space();
 
-                if (m_ContentType.enumValueIndex == (int)InputField.ContentType.Custom)
+                EditorGUILayout.PropertyField(m_ContentType);
+                if (!m_ContentType.hasMultipleDifferentValues)
                 {
-                    EditorGUILayout.PropertyField(m_InputType);
-                    EditorGUILayout.PropertyField(m_KeyboardType);
-                    EditorGUILayout.PropertyField(m_CharacterValidation);
+                    EditorGUI.indentLevel++;
+
+                    if (m_ContentType.enumValueIndex == (int)InputField.ContentType.Standard ||
+                        m_ContentType.enumValueIndex == (int)InputField.ContentType.Autocorrected ||
+                        m_ContentType.enumValueIndex == (int)InputField.ContentType.Custom)
+                        EditorGUILayout.PropertyField(m_LineType);
+
+                    if (m_ContentType.enumValueIndex == (int)InputField.ContentType.Custom)
+                    {
+                        EditorGUILayout.PropertyField(m_InputType);
+                        EditorGUILayout.PropertyField(m_KeyboardType);
+                        EditorGUILayout.PropertyField(m_CharacterValidation);
+                    }
+
+                    EditorGUI.indentLevel--;
                 }
 
-                EditorGUI.indentLevel--;
+                EditorGUILayout.Space();
+
+                EditorGUILayout.PropertyField(m_Placeholder);
+                EditorGUILayout.PropertyField(m_CaretBlinkRate);
+                EditorGUILayout.PropertyField(m_CaretWidth);
+
+                EditorGUILayout.PropertyField(m_CustomCaretColor);
+
+                m_CustomColor.target = m_CustomCaretColor.boolValue;
+
+                if (EditorGUILayout.BeginFadeGroup(m_CustomColor.faded))
+                {
+                    EditorGUILayout.PropertyField(m_CaretColor);
+                }
+                EditorGUILayout.EndFadeGroup();
+
+                EditorGUILayout.PropertyField(m_SelectionColor);
+                EditorGUILayout.PropertyField(m_HideMobileInput);
+                EditorGUILayout.PropertyField(m_ReadOnly);
+
+                EditorGUILayout.Space();
+
+                EditorGUILayout.PropertyField(m_OnValueChanged);
+                EditorGUILayout.PropertyField(m_OnEndEdit);
             }
-
-            EditorGUILayout.Space();
-
-            EditorGUILayout.PropertyField(m_Placeholder);
-            EditorGUILayout.PropertyField(m_CaretBlinkRate);
-            EditorGUILayout.PropertyField(m_CaretWidth);
-
-            EditorGUILayout.PropertyField(m_CustomCaretColor);
-
-            m_CustomColor.target = m_CustomCaretColor.boolValue;
-
-            if (EditorGUILayout.BeginFadeGroup(m_CustomColor.faded))
-            {
-                EditorGUILayout.PropertyField(m_CaretColor);
-            }
-            EditorGUILayout.EndFadeGroup();
-
-            EditorGUILayout.PropertyField(m_SelectionColor);
-            EditorGUILayout.PropertyField(m_HideMobileInput);
-            EditorGUILayout.PropertyField(m_ReadOnly);
-
-            EditorGUILayout.Space();
-
-            EditorGUILayout.PropertyField(m_OnValueChanged);
-            EditorGUILayout.PropertyField(m_OnEndEdit);
-
-            EditorGUI.EndDisabledGroup();
 
             serializedObject.ApplyModifiedProperties();
         }

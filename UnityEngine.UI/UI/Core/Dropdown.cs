@@ -594,7 +594,10 @@ namespace UnityEngine.UI
             if (m_Dropdown != null)
             {
                 AlphaFadeList(0.15f, 0f);
-                StartCoroutine(DelayedDestroyDropdownList(0.15f));
+
+                // User could have disabled the dropdown during the OnValueChanged call.
+                if (IsActive())
+                    StartCoroutine(DelayedDestroyDropdownList(0.15f));
             }
             if (m_Blocker != null)
                 DestroyBlocker(m_Blocker);
@@ -604,13 +607,7 @@ namespace UnityEngine.UI
 
         private IEnumerator DelayedDestroyDropdownList(float delay)
         {
-            // We can't use WaitForSeconds as it uses scaled time(would not work if timeScale == 0)
-            float waitTime = Time.realtimeSinceStartup + delay;
-            while (Time.realtimeSinceStartup < waitTime)
-            {
-                yield return null;
-            }
-
+            yield return new WaitForSecondsRealtime(delay);
             for (int i = 0; i < m_Items.Count; i++)
             {
                 if (m_Items[i] != null)
