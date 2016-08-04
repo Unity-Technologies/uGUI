@@ -393,6 +393,8 @@ namespace UnityEngine.UI
                     {
                         float speed = m_Velocity[axis];
                         position[axis] = Mathf.SmoothDamp(m_Content.anchoredPosition[axis], m_Content.anchoredPosition[axis] + offset[axis], ref speed, m_Elasticity, Mathf.Infinity, deltaTime);
+                        if (Mathf.Abs(speed) < 1)
+                            speed = 0;
                         m_Velocity[axis] = speed;
                     }
                     // Else move content according to velocity with deceleration applied.
@@ -528,7 +530,7 @@ namespace UnityEngine.UI
             float newLocalPosition = m_Content.localPosition[axis] + contentBoundsMinPosition - m_ContentBounds.min[axis];
 
             Vector3 localPosition = m_Content.localPosition;
-            if (Mathf.Abs(localPosition[axis] - newLocalPosition) > 0.01f)
+            if (Mathf.Abs(localPosition[axis] - newLocalPosition) > 0.0001f)
             {
                 localPosition[axis] = newLocalPosition;
                 m_Content.localPosition = localPosition;

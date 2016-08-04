@@ -156,7 +156,7 @@ namespace UnityEngine.UI
             }
 
             for (int i = 0; i < m_GraphicRebuildQueue.Count; ++i)
-                m_GraphicRebuildQueue[i].LayoutComplete();
+                m_GraphicRebuildQueue[i].GraphicUpdateComplete();
 
             instance.m_GraphicRebuildQueue.Clear();
             m_PerformingGraphicUpdate = false;

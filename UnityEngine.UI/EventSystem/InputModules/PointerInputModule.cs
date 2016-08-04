@@ -191,8 +191,17 @@ namespace UnityEngine.EventSystems
                 leftData.position = Input.mousePosition;
 
             Vector2 pos = Input.mousePosition;
-            leftData.delta = pos - leftData.position;
-            leftData.position = pos;
+            if (Cursor.lockState == CursorLockMode.Locked)
+            {
+                // We don't want to do ANY cursor-based interaction when the mouse is locked
+                leftData.position = new Vector2(-1.0f, -1.0f);
+                leftData.delta = Vector2.zero;
+            }
+            else
+            {
+                leftData.delta = pos - leftData.position;
+                leftData.position = pos;
+            }
             leftData.scrollDelta = Input.mouseScrollDelta;
             leftData.button = PointerEventData.InputButton.Left;
             eventSystem.RaycastAll(leftData, m_RaycastResultCache);

@@ -573,12 +573,12 @@ namespace UnityEngine.UI
             return RectTransformUtility.PixelAdjustRect(rectTransform, canvas);
         }
 
-        public void CrossFadeColor(Color targetColor, float duration, bool ignoreTimeScale, bool useAlpha)
+        public virtual void CrossFadeColor(Color targetColor, float duration, bool ignoreTimeScale, bool useAlpha)
         {
             CrossFadeColor(targetColor, duration, ignoreTimeScale, useAlpha, true);
         }
 
-        private void CrossFadeColor(Color targetColor, float duration, bool ignoreTimeScale, bool useAlpha, bool useRGB)
+        public virtual void CrossFadeColor(Color targetColor, float duration, bool ignoreTimeScale, bool useAlpha, bool useRGB)
         {
             if (canvasRenderer == null || (!useRGB && !useAlpha))
                 return;
@@ -608,7 +608,7 @@ namespace UnityEngine.UI
             return alphaColor;
         }
 
-        public void CrossFadeAlpha(float alpha, float duration, bool ignoreTimeScale)
+        public virtual void CrossFadeAlpha(float alpha, float duration, bool ignoreTimeScale)
         {
             CrossFadeColor(CreateColorFromAlpha(alpha), duration, ignoreTimeScale, true, false);
         }

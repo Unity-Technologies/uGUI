@@ -7,6 +7,9 @@ namespace UnityEngine.UI
 
         public Rect GetCanvasRect(RectTransform t, Canvas c)
         {
+            if (c == null)
+                return new Rect();
+
             t.GetWorldCorners(m_WorldCorners);
             var canvasTransform = c.GetComponent<Transform>();
             for (int i = 0; i < 4; ++i)

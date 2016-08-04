@@ -278,9 +278,10 @@ namespace UnityEngine.UI
             {
                 if (this.text == value)
                     return;
-
+                if (value == null)
+                    value = "";
                 if (m_LineType == LineType.SingleLine)
-                    m_Text = m_Text.Replace("\n", "").Replace("\t", "");
+                    value = value.Replace("\n", "").Replace("\t", "");
 
                 // If we have an input validator, validate the input and apply the character limit at the same time.
                 if (onValidateInput != null || characterValidation != CharacterValidation.None)
@@ -288,7 +289,7 @@ namespace UnityEngine.UI
                     m_Text = "";
                     OnValidateInput validatorMethod = onValidateInput ?? Validate;
                     m_CaretPosition = m_CaretSelectPosition = value.Length;
-                    int charactersToCheck = characterLimit > 0 ? Math.Min(characterLimit - 1, value.Length) : value.Length;
+                    int charactersToCheck = characterLimit > 0 ? Math.Min(characterLimit, value.Length) : value.Length;
                     for (int i = 0; i < charactersToCheck; ++i)
                     {
                         char c = validatorMethod(m_Text, m_Text.Length, value[i]);
@@ -314,7 +315,8 @@ namespace UnityEngine.UI
 
                 if (m_CaretPosition > m_Text.Length)
                     m_CaretPosition = m_CaretSelectPosition = m_Text.Length;
-
+                else if (m_CaretSelectPosition > m_Text.Length)
+                    m_CaretSelectPosition = m_Text.Length;
                 SendOnValueChangedAndUpdateLabel();
             }
         }
@@ -1155,7 +1157,7 @@ namespace UnityEngine.UI
             int startPos = caretPositionInternal;
             int endPos = caretSelectPositionInternal;
 
-            // Ensure pos is always less then selPos to make the code simpler
+            // Ensure startPos is always less then endPos to make the code simpler
             if (startPos > endPos)
             {
                 int temp = startPos;
@@ -1257,7 +1259,7 @@ namespace UnityEngine.UI
 
         private int LineUpCharacterPosition(int originalPos, bool goToFirstChar)
         {
-            if (originalPos > cachedInputTextGenerator.characterCountVisible)
+            if (originalPos >= cachedInputTextGenerator.characters.Count)
                 return 0;
 
             UICharInfo originChar = cachedInputTextGenerator.characters[originalPos];
@@ -1610,7 +1612,7 @@ namespace UnityEngine.UI
                 {
                     // Caret comes after drawEnd, so we need to move drawEnd to the end of the line with the caret
                     m_DrawEnd = GetLineEndPosition(cachedInputTextGenerator, caretLine);
-                    float bottomY = lines[caretLine].topY - lines[caretLine].height;
+                    float bottomY = lines[caretLine].topY + lines[caretLine].height;
                     int startLine = caretLine;
                     while (startLine > 0)
                     {

@@ -85,17 +85,63 @@ namespace UnityEngine.UI
             return depth;
         }
 
-        public static RectMask2D GetRectMaskForClippable(IClippable transform)
+        public static bool IsDescendantOrSelf(Transform father, Transform child)
+        {
+            if (father == null || child == null)
+                return false;
+
+            if (father == child)
+                return true;
+
+            while (child.parent != null)
+            {
+                if (child.parent == father)
+                    return true;
+
+                child = child.parent;
+            }
+
+            return false;
+        }
+
+        public static RectMask2D GetRectMaskForClippable(IClippable clippable)
         {
             List<RectMask2D> rectMaskComponents = ListPool<RectMask2D>.Get();
+            List<Canvas> canvasComponents = ListPool<Canvas>.Get();
             RectMask2D componentToReturn = null;
 
-            transform.rectTransform.GetComponentsInParent<RectMask2D>(false, rectMaskComponents);
+            clippable.rectTransform.GetComponentsInParent(false, rectMaskComponents);
 
             if (rectMaskComponents.Count > 0)
-                componentToReturn = rectMaskComponents[0];
+            {
+                for (int rmi = 0; rmi < rectMaskComponents.Count; rmi++)
+                {
+                    componentToReturn = rectMaskComponents[rmi];
+                    if (componentToReturn.gameObject == clippable.gameObject)
+                    {
+                        componentToReturn = null;
+                        continue;
+                    }
+                    if (!componentToReturn.isActiveAndEnabled)
+                    {
+                        componentToReturn = null;
+                        continue;
+                    }
+                    clippable.rectTransform.GetComponentsInParent(false, canvasComponents);
+                    for (int i = canvasComponents.Count - 1; i >= 0; i--)
+                    {
+                        if (!IsDescendantOrSelf(canvasComponents[i].transform, componentToReturn.transform) && canvasComponents[i].overrideSorting)
+                        {
+                            componentToReturn = null;
+                            break;
+                        }
+                    }
+                    return componentToReturn;
+                }
+            }
 
             ListPool<RectMask2D>.Release(rectMaskComponents);
+            ListPool<Canvas>.Release(canvasComponents);
 
             return componentToReturn;
         }
@@ -103,7 +149,34 @@ namespace UnityEngine.UI
         public static void GetRectMasksForClip(RectMask2D clipper, List<RectMask2D> masks)
         {
             masks.Clear();
-            clipper.transform.GetComponentsInParent<RectMask2D>(false, masks);
+
+            List<Canvas> canvasComponents = ListPool<Canvas>.Get();
+            List<RectMask2D> rectMaskComponents = ListPool<RectMask2D>.Get();
+            clipper.transform.GetComponentsInParent(false, rectMaskComponents);
+
+            if (rectMaskComponents.Count > 0)
+            {
+                clipper.transform.GetComponentsInParent(false, canvasComponents);
+                for (int i = rectMaskComponents.Count - 1; i >= 0; i--)
+                {
+                    if (!rectMaskComponents[i].IsActive())
+                        continue;
+                    bool shouldAdd = true;
+                    for (int j = canvasComponents.Count - 1; j >= 0; j--)
+                    {
+                        if (!IsDescendantOrSelf(canvasComponents[j].transform, rectMaskComponents[i].transform) && canvasComponents[j].overrideSorting)
+                        {
+                            shouldAdd = false;
+                            break;
+                        }
+                    }
+                    if (shouldAdd)
+                        masks.Add(rectMaskComponents[i]);
+                }
+            }
+
+            ListPool<RectMask2D>.Release(rectMaskComponents);
+            ListPool<Canvas>.Release(canvasComponents);
         }
     }
 }

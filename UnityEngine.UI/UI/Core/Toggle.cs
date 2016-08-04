@@ -70,8 +70,6 @@ namespace UnityEngine.UI
         protected override void OnValidate()
         {
             base.OnValidate();
-            Set(m_IsOn, false);
-            PlayEffect(toggleTransition == ToggleTransition.None);
 
             var prefabType = UnityEditor.PrefabUtility.GetPrefabType(this);
             if (prefabType != UnityEditor.PrefabType.Prefab && !Application.isPlaying)
@@ -139,13 +137,13 @@ namespace UnityEngine.UI
                 m_Group = newGroup;
 
             // Only register to the new group if this Toggle is active.
-            if (m_Group != null && IsActive())
-                m_Group.RegisterToggle(this);
+            if (newGroup != null && IsActive())
+                newGroup.RegisterToggle(this);
 
             // If we are in a new group, and this toggle is on, notify group.
             // Note: Don't refer to m_Group here as it's not guaranteed to have been set.
             if (newGroup != null && newGroup != oldGroup && isOn && IsActive())
-                m_Group.NotifyToggleOn(this);
+                newGroup.NotifyToggleOn(this);
         }
 
         /// <summary>

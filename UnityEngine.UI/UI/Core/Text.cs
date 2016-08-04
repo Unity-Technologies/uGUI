@@ -385,10 +385,14 @@ namespace UnityEngine.UI
 #if UNITY_EDITOR
         protected override void Reset()
         {
-            font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            AssignDefaultFont();
         }
 
 #endif
+        internal void AssignDefaultFont()
+        {
+            font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        }
 
         public TextGenerationSettings GetGenerationSettings(Vector2 extents)
         {

@@ -100,6 +100,8 @@ namespace UnityEngine.UI
 
         public virtual void PerformClipping()
         {
+            //TODO See if an IsActive() test would work well here or whether it might cause unexpected side effects (re case 776771)
+
             // if the parents are changed
             // or something similar we
             // do a recalculate here
@@ -130,7 +132,7 @@ namespace UnityEngine.UI
         {
             if (clippable == null)
                 return;
-
+            m_ShouldRecalculateClipRects = true;
             if (!m_ClipTargets.Contains(clippable))
                 m_ClipTargets.Add(clippable);
 
@@ -142,6 +144,7 @@ namespace UnityEngine.UI
             if (clippable == null)
                 return;
 
+            m_ShouldRecalculateClipRects = true;
             clippable.SetClipRect(new Rect(), false);
             m_ClipTargets.Remove(clippable);
 

@@ -90,7 +90,7 @@ namespace UnityEngine.UI
             if (!canvasRenderer.hasMoved)
                 return;
 
-            var cull = !validRect || !clipRect.Overlaps(canvasRect, true);
+            var cull = !validRect || !clipRect.Overlaps(rootCanvasRect, true);
             UpdateCull(cull);
         }
 
@@ -181,7 +181,7 @@ namespace UnityEngine.UI
         }
 
         readonly Vector3[] m_Corners = new Vector3[4];
-        private Rect canvasRect
+        private Rect rootCanvasRect
         {
             get
             {
@@ -189,8 +189,9 @@ namespace UnityEngine.UI
 
                 if (canvas)
                 {
+                    Canvas rootCanvas = canvas.rootCanvas;
                     for (int i = 0; i < 4; ++i)
-                        m_Corners[i] = canvas.transform.InverseTransformPoint(m_Corners[i]);
+                        m_Corners[i] = rootCanvas.transform.InverseTransformPoint(m_Corners[i]);
                 }
 
                 return new Rect(m_Corners[0].x, m_Corners[0].y, m_Corners[2].x - m_Corners[0].x, m_Corners[2].y - m_Corners[0].y);
@@ -201,13 +202,15 @@ namespace UnityEngine.UI
         {
             var newParent = (maskable && IsActive()) ? MaskUtilities.GetRectMaskForClippable(this) : null;
 
-            if (newParent != m_ParentMask && m_ParentMask != null)
+            // if the new parent is different OR is now inactive
+            if (m_ParentMask != null && (newParent != m_ParentMask || !newParent.IsActive()))
             {
                 m_ParentMask.RemoveClippable(this);
                 UpdateCull(false);
             }
 
-            if (newParent != null)
+            // don't re-add it if the newparent is inactive
+            if (newParent != null && newParent.IsActive())
                 newParent.AddClippable(this);
 
             m_ParentMask = newParent;

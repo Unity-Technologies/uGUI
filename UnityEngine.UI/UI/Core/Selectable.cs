@@ -85,7 +85,7 @@ namespace UnityEngine.UI
             {
                 if (SetPropertyUtility.SetStruct(ref m_Interactable, value))
                 {
-                    if (m_Interactable && EventSystem.current.currentSelectedGameObject == gameObject)
+                    if (!m_Interactable && EventSystem.current != null && EventSystem.current.currentSelectedGameObject == gameObject)
                         EventSystem.current.SetSelectedGameObject(null);
                     OnSetProperty();
                 }
@@ -586,7 +586,7 @@ namespace UnityEngine.UI
                 return;
 
             // Selection tracking
-            if (IsInteractable() && navigation.mode != Navigation.Mode.None)
+            if (IsInteractable() && navigation.mode != Navigation.Mode.None && EventSystem.current != null)
                 EventSystem.current.SetSelectedGameObject(gameObject, eventData);
 
             isPointerDown = true;
@@ -628,7 +628,7 @@ namespace UnityEngine.UI
 
         public virtual void Select()
         {
-            if (EventSystem.current.alreadySelecting)
+            if (EventSystem.current == null || EventSystem.current.alreadySelecting)
                 return;
 
             EventSystem.current.SetSelectedGameObject(gameObject);

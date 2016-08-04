@@ -65,13 +65,17 @@ namespace UnityEngine.UI
             Left,
         }
 
+        static protected Material s_ETC1DefaultUI = null;
+
         [FormerlySerializedAs("m_Frame")]
         [SerializeField] private Sprite m_Sprite;
         public Sprite sprite { get { return m_Sprite; } set { if (SetPropertyUtility.SetClass(ref m_Sprite, value)) SetAllDirty(); } }
 
         [NonSerialized]
         private Sprite m_OverrideSprite;
-        public Sprite overrideSprite { get { return m_OverrideSprite == null ? sprite : m_OverrideSprite; } set { if (SetPropertyUtility.SetClass(ref m_OverrideSprite, value)) SetAllDirty(); } }
+        public Sprite overrideSprite { get { return activeSprite; } set { if (SetPropertyUtility.SetClass(ref m_OverrideSprite, value)) SetAllDirty(); } }
+
+        private Sprite activeSprite { get { return m_OverrideSprite != null ? m_OverrideSprite : sprite; } }
 
         /// How the Image is drawn.
         [SerializeField] private Type m_Type = Type.Simple;
@@ -85,7 +89,7 @@ namespace UnityEngine.UI
 
         /// Filling method for filled sprites.
         [SerializeField] private FillMethod m_FillMethod = FillMethod.Radial360;
-        public FillMethod fillMethod { get { return m_FillMethod; } set { if (SetPropertyUtility.SetStruct(ref m_FillMethod, value)) {SetVerticesDirty(); m_FillOrigin = 0; } } }
+        public FillMethod fillMethod { get { return m_FillMethod; } set { if (SetPropertyUtility.SetStruct(ref m_FillMethod, value)) { SetVerticesDirty(); m_FillOrigin = 0; } } }
 
         /// Amount of the Image shown. 0-1 range with 0 being nothing shown, and 1 being the full Image.
         [Range(0, 1)]
@@ -101,12 +105,29 @@ namespace UnityEngine.UI
         public int fillOrigin { get { return m_FillOrigin; } set { if (SetPropertyUtility.SetStruct(ref m_FillOrigin, value)) SetVerticesDirty(); } }
 
         // Not serialized until we support read-enabled sprites better.
-        private float m_EventAlphaThreshold = 1;
-        public float eventAlphaThreshold { get { return m_EventAlphaThreshold; } set { m_EventAlphaThreshold = value; } }
+        private float m_AlphaHitTestMinimumThreshold = 0;
+
+        [Obsolete("eventAlphaThreshold has been deprecated. Use eventMinimumAlphaThreshold instead (UnityUpgradable) -> alphaHitTestMinimumThreshold")]
+        public float eventAlphaThreshold { get { return 1 - alphaHitTestMinimumThreshold; } set { alphaHitTestMinimumThreshold = 1 - value; } }
+        public float alphaHitTestMinimumThreshold { get { return m_AlphaHitTestMinimumThreshold; } set { m_AlphaHitTestMinimumThreshold = value; } }
 
         protected Image()
         {
             useLegacyMeshGeneration = false;
+        }
+
+        /// <summary>
+        /// Default material used to draw everything if no explicit material was specified.
+        /// </summary>
+
+        static public Material defaultETC1GraphicMaterial
+        {
+            get
+            {
+                if (s_ETC1DefaultUI == null)
+                    s_ETC1DefaultUI = Canvas.GetETC1SupportedCanvasMaterial();
+                return s_ETC1DefaultUI;
+            }
         }
 
         /// <summary>
@@ -116,7 +137,7 @@ namespace UnityEngine.UI
         {
             get
             {
-                if (overrideSprite == null)
+                if (activeSprite == null)
                 {
                     if (material != null && material.mainTexture != null)
                     {
@@ -125,7 +146,7 @@ namespace UnityEngine.UI
                     return s_WhiteTexture;
                 }
 
-                return overrideSprite.texture;
+                return activeSprite.texture;
             }
         }
 
@@ -137,9 +158,9 @@ namespace UnityEngine.UI
         {
             get
             {
-                if (overrideSprite != null)
+                if (activeSprite != null)
                 {
-                    Vector4 v = overrideSprite.border;
+                    Vector4 v = activeSprite.border;
                     return v.sqrMagnitude > 0f;
                 }
                 return false;
@@ -151,14 +172,33 @@ namespace UnityEngine.UI
             get
             {
                 float spritePixelsPerUnit = 100;
-                if (sprite)
-                    spritePixelsPerUnit = sprite.pixelsPerUnit;
+                if (activeSprite)
+                    spritePixelsPerUnit = activeSprite.pixelsPerUnit;
 
                 float referencePixelsPerUnit = 100;
                 if (canvas)
                     referencePixelsPerUnit = canvas.referencePixelsPerUnit;
 
                 return spritePixelsPerUnit / referencePixelsPerUnit;
+            }
+        }
+
+        public override Material material
+        {
+            get
+            {
+                if (m_Material != null)
+                    return m_Material;
+
+                if (activeSprite && activeSprite.associatedAlphaSplitTexture != null)
+                    return defaultETC1GraphicMaterial;
+
+                return defaultMaterial;
+            }
+
+            set
+            {
+                base.material = value;
             }
         }
 
@@ -181,8 +221,8 @@ namespace UnityEngine.UI
         /// Image's dimensions used for drawing. X = left, Y = bottom, Z = right, W = top.
         private Vector4 GetDrawingDimensions(bool shouldPreserveAspect)
         {
-            var padding = overrideSprite == null ? Vector4.zero : Sprites.DataUtility.GetPadding(overrideSprite);
-            var size = overrideSprite == null ? Vector2.zero : new Vector2(overrideSprite.rect.width, overrideSprite.rect.height);
+            var padding = activeSprite == null ? Vector4.zero : Sprites.DataUtility.GetPadding(activeSprite);
+            var size = activeSprite == null ? Vector2.zero : new Vector2(activeSprite.rect.width, activeSprite.rect.height);
 
             Rect r = GetPixelAdjustedRect();
             // Debug.Log(string.Format("r:{2}, size:{0}, padding:{1}", size, padding, r));
@@ -227,10 +267,10 @@ namespace UnityEngine.UI
 
         public override void SetNativeSize()
         {
-            if (overrideSprite != null)
+            if (activeSprite != null)
             {
-                float w = overrideSprite.rect.width / pixelsPerUnit;
-                float h = overrideSprite.rect.height / pixelsPerUnit;
+                float w = activeSprite.rect.width / pixelsPerUnit;
+                float h = activeSprite.rect.height / pixelsPerUnit;
                 rectTransform.anchorMax = rectTransform.anchorMin;
                 rectTransform.sizeDelta = new Vector2(w, h);
                 SetAllDirty();
@@ -242,7 +282,7 @@ namespace UnityEngine.UI
         /// </summary>
         protected override void OnPopulateMesh(VertexHelper toFill)
         {
-            if (overrideSprite == null)
+            if (activeSprite == null)
             {
                 base.OnPopulateMesh(toFill);
                 return;
@@ -265,6 +305,30 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// Update the renderer's material.
+        /// </summary>
+
+        protected override void UpdateMaterial()
+        {
+            base.UpdateMaterial();
+
+            // check if this sprite has an associated alpha texture (generated when splitting RGBA = RGB + A as two textures without alpha)
+
+            if (activeSprite == null)
+            {
+                canvasRenderer.SetAlphaTexture(null);
+                return;
+            }
+
+            Texture2D alphaTex = activeSprite.associatedAlphaSplitTexture;
+
+            if (alphaTex != null)
+            {
+                canvasRenderer.SetAlphaTexture(alphaTex);
+            }
+        }
+
         #region Various fill functions
         /// <summary>
         /// Generate vertices for a simple Image.
@@ -272,7 +336,7 @@ namespace UnityEngine.UI
         void GenerateSimpleSprite(VertexHelper vh, bool lPreserveAspect)
         {
             Vector4 v = GetDrawingDimensions(lPreserveAspect);
-            var uv = (overrideSprite != null) ? Sprites.DataUtility.GetOuterUV(overrideSprite) : Vector4.zero;
+            var uv = (activeSprite != null) ? Sprites.DataUtility.GetOuterUV(activeSprite) : Vector4.zero;
 
             var color32 = color;
             vh.Clear();
@@ -302,12 +366,12 @@ namespace UnityEngine.UI
 
             Vector4 outer, inner, padding, border;
 
-            if (overrideSprite != null)
+            if (activeSprite != null)
             {
-                outer = Sprites.DataUtility.GetOuterUV(overrideSprite);
-                inner = Sprites.DataUtility.GetInnerUV(overrideSprite);
-                padding = Sprites.DataUtility.GetPadding(overrideSprite);
-                border = overrideSprite.border;
+                outer = Sprites.DataUtility.GetOuterUV(activeSprite);
+                inner = Sprites.DataUtility.GetInnerUV(activeSprite);
+                padding = Sprites.DataUtility.GetPadding(activeSprite);
+                border = activeSprite.border;
             }
             else
             {
@@ -372,12 +436,12 @@ namespace UnityEngine.UI
             Vector4 outer, inner, border;
             Vector2 spriteSize;
 
-            if (overrideSprite != null)
+            if (activeSprite != null)
             {
-                outer = Sprites.DataUtility.GetOuterUV(overrideSprite);
-                inner = Sprites.DataUtility.GetInnerUV(overrideSprite);
-                border = overrideSprite.border;
-                spriteSize = overrideSprite.rect.size;
+                outer = Sprites.DataUtility.GetOuterUV(activeSprite);
+                inner = Sprites.DataUtility.GetInnerUV(activeSprite);
+                border = activeSprite.border;
+                spriteSize = activeSprite.rect.size;
             }
             else
             {
@@ -408,10 +472,10 @@ namespace UnityEngine.UI
             var clipped = uvMax;
 
             // if either with is zero we cant tile so just assume it was the full width.
-            if (tileWidth == 0)
+            if (tileWidth <= 0)
                 tileWidth = xMax - xMin;
 
-            if (tileHeight == 0)
+            if (tileHeight <= 0)
                 tileHeight = yMax - yMin;
 
             if (m_FillCenter)
@@ -571,7 +635,7 @@ namespace UnityEngine.UI
                 return;
 
             Vector4 v = GetDrawingDimensions(preserveAspect);
-            Vector4 outer = overrideSprite != null ? Sprites.DataUtility.GetOuterUV(overrideSprite) : Vector4.zero;
+            Vector4 outer = activeSprite != null ? Sprites.DataUtility.GetOuterUV(activeSprite) : Vector4.zero;
             UIVertex uiv = UIVertex.simpleVert;
             uiv.color = color;
 
@@ -882,11 +946,11 @@ namespace UnityEngine.UI
         {
             get
             {
-                if (overrideSprite == null)
+                if (activeSprite == null)
                     return 0;
                 if (type == Type.Sliced || type == Type.Tiled)
-                    return Sprites.DataUtility.GetMinSize(overrideSprite).x / pixelsPerUnit;
-                return overrideSprite.rect.size.x / pixelsPerUnit;
+                    return Sprites.DataUtility.GetMinSize(activeSprite).x / pixelsPerUnit;
+                return activeSprite.rect.size.x / pixelsPerUnit;
             }
         }
 
@@ -898,11 +962,11 @@ namespace UnityEngine.UI
         {
             get
             {
-                if (overrideSprite == null)
+                if (activeSprite == null)
                     return 0;
                 if (type == Type.Sliced || type == Type.Tiled)
-                    return Sprites.DataUtility.GetMinSize(overrideSprite).y / pixelsPerUnit;
-                return overrideSprite.rect.size.y / pixelsPerUnit;
+                    return Sprites.DataUtility.GetMinSize(activeSprite).y / pixelsPerUnit;
+                return activeSprite.rect.size.y / pixelsPerUnit;
             }
         }
 
@@ -912,15 +976,18 @@ namespace UnityEngine.UI
 
         public virtual bool IsRaycastLocationValid(Vector2 screenPoint, Camera eventCamera)
         {
-            if (m_EventAlphaThreshold >= 1)
+            if (alphaHitTestMinimumThreshold <= 0)
                 return true;
 
-            Sprite sprite = overrideSprite;
-            if (sprite == null)
+            if (alphaHitTestMinimumThreshold > 1)
+                return false;
+
+            if (activeSprite == null)
                 return true;
 
             Vector2 local;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, screenPoint, eventCamera, out local);
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, screenPoint, eventCamera, out local))
+                return false;
 
             Rect rect = GetPixelAdjustedRect();
 
@@ -931,31 +998,31 @@ namespace UnityEngine.UI
             local = MapCoordinate(local, rect);
 
             // Normalize local coordinates.
-            Rect spriteRect = sprite.textureRect;
+            Rect spriteRect = activeSprite.textureRect;
             Vector2 normalized = new Vector2(local.x / spriteRect.width, local.y / spriteRect.height);
 
             // Convert to texture space.
-            float x = Mathf.Lerp(spriteRect.x, spriteRect.xMax, normalized.x) / sprite.texture.width;
-            float y = Mathf.Lerp(spriteRect.y, spriteRect.yMax, normalized.y) / sprite.texture.height;
+            float x = Mathf.Lerp(spriteRect.x, spriteRect.xMax, normalized.x) / activeSprite.texture.width;
+            float y = Mathf.Lerp(spriteRect.y, spriteRect.yMax, normalized.y) / activeSprite.texture.height;
 
             try
             {
-                return sprite.texture.GetPixelBilinear(x, y).a >= m_EventAlphaThreshold;
+                return activeSprite.texture.GetPixelBilinear(x, y).a >= alphaHitTestMinimumThreshold;
             }
             catch (UnityException e)
             {
-                Debug.LogError("Using clickAlphaThreshold lower than 1 on Image whose sprite texture cannot be read. " + e.Message + " Also make sure to disable sprite packing for this sprite.", this);
+                Debug.LogError("Using alphaHitTestMinimumThreshold greater than 0 on Image whose sprite texture cannot be read. " + e.Message + " Also make sure to disable sprite packing for this sprite.", this);
                 return true;
             }
         }
 
         private Vector2 MapCoordinate(Vector2 local, Rect rect)
         {
-            Rect spriteRect = sprite.rect;
+            Rect spriteRect = activeSprite.rect;
             if (type == Type.Simple || type == Type.Filled)
                 return new Vector2(local.x * spriteRect.width / rect.width, local.y * spriteRect.height / rect.height);
 
-            Vector4 border = sprite.border;
+            Vector4 border = activeSprite.border;
             Vector4 adjustedBorder = GetAdjustedBorders(border / pixelsPerUnit, rect);
 
             for (int i = 0; i < 2; i++)

@@ -50,6 +50,9 @@ namespace UnityEngine.UI
             // Don't set values which are the same as the default values for the Text component,
             // since there's no point in that, and it's good to keep them as consistent as possible.
             lbl.color = s_TextColor;
+
+            // Reset() is not called when playing. We still want the default font to be assigned
+            lbl.AssignDefaultFont();
         }
 
         private static void SetDefaultColorTransitionValues(Selectable slider)
