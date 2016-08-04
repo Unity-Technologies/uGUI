@@ -62,7 +62,11 @@ namespace UnityEngine.UI
         {
             FitMode fitting = (axis == 0 ? horizontalFit : verticalFit);
             if (fitting == FitMode.Unconstrained)
+            {
+                // Keep a reference to the tracked transform, but don't control its properties:
+                m_Tracker.Add(this, rectTransform, DrivenTransformProperties.None);
                 return;
+            }
 
             m_Tracker.Add(this, rectTransform, (axis == 0 ? DrivenTransformProperties.SizeDeltaX : DrivenTransformProperties.SizeDeltaY));
 

@@ -594,7 +594,10 @@ namespace UnityEngine.UI
             if (m_Dropdown != null)
             {
                 AlphaFadeList(0.15f, 0f);
-                StartCoroutine(DelayedDestroyDropdownList(0.15f));
+
+                // User could have disabled the dropdown during the OnValueChanged call.
+                if (IsActive())
+                    StartCoroutine(DelayedDestroyDropdownList(0.15f));
             }
             if (m_Blocker != null)
                 DestroyBlocker(m_Blocker);

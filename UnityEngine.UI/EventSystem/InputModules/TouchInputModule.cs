@@ -58,15 +58,9 @@ namespace UnityEngine.EventSystems
                 return wantsEnable;
             }
 
-            for (int i = 0; i < Input.touchCount; ++i)
-            {
-                Touch input = Input.GetTouch(i);
+            if (Input.touchCount > 0)
+                return true;
 
-                if (input.phase == TouchPhase.Began
-                    || input.phase == TouchPhase.Moved
-                    || input.phase == TouchPhase.Stationary)
-                    return true;
-            }
             return false;
         }
 

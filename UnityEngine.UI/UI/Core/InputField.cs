@@ -282,13 +282,6 @@ namespace UnityEngine.UI
         {
             get
             {
-                // only return keyboard data if it's activated for this input field
-                if (m_Keyboard != null && m_Keyboard.active && !InPlaceEditing() &&
-                    EventSystem.current.currentSelectedGameObject == gameObject)
-                {
-                    return m_Keyboard.text;
-                }
-
                 return m_Text;
             }
             set
@@ -296,7 +289,24 @@ namespace UnityEngine.UI
                 if (this.text == value)
                     return;
 
-                m_Text = value;
+                // If we have an input validator, validate the input and apply the character limit at the same time.
+                if (onValidateInput != null || characterValidation != CharacterValidation.None)
+                {
+                    m_Text = "";
+                    OnValidateInput validatorMethod = onValidateInput ?? Validate;
+                    m_CaretPosition = m_CaretSelectPosition = value.Length;
+                    int charactersToCheck = characterLimit > 0 ? Math.Min(characterLimit - 1, value.Length) : value.Length;
+                    for (int i = 0; i < charactersToCheck; ++i)
+                    {
+                        char c = validatorMethod(m_Text, m_Text.Length, value[i]);
+                        if (c != 0)
+                            m_Text += c;
+                    }
+                }
+                else
+                {
+                    m_Text = characterLimit > 0 && value.Length > characterLimit ? value.Substring(0, characterLimit) : value;
+                }
 
 #if UNITY_EDITOR
                 if (!Application.isPlaying)
@@ -1530,7 +1540,7 @@ namespace UnityEngine.UI
                 bool isEmpty = string.IsNullOrEmpty(fullText);
 
                 if (m_Placeholder != null)
-                    m_Placeholder.enabled = isEmpty && !isFocused;
+                    m_Placeholder.enabled = isEmpty;
 
                 // If not currently editing the text, set the visible range to the whole text.
                 // The UpdateLabel method will then truncate it to the part that fits inside the Text area.

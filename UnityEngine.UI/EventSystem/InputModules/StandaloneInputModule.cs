@@ -141,15 +141,9 @@ namespace UnityEngine.EventSystems
             shouldActivate |= (m_MousePosition - m_LastMousePosition).sqrMagnitude > 0.0f;
             shouldActivate |= Input.GetMouseButtonDown(0);
 
+            if (Input.touchCount > 0)
+                shouldActivate = true;
 
-            for (int i = 0; i < Input.touchCount; ++i)
-            {
-                Touch input = Input.GetTouch(i);
-
-                shouldActivate |= input.phase == TouchPhase.Began
-                    || input.phase == TouchPhase.Moved
-                    || input.phase == TouchPhase.Stationary;
-            }
             return shouldActivate;
         }
 
