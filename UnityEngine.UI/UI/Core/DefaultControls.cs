@@ -106,6 +106,7 @@ namespace UnityEngine.UI
             GameObject buttonRoot = CreateUIElementRoot("Button", s_ThickElementSize);
 
             GameObject childText = new GameObject("Text");
+            childText.AddComponent<RectTransform>();
             SetParentAndAlign(childText, buttonRoot);
 
             Image image = buttonRoot.AddComponent<Image>();

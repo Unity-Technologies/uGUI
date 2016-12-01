@@ -11,14 +11,21 @@
     <AssemblyName>UnityEngine.UI</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <ProductVersion>10.0.0</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>False</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;UNITY_EDITOR</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Test|AnyCPU' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>False</Optimize>
+    <OutputPath>bin\Test</OutputPath>
     <DefineConstants>TRACE;DEBUG;UNITY_EDITOR</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -34,10 +41,12 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="UnityEditor">
+    <Reference Include="UnityEditor, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\UnityEditor.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine">
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\UnityEngine.dll</HintPath>
     </Reference>
   </ItemGroup>
@@ -88,6 +97,10 @@
     </Compile>
     <Compile Include="..\UnityEngine.UI\EventSystem\ExecuteEvents.cs">
       <Link>EventSystem\ExecuteEvents.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\EventSystem\InputModules\BaseInput.cs">
+      <Link>EventSystem\InputModules\BaseInput.cs</Link>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="..\UnityEngine.UI\EventSystem\InputModules\BaseInputModule.cs">
@@ -199,6 +212,7 @@
     </Compile>
     <Compile Include="..\UnityEngine.UI\UI\Core\GraphicRebuildTracker.cs">
       <Link>UI\Core\GraphicRebuildTracker.cs</Link>
+      <SubType>Code</SubType>
     </Compile>
     <Compile Include="..\UnityEngine.UI\UI\Core\GraphicRegistry.cs">
       <Link>UI\Core\GraphicRegistry.cs</Link>
@@ -354,6 +368,10 @@
     </Compile>
     <Compile Include="..\UnityEngine.UI\UI\Core\Utility\ObjectPool.cs">
       <Link>UI\Core\Utility\ObjectPool.cs</Link>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Utility\ReflectionMethodsCache.cs">
+      <Link>UI\Core\Utility\ReflectionMethodsCache.cs</Link>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="..\UnityEngine.UI\UI\Core\Utility\VertexHelper.cs">

@@ -67,10 +67,7 @@ namespace UnityEngine.UI
         {
             // Only invoke if we are not destroyed.
             if (!this)
-            {
-                FontUpdateTracker.UntrackText(this);
                 return;
-            }
 
             if (m_DisableFontTextureRebuiltCallback)
                 return;
@@ -455,25 +452,16 @@ namespace UnityEngine.UI
             Vector2 extents = rectTransform.rect.size;
 
             var settings = GetGenerationSettings(extents);
-            cachedTextGenerator.Populate(text, settings);
-
-            Rect inputRect = rectTransform.rect;
-
-            // get the text alignment anchor point for the text in local space
-            Vector2 textAnchorPivot = GetTextAnchorPivot(m_FontData.alignment);
-            Vector2 refPoint = Vector2.zero;
-            refPoint.x = Mathf.Lerp(inputRect.xMin, inputRect.xMax, textAnchorPivot.x);
-            refPoint.y = Mathf.Lerp(inputRect.yMin, inputRect.yMax, textAnchorPivot.y);
-
-            // Determine fraction of pixel to offset text mesh.
-            Vector2 roundingOffset = PixelAdjustPoint(refPoint) - refPoint;
+            cachedTextGenerator.PopulateWithErrors(text, settings, gameObject);
 
             // Apply the offset to the vertices
             IList<UIVertex> verts = cachedTextGenerator.verts;
             float unitsPerPixel = 1 / pixelsPerUnit;
-            //Last 4 verts are always a new line...
+            //Last 4 verts are always a new line... (\n)
             int vertCount = verts.Count - 4;
 
+            Vector2 roundingOffset = new Vector2(verts[0].position.x, verts[0].position.y) * unitsPerPixel;
+            roundingOffset = PixelAdjustPoint(roundingOffset) - roundingOffset;
             toFill.Clear();
             if (roundingOffset != Vector2.zero)
             {
@@ -499,6 +487,7 @@ namespace UnityEngine.UI
                         toFill.AddUIVertexQuad(m_TempVerts);
                 }
             }
+
             m_DisableFontTextureRebuiltCallback = false;
         }
 
@@ -530,7 +519,7 @@ namespace UnityEngine.UI
         {
             get
             {
-                var settings = GetGenerationSettings(new Vector2(rectTransform.rect.size.x, 0.0f));
+                var settings = GetGenerationSettings(new Vector2(GetPixelAdjustedRect().size.x, 0.0f));
                 return cachedTextGeneratorForLayout.GetPreferredHeight(m_Text, settings) / pixelsPerUnit;
             }
         }
@@ -558,6 +547,12 @@ namespace UnityEngine.UI
         // We can intercept changes in OnValidate, and keep track of the previous font reference
         protected override void OnValidate()
         {
+            if (!IsActive())
+            {
+                base.OnValidate();
+                return;
+            }
+
             if (m_FontData.font != m_LastTrackedFont)
             {
                 Font newFont = m_FontData.font;

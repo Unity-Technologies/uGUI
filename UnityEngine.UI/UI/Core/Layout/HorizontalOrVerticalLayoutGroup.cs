@@ -11,9 +11,17 @@ namespace UnityEngine.UI
         [SerializeField] protected bool m_ChildForceExpandHeight = true;
         public bool childForceExpandHeight { get { return m_ChildForceExpandHeight; } set { SetProperty(ref m_ChildForceExpandHeight, value); } }
 
+        [SerializeField] protected bool m_ChildControlWidth = true;
+        public bool childControlWidth { get { return m_ChildControlWidth; } set { SetProperty(ref m_ChildControlWidth, value); } }
+
+        [SerializeField] protected bool m_ChildControlHeight = true;
+        public bool childControlHeight { get { return m_ChildControlHeight; } set { SetProperty(ref m_ChildControlHeight, value); } }
+
         protected void CalcAlongAxis(int axis, bool isVertical)
         {
             float combinedPadding = (axis == 0 ? padding.horizontal : padding.vertical);
+            bool controlSize = (axis == 0 ? m_ChildControlWidth : m_ChildControlHeight);
+            bool childForceExpandSize = (axis == 0 ? childForceExpandWidth : childForceExpandHeight);
 
             float totalMin = combinedPadding;
             float totalPreferred = combinedPadding;
@@ -23,11 +31,8 @@ namespace UnityEngine.UI
             for (int i = 0; i < rectChildren.Count; i++)
             {
                 RectTransform child = rectChildren[i];
-                float min = LayoutUtility.GetMinSize(child, axis);
-                float preferred = LayoutUtility.GetPreferredSize(child, axis);
-                float flexible = LayoutUtility.GetFlexibleSize(child, axis);
-                if ((axis == 0 ? childForceExpandWidth : childForceExpandHeight))
-                    flexible = Mathf.Max(flexible, 1);
+                float min, preferred, flexible;
+                GetChildSizes(child, axis, controlSize, childForceExpandSize, out min, out preferred, out flexible);
 
                 if (alongOtherAxis)
                 {
@@ -57,6 +62,9 @@ namespace UnityEngine.UI
         protected void SetChildrenAlongAxis(int axis, bool isVertical)
         {
             float size = rectTransform.rect.size[axis];
+            bool controlSize = (axis == 0 ? m_ChildControlWidth : m_ChildControlHeight);
+            bool childForceExpandSize = (axis == 0 ? childForceExpandWidth : childForceExpandHeight);
+            float alignmentOnAxis = GetAlignmentOnAxis(axis);
 
             bool alongOtherAxis = (isVertical ^ (axis == 1));
             if (alongOtherAxis)
@@ -65,15 +73,20 @@ namespace UnityEngine.UI
                 for (int i = 0; i < rectChildren.Count; i++)
                 {
                     RectTransform child = rectChildren[i];
-                    float min = LayoutUtility.GetMinSize(child, axis);
-                    float preferred = LayoutUtility.GetPreferredSize(child, axis);
-                    float flexible = LayoutUtility.GetFlexibleSize(child, axis);
-                    if ((axis == 0 ? childForceExpandWidth : childForceExpandHeight))
-                        flexible = Mathf.Max(flexible, 1);
+                    float min, preferred, flexible;
+                    GetChildSizes(child, axis, controlSize, childForceExpandSize, out min, out preferred, out flexible);
 
                     float requiredSpace = Mathf.Clamp(innerSize, min, flexible > 0 ? size : preferred);
                     float startOffset = GetStartOffset(axis, requiredSpace);
-                    SetChildAlongAxis(child, axis, startOffset, requiredSpace);
+                    if (controlSize)
+                    {
+                        SetChildAlongAxis(child, axis, startOffset, requiredSpace);
+                    }
+                    else
+                    {
+                        float offsetInCell = (requiredSpace - child.sizeDelta[axis]) * alignmentOnAxis;
+                        SetChildAlongAxis(child, axis, startOffset + offsetInCell);
+                    }
                 }
             }
             else
@@ -96,18 +109,61 @@ namespace UnityEngine.UI
                 for (int i = 0; i < rectChildren.Count; i++)
                 {
                     RectTransform child = rectChildren[i];
-                    float min = LayoutUtility.GetMinSize(child, axis);
-                    float preferred = LayoutUtility.GetPreferredSize(child, axis);
-                    float flexible = LayoutUtility.GetFlexibleSize(child, axis);
-                    if ((axis == 0 ? childForceExpandWidth : childForceExpandHeight))
-                        flexible = Mathf.Max(flexible, 1);
+                    float min, preferred, flexible;
+                    GetChildSizes(child, axis, controlSize, childForceExpandSize, out min, out preferred, out flexible);
 
                     float childSize = Mathf.Lerp(min, preferred, minMaxLerp);
                     childSize += flexible * itemFlexibleMultiplier;
-                    SetChildAlongAxis(child, axis, pos, childSize);
+                    if (controlSize)
+                    {
+                        SetChildAlongAxis(child, axis, pos, childSize);
+                    }
+                    else
+                    {
+                        float offsetInCell = (childSize - child.sizeDelta[axis]) * alignmentOnAxis;
+                        SetChildAlongAxis(child, axis, pos + offsetInCell);
+                    }
                     pos += childSize + spacing;
                 }
             }
         }
+
+        private void GetChildSizes(RectTransform child, int axis, bool controlSize, bool childForceExpand,
+            out float min, out float preferred, out float flexible)
+        {
+            if (!controlSize)
+            {
+                min = child.sizeDelta[axis];
+                preferred = min;
+                flexible = 0;
+            }
+            else
+            {
+                min = LayoutUtility.GetMinSize(child, axis);
+                preferred = LayoutUtility.GetPreferredSize(child, axis);
+                flexible = LayoutUtility.GetFlexibleSize(child, axis);
+            }
+
+            if (childForceExpand)
+                flexible = Mathf.Max(flexible, 1);
+        }
+
+#if UNITY_EDITOR
+        protected override void Reset()
+        {
+            base.Reset();
+
+            // For new added components we want these to be set to false,
+            // so that the user's sizes won't be overwritten before they
+            // have a chance to turn these settings off.
+            // However, for existing components that were added before this
+            // feature was introduced, we want it to be on be default for
+            // backwardds compatibility.
+            // Hence their default value is on, but we set to off in reset.
+            m_ChildControlWidth = false;
+            m_ChildControlHeight = false;
+        }
+
+#endif
     }
 }

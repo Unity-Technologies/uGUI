@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine.Events;
 
 namespace UnityEngine.UI
@@ -14,18 +15,9 @@ namespace UnityEngine.UI
             return true;
         }
 
-        public static bool SetEquatableStruct<T>(ref T currentValue, T newValue) where T : IEquatable<T>
-        {
-            if (currentValue.Equals(newValue))
-                return false;
-
-            currentValue = newValue;
-            return true;
-        }
-
         public static bool SetStruct<T>(ref T currentValue, T newValue) where T : struct
         {
-            if (currentValue.Equals(newValue))
+            if (EqualityComparer<T>.Default.Equals(currentValue, newValue))
                 return false;
 
             currentValue = newValue;

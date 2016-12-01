@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace UnityEngine.EventSystems
@@ -61,6 +62,8 @@ namespace UnityEngine.EventSystems
         {
             get { return null; }
         }
+
+        private bool m_Paused;
 
         protected EventSystem()
         {}
@@ -236,11 +239,18 @@ namespace UnityEngine.EventSystems
             }
         }
 
+        protected virtual void OnApplicationFocus(bool hasFocus)
+        {
+            if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Windows ||
+                SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux ||
+                SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX)
+                m_Paused = !hasFocus;
+        }
+
         protected virtual void Update()
         {
-            if (current != this)
+            if (current != this || m_Paused)
                 return;
-
             TickModules();
 
             bool changedModule = false;

@@ -317,7 +317,11 @@ namespace UnityEngine.UI
             if (currentCanvas != m_Canvas)
             {
                 GraphicRegistry.UnregisterGraphicForCanvas(currentCanvas, this);
-                GraphicRegistry.RegisterGraphicForCanvas(canvas, this);
+
+                // Only register if we are active and enabled as OnCanvasHierarchyChanged can get called
+                // during object destruction and we dont want to register ourself and then become null.
+                if (IsActive())
+                    GraphicRegistry.RegisterGraphicForCanvas(canvas, this);
             }
         }
 
@@ -467,7 +471,7 @@ namespace UnityEngine.UI
         {
             // when rebuild is requested we need to rebuild all the graphics /
             // and associated components... The correct way to do this is by
-            // calling OnValidate... Becasue MB's dont' have a common base class
+            // calling OnValidate... Because MB's don't have a common base class
             // we do this via reflection. It's nasty and ugly... Editor only.
             var mbs = gameObject.GetComponents<MonoBehaviour>();
             foreach (var mb in mbs)
@@ -478,6 +482,11 @@ namespace UnityEngine.UI
                 if (methodInfo != null)
                     methodInfo.Invoke(mb, null);
             }
+        }
+
+        protected override void Reset()
+        {
+            SetAllDirty();
         }
 
 #endif
@@ -559,18 +568,20 @@ namespace UnityEngine.UI
 
         public Vector2 PixelAdjustPoint(Vector2 point)
         {
-            if (!canvas || !canvas.pixelPerfect)
+            if (!canvas || canvas.renderMode == RenderMode.WorldSpace || canvas.scaleFactor == 0.0f || !canvas.pixelPerfect)
                 return point;
-
-            return RectTransformUtility.PixelAdjustPoint(point, transform, canvas);
+            else
+            {
+                return RectTransformUtility.PixelAdjustPoint(point, transform, canvas);
+            }
         }
 
         public Rect GetPixelAdjustedRect()
         {
-            if (!canvas || !canvas.pixelPerfect)
+            if (!canvas || canvas.renderMode == RenderMode.WorldSpace || canvas.scaleFactor == 0.0f || !canvas.pixelPerfect)
                 return rectTransform.rect;
-
-            return RectTransformUtility.PixelAdjustRect(rectTransform, canvas);
+            else
+                return RectTransformUtility.PixelAdjustRect(rectTransform, canvas);
         }
 
         public virtual void CrossFadeColor(Color targetColor, float duration, bool ignoreTimeScale, bool useAlpha)

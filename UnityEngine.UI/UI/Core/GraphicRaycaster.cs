@@ -79,23 +79,37 @@ namespace UnityEngine.UI
             if (canvas == null)
                 return;
 
+            var eventPosition = Display.RelativeMouseAt(eventData.position);
+
+            int displayIndex = canvas.targetDisplay;
+
+            // Discard events that are not part of this display so the user does not interact with multiple displays at once.
+            if (eventPosition.z != displayIndex)
+                return;
+
+            // The multiple display system is not supported on all platforms, when it is not supported the returned position
+            // will be all zeros so when the returned index is 0 we will default to the event data to be safe.
+            if (eventPosition.z == 0)
+                eventPosition = eventData.position;
+
             // Convert to view space
             Vector2 pos;
             if (eventCamera == null)
             {
-                // Removed multiple display support until it supports none native resolutions(case 741751)
-                //int displayIndex = canvas.targetDisplay;
+                // Multiple display support only when not the main display. For display 0 the reported
+                // resolution is always the desktops resolution since its part of the display API,
+                // so we use the standard none multiple display method. (case 741751)
                 float w = Screen.width;
                 float h = Screen.height;
-                //if (Screen.fullScreen && displayIndex < Display.displays.Length)
-                //{
-                //    w = Display.displays[displayIndex].systemWidth;
-                //    h = Display.displays[displayIndex].systemHeight;
-                //}
-                pos = new Vector2(eventData.position.x / w, eventData.position.y / h);
+                if (displayIndex > 0 && displayIndex < Display.displays.Length)
+                {
+                    w = Display.displays[displayIndex].systemWidth;
+                    h = Display.displays[displayIndex].systemHeight;
+                }
+                pos = new Vector2(eventPosition.x / w, eventPosition.y / h);
             }
             else
-                pos = eventCamera.ScreenToViewportPoint(eventData.position);
+                pos = eventCamera.ScreenToViewportPoint(eventPosition);
 
             // If it's outside the camera's viewport, do nothing
             if (pos.x < 0f || pos.x > 1f || pos.y < 0f || pos.y > 1f)
@@ -106,7 +120,7 @@ namespace UnityEngine.UI
             Ray ray = new Ray();
 
             if (eventCamera != null)
-                ray = eventCamera.ScreenPointToRay(eventData.position);
+                ray = eventCamera.ScreenPointToRay(eventPosition);
 
             if (canvas.renderMode != RenderMode.ScreenSpaceOverlay && blockingObjects != BlockingObjects.None)
             {
@@ -117,26 +131,27 @@ namespace UnityEngine.UI
 
                 if (blockingObjects == BlockingObjects.ThreeD || blockingObjects == BlockingObjects.All)
                 {
-                    RaycastHit hit;
-                    if (Physics.Raycast(ray, out hit, dist, m_BlockingMask))
+                    if (ReflectionMethodsCache.Singleton.raycast3D != null)
                     {
-                        hitDistance = hit.distance;
+                        RaycastHit hit;
+                        if (ReflectionMethodsCache.Singleton.raycast3D(ray, out hit, dist, m_BlockingMask))
+                            hitDistance = hit.distance;
                     }
                 }
 
                 if (blockingObjects == BlockingObjects.TwoD || blockingObjects == BlockingObjects.All)
                 {
-                    RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, dist, m_BlockingMask);
-
-                    if (hit.collider != null)
+                    if (ReflectionMethodsCache.Singleton.raycast2D != null)
                     {
-                        hitDistance = hit.fraction * dist;
+                        var hit = ReflectionMethodsCache.Singleton.raycast2D((Vector2)ray.origin, (Vector2)ray.direction, dist, (int)m_BlockingMask);
+                        if (hit.collider)
+                            hitDistance = hit.fraction * dist;
                     }
                 }
             }
 
             m_RaycastResults.Clear();
-            Raycast(canvas, eventCamera, eventData.position, m_RaycastResults);
+            Raycast(canvas, eventCamera, eventPosition, m_RaycastResults);
 
             for (var index = 0; index < m_RaycastResults.Count; index++)
             {
@@ -186,7 +201,7 @@ namespace UnityEngine.UI
                         gameObject = go,
                         module = this,
                         distance = distance,
-                        screenPosition = eventData.position,
+                        screenPosition = eventPosition,
                         index = resultAppendList.Count,
                         depth = m_RaycastResults[index].depth,
                         sortingLayer =  canvas.sortingLayerID,

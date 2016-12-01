@@ -34,12 +34,12 @@ namespace UnityEngine.EventSystems
         public override void UpdateModule()
         {
             m_LastMousePosition = m_MousePosition;
-            m_MousePosition = Input.mousePosition;
+            m_MousePosition = input.mousePosition;
         }
 
         public override bool IsModuleSupported()
         {
-            return forceModuleActive || Input.touchSupported;
+            return forceModuleActive || input.touchSupported;
         }
 
         public override bool ShouldActivateModule()
@@ -52,13 +52,13 @@ namespace UnityEngine.EventSystems
 
             if (UseFakeInput())
             {
-                bool wantsEnable = Input.GetMouseButtonDown(0);
+                bool wantsEnable = input.GetMouseButtonDown(0);
 
                 wantsEnable |= (m_MousePosition - m_LastMousePosition).sqrMagnitude > 0.0f;
                 return wantsEnable;
             }
 
-            if (Input.touchCount > 0)
+            if (input.touchCount > 0)
                 return true;
 
             return false;
@@ -66,7 +66,7 @@ namespace UnityEngine.EventSystems
 
         private bool UseFakeInput()
         {
-            return !Input.touchSupported;
+            return !input.touchSupported;
         }
 
         public override void Process()
@@ -93,7 +93,7 @@ namespace UnityEngine.EventSystems
             ProcessTouchPress(leftPressData.buttonData, leftPressData.PressedThisFrame(), leftPressData.ReleasedThisFrame());
 
             // only process move if we are pressed...
-            if (Input.GetMouseButton(0))
+            if (input.GetMouseButton(0))
             {
                 ProcessMove(leftPressData.buttonData);
                 ProcessDrag(leftPressData.buttonData);
@@ -105,16 +105,16 @@ namespace UnityEngine.EventSystems
         /// </summary>
         private void ProcessTouchEvents()
         {
-            for (int i = 0; i < Input.touchCount; ++i)
+            for (int i = 0; i < input.touchCount; ++i)
             {
-                Touch input = Input.GetTouch(i);
+                Touch touch = input.GetTouch(i);
 
-                if (input.type == TouchType.Indirect)
+                if (touch.type == TouchType.Indirect)
                     continue;
 
                 bool released;
                 bool pressed;
-                var pointer = GetTouchPointerEventData(input, out pressed, out released);
+                var pointer = GetTouchPointerEventData(touch, out pressed, out released);
 
                 ProcessTouchPress(pointer, pressed, released);
 
@@ -128,7 +128,7 @@ namespace UnityEngine.EventSystems
             }
         }
 
-        private void ProcessTouchPress(PointerEventData pointerEvent, bool pressed, bool released)
+        protected void ProcessTouchPress(PointerEventData pointerEvent, bool pressed, bool released)
         {
             var currentOverGo = pointerEvent.pointerCurrentRaycast.gameObject;
 

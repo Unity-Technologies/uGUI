@@ -72,10 +72,11 @@ namespace UnityEngine.UI
                 m_ShouldRecalculateStencil = false;
             }
 
-            // if we have a Mask component then it will
+            // if we have a enabled Mask component then it will
             // generate the mask material. This is an optimisation
             // it adds some coupling between components though :(
-            if (m_StencilValue > 0 && GetComponent<Mask>() == null)
+            Mask maskComponent = GetComponent<Mask>();
+            if (m_StencilValue > 0 && (maskComponent == null || !maskComponent.IsActive()))
             {
                 var maskMat = StencilMaterial.Add(toUse, (1 << m_StencilValue) - 1, StencilOp.Keep, CompareFunction.Equal, ColorWriteMask.All, (1 << m_StencilValue) - 1, 0);
                 StencilMaterial.Remove(m_MaskMaterial);

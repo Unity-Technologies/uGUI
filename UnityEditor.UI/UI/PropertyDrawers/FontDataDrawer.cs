@@ -243,7 +243,7 @@ namespace UnityEditor.UI
         {
             GUIContent alingmentContent = new GUIContent("Alignment");
 
-            int id = EditorGUIUtility.GetControlID(s_TextAlignmentHash, EditorGUIUtility.native, position);
+            int id = EditorGUIUtility.GetControlID(s_TextAlignmentHash, FocusType.Keyboard, position);
 
             EditorGUIUtility.SetIconSize(new Vector2(15, 15));
             EditorGUI.BeginProperty(position, alingmentContent, alignment);
@@ -363,7 +363,7 @@ namespace UnityEditor.UI
         private static bool EditorToggle(Rect position, bool value, GUIContent content, GUIStyle style)
         {
             int hashCode = "AlignToggle".GetHashCode();
-            int id = EditorGUIUtility.GetControlID(hashCode, EditorGUIUtility.native, position);
+            int id = EditorGUIUtility.GetControlID(hashCode, FocusType.Keyboard, position);
             Event evt = Event.current;
 
             // Toggle selected toggle on space or return key

@@ -11,14 +11,21 @@
     <AssemblyName>UnityEngine.UI</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <ProductVersion>10.0.0</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>False</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Test|AnyCPU' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>False</Optimize>
+    <OutputPath>bin\Test</OutputPath>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -34,7 +41,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="UnityEngine">
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\UnityEngine.dll</HintPath>
     </Reference>
   </ItemGroup>
@@ -64,6 +72,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="EventSystem\ExecuteEvents.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventSystem\InputModules\BaseInput.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="EventSystem\InputModules\BaseInputModule.cs">
@@ -261,6 +272,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="UI\Core\Utility\ObjectPool.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Core\Utility\ReflectionMethodsCache.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="UI\Core\Utility\VertexHelper.cs">

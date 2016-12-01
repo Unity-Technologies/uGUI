@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace UnityEngine.EventSystems
 {
@@ -69,7 +70,10 @@ namespace UnityEngine.EventSystems
             var ray = eventCamera.ScreenPointToRay(eventData.position);
             float dist = eventCamera.farClipPlane - eventCamera.nearClipPlane;
 
-            var hits = Physics.RaycastAll(ray, dist, finalEventMask);
+            if (ReflectionMethodsCache.Singleton.raycast3DAll == null)
+                return;
+
+            var hits = ReflectionMethodsCache.Singleton.raycast3DAll(ray, dist, finalEventMask);
 
             if (hits.Length > 1)
                 System.Array.Sort(hits, (r1, r2) => r1.distance.CompareTo(r2.distance));

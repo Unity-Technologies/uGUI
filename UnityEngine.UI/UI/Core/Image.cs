@@ -382,16 +382,17 @@ namespace UnityEngine.UI
             }
 
             Rect rect = GetPixelAdjustedRect();
-            border = GetAdjustedBorders(border / pixelsPerUnit, rect);
+            Vector4 adjustedBorders = GetAdjustedBorders(border / pixelsPerUnit, rect);
             padding = padding / pixelsPerUnit;
 
             s_VertScratch[0] = new Vector2(padding.x, padding.y);
             s_VertScratch[3] = new Vector2(rect.width - padding.z, rect.height - padding.w);
 
-            s_VertScratch[1].x = border.x;
-            s_VertScratch[1].y = border.y;
-            s_VertScratch[2].x = rect.width - border.z;
-            s_VertScratch[2].y = rect.height - border.w;
+            s_VertScratch[1].x = adjustedBorders.x;
+            s_VertScratch[1].y = adjustedBorders.y;
+
+            s_VertScratch[2].x = rect.width - adjustedBorders.z;
+            s_VertScratch[2].y = rect.height - adjustedBorders.w;
 
             for (int i = 0; i < 4; ++i)
             {
@@ -459,9 +460,6 @@ namespace UnityEngine.UI
             var uvMin = new Vector2(inner.x, inner.y);
             var uvMax = new Vector2(inner.z, inner.w);
 
-            var v = UIVertex.simpleVert;
-            v.color = color;
-
             // Min to max max range for tiled region in coordinates relative to lower left corner.
             float xMin = border.x;
             float xMax = rect.width - border.z;
@@ -471,112 +469,209 @@ namespace UnityEngine.UI
             toFill.Clear();
             var clipped = uvMax;
 
-            // if either with is zero we cant tile so just assume it was the full width.
+            // if either width is zero we cant tile so just assume it was the full width.
             if (tileWidth <= 0)
                 tileWidth = xMax - xMin;
 
             if (tileHeight <= 0)
                 tileHeight = yMax - yMin;
 
-            if (m_FillCenter)
+            if (activeSprite != null && (hasBorder || activeSprite.packed || activeSprite.texture.wrapMode != TextureWrapMode.Repeat))
             {
-                for (float y1 = yMin; y1 < yMax; y1 += tileHeight)
+                // Sprite has border, or is not in repeat mode, or cannot be repeated because of packing.
+                // We cannot use texture tiling so we will generate a mesh of quads to tile the texture.
+
+                // Evaluate how many vertices we will generate. Limit this number to something sane,
+                // especially since meshes can not have more than 65000 vertices.
+
+                int nTilesW = 0;
+                int nTilesH = 0;
+                if (m_FillCenter)
                 {
-                    float y2 = y1 + tileHeight;
-                    if (y2 > yMax)
+                    nTilesW = (int)Math.Ceiling((xMax - xMin) / tileWidth);
+                    nTilesH = (int)Math.Ceiling((yMax - yMin) / tileHeight);
+
+                    int nVertices = 0;
+                    if (hasBorder)
                     {
-                        clipped.y = uvMin.y + (uvMax.y - uvMin.y) * (yMax - y1) / (y2 - y1);
-                        y2 = yMax;
+                        nVertices = (nTilesW + 2) * (nTilesH + 2) * 4; // 4 vertices per tile
+                    }
+                    else
+                    {
+                        nVertices = nTilesW * nTilesH * 4; // 4 vertices per tile
                     }
 
-                    clipped.x = uvMax.x;
-                    for (float x1 = xMin; x1 < xMax; x1 += tileWidth)
+                    if (nVertices > 65000)
                     {
-                        float x2 = x1 + tileWidth;
+                        Debug.LogError("Too many sprite tiles on Image \"" + name + "\". The tile size will be increased. To remove the limit on the number of tiles, convert the Sprite to an Advanced texture, remove the borders, clear the Packing tag and set the Wrap mode to Repeat.", this);
+
+                        double maxTiles = 65000.0 / 4.0; // Max number of vertices is 65000; 4 vertices per tile.
+                        double imageRatio;
+                        if (hasBorder)
+                        {
+                            imageRatio = (nTilesW + 2.0) / (nTilesH + 2.0);
+                        }
+                        else
+                        {
+                            imageRatio = (double)nTilesW / nTilesH;
+                        }
+
+                        double targetTilesW = Math.Sqrt(maxTiles / imageRatio);
+                        double targetTilesH = targetTilesW * imageRatio;
+                        if (hasBorder)
+                        {
+                            targetTilesW -= 2;
+                            targetTilesH -= 2;
+                        }
+
+                        nTilesW = (int)Math.Floor(targetTilesW);
+                        nTilesH = (int)Math.Floor(targetTilesH);
+                        tileWidth = (xMax - xMin) / nTilesW;
+                        tileHeight = (yMax - yMin) / nTilesH;
+                    }
+                }
+                else
+                {
+                    if (hasBorder)
+                    {
+                        // Texture on the border is repeated only in one direction.
+                        nTilesW = (int)Math.Ceiling((xMax - xMin) / tileWidth);
+                        nTilesH = (int)Math.Ceiling((yMax - yMin) / tileHeight);
+                        int nVertices = (nTilesH + nTilesW + 2 /*corners*/) * 2 /*sides*/ * 4 /*vertices per tile*/;
+                        if (nVertices > 65000)
+                        {
+                            Debug.LogError("Too many sprite tiles on Image \"" + name + "\". The tile size will be increased. To remove the limit on the number of tiles, convert the Sprite to an Advanced texture, remove the borders, clear the Packing tag and set the Wrap mode to Repeat.", this);
+
+                            double maxTiles = 65000.0 / 4.0; // Max number of vertices is 65000; 4 vertices per tile.
+                            double imageRatio = (double)nTilesW / nTilesH;
+                            double targetTilesW = (maxTiles - 4 /*corners*/) / (2 * (1.0 + imageRatio));
+                            double targetTilesH = targetTilesW * imageRatio;
+
+                            nTilesW = (int)Math.Floor(targetTilesW);
+                            nTilesH = (int)Math.Floor(targetTilesH);
+                            tileWidth = (xMax - xMin) / nTilesW;
+                            tileHeight = (yMax - yMin) / nTilesH;
+                        }
+                    }
+                    else
+                    {
+                        nTilesH = nTilesW = 0;
+                    }
+                }
+
+                if (m_FillCenter)
+                {
+                    // TODO: we could share vertices between quads. If vertex sharing is implemented. update the computation for the number of vertices accordingly.
+                    for (int j = 0; j < nTilesH; j++)
+                    {
+                        float y1 = yMin + j * tileHeight;
+                        float y2 = yMin + (j + 1) * tileHeight;
+                        if (y2 > yMax)
+                        {
+                            clipped.y = uvMin.y + (uvMax.y - uvMin.y) * (yMax - y1) / (y2 - y1);
+                            y2 = yMax;
+                        }
+                        clipped.x = uvMax.x;
+                        for (int i = 0; i < nTilesW; i++)
+                        {
+                            float x1 = xMin + i * tileWidth;
+                            float x2 = xMin + (i + 1) * tileWidth;
+                            if (x2 > xMax)
+                            {
+                                clipped.x = uvMin.x + (uvMax.x - uvMin.x) * (xMax - x1) / (x2 - x1);
+                                x2 = xMax;
+                            }
+                            AddQuad(toFill, new Vector2(x1, y1) + rect.position, new Vector2(x2, y2) + rect.position, color, uvMin, clipped);
+                        }
+                    }
+                }
+                if (hasBorder)
+                {
+                    clipped = uvMax;
+                    for (int j = 0; j < nTilesH; j++)
+                    {
+                        float y1 = yMin + j * tileHeight;
+                        float y2 = yMin + (j + 1) * tileHeight;
+                        if (y2 > yMax)
+                        {
+                            clipped.y = uvMin.y + (uvMax.y - uvMin.y) * (yMax - y1) / (y2 - y1);
+                            y2 = yMax;
+                        }
+                        AddQuad(toFill,
+                            new Vector2(0, y1) + rect.position,
+                            new Vector2(xMin, y2) + rect.position,
+                            color,
+                            new Vector2(outer.x, uvMin.y),
+                            new Vector2(uvMin.x, clipped.y));
+                        AddQuad(toFill,
+                            new Vector2(xMax, y1) + rect.position,
+                            new Vector2(rect.width, y2) + rect.position,
+                            color,
+                            new Vector2(uvMax.x, uvMin.y),
+                            new Vector2(outer.z, clipped.y));
+                    }
+
+                    // Bottom and top tiled border
+                    clipped = uvMax;
+                    for (int i = 0; i < nTilesW; i++)
+                    {
+                        float x1 = xMin + i * tileWidth;
+                        float x2 = xMin + (i + 1) * tileWidth;
                         if (x2 > xMax)
                         {
                             clipped.x = uvMin.x + (uvMax.x - uvMin.x) * (xMax - x1) / (x2 - x1);
                             x2 = xMax;
                         }
-                        AddQuad(toFill, new Vector2(x1, y1) + rect.position, new Vector2(x2, y2) + rect.position, color, uvMin, clipped);
+                        AddQuad(toFill,
+                            new Vector2(x1, 0) + rect.position,
+                            new Vector2(x2, yMin) + rect.position,
+                            color,
+                            new Vector2(uvMin.x, outer.y),
+                            new Vector2(clipped.x, uvMin.y));
+                        AddQuad(toFill,
+                            new Vector2(x1, yMax) + rect.position,
+                            new Vector2(x2, rect.height) + rect.position,
+                            color,
+                            new Vector2(uvMin.x, uvMax.y),
+                            new Vector2(clipped.x, outer.w));
                     }
+
+                    // Corners
+                    AddQuad(toFill,
+                        new Vector2(0, 0) + rect.position,
+                        new Vector2(xMin, yMin) + rect.position,
+                        color,
+                        new Vector2(outer.x, outer.y),
+                        new Vector2(uvMin.x, uvMin.y));
+                    AddQuad(toFill,
+                        new Vector2(xMax, 0) + rect.position,
+                        new Vector2(rect.width, yMin) + rect.position,
+                        color,
+                        new Vector2(uvMax.x, outer.y),
+                        new Vector2(outer.z, uvMin.y));
+                    AddQuad(toFill,
+                        new Vector2(0, yMax) + rect.position,
+                        new Vector2(xMin, rect.height) + rect.position,
+                        color,
+                        new Vector2(outer.x, uvMax.y),
+                        new Vector2(uvMin.x, outer.w));
+                    AddQuad(toFill,
+                        new Vector2(xMax, yMax) + rect.position,
+                        new Vector2(rect.width, rect.height) + rect.position,
+                        color,
+                        new Vector2(uvMax.x, uvMax.y),
+                        new Vector2(outer.z, outer.w));
                 }
             }
-
-            if (hasBorder)
+            else
             {
-                clipped = uvMax;
-                for (float y1 = yMin; y1 < yMax; y1 += tileHeight)
-                {
-                    float y2 = y1 + tileHeight;
-                    if (y2 > yMax)
-                    {
-                        clipped.y = uvMin.y + (uvMax.y - uvMin.y) * (yMax - y1) / (y2 - y1);
-                        y2 = yMax;
-                    }
-                    AddQuad(toFill,
-                        new Vector2(0, y1) + rect.position,
-                        new Vector2(xMin, y2) + rect.position,
-                        color,
-                        new Vector2(outer.x, uvMin.y),
-                        new Vector2(uvMin.x, clipped.y));
-                    AddQuad(toFill,
-                        new Vector2(xMax, y1) + rect.position,
-                        new Vector2(rect.width, y2) + rect.position,
-                        color,
-                        new Vector2(uvMax.x, uvMin.y),
-                        new Vector2(outer.z, clipped.y));
-                }
+                // Texture has no border, is in repeat mode and not packed. Use texture tiling.
+                Vector2 uvScale = new Vector2((xMax - xMin) / tileWidth, (yMax - yMin) / tileHeight);
 
-                // Bottom and top tiled border
-                clipped = uvMax;
-                for (float x1 = xMin; x1 < xMax; x1 += tileWidth)
+                if (m_FillCenter)
                 {
-                    float x2 = x1 + tileWidth;
-                    if (x2 > xMax)
-                    {
-                        clipped.x = uvMin.x + (uvMax.x - uvMin.x) * (xMax - x1) / (x2 - x1);
-                        x2 = xMax;
-                    }
-                    AddQuad(toFill,
-                        new Vector2(x1, 0) + rect.position,
-                        new Vector2(x2, yMin) + rect.position,
-                        color,
-                        new Vector2(uvMin.x, outer.y),
-                        new Vector2(clipped.x, uvMin.y));
-                    AddQuad(toFill,
-                        new Vector2(x1, yMax) + rect.position,
-                        new Vector2(x2, rect.height) + rect.position,
-                        color,
-                        new Vector2(uvMin.x, uvMax.y),
-                        new Vector2(clipped.x, outer.w));
+                    AddQuad(toFill, new Vector2(xMin, yMin) + rect.position, new Vector2(xMax, yMax) + rect.position, color, Vector2.Scale(uvMin, uvScale), Vector2.Scale(uvMax, uvScale));
                 }
-
-                // Corners
-                AddQuad(toFill,
-                    new Vector2(0, 0) + rect.position,
-                    new Vector2(xMin, yMin) + rect.position,
-                    color,
-                    new Vector2(outer.x, outer.y),
-                    new Vector2(uvMin.x, uvMin.y));
-                AddQuad(toFill,
-                    new Vector2(xMax, 0) + rect.position,
-                    new Vector2(rect.width, yMin) + rect.position,
-                    color,
-                    new Vector2(uvMax.x, outer.y),
-                    new Vector2(outer.z, uvMin.y));
-                AddQuad(toFill,
-                    new Vector2(0, yMax) + rect.position,
-                    new Vector2(xMin, rect.height) + rect.position,
-                    color,
-                    new Vector2(outer.x, uvMax.y),
-                    new Vector2(uvMin.x, outer.w));
-                AddQuad(toFill,
-                    new Vector2(xMax, yMax) + rect.position,
-                    new Vector2(rect.width, rect.height) + rect.position,
-                    color,
-                    new Vector2(uvMax.x, uvMax.y),
-                    new Vector2(outer.z, outer.w));
             }
         }
 

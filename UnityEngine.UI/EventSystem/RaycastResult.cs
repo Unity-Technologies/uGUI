@@ -49,7 +49,6 @@ namespace UnityEngine.EventSystems
 
             return "Name: " + gameObject + "\n" +
                    "module: " + module + "\n" +
-                   "module camera: " + module.GetComponent<Camera>() + "\n" +
                    "distance: " + distance + "\n" +
                    "index: " + index + "\n" +
                    "depth: " + depth + "\n" +

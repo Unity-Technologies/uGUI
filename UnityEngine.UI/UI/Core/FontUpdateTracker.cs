@@ -6,14 +6,14 @@ namespace UnityEngine.UI
 {
     public static class FontUpdateTracker
     {
-        static Dictionary<Font, List<Text>> m_Tracked = new Dictionary<Font, List<Text>>();
+        static Dictionary<Font, HashSet<Text>> m_Tracked = new Dictionary<Font, HashSet<Text>>();
 
         public static void TrackText(Text t)
         {
             if (t.font == null)
                 return;
 
-            List<Text> exists;
+            HashSet<Text> exists;
             m_Tracked.TryGetValue(t.font, out exists);
             if (exists == null)
             {
@@ -21,7 +21,7 @@ namespace UnityEngine.UI
                 if (m_Tracked.Count == 0)
                     Font.textureRebuilt += RebuildForFont;
 
-                exists = new List<Text>();
+                exists = new HashSet<Text>();
                 m_Tracked.Add(t.font, exists);
             }
 
@@ -31,14 +31,14 @@ namespace UnityEngine.UI
 
         private static void RebuildForFont(Font f)
         {
-            List<Text> texts;
+            HashSet<Text> texts;
             m_Tracked.TryGetValue(f, out texts);
 
             if (texts == null)
                 return;
 
-            for (var i = 0; i < texts.Count; i++)
-                texts[i].FontTextureChanged();
+            foreach (var text in texts)
+                text.FontTextureChanged();
         }
 
         public static void UntrackText(Text t)
@@ -46,7 +46,7 @@ namespace UnityEngine.UI
             if (t.font == null)
                 return;
 
-            List<Text> texts;
+            HashSet<Text> texts;
             m_Tracked.TryGetValue(t.font, out texts);
 
             if (texts == null)

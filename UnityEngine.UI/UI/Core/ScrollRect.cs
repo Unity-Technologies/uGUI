@@ -124,7 +124,7 @@ namespace UnityEngine.UI
 
         // The offset from handle position to mouse down position
         private Vector2 m_PointerStartLocalCursor = Vector2.zero;
-        private Vector2 m_ContentStartPosition = Vector2.zero;
+        protected Vector2 m_ContentStartPosition = Vector2.zero;
 
         private RectTransform m_ViewRect;
 
@@ -140,7 +140,7 @@ namespace UnityEngine.UI
             }
         }
 
-        private Bounds m_ContentBounds;
+        protected Bounds m_ContentBounds;
         private Bounds m_ViewBounds;
 
         private Vector2 m_Velocity;
@@ -438,7 +438,7 @@ namespace UnityEngine.UI
             }
         }
 
-        private void UpdatePrevData()
+        protected void UpdatePrevData()
         {
             if (m_Content == null)
                 m_PrevPosition = Vector2.zero;
@@ -642,11 +642,25 @@ namespace UnityEngine.UI
 
         void UpdateScrollbarVisibility()
         {
-            if (m_VerticalScrollbar && m_VerticalScrollbarVisibility != ScrollbarVisibility.Permanent && m_VerticalScrollbar.gameObject.activeSelf != vScrollingNeeded)
-                m_VerticalScrollbar.gameObject.SetActive(vScrollingNeeded);
+            UpdateOneScrollbarVisibility(vScrollingNeeded, m_Vertical, m_VerticalScrollbarVisibility, m_VerticalScrollbar);
+            UpdateOneScrollbarVisibility(hScrollingNeeded, m_Horizontal, m_HorizontalScrollbarVisibility, m_HorizontalScrollbar);
+        }
 
-            if (m_HorizontalScrollbar && m_HorizontalScrollbarVisibility != ScrollbarVisibility.Permanent && m_HorizontalScrollbar.gameObject.activeSelf != hScrollingNeeded)
-                m_HorizontalScrollbar.gameObject.SetActive(hScrollingNeeded);
+        private static void UpdateOneScrollbarVisibility(bool xScrollingNeeded, bool xAxisEnabled, ScrollbarVisibility scrollbarVisibility, Scrollbar scrollbar)
+        {
+            if (scrollbar)
+            {
+                if (scrollbarVisibility == ScrollbarVisibility.Permanent)
+                {
+                    if (scrollbar.gameObject.activeSelf != xAxisEnabled)
+                        scrollbar.gameObject.SetActive(xAxisEnabled);
+                }
+                else
+                {
+                    if (scrollbar.gameObject.activeSelf != xScrollingNeeded)
+                        scrollbar.gameObject.SetActive(xScrollingNeeded);
+                }
+            }
         }
 
         void UpdateScrollbarLayout()
@@ -684,7 +698,7 @@ namespace UnityEngine.UI
             }
         }
 
-        private void UpdateBounds()
+        protected void UpdateBounds()
         {
             m_ViewBounds = new Bounds(viewRect.rect.center, viewRect.rect.size);
             m_ContentBounds = GetBounds();
@@ -692,6 +706,17 @@ namespace UnityEngine.UI
             if (m_Content == null)
                 return;
 
+            Vector3 contentSize = m_ContentBounds.size;
+            Vector3 contentPos = m_ContentBounds.center;
+            var contentPivot = m_Content.pivot;
+            InternalUpdateBounds(ref m_ViewBounds, ref contentPivot, ref contentSize, ref contentPos);
+
+            m_ContentBounds.size = contentSize;
+            m_ContentBounds.center = contentPos;
+        }
+
+        internal static void InternalUpdateBounds(ref Bounds viewBounds, ref Vector2 contentPivot, ref Vector3 contentSize, ref Vector3 contentPos)
+        {
             // Make sure content bounds are at least as large as view by adding padding if not.
             // One might think at first that if the content is smaller than the view, scrolling should be allowed.
             // However, that's not how scroll views normally work.
@@ -699,22 +724,17 @@ namespace UnityEngine.UI
             // We use the pivot of the content rect to decide in which directions the content bounds should be expanded.
             // E.g. if pivot is at top, bounds are expanded downwards.
             // This also works nicely when ContentSizeFitter is used on the content.
-            Vector3 contentSize = m_ContentBounds.size;
-            Vector3 contentPos = m_ContentBounds.center;
-            Vector3 excess = m_ViewBounds.size - contentSize;
+            Vector3 excess = viewBounds.size - contentSize;
             if (excess.x > 0)
             {
-                contentPos.x -= excess.x * (m_Content.pivot.x - 0.5f);
-                contentSize.x = m_ViewBounds.size.x;
+                contentPos.x -= excess.x * (contentPivot.x - 0.5f);
+                contentSize.x = viewBounds.size.x;
             }
             if (excess.y > 0)
             {
-                contentPos.y -= excess.y * (m_Content.pivot.y - 0.5f);
-                contentSize.y = m_ViewBounds.size.y;
+                contentPos.y -= excess.y * (contentPivot.y - 0.5f);
+                contentSize.y = viewBounds.size.y;
             }
-
-            m_ContentBounds.size = contentSize;
-            m_ContentBounds.center = contentPos;
         }
 
         private readonly Vector3[] m_Corners = new Vector3[4];
@@ -722,15 +742,19 @@ namespace UnityEngine.UI
         {
             if (m_Content == null)
                 return new Bounds();
+            m_Content.GetWorldCorners(m_Corners);
+            var viewWorldToLocalMatrix = viewRect.worldToLocalMatrix;
+            return InternalGetBounds(m_Corners, ref viewWorldToLocalMatrix);
+        }
 
+        internal static Bounds InternalGetBounds(Vector3[] corners, ref Matrix4x4 viewWorldToLocalMatrix)
+        {
             var vMin = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
             var vMax = new Vector3(float.MinValue, float.MinValue, float.MinValue);
 
-            var toLocal = viewRect.worldToLocalMatrix;
-            m_Content.GetWorldCorners(m_Corners);
             for (int j = 0; j < 4; j++)
             {
-                Vector3 v = toLocal.MultiplyPoint3x4(m_Corners[j]);
+                Vector3 v = viewWorldToLocalMatrix.MultiplyPoint3x4(corners[j]);
                 vMin = Vector3.Min(v, vMin);
                 vMax = Vector3.Max(v, vMax);
             }
@@ -742,31 +766,36 @@ namespace UnityEngine.UI
 
         private Vector2 CalculateOffset(Vector2 delta)
         {
+            return InternalCalculateOffset(ref m_ViewBounds, ref m_ContentBounds, m_Horizontal, m_Vertical, m_MovementType, ref delta);
+        }
+
+        internal static Vector2 InternalCalculateOffset(ref Bounds viewBounds, ref Bounds contentBounds, bool horizontal, bool vertical, MovementType movementType, ref Vector2 delta)
+        {
             Vector2 offset = Vector2.zero;
-            if (m_MovementType == MovementType.Unrestricted)
+            if (movementType == MovementType.Unrestricted)
                 return offset;
 
-            Vector2 min = m_ContentBounds.min;
-            Vector2 max = m_ContentBounds.max;
+            Vector2 min = contentBounds.min;
+            Vector2 max = contentBounds.max;
 
-            if (m_Horizontal)
+            if (horizontal)
             {
                 min.x += delta.x;
                 max.x += delta.x;
-                if (min.x > m_ViewBounds.min.x)
-                    offset.x = m_ViewBounds.min.x - min.x;
-                else if (max.x < m_ViewBounds.max.x)
-                    offset.x = m_ViewBounds.max.x - max.x;
+                if (min.x > viewBounds.min.x)
+                    offset.x = viewBounds.min.x - min.x;
+                else if (max.x < viewBounds.max.x)
+                    offset.x = viewBounds.max.x - max.x;
             }
 
-            if (m_Vertical)
+            if (vertical)
             {
                 min.y += delta.y;
                 max.y += delta.y;
-                if (max.y < m_ViewBounds.max.y)
-                    offset.y = m_ViewBounds.max.y - max.y;
-                else if (min.y > m_ViewBounds.min.y)
-                    offset.y = m_ViewBounds.min.y - min.y;
+                if (max.y < viewBounds.max.y)
+                    offset.y = viewBounds.max.y - max.y;
+                else if (min.y > viewBounds.min.y)
+                    offset.y = viewBounds.min.y - min.y;
             }
 
             return offset;

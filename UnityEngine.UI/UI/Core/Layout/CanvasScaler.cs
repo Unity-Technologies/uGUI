@@ -75,7 +75,7 @@ namespace UnityEngine.UI
 
         [Tooltip("The pixels per inch to use for sprites that have a 'Pixels Per Unit' setting that matches the 'Reference Pixels Per Unit' setting.")]
         [SerializeField] protected float m_DefaultSpriteDPI = 96;
-        public float defaultSpriteDPI { get { return m_DefaultSpriteDPI; } set { m_DefaultSpriteDPI = value; } }
+        public float defaultSpriteDPI { get { return m_DefaultSpriteDPI; } set { m_DefaultSpriteDPI = Mathf.Max(1, value); } }
 
 
         // World Canvas settings
@@ -150,12 +150,15 @@ namespace UnityEngine.UI
         {
             Vector2 screenSize = new Vector2(Screen.width, Screen.height);
 
-            // Removed multiple display support until it supports none native resolutions(case 741751)
-            //if (Screen.fullScreen && m_Canvas.targetDisplay < Display.displays.Length )
-            //{
-            //    Display disp = Display.displays[m_Canvas.targetDisplay];
-            //    screenSize = new Vector2 (disp.renderingWidth, disp.renderingHeight);
-            //}
+            // Multiple display support only when not the main display. For display 0 the reported
+            // resolution is always the desktops resolution since its part of the display API,
+            // so we use the standard none multiple display method. (case 741751)
+            int displayIndex = m_Canvas.targetDisplay;
+            if (displayIndex > 0 && displayIndex < Display.displays.Length)
+            {
+                Display disp = Display.displays[displayIndex];
+                screenSize = new Vector2(disp.renderingWidth, disp.renderingHeight);
+            }
 
             float scaleFactor = 0;
             switch (m_ScreenMatchMode)
@@ -230,6 +233,7 @@ namespace UnityEngine.UI
         protected override void OnValidate()
         {
             m_ScaleFactor = Mathf.Max(0.01f, m_ScaleFactor);
+            m_DefaultSpriteDPI = Mathf.Max(1, m_DefaultSpriteDPI);
         }
 
 #endif

@@ -72,10 +72,10 @@ namespace UnityEngine.EventSystems
             @to.pointerEnter = @from.pointerEnter;
         }
 
-        protected static PointerEventData.FramePressState StateForMouseButton(int buttonId)
+        protected PointerEventData.FramePressState StateForMouseButton(int buttonId)
         {
-            var pressed = Input.GetMouseButtonDown(buttonId);
-            var released = Input.GetMouseButtonUp(buttonId);
+            var pressed = input.GetMouseButtonDown(buttonId);
+            var released = input.GetMouseButtonUp(buttonId);
             if (pressed && released)
                 return PointerEventData.FramePressState.PressedAndReleased;
             if (pressed)
@@ -188,9 +188,9 @@ namespace UnityEngine.EventSystems
             leftData.Reset();
 
             if (created)
-                leftData.position = Input.mousePosition;
+                leftData.position = input.mousePosition;
 
-            Vector2 pos = Input.mousePosition;
+            Vector2 pos = input.mousePosition;
             if (Cursor.lockState == CursorLockMode.Locked)
             {
                 // We don't want to do ANY cursor-based interaction when the mouse is locked
@@ -202,7 +202,7 @@ namespace UnityEngine.EventSystems
                 leftData.delta = pos - leftData.position;
                 leftData.position = pos;
             }
-            leftData.scrollDelta = Input.mouseScrollDelta;
+            leftData.scrollDelta = input.mouseScrollDelta;
             leftData.button = PointerEventData.InputButton.Left;
             eventSystem.RaycastAll(leftData, m_RaycastResultCache);
             var raycast = FindFirstRaycast(m_RaycastResultCache);
@@ -244,16 +244,18 @@ namespace UnityEngine.EventSystems
 
         protected virtual void ProcessMove(PointerEventData pointerEvent)
         {
-            var targetGO = pointerEvent.pointerCurrentRaycast.gameObject;
+            var targetGO = (Cursor.lockState == CursorLockMode.Locked ? null : pointerEvent.pointerCurrentRaycast.gameObject);
             HandlePointerExitAndEnter(pointerEvent, targetGO);
         }
 
         protected virtual void ProcessDrag(PointerEventData pointerEvent)
         {
-            bool moving = pointerEvent.IsPointerMoving();
+            if (!pointerEvent.IsPointerMoving() ||
+                Cursor.lockState == CursorLockMode.Locked ||
+                pointerEvent.pointerDrag == null)
+                return;
 
-            if (moving && pointerEvent.pointerDrag != null
-                && !pointerEvent.dragging
+            if (!pointerEvent.dragging
                 && ShouldStartDrag(pointerEvent.pressPosition, pointerEvent.position, eventSystem.pixelDragThreshold, pointerEvent.useDragThreshold))
             {
                 ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.beginDragHandler);
@@ -261,7 +263,7 @@ namespace UnityEngine.EventSystems
             }
 
             // Drag notification
-            if (pointerEvent.dragging && moving && pointerEvent.pointerDrag != null)
+            if (pointerEvent.dragging)
             {
                 // Before doing drag we should cancel any pointer down state
                 // And clear selection!

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace UnityEngine.EventSystems
 {
@@ -21,7 +22,10 @@ namespace UnityEngine.EventSystems
 
             float dist = eventCamera.farClipPlane - eventCamera.nearClipPlane;
 
-            var hits = Physics2D.GetRayIntersectionAll(ray, dist, finalEventMask);
+            if (ReflectionMethodsCache.Singleton.getRayIntersectionAll == null)
+                return;
+
+            var hits = ReflectionMethodsCache.Singleton.getRayIntersectionAll(ray, dist, finalEventMask);
 
             if (hits.Length != 0)
             {
@@ -33,7 +37,7 @@ namespace UnityEngine.EventSystems
                     {
                         gameObject = hits[b].collider.gameObject,
                         module = this,
-                        distance = Vector3.Distance(eventCamera.transform.position, hits[b].transform.position),
+                        distance = Vector3.Distance(eventCamera.transform.position, hits[b].point),
                         worldPosition = hits[b].point,
                         worldNormal = hits[b].normal,
                         screenPosition = eventData.position,

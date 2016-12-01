@@ -120,12 +120,12 @@ namespace UnityEngine.EventSystems
         public override void UpdateModule()
         {
             m_LastMousePosition = m_MousePosition;
-            m_MousePosition = Input.mousePosition;
+            m_MousePosition = input.mousePosition;
         }
 
         public override bool IsModuleSupported()
         {
-            return m_ForceModuleActive || Input.mousePresent || Input.touchSupported;
+            return m_ForceModuleActive || input.mousePresent || input.touchSupported;
         }
 
         public override bool ShouldActivateModule()
@@ -134,14 +134,14 @@ namespace UnityEngine.EventSystems
                 return false;
 
             var shouldActivate = m_ForceModuleActive;
-            shouldActivate |= Input.GetButtonDown(m_SubmitButton);
-            shouldActivate |= Input.GetButtonDown(m_CancelButton);
-            shouldActivate |= !Mathf.Approximately(Input.GetAxisRaw(m_HorizontalAxis), 0.0f);
-            shouldActivate |= !Mathf.Approximately(Input.GetAxisRaw(m_VerticalAxis), 0.0f);
+            shouldActivate |= input.GetButtonDown(m_SubmitButton);
+            shouldActivate |= input.GetButtonDown(m_CancelButton);
+            shouldActivate |= !Mathf.Approximately(input.GetAxisRaw(m_HorizontalAxis), 0.0f);
+            shouldActivate |= !Mathf.Approximately(input.GetAxisRaw(m_VerticalAxis), 0.0f);
             shouldActivate |= (m_MousePosition - m_LastMousePosition).sqrMagnitude > 0.0f;
-            shouldActivate |= Input.GetMouseButtonDown(0);
+            shouldActivate |= input.GetMouseButtonDown(0);
 
-            if (Input.touchCount > 0)
+            if (input.touchCount > 0)
                 shouldActivate = true;
 
             return shouldActivate;
@@ -150,8 +150,8 @@ namespace UnityEngine.EventSystems
         public override void ActivateModule()
         {
             base.ActivateModule();
-            m_MousePosition = Input.mousePosition;
-            m_LastMousePosition = Input.mousePosition;
+            m_MousePosition = input.mousePosition;
+            m_LastMousePosition = input.mousePosition;
 
             var toSelect = eventSystem.currentSelectedGameObject;
             if (toSelect == null)
@@ -180,22 +180,22 @@ namespace UnityEngine.EventSystems
             }
 
             // touch needs to take precedence because of the mouse emulation layer
-            if (!ProcessTouchEvents() && Input.mousePresent)
+            if (!ProcessTouchEvents() && input.mousePresent)
                 ProcessMouseEvent();
         }
 
         private bool ProcessTouchEvents()
         {
-            for (int i = 0; i < Input.touchCount; ++i)
+            for (int i = 0; i < input.touchCount; ++i)
             {
-                Touch input = Input.GetTouch(i);
+                Touch touch = input.GetTouch(i);
 
-                if (input.type == TouchType.Indirect)
+                if (touch.type == TouchType.Indirect)
                     continue;
 
                 bool released;
                 bool pressed;
-                var pointer = GetTouchPointerEventData(input, out pressed, out released);
+                var pointer = GetTouchPointerEventData(touch, out pressed, out released);
 
                 ProcessTouchPress(pointer, pressed, released);
 
@@ -207,10 +207,10 @@ namespace UnityEngine.EventSystems
                 else
                     RemovePointerData(pointer);
             }
-            return Input.touchCount > 0;
+            return input.touchCount > 0;
         }
 
-        private void ProcessTouchPress(PointerEventData pointerEvent, bool pressed, bool released)
+        protected void ProcessTouchPress(PointerEventData pointerEvent, bool pressed, bool released)
         {
             var currentOverGo = pointerEvent.pointerCurrentRaycast.gameObject;
 
@@ -324,10 +324,10 @@ namespace UnityEngine.EventSystems
                 return false;
 
             var data = GetBaseEventData();
-            if (Input.GetButtonDown(m_SubmitButton))
+            if (input.GetButtonDown(m_SubmitButton))
                 ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, data, ExecuteEvents.submitHandler);
 
-            if (Input.GetButtonDown(m_CancelButton))
+            if (input.GetButtonDown(m_CancelButton))
                 ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, data, ExecuteEvents.cancelHandler);
             return data.used;
         }
@@ -335,17 +335,17 @@ namespace UnityEngine.EventSystems
         private Vector2 GetRawMoveVector()
         {
             Vector2 move = Vector2.zero;
-            move.x = Input.GetAxisRaw(m_HorizontalAxis);
-            move.y = Input.GetAxisRaw(m_VerticalAxis);
+            move.x = input.GetAxisRaw(m_HorizontalAxis);
+            move.y = input.GetAxisRaw(m_VerticalAxis);
 
-            if (Input.GetButtonDown(m_HorizontalAxis))
+            if (input.GetButtonDown(m_HorizontalAxis))
             {
                 if (move.x < 0)
                     move.x = -1f;
                 if (move.x > 0)
                     move.x = 1f;
             }
-            if (Input.GetButtonDown(m_VerticalAxis))
+            if (input.GetButtonDown(m_VerticalAxis))
             {
                 if (move.y < 0)
                     move.y = -1f;
@@ -370,7 +370,7 @@ namespace UnityEngine.EventSystems
             }
 
             // If user pressed key again, always allow event
-            bool allow = Input.GetButtonDown(m_HorizontalAxis) || Input.GetButtonDown(m_VerticalAxis);
+            bool allow = input.GetButtonDown(m_HorizontalAxis) || input.GetButtonDown(m_VerticalAxis);
             bool similarDir = (Vector2.Dot(movement, m_LastMoveVector) > 0);
             if (!allow)
             {
@@ -410,6 +410,11 @@ namespace UnityEngine.EventSystems
             ProcessMouseEvent(0);
         }
 
+        protected virtual bool ForceAutoSelect()
+        {
+            return false;
+        }
+
         /// <summary>
         /// Process all mouse events.
         /// </summary>
@@ -417,6 +422,9 @@ namespace UnityEngine.EventSystems
         {
             var mouseData = GetMousePointerEventData(id);
             var leftButtonData = mouseData.GetButtonState(PointerEventData.InputButton.Left).eventData;
+
+            if (ForceAutoSelect())
+                eventSystem.SetSelectedGameObject(leftButtonData.buttonData.pointerCurrentRaycast.gameObject, leftButtonData.buttonData);
 
             // Process the first mouse button fully
             ProcessMousePress(leftButtonData);

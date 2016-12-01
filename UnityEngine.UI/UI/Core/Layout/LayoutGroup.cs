@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
@@ -132,12 +133,16 @@ namespace UnityEngine.UI
             float requiredSpace = requiredSpaceWithoutPadding + (axis == 0 ? padding.horizontal : padding.vertical);
             float availableSpace = rectTransform.rect.size[axis];
             float surplusSpace = availableSpace - requiredSpace;
-            float alignmentOnAxis = 0;
-            if (axis == 0)
-                alignmentOnAxis = ((int)childAlignment % 3) * 0.5f;
-            else
-                alignmentOnAxis = ((int)childAlignment / 3) * 0.5f;
+            float alignmentOnAxis = GetAlignmentOnAxis(axis);
             return (axis == 0 ? padding.left : padding.top) + surplusSpace * alignmentOnAxis;
+        }
+
+        protected float GetAlignmentOnAxis(int axis)
+        {
+            if (axis == 0)
+                return ((int)childAlignment % 3) * 0.5f;
+            else
+                return ((int)childAlignment / 3) * 0.5f;
         }
 
         protected void SetLayoutInputForAxis(float totalMin, float totalPreferred, float totalFlexible, int axis)
@@ -147,6 +152,18 @@ namespace UnityEngine.UI
             m_TotalFlexibleSize[axis] = totalFlexible;
         }
 
+        protected void SetChildAlongAxis(RectTransform rect, int axis, float pos)
+        {
+            if (rect == null)
+                return;
+
+            m_Tracker.Add(this, rect,
+                DrivenTransformProperties.Anchors |
+                (axis == 0 ? DrivenTransformProperties.AnchoredPositionX : DrivenTransformProperties.AnchoredPositionY));
+
+            rect.SetInsetAndSizeFromParentEdge(axis == 0 ? RectTransform.Edge.Left : RectTransform.Edge.Top, pos, rect.sizeDelta[axis]);
+        }
+
         protected void SetChildAlongAxis(RectTransform rect, int axis, float pos, float size)
         {
             if (rect == null)
@@ -154,8 +171,10 @@ namespace UnityEngine.UI
 
             m_Tracker.Add(this, rect,
                 DrivenTransformProperties.Anchors |
-                DrivenTransformProperties.AnchoredPosition |
-                DrivenTransformProperties.SizeDelta);
+                (axis == 0 ?
+                 (DrivenTransformProperties.AnchoredPositionX | DrivenTransformProperties.SizeDeltaX) :
+                 (DrivenTransformProperties.AnchoredPositionY | DrivenTransformProperties.SizeDeltaY)
+                ));
 
             rect.SetInsetAndSizeFromParentEdge(axis == 0 ? RectTransform.Edge.Left : RectTransform.Edge.Top, pos, size);
         }
@@ -196,6 +215,15 @@ namespace UnityEngine.UI
             if (!IsActive())
                 return;
 
+            if (!CanvasUpdateRegistry.IsRebuildingLayout())
+                LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
+            else
+                StartCoroutine(DelayedSetDirty(rectTransform));
+        }
+
+        IEnumerator DelayedSetDirty(RectTransform rectTransform)
+        {
+            yield return null;
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
         }
 

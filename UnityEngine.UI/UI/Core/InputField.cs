@@ -21,7 +21,8 @@ namespace UnityEngine.UI
         IEndDragHandler,
         IPointerClickHandler,
         ISubmitHandler,
-        ICanvasElement
+        ICanvasElement,
+        ILayoutElement
     {
         // Setting the content type acts as a shortcut for setting a combination of InputType, CharacterValidation, LineType, and TouchScreenKeyboardType
         public enum ContentType
@@ -213,6 +214,21 @@ namespace UnityEngine.UI
         private bool m_WasCanceled = false;
         private bool m_HasDoneFocusTransition = false;
 
+        private BaseInput input
+        {
+            get
+            {
+                if (EventSystem.current && EventSystem.current.currentInputModule)
+                    return EventSystem.current.currentInputModule.input;
+                return null;
+            }
+        }
+
+        private string compositionString
+        {
+            get { return input != null ? input.compositionString : Input.compositionString; }
+        }
+
         // Doesn't include dot and @ on purpose! See usage for details.
         const string kEmailSpecialCharacters = "!#$%&'*+-/=?^_`{|}~";
 
@@ -257,10 +273,19 @@ namespace UnityEngine.UI
                     case RuntimePlatform.Android:
                     case RuntimePlatform.IPhonePlayer:
                     case RuntimePlatform.TizenPlayer:
+                    case RuntimePlatform.tvOS:
                         return m_HideMobileInput;
                 }
 
                 return true;
+            }
+        }
+
+        bool shouldActivateOnSelect
+        {
+            get
+            {
+                return Application.platform != RuntimePlatform.tvOS;
             }
         }
 
@@ -393,8 +418,8 @@ namespace UnityEngine.UI
         /// Getters are public Setters are protected
         /// </summary>
 
-        protected int caretPositionInternal { get { return m_CaretPosition + Input.compositionString.Length; } set { m_CaretPosition = value; ClampPos(ref m_CaretPosition); } }
-        protected int caretSelectPositionInternal { get { return m_CaretSelectPosition + Input.compositionString.Length; } set { m_CaretSelectPosition = value; ClampPos(ref m_CaretSelectPosition); } }
+        protected int caretPositionInternal { get { return m_CaretPosition + compositionString.Length; } set { m_CaretPosition = value; ClampPos(ref m_CaretPosition); } }
+        protected int caretSelectPositionInternal { get { return m_CaretSelectPosition + compositionString.Length; } set { m_CaretSelectPosition = value; ClampPos(ref m_CaretSelectPosition); } }
         private bool hasSelection { get { return caretPositionInternal != caretSelectPositionInternal; } }
 
 #if UNITY_EDITOR
@@ -409,7 +434,7 @@ namespace UnityEngine.UI
 
         public int caretPosition
         {
-            get { return m_CaretSelectPosition + Input.compositionString.Length; }
+            get { return m_CaretSelectPosition + compositionString.Length; }
             set { selectionAnchorPosition = value; selectionFocusPosition = value; }
         }
 
@@ -420,10 +445,10 @@ namespace UnityEngine.UI
 
         public int selectionAnchorPosition
         {
-            get { return m_CaretPosition + Input.compositionString.Length; }
+            get { return m_CaretPosition + compositionString.Length; }
             set
             {
-                if (Input.compositionString.Length != 0)
+                if (compositionString.Length != 0)
                     return;
 
                 m_CaretPosition = value;
@@ -438,10 +463,10 @@ namespace UnityEngine.UI
 
         public int selectionFocusPosition
         {
-            get { return m_CaretSelectPosition + Input.compositionString.Length; }
+            get { return m_CaretSelectPosition + compositionString.Length; }
             set
             {
-                if (Input.compositionString.Length != 0)
+                if (compositionString.Length != 0)
                     return;
 
                 m_CaretSelectPosition = value;
@@ -654,7 +679,7 @@ namespace UnityEngine.UI
 
             AssignPositioningIfNeeded();
 
-            if (m_Keyboard == null || !m_Keyboard.active)
+            if (m_Keyboard == null || m_Keyboard.done)
             {
                 if (m_Keyboard != null)
                 {
@@ -936,9 +961,7 @@ namespace UnityEngine.UI
         protected EditState KeyPressed(Event evt)
         {
             var currentEventModifiers = evt.modifiers;
-            RuntimePlatform rp = Application.platform;
-            bool isMac = (rp == RuntimePlatform.OSXEditor || rp == RuntimePlatform.OSXPlayer);
-            bool ctrl = isMac ? (currentEventModifiers & EventModifiers.Command) != 0 : (currentEventModifiers & EventModifiers.Control) != 0;
+            bool ctrl = SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX ? (currentEventModifiers & EventModifiers.Command) != 0 : (currentEventModifiers & EventModifiers.Control) != 0;
             bool shift = (currentEventModifiers & EventModifiers.Shift) != 0;
             bool alt = (currentEventModifiers & EventModifiers.Alt) != 0;
             bool ctrlOnly = ctrl && !alt && !shift;
@@ -1079,7 +1102,7 @@ namespace UnityEngine.UI
 
             if (c == 0)
             {
-                if (Input.compositionString.Length > 0)
+                if (compositionString.Length > 0)
                 {
                     UpdateLabel();
                 }
@@ -1521,8 +1544,8 @@ namespace UnityEngine.UI
                 m_PreventFontCallback = true;
 
                 string fullText;
-                if (Input.compositionString.Length > 0)
-                    fullText = text.Substring(0, m_CaretPosition) + Input.compositionString + text.Substring(m_CaretPosition);
+                if (compositionString.Length > 0)
+                    fullText = text.Substring(0, m_CaretPosition) + compositionString + text.Substring(m_CaretPosition);
                 else
                     fullText = text;
 
@@ -1555,7 +1578,7 @@ namespace UnityEngine.UI
                     var settings = m_TextComponent.GetGenerationSettings(extents);
                     settings.generateOutOfBounds = true;
 
-                    cachedInputTextGenerator.Populate(processed, settings);
+                    cachedInputTextGenerator.PopulateWithErrors(processed, settings, gameObject);
 
                     SetDrawRangeToContainCaretPosition(caretSelectPositionInternal);
 
@@ -1793,25 +1816,7 @@ namespace UnityEngine.UI
                     return;
                 }
 
-                Rect inputRect = m_TextComponent.rectTransform.rect;
-                Vector2 extents = inputRect.size;
-
-                // get the text alignment anchor point for the text in local space
-                Vector2 textAnchorPivot = Text.GetTextAnchorPivot(m_TextComponent.alignment);
-                Vector2 refPoint = Vector2.zero;
-
-                refPoint.x = Mathf.Lerp(inputRect.xMin, inputRect.xMax, textAnchorPivot.x);
-                refPoint.y = Mathf.Lerp(inputRect.yMin, inputRect.yMax, textAnchorPivot.y);
-
-                // Adjust the anchor point in screen space
-                Vector2 roundedRefPoint = m_TextComponent.PixelAdjustPoint(refPoint);
-
-                // Determine fraction of pixel to offset text mesh.
-                // This is the rounding in screen space, plus the fraction of a pixel the text anchor pivot is from the corner of the text mesh.
-                Vector2 roundingOffset = roundedRefPoint - refPoint + Vector2.Scale(extents, textAnchorPivot);
-                roundingOffset.x = roundingOffset.x - Mathf.Floor(0.5f + roundingOffset.x);
-                roundingOffset.y = roundingOffset.y - Mathf.Floor(0.5f + roundingOffset.y);
-
+                Vector2 roundingOffset = m_TextComponent.PixelAdjustPoint(Vector2.zero);
                 if (!hasSelection)
                     GenerateCaret(helper, roundingOffset);
                 else
@@ -1880,13 +1885,15 @@ namespace UnityEngine.UI
             vbo.AddUIVertexQuad(m_CursorVerts);
 
             int screenHeight = Screen.height;
-            // Removed multiple display support until it supports none native resolutions(case 741751)
-            //int displayIndex = m_TextComponent.canvas.targetDisplay;
-            //if (Screen.fullScreen && displayIndex < Display.displays.Length)
-            //    screenHeight = Display.displays[displayIndex].renderingHeight;
+            // Multiple display support only when not the main display. For display 0 the reported
+            // resolution is always the desktops resolution since its part of the display API,
+            // so we use the standard none multiple display method. (case 741751)
+            int displayIndex = m_TextComponent.canvas.targetDisplay;
+            if (displayIndex > 0 && displayIndex < Display.displays.Length)
+                screenHeight = Display.displays[displayIndex].renderingHeight;
 
             startPosition.y = screenHeight - startPosition.y;
-            Input.compositionCursorPos = startPosition;
+            input.compositionCursorPos = startPosition;
         }
 
         private void CreateCursorVerts()
@@ -2079,7 +2086,7 @@ namespace UnityEngine.UI
 
             if (TouchScreenKeyboard.isSupported)
             {
-                if (Input.touchSupported)
+                if (input.touchSupported)
                 {
                     TouchScreenKeyboard.hideInput = shouldHideMobileInput;
                 }
@@ -2094,7 +2101,7 @@ namespace UnityEngine.UI
             }
             else
             {
-                Input.imeCompositionMode = IMECompositionMode.On;
+                input.imeCompositionMode = IMECompositionMode.On;
                 OnFocus();
             }
 
@@ -2108,7 +2115,9 @@ namespace UnityEngine.UI
         public override void OnSelect(BaseEventData eventData)
         {
             base.OnSelect(eventData);
-            ActivateInputField();
+
+            if (shouldActivateOnSelect)
+                ActivateInputField();
         }
 
         public virtual void OnPointerClick(PointerEventData eventData)
@@ -2146,7 +2155,7 @@ namespace UnityEngine.UI
 
                 SendOnSubmit();
 
-                Input.imeCompositionMode = IMECompositionMode.Auto;
+                input.imeCompositionMode = IMECompositionMode.Auto;
             }
 
             MarkGeometryAsDirty();
@@ -2280,5 +2289,37 @@ namespace UnityEngine.UI
 
             base.DoStateTransition(state, instant);
         }
+
+        public virtual void CalculateLayoutInputHorizontal() {}
+        public virtual void CalculateLayoutInputVertical() {}
+
+        public virtual float minWidth { get { return 0; } }
+
+        public virtual float preferredWidth
+        {
+            get
+            {
+                if (textComponent == null)
+                    return 0;
+                var settings = textComponent.GetGenerationSettings(Vector2.zero);
+                return textComponent.cachedTextGeneratorForLayout.GetPreferredWidth(m_Text, settings) / textComponent.pixelsPerUnit;
+            }
+        }
+        public virtual float flexibleWidth { get { return -1; } }
+        public virtual float minHeight { get { return 0; } }
+
+        public virtual float preferredHeight
+        {
+            get
+            {
+                if (textComponent == null)
+                    return 0;
+                var settings = textComponent.GetGenerationSettings(new Vector2(textComponent.rectTransform.rect.size.x, 0.0f));
+                return textComponent.cachedTextGeneratorForLayout.GetPreferredHeight(m_Text, settings) / textComponent.pixelsPerUnit;
+            }
+        }
+
+        public virtual float flexibleHeight { get { return -1; } }
+        public virtual int layoutPriority { get { return 1; } }
     }
 }

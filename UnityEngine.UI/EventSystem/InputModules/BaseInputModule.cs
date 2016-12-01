@@ -14,6 +14,37 @@ namespace UnityEngine.EventSystems
         private EventSystem m_EventSystem;
         private BaseEventData m_BaseEventData;
 
+        protected BaseInput m_InputOverride;
+        private BaseInput m_DefaultInput;
+
+        public BaseInput input
+        {
+            get
+            {
+                if (m_InputOverride != null)
+                    return m_InputOverride;
+
+                if (m_DefaultInput == null)
+                {
+                    var inputs = GetComponents<BaseInput>();
+                    foreach (var baseInput in inputs)
+                    {
+                        // We dont want to use any classes that derrive from BaseInput for default.
+                        if (baseInput != null && baseInput.GetType() == typeof(BaseInput))
+                        {
+                            m_DefaultInput = baseInput;
+                            break;
+                        }
+                    }
+
+                    if (m_DefaultInput == null)
+                        m_DefaultInput = gameObject.AddComponent<BaseInput>();
+                }
+
+                return m_DefaultInput;
+            }
+        }
+
         protected EventSystem eventSystem
         {
             get { return m_EventSystem; }

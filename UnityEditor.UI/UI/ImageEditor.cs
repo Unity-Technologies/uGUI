@@ -26,6 +26,7 @@ namespace UnityEditor.UI
         GUIContent m_ClockwiseContent;
         AnimBool m_ShowSlicedOrTiled;
         AnimBool m_ShowSliced;
+        AnimBool m_ShowTiled;
         AnimBool m_ShowFilled;
         AnimBool m_ShowType;
 
@@ -53,9 +54,11 @@ namespace UnityEditor.UI
 
             m_ShowSlicedOrTiled = new AnimBool(!m_Type.hasMultipleDifferentValues && typeEnum == Image.Type.Sliced);
             m_ShowSliced = new AnimBool(!m_Type.hasMultipleDifferentValues && typeEnum == Image.Type.Sliced);
+            m_ShowTiled = new AnimBool(!m_Type.hasMultipleDifferentValues && typeEnum == Image.Type.Tiled);
             m_ShowFilled = new AnimBool(!m_Type.hasMultipleDifferentValues && typeEnum == Image.Type.Filled);
             m_ShowSlicedOrTiled.valueChanged.AddListener(Repaint);
             m_ShowSliced.valueChanged.AddListener(Repaint);
+            m_ShowTiled.valueChanged.AddListener(Repaint);
             m_ShowFilled.valueChanged.AddListener(Repaint);
 
             SetShowNativeSize(true);
@@ -66,6 +69,7 @@ namespace UnityEditor.UI
             m_ShowType.valueChanged.RemoveListener(Repaint);
             m_ShowSlicedOrTiled.valueChanged.RemoveListener(Repaint);
             m_ShowSliced.valueChanged.RemoveListener(Repaint);
+            m_ShowTiled.valueChanged.RemoveListener(Repaint);
             m_ShowFilled.valueChanged.RemoveListener(Repaint);
         }
 
@@ -98,7 +102,7 @@ namespace UnityEditor.UI
         void SetShowNativeSize(bool instant)
         {
             Image.Type type = (Image.Type)m_Type.enumValueIndex;
-            bool showNativeSize = (type == Image.Type.Simple || type == Image.Type.Filled);
+            bool showNativeSize = (type == Image.Type.Simple || type == Image.Type.Filled) && m_Sprite.objectReferenceValue != null;
             base.SetShowNativeSize(showNativeSize, instant);
         }
 
@@ -146,6 +150,7 @@ namespace UnityEditor.UI
 
                 m_ShowSlicedOrTiled.target = showSlicedOrTiled;
                 m_ShowSliced.target = (showSlicedOrTiled && !m_Type.hasMultipleDifferentValues && typeEnum == Image.Type.Sliced);
+                m_ShowTiled.target = (showSlicedOrTiled && !m_Type.hasMultipleDifferentValues && typeEnum == Image.Type.Tiled);
                 m_ShowFilled.target = (!m_Type.hasMultipleDifferentValues && typeEnum == Image.Type.Filled);
 
                 Image image = target as Image;
@@ -160,6 +165,13 @@ namespace UnityEditor.UI
                 {
                     if (image.sprite != null && !image.hasBorder)
                         EditorGUILayout.HelpBox("This Image doesn't have a border.", MessageType.Warning);
+                }
+                EditorGUILayout.EndFadeGroup();
+
+                if (EditorGUILayout.BeginFadeGroup(m_ShowTiled.faded))
+                {
+                    if (image.sprite != null && !image.hasBorder && (image.sprite.texture.wrapMode != TextureWrapMode.Repeat || image.sprite.packed))
+                        EditorGUILayout.HelpBox("It looks like you want to tile a sprite with no border. It would be more efficient to convert the Sprite to an Advanced texture, clear the Packing tag and set the Wrap mode to Repeat.", MessageType.Warning);
                 }
                 EditorGUILayout.EndFadeGroup();
 

@@ -121,7 +121,7 @@ namespace UnityEngine.UI
             // If there are no controllers on this rect we can skip this entire sub-tree
             // We don't need to consider controllers on children deeper in the sub-tree either,
             // since they will be their own roots.
-            if (components.Count > 0)
+            if (components.Count > 0  || rect.GetComponent(typeof(ILayoutGroup)))
             {
                 // Layout calculations needs to executed bottom up with children being done before their parents,
                 // because the parent calculated sizes rely on the sizes of the children.

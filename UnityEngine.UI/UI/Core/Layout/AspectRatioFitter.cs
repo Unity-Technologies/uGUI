@@ -5,6 +5,7 @@ namespace UnityEngine.UI
     [AddComponentMenu("Layout/Aspect Ratio Fitter", 142)]
     [ExecuteInEditMode]
     [RequireComponent(typeof(RectTransform))]
+    [DisallowMultipleComponent]
     public class AspectRatioFitter : UIBehaviour, ILayoutSelfController
     {
         public enum AspectMode { None, WidthControlsHeight, HeightControlsWidth, FitInParent, EnvelopeParent }
@@ -133,9 +134,6 @@ namespace UnityEngine.UI
 
         protected void SetDirty()
         {
-            if (!IsActive())
-                return;
-
             UpdateRect();
         }
 

@@ -612,8 +612,8 @@ namespace UnityEngine.UI
             {
                 if (m_Items[i] != null)
                     DestroyItem(m_Items[i]);
-                m_Items.Clear();
             }
+            m_Items.Clear();
             if (m_Dropdown != null)
                 DestroyDropdownList(m_Dropdown);
             m_Dropdown = null;
