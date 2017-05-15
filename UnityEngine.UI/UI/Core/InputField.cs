@@ -74,7 +74,6 @@ namespace UnityEngine.UI
         protected TouchScreenKeyboard m_Keyboard;
         static private readonly char[] kSeparators = { ' ', '.', ',', '\t', '\r', '\n' };
 
-        #region Exposed properties
         /// <summary>
         /// Text Text used to display the input's value.
         /// </summary>
@@ -188,8 +187,6 @@ namespace UnityEngine.UI
         [SerializeField]
         private bool m_ReadOnly = false;
 
-        #endregion
-
         protected int m_CaretPosition = 0;
         protected int m_CaretSelectPosition = 0;
         private RectTransform caretRectTrans = null;
@@ -233,7 +230,9 @@ namespace UnityEngine.UI
         const string kEmailSpecialCharacters = "!#$%&'*+-/=?^_`{|}~";
 
         protected InputField()
-        {}
+        {
+            EnforceTextHOverflow();
+        }
 
         protected Mesh mesh
         {
@@ -305,6 +304,7 @@ namespace UnityEngine.UI
                     return;
                 if (value == null)
                     value = "";
+                value = value.Replace("\0", string.Empty); // remove embedded nulls
                 if (m_LineType == LineType.SingleLine)
                     value = value.Replace("\n", "").Replace("\t", "");
 
@@ -366,7 +366,15 @@ namespace UnityEngine.UI
 
         public int caretWidth { get { return m_CaretWidth; } set { if (SetPropertyUtility.SetStruct(ref m_CaretWidth, value)) MarkGeometryAsDirty(); } }
 
-        public Text textComponent { get { return m_TextComponent; } set { SetPropertyUtility.SetClass(ref m_TextComponent, value); } }
+        public Text textComponent
+        {
+            get { return m_TextComponent; }
+            set
+            {
+                if (SetPropertyUtility.SetClass(ref m_TextComponent, value))
+                    EnforceTextHOverflow();
+            }
+        }
 
         public Graphic placeholder { get { return m_Placeholder; } set { SetPropertyUtility.SetClass(ref m_Placeholder, value); } }
 
@@ -391,7 +399,18 @@ namespace UnityEngine.UI
 
         public ContentType contentType { get { return m_ContentType; } set { if (SetPropertyUtility.SetStruct(ref m_ContentType, value)) EnforceContentType(); } }
 
-        public LineType lineType { get { return m_LineType; } set { if (SetPropertyUtility.SetStruct(ref m_LineType, value)) SetToCustomIfContentTypeIsNot(ContentType.Standard, ContentType.Autocorrected); } }
+        public LineType lineType
+        {
+            get { return m_LineType; }
+            set
+            {
+                if (SetPropertyUtility.SetStruct(ref m_LineType, value))
+                {
+                    SetToCustomIfContentTypeIsNot(ContentType.Standard, ContentType.Autocorrected);
+                    EnforceTextHOverflow();
+                }
+            }
+        }
 
         public InputType inputType { get { return m_InputType; } set { if (SetPropertyUtility.SetStruct(ref m_InputType, value)) SetToCustom(); } }
 
@@ -481,6 +500,7 @@ namespace UnityEngine.UI
         {
             base.OnValidate();
             EnforceContentType();
+            EnforceTextHOverflow();
 
             m_CharacterLimit = Math.Max(0, m_CharacterLimit);
 
@@ -505,12 +525,13 @@ namespace UnityEngine.UI
 
             // If we have a cached renderer then we had OnDisable called so just restore the material.
             if (m_CachedInputRenderer != null)
-                m_CachedInputRenderer.SetMaterial(Graphic.defaultGraphicMaterial, Texture2D.whiteTexture);
+                m_CachedInputRenderer.SetMaterial(m_TextComponent.GetModifiedMaterial(Graphic.defaultGraphicMaterial), Texture2D.whiteTexture);
 
             if (m_TextComponent != null)
             {
                 m_TextComponent.RegisterDirtyVerticesCallback(MarkGeometryAsDirty);
                 m_TextComponent.RegisterDirtyVerticesCallback(UpdateLabel);
+                m_TextComponent.RegisterDirtyMaterialCallback(UpdateCaretMaterial);
                 UpdateLabel();
             }
         }
@@ -525,6 +546,7 @@ namespace UnityEngine.UI
             {
                 m_TextComponent.UnregisterDirtyVerticesCallback(MarkGeometryAsDirty);
                 m_TextComponent.UnregisterDirtyVerticesCallback(UpdateLabel);
+                m_TextComponent.UnregisterDirtyMaterialCallback(UpdateCaretMaterial);
             }
             CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
 
@@ -593,6 +615,12 @@ namespace UnityEngine.UI
             }
         }
 
+        private void UpdateCaretMaterial()
+        {
+            if (m_TextComponent != null && m_CachedInputRenderer != null)
+                m_CachedInputRenderer.SetMaterial(m_TextComponent.GetModifiedMaterial(Graphic.defaultGraphicMaterial), Texture2D.whiteTexture);
+        }
+
         protected void OnFocus()
         {
             SelectAll();
@@ -652,6 +680,35 @@ namespace UnityEngine.UI
         private bool InPlaceEditing()
         {
             return !TouchScreenKeyboard.isSupported;
+        }
+
+        void UpdateCaretFromKeyboard()
+        {
+            var selectionRange = m_Keyboard.selection;
+
+            var selectionStart = selectionRange.start;
+            var selectionEnd = selectionRange.end;
+
+            var caretChanged = false;
+
+            if (caretPositionInternal != selectionStart)
+            {
+                caretChanged = true;
+                caretPositionInternal = selectionStart;
+            }
+
+            if (caretSelectPositionInternal != selectionEnd)
+            {
+                caretSelectPositionInternal = selectionEnd;
+                caretChanged = true;
+            }
+
+            if (caretChanged)
+            {
+                m_BlinkStartTime = Time.unscaledTime;
+
+                UpdateLabel();
+            }
         }
 
         /// <summary>
@@ -732,7 +789,15 @@ namespace UnityEngine.UI
 
                     if (characterLimit > 0 && m_Text.Length > characterLimit)
                         m_Text = m_Text.Substring(0, characterLimit);
-                    caretPositionInternal = caretSelectPositionInternal = m_Text.Length;
+
+                    if (m_Keyboard.canGetSelection)
+                    {
+                        UpdateCaretFromKeyboard();
+                    }
+                    else
+                    {
+                        caretPositionInternal = caretSelectPositionInternal = m_Text.Length;
+                    }
 
                     // Set keyboard text before updating label, as we might have changed it with validation
                     // and update label will take the old value from keyboard if we don't change it here
@@ -741,6 +806,10 @@ namespace UnityEngine.UI
 
                     SendOnValueChangedAndUpdateLabel();
                 }
+            }
+            else if (m_Keyboard.canGetSelection)
+            {
+                UpdateCaretFromKeyboard();
             }
 
 
@@ -851,10 +920,10 @@ namespace UnityEngine.UI
         private bool MayDrag(PointerEventData eventData)
         {
             return IsActive() &&
-                   IsInteractable() &&
-                   eventData.button == PointerEventData.InputButton.Left &&
-                   m_TextComponent != null &&
-                   m_Keyboard == null;
+                IsInteractable() &&
+                eventData.button == PointerEventData.InputButton.Left &&
+                m_TextComponent != null &&
+                m_Keyboard == null;
         }
 
         public virtual void OnBeginDrag(PointerEventData eventData)
@@ -1507,10 +1576,11 @@ namespace UnityEngine.UI
                 return;
 
             // If we have an input validator, validate the input first
+            int insertionPoint = Math.Min(selectionFocusPosition, selectionAnchorPosition);
             if (onValidateInput != null)
-                input = onValidateInput(text, caretPositionInternal, input);
+                input = onValidateInput(text, insertionPoint, input);
             else if (characterValidation != CharacterValidation.None)
-                input = Validate(text, caretPositionInternal, input);
+                input = Validate(text, insertionPoint, input);
 
             // If the input is invalid, skip it
             if (input == 0)
@@ -1626,6 +1696,7 @@ namespace UnityEngine.UI
             // the extents gets modified by the pixel density, so we need to use the generated extents since that will be in the same 'space' as
             // the values returned by the TextGenerator.lines[x].height for instance.
             Vector2 extents = cachedInputTextGenerator.rectExtents.size;
+
             if (multiLine)
             {
                 var lines = cachedInputTextGenerator.lines;
@@ -1635,7 +1706,12 @@ namespace UnityEngine.UI
                 {
                     // Caret comes after drawEnd, so we need to move drawEnd to the end of the line with the caret
                     m_DrawEnd = GetLineEndPosition(cachedInputTextGenerator, caretLine);
-                    float bottomY = lines[caretLine].topY + lines[caretLine].height;
+                    float bottomY = lines[caretLine].topY - lines[caretLine].height;
+                    if (caretLine == lines.Count - 1)
+                    {
+                        // Remove interline spacing on last line.
+                        bottomY += lines[caretLine].leading;
+                    }
                     int startLine = caretLine;
                     while (startLine > 0)
                     {
@@ -1660,13 +1736,27 @@ namespace UnityEngine.UI
                     float topY = lines[startLine].topY;
                     float bottomY = lines[endLine].topY - lines[endLine].height;
 
+                    if (endLine == lines.Count - 1)
+                    {
+                        // Remove interline spacing on last line.
+                        bottomY += lines[endLine].leading;
+                    }
+
                     while (endLine < lines.Count - 1)
                     {
                         bottomY = lines[endLine + 1].topY - lines[endLine + 1].height;
+
+                        if (endLine + 1 == lines.Count - 1)
+                        {
+                            // Remove interline spacing on last line.
+                            bottomY += lines[endLine + 1].leading;
+                        }
+
                         if (topY - bottomY > extents.y)
                             break;
                         ++endLine;
                     }
+
                     m_DrawEnd = GetLineEndPosition(cachedInputTextGenerator, endLine);
 
                     while (startLine > 0)
@@ -1760,15 +1850,15 @@ namespace UnityEngine.UI
 
             if (m_CachedInputRenderer == null && m_TextComponent != null)
             {
-                GameObject go = new GameObject(transform.name + " Input Caret");
+                GameObject go = new GameObject(transform.name + " Input Caret", typeof(RectTransform), typeof(CanvasRenderer));
                 go.hideFlags = HideFlags.DontSave;
                 go.transform.SetParent(m_TextComponent.transform.parent);
                 go.transform.SetAsFirstSibling();
                 go.layer = gameObject.layer;
 
-                caretRectTrans = go.AddComponent<RectTransform>();
-                m_CachedInputRenderer = go.AddComponent<CanvasRenderer>();
-                m_CachedInputRenderer.SetMaterial(Graphic.defaultGraphicMaterial, Texture2D.whiteTexture);
+                caretRectTrans = go.GetComponent<RectTransform>();
+                m_CachedInputRenderer = go.GetComponent<CanvasRenderer>();
+                m_CachedInputRenderer.SetMaterial(m_TextComponent.GetModifiedMaterial(Graphic.defaultGraphicMaterial), Texture2D.whiteTexture);
 
                 // Needed as if any layout is present we want the caret to always be the same as the text area.
                 go.AddComponent<LayoutElement>().ignoreLayout = true;
@@ -2004,33 +2094,51 @@ namespace UnityEngine.UI
             }
             else if (characterValidation == CharacterValidation.Name)
             {
-                char lastChar = (text.Length > 0) ? text[Mathf.Clamp(pos, 0, text.Length - 1)] : ' ';
-                char nextChar = (text.Length > 0) ? text[Mathf.Clamp(pos + 1, 0, text.Length - 1)] : '\n';
+                // FIXME: some actions still lead to invalid input:
+                //        - Hitting delete in front of an uppercase letter
+                //        - Selecting an uppercase letter and deleting it
+                //        - Typing some text, hitting Home and typing more text (we then have an uppercase letter in the middle of a word)
+                //        - Typing some text, hitting Home and typing a space (we then have a leading space)
+                //        - Erasing a space between two words (we then have an uppercase letter in the middle of a word)
+                //        - We accept a trailing space
+                //        - We accept the insertion of a space between two lowercase letters.
+                //        - Typing text in front of an existing uppercase letter
+                //        - ... and certainly more
+                //
+                // The rule we try to implement are too complex for this kind of verification.
 
                 if (char.IsLetter(ch))
                 {
-                    // Space followed by a letter -- make sure it's capitalized
-                    if (char.IsLower(ch) && lastChar == ' ')
+                    // Character following a space should be in uppercase.
+                    if (char.IsLower(ch) && ((pos == 0) || (text[pos - 1] == ' ')))
+                    {
                         return char.ToUpper(ch);
+                    }
 
-                    // Uppercase letters are only allowed after spaces (and apostrophes)
-                    if (char.IsUpper(ch) && lastChar != ' ' && lastChar != '\'')
+                    // Character not following a space or an apostrophe should be in lowercase.
+                    if (char.IsUpper(ch) && (pos > 0) && (text[pos - 1] != ' ') && (text[pos - 1] != '\''))
+                    {
                         return char.ToLower(ch);
+                    }
 
-                    // If character was already in correct case, return it as-is.
-                    // Also, letters that are neither upper nor lower case are always allowed.
                     return ch;
                 }
-                else if (ch == '\'')
+
+                if (ch == '\'')
                 {
                     // Don't allow more than one apostrophe
-                    if (lastChar != ' ' && lastChar != '\'' && nextChar != '\'' && !text.Contains("'"))
-                        return ch;
+                    if (!text.Contains("'"))
+                        // Don't allow consecutive spaces and apostrophes.
+                        if (!(((pos > 0) && ((text[pos - 1] == ' ') || (text[pos - 1] == '\''))) ||
+                              ((pos < text.Length) && ((text[pos] == ' ') || (text[pos] == '\'')))))
+                            return ch;
                 }
-                else if (ch == ' ')
+
+                if (ch == ' ')
                 {
-                    // Don't allow more than one space in a row
-                    if (lastChar != ' ' && lastChar != '\'' && nextChar != ' ' && nextChar != '\'')
+                    // Don't allow consecutive spaces and apostrophes.
+                    if (!(((pos > 0) && ((text[pos - 1] == ' ') || (text[pos - 1] == '\''))) ||
+                          ((pos < text.Length) && ((text[pos] == ' ') || (text[pos] == '\'')))))
                         return ch;
                 }
             }
@@ -2186,7 +2294,7 @@ namespace UnityEngine.UI
                     m_InputType = InputType.Standard;
                     m_KeyboardType = TouchScreenKeyboardType.Default;
                     m_CharacterValidation = CharacterValidation.None;
-                    return;
+                    break;
                 }
                 case ContentType.Autocorrected:
                 {
@@ -2194,7 +2302,7 @@ namespace UnityEngine.UI
                     m_InputType = InputType.AutoCorrect;
                     m_KeyboardType = TouchScreenKeyboardType.Default;
                     m_CharacterValidation = CharacterValidation.None;
-                    return;
+                    break;
                 }
                 case ContentType.IntegerNumber:
                 {
@@ -2202,7 +2310,7 @@ namespace UnityEngine.UI
                     m_InputType = InputType.Standard;
                     m_KeyboardType = TouchScreenKeyboardType.NumberPad;
                     m_CharacterValidation = CharacterValidation.Integer;
-                    return;
+                    break;
                 }
                 case ContentType.DecimalNumber:
                 {
@@ -2210,7 +2318,7 @@ namespace UnityEngine.UI
                     m_InputType = InputType.Standard;
                     m_KeyboardType = TouchScreenKeyboardType.NumbersAndPunctuation;
                     m_CharacterValidation = CharacterValidation.Decimal;
-                    return;
+                    break;
                 }
                 case ContentType.Alphanumeric:
                 {
@@ -2218,7 +2326,7 @@ namespace UnityEngine.UI
                     m_InputType = InputType.Standard;
                     m_KeyboardType = TouchScreenKeyboardType.ASCIICapable;
                     m_CharacterValidation = CharacterValidation.Alphanumeric;
-                    return;
+                    break;
                 }
                 case ContentType.Name:
                 {
@@ -2226,7 +2334,7 @@ namespace UnityEngine.UI
                     m_InputType = InputType.Standard;
                     m_KeyboardType = TouchScreenKeyboardType.Default;
                     m_CharacterValidation = CharacterValidation.Name;
-                    return;
+                    break;
                 }
                 case ContentType.EmailAddress:
                 {
@@ -2234,7 +2342,7 @@ namespace UnityEngine.UI
                     m_InputType = InputType.Standard;
                     m_KeyboardType = TouchScreenKeyboardType.EmailAddress;
                     m_CharacterValidation = CharacterValidation.EmailAddress;
-                    return;
+                    break;
                 }
                 case ContentType.Password:
                 {
@@ -2242,7 +2350,7 @@ namespace UnityEngine.UI
                     m_InputType = InputType.Password;
                     m_KeyboardType = TouchScreenKeyboardType.Default;
                     m_CharacterValidation = CharacterValidation.None;
-                    return;
+                    break;
                 }
                 case ContentType.Pin:
                 {
@@ -2250,14 +2358,25 @@ namespace UnityEngine.UI
                     m_InputType = InputType.Password;
                     m_KeyboardType = TouchScreenKeyboardType.NumberPad;
                     m_CharacterValidation = CharacterValidation.Integer;
-                    return;
+                    break;
                 }
                 default:
                 {
                     // Includes Custom type. Nothing should be enforced.
-                    return;
+                    break;
                 }
             }
+
+            EnforceTextHOverflow();
+        }
+
+        void EnforceTextHOverflow()
+        {
+            if (m_TextComponent != null)
+                if (multiLine)
+                    m_TextComponent.horizontalOverflow = HorizontalWrapMode.Wrap;
+                else
+                    m_TextComponent.horizontalOverflow = HorizontalWrapMode.Overflow;
         }
 
         void SetToCustomIfContentTypeIsNot(params ContentType[] allowedContentTypes)

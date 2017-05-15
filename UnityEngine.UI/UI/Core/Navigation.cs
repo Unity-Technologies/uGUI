@@ -65,10 +65,10 @@ namespace UnityEngine.UI
         public bool Equals(Navigation other)
         {
             return mode == other.mode &&
-                   selectOnUp == other.selectOnUp &&
-                   selectOnDown == other.selectOnDown &&
-                   selectOnLeft == other.selectOnLeft &&
-                   selectOnRight == other.selectOnRight;
+                selectOnUp == other.selectOnUp &&
+                selectOnDown == other.selectOnDown &&
+                selectOnLeft == other.selectOnLeft &&
+                selectOnRight == other.selectOnRight;
         }
     }
 }

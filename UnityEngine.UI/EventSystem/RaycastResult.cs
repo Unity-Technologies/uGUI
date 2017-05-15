@@ -48,17 +48,17 @@ namespace UnityEngine.EventSystems
                 return "";
 
             return "Name: " + gameObject + "\n" +
-                   "module: " + module + "\n" +
-                   "distance: " + distance + "\n" +
-                   "index: " + index + "\n" +
-                   "depth: " + depth + "\n" +
-                   "worldNormal: " + worldNormal + "\n" +
-                   "worldPosition: " + worldPosition + "\n" +
-                   "screenPosition: " + screenPosition + "\n" +
-                   "module.sortOrderPriority: " + module.sortOrderPriority + "\n" +
-                   "module.renderOrderPriority: " + module.renderOrderPriority + "\n" +
-                   "sortingLayer: " + sortingLayer + "\n" +
-                   "sortingOrder: " + sortingOrder;
+                "module: " + module + "\n" +
+                "distance: " + distance + "\n" +
+                "index: " + index + "\n" +
+                "depth: " + depth + "\n" +
+                "worldNormal: " + worldNormal + "\n" +
+                "worldPosition: " + worldPosition + "\n" +
+                "screenPosition: " + screenPosition + "\n" +
+                "module.sortOrderPriority: " + module.sortOrderPriority + "\n" +
+                "module.renderOrderPriority: " + module.renderOrderPriority + "\n" +
+                "sortingLayer: " + sortingLayer + "\n" +
+                "sortingOrder: " + sortingOrder;
         }
     }
 }

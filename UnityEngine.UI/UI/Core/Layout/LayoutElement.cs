@@ -32,8 +32,6 @@ namespace UnityEngine.UI
         protected LayoutElement()
         {}
 
-        #region Unity Lifetime calls
-
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -60,8 +58,6 @@ namespace UnityEngine.UI
         {
             SetDirty();
         }
-
-        #endregion
 
         protected void SetDirty()
         {

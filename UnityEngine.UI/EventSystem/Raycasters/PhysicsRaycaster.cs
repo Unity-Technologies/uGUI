@@ -62,18 +62,29 @@ namespace UnityEngine.EventSystems
             set { m_EventMask = value; }
         }
 
+        protected void ComputeRayAndDistance(PointerEventData eventData, out Ray ray, out float distanceToClipPlane)
+        {
+            ray = eventCamera.ScreenPointToRay(eventData.position);
+            // compensate far plane distance - see MouseEvents.cs
+            float projectionDirection = ray.direction.z;
+            distanceToClipPlane = Mathf.Approximately(0.0f, projectionDirection)
+                ? Mathf.Infinity
+                : Mathf.Abs((eventCamera.farClipPlane - eventCamera.nearClipPlane) / projectionDirection);
+        }
+
         public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
         {
             if (eventCamera == null)
                 return;
 
-            var ray = eventCamera.ScreenPointToRay(eventData.position);
-            float dist = eventCamera.farClipPlane - eventCamera.nearClipPlane;
+            Ray ray;
+            float distanceToClipPlane;
+            ComputeRayAndDistance(eventData, out ray, out distanceToClipPlane);
 
             if (ReflectionMethodsCache.Singleton.raycast3DAll == null)
                 return;
 
-            var hits = ReflectionMethodsCache.Singleton.raycast3DAll(ray, dist, finalEventMask);
+            var hits = ReflectionMethodsCache.Singleton.raycast3DAll(ray, distanceToClipPlane, finalEventMask);
 
             if (hits.Length > 1)
                 System.Array.Sort(hits, (r1, r2) => r1.distance.CompareTo(r2.distance));

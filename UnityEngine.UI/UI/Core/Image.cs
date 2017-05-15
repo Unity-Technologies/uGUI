@@ -329,7 +329,6 @@ namespace UnityEngine.UI
             }
         }
 
-        #region Various fill functions
         /// <summary>
         /// Generate vertices for a simple Image.
         /// </summary>
@@ -417,6 +416,7 @@ namespace UnityEngine.UI
                         continue;
 
                     int y2 = y + 1;
+
 
                     AddQuad(toFill,
                         new Vector2(s_VertScratch[x].x, s_VertScratch[y].y),
@@ -699,16 +699,31 @@ namespace UnityEngine.UI
             vertexHelper.AddTriangle(startIndex + 2, startIndex + 3, startIndex);
         }
 
-        Vector4 GetAdjustedBorders(Vector4 border, Rect rect)
+        private Vector4 GetAdjustedBorders(Vector4 border, Rect adjustedRect)
         {
+            Rect originalRect = rectTransform.rect;
+
             for (int axis = 0; axis <= 1; axis++)
             {
+                float borderScaleRatio;
+
+                // The adjusted rect (adjusted for pixel correctness)
+                // may be slightly larger than the original rect.
+                // Adjust the border to match the adjustedRect to avoid
+                // small gaps between borders (case 833201).
+                if (originalRect.size[axis] != 0)
+                {
+                    borderScaleRatio = adjustedRect.size[axis] / originalRect.size[axis];
+                    border[axis] *= borderScaleRatio;
+                    border[axis + 2] *= borderScaleRatio;
+                }
+
                 // If the rect is smaller than the combined borders, then there's not room for the borders at their normal size.
                 // In order to avoid artefacts with overlapping borders, we scale the borders down to fit.
                 float combinedBorders = border[axis] + border[axis + 2];
-                if (rect.size[axis] < combinedBorders && combinedBorders != 0)
+                if (adjustedRect.size[axis] < combinedBorders && combinedBorders != 0)
                 {
-                    float borderScaleRatio = rect.size[axis] / combinedBorders;
+                    borderScaleRatio = adjustedRect.size[axis] / combinedBorders;
                     border[axis] *= borderScaleRatio;
                     border[axis + 2] *= borderScaleRatio;
                 }
@@ -1029,8 +1044,6 @@ namespace UnityEngine.UI
                 else xy[i1].x = Mathf.Lerp(xy[i0].x, xy[i2].x, cos);
             }
         }
-
-        #endregion
 
         public virtual void CalculateLayoutInputHorizontal() {}
         public virtual void CalculateLayoutInputVertical() {}

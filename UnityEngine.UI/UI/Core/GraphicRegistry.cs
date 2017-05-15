@@ -57,6 +57,9 @@ namespace UnityEngine.UI
             if (instance.m_Graphics.TryGetValue(c, out graphics))
             {
                 graphics.Remove(graphic);
+
+                if (graphics.Count == 0)
+                    instance.m_Graphics.Remove(c);
             }
         }
 

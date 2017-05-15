@@ -118,7 +118,7 @@ namespace UnityEngine.UI
         public bool alignByGeometry
         {
             get { return m_AlignByGeometry; }
-            set { m_AlignByGeometry = value; }
+            set { m_AlignByGeometry = value;  }
         }
 
         public bool richText

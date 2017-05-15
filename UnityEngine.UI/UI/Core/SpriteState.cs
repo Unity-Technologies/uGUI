@@ -26,8 +26,8 @@ namespace UnityEngine.UI
         public bool Equals(SpriteState other)
         {
             return highlightedSprite == other.highlightedSprite &&
-                   pressedSprite == other.pressedSprite &&
-                   disabledSprite == other.disabledSprite;
+                pressedSprite == other.pressedSprite &&
+                disabledSprite == other.disabledSprite;
         }
     }
 }

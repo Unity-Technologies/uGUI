@@ -18,14 +18,14 @@ namespace UnityEngine.EventSystems
             if (eventCamera == null)
                 return;
 
-            var ray = eventCamera.ScreenPointToRay(eventData.position);
-
-            float dist = eventCamera.farClipPlane - eventCamera.nearClipPlane;
+            Ray ray;
+            float distanceToClipPlane;
+            ComputeRayAndDistance(eventData, out ray, out distanceToClipPlane);
 
             if (ReflectionMethodsCache.Singleton.getRayIntersectionAll == null)
                 return;
 
-            var hits = ReflectionMethodsCache.Singleton.getRayIntersectionAll(ray, dist, finalEventMask);
+            var hits = ReflectionMethodsCache.Singleton.getRayIntersectionAll(ray, distanceToClipPlane, finalEventMask);
 
             if (hits.Length != 0)
             {

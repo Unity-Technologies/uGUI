@@ -15,8 +15,6 @@ namespace UnityEngine.EventSystems
             return data as T;
         }
 
-        #region Execution Handlers
-
         private static readonly EventFunction<IPointerEnterHandler> s_PointerEnterHandler = Execute;
 
         private static void Execute(IPointerEnterHandler handler, BaseEventData eventData)
@@ -136,10 +134,6 @@ namespace UnityEngine.EventSystems
             handler.OnCancel(eventData);
         }
 
-        #endregion
-
-        #region Execution Accessors
-
         public static EventFunction<IPointerEnterHandler> pointerEnterHandler
         {
             get { return s_PointerEnterHandler; }
@@ -225,8 +219,6 @@ namespace UnityEngine.EventSystems
             get { return s_CancelHandler; }
         }
 
-        #endregion
-
         private static void GetEventChain(GameObject root, IList<Transform> eventChain)
         {
             eventChain.Clear();
@@ -247,8 +239,8 @@ namespace UnityEngine.EventSystems
         {
             var internalHandlers = s_HandlerListPool.Get();
             GetEventList<T>(target, internalHandlers);
-            //	if (s_InternalHandlers.Count > 0)
-            //		Debug.Log("Executinng " + typeof (T) + " on " + target);
+            //  if (s_InternalHandlers.Count > 0)
+            //      Debug.Log("Executinng " + typeof (T) + " on " + target);
 
             for (var i = 0; i < internalHandlers.Count; i++)
             {

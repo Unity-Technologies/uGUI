@@ -14,6 +14,8 @@ namespace UnityEngine.EventSystems
         private Vector2 m_LastMousePosition;
         private Vector2 m_MousePosition;
 
+        private GameObject m_CurrentFocusedGameObject;
+
         protected StandaloneInputModule()
         {
         }
@@ -410,6 +412,7 @@ namespace UnityEngine.EventSystems
             ProcessMouseEvent(0);
         }
 
+        [Obsolete("This method is no longer checked, overriding it with return true does nothing!")]
         protected virtual bool ForceAutoSelect()
         {
             return false;
@@ -423,8 +426,7 @@ namespace UnityEngine.EventSystems
             var mouseData = GetMousePointerEventData(id);
             var leftButtonData = mouseData.GetButtonState(PointerEventData.InputButton.Left).eventData;
 
-            if (ForceAutoSelect())
-                eventSystem.SetSelectedGameObject(leftButtonData.buttonData.pointerCurrentRaycast.gameObject, leftButtonData.buttonData);
+            m_CurrentFocusedGameObject = leftButtonData.buttonData.pointerCurrentRaycast.gameObject;
 
             // Process the first mouse button fully
             ProcessMousePress(leftButtonData);
@@ -555,6 +557,11 @@ namespace UnityEngine.EventSystems
                     HandlePointerExitAndEnter(pointerEvent, currentOverGo);
                 }
             }
+        }
+
+        protected GameObject GetCurrentFocusedGameObject()
+        {
+            return m_CurrentFocusedGameObject;
         }
     }
 }

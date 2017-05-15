@@ -66,7 +66,7 @@ namespace UnityEngine.UI
                 Debug.LogWarning("Material " + baseMat.name + " doesn't have _StencilReadMask property", baseMat);
                 return baseMat;
             }
-            if (!baseMat.HasProperty("_StencilReadMask"))
+            if (!baseMat.HasProperty("_StencilWriteMask"))
             {
                 Debug.LogWarning("Material " + baseMat.name + " doesn't have _StencilWriteMask property", baseMat);
                 return baseMat;

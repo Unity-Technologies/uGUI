@@ -61,7 +61,11 @@
     <!--Uncomment the block below and change the destination to copy the built dll into your unity install directory-->
     <!--<Copy SourceFiles="$(TargetDir)$(TargetName).dll" DestinationFiles="C:\Program Files (x86)\Unity\Editor\Data\UnityExtensions\Unity\GUISystem\4.6.0\$(TargetName).dll"/>-->
   </Target>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="..\UnityEngine.UI\UI\Core\GraphicRaycaster.cs.orig">
+      <Link>UI\Core\GraphicRaycaster.cs.orig</Link>
+    </None>
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="..\UnityEngine.UI\EventSystem\EventData\AxisEventData.cs">
       <Link>EventSystem\EventData\AxisEventData.cs</Link>
@@ -212,7 +216,8 @@
     </Compile>
     <Compile Include="..\UnityEngine.UI\UI\Core\GraphicRebuildTracker.cs">
       <Link>UI\Core\GraphicRebuildTracker.cs</Link>
-      <SubType>Code</SubType>
+      <SubType>
+      </SubType>
     </Compile>
     <Compile Include="..\UnityEngine.UI\UI\Core\GraphicRegistry.cs">
       <Link>UI\Core\GraphicRegistry.cs</Link>

@@ -50,8 +50,6 @@ namespace UnityEngine.EventSystems
             get { return m_EventSystem; }
         }
 
-        #region Unity Lifetime calls
-
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -64,8 +62,6 @@ namespace UnityEngine.EventSystems
             m_EventSystem.UpdateModules();
             base.OnDisable();
         }
-
-        #endregion
 
         public abstract void Process();
 

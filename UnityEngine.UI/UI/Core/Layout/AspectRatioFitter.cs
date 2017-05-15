@@ -33,8 +33,6 @@ namespace UnityEngine.UI
 
         protected AspectRatioFitter() {}
 
-        #region Unity Lifetime calls
-
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -47,8 +45,6 @@ namespace UnityEngine.UI
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
             base.OnDisable();
         }
-
-        #endregion
 
         protected override void OnRectTransformDimensionsChange()
         {

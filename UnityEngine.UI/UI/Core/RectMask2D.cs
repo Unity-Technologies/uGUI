@@ -115,7 +115,8 @@ namespace UnityEngine.UI
             // the clippers that are valid
             bool validRect = true;
             Rect clipRect = Clipping.FindCullAndClipWorldRect(m_Clippers, out validRect);
-            if (clipRect != m_LastClipRectCanvasSpace || m_ForceClip)
+            bool clipRectChanged = clipRect != m_LastClipRectCanvasSpace;
+            if (clipRectChanged || m_ForceClip)
             {
                 foreach (IClippable clipTarget in m_ClipTargets)
                     clipTarget.SetClipRect(clipRect, validRect);
@@ -125,7 +126,13 @@ namespace UnityEngine.UI
             }
 
             foreach (IClippable clipTarget in m_ClipTargets)
+            {
+                var maskable = clipTarget as MaskableGraphic;
+                if (maskable != null && !maskable.canvasRenderer.hasMoved && !clipRectChanged)
+                    continue;
+
                 clipTarget.Cull(m_LastClipRectCanvasSpace, m_LastValidClipRect);
+            }
         }
 
         public void AddClippable(IClippable clippable)

@@ -518,7 +518,7 @@ namespace UnityEngine.UI
         private void SetHorizontalNormalizedPosition(float value) { SetNormalizedPosition(value, 0); }
         private void SetVerticalNormalizedPosition(float value) { SetNormalizedPosition(value, 1); }
 
-        private void SetNormalizedPosition(float value, int axis)
+        protected virtual void SetNormalizedPosition(float value, int axis)
         {
             EnsureLayoutHasRebuilt();
             UpdateBounds();
@@ -530,7 +530,7 @@ namespace UnityEngine.UI
             float newLocalPosition = m_Content.localPosition[axis] + contentBoundsMinPosition - m_ContentBounds.min[axis];
 
             Vector3 localPosition = m_Content.localPosition;
-            if (Mathf.Abs(localPosition[axis] - newLocalPosition) > 0.0001f)
+            if (Mathf.Abs(localPosition[axis] - newLocalPosition) > 0.01f)
             {
                 localPosition[axis] = newLocalPosition;
                 m_Content.localPosition = localPosition;
@@ -709,13 +709,51 @@ namespace UnityEngine.UI
             Vector3 contentSize = m_ContentBounds.size;
             Vector3 contentPos = m_ContentBounds.center;
             var contentPivot = m_Content.pivot;
-            InternalUpdateBounds(ref m_ViewBounds, ref contentPivot, ref contentSize, ref contentPos);
-
+            AdjustBounds(ref m_ViewBounds, ref contentPivot, ref contentSize, ref contentPos);
             m_ContentBounds.size = contentSize;
             m_ContentBounds.center = contentPos;
+
+            if (movementType == MovementType.Clamped)
+            {
+                // Adjust content so that content bounds bottom (right side) is never higher (to the left) than the view bounds bottom (right side).
+                //                                       top (left side) is never lower (to the right) than the view bounds top (left side).
+                // All this can happen if content has shrunk.
+                // This works because content size is at least as big as view size (because of the call to InternalUpdateBounds above).
+                Vector3 delta = Vector3.zero;
+                if (m_ViewBounds.max.x > m_ContentBounds.max.x)
+                {
+                    delta.x = Math.Min(m_ViewBounds.min.x - m_ContentBounds.min.x, m_ViewBounds.max.x - m_ContentBounds.max.x);
+                }
+                else if (m_ViewBounds.min.x < m_ContentBounds.min.x)
+                {
+                    delta.x = Math.Max(m_ViewBounds.min.x - m_ContentBounds.min.x, m_ViewBounds.max.x - m_ContentBounds.max.x);
+                }
+
+                if (m_ViewBounds.min.y < m_ContentBounds.min.y)
+                {
+                    delta.y = Math.Max(m_ViewBounds.min.y - m_ContentBounds.min.y, m_ViewBounds.max.y - m_ContentBounds.max.y);
+                }
+                else if (m_ViewBounds.max.y > m_ContentBounds.max.y)
+                {
+                    delta.y = Math.Min(m_ViewBounds.min.y - m_ContentBounds.min.y, m_ViewBounds.max.y - m_ContentBounds.max.y);
+                }
+                if (delta != Vector3.zero)
+                {
+                    m_Content.Translate(delta);
+
+                    // Content position changed; recompute content bounds.
+                    m_ContentBounds = GetBounds();
+                    contentSize = m_ContentBounds.size;
+                    contentPos = m_ContentBounds.center;
+                    contentPivot = m_Content.pivot;
+                    AdjustBounds(ref m_ViewBounds, ref contentPivot, ref contentSize, ref contentPos);
+                    m_ContentBounds.size = contentSize;
+                    m_ContentBounds.center = contentPos;
+                }
+            }
         }
 
-        internal static void InternalUpdateBounds(ref Bounds viewBounds, ref Vector2 contentPivot, ref Vector3 contentSize, ref Vector3 contentPos)
+        internal static void AdjustBounds(ref Bounds viewBounds, ref Vector2 contentPivot, ref Vector3 contentSize, ref Vector3 contentPos)
         {
             // Make sure content bounds are at least as large as view by adding padding if not.
             // One might think at first that if the content is smaller than the view, scrolling should be allowed.

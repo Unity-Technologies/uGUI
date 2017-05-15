@@ -37,7 +37,7 @@ namespace UnityEngine.UI
             {
                 // We need to return the sorting order here as distance will all be 0 for overlay.
                 if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
-                    return canvas.renderOrder;
+                    return canvas.rootCanvas.renderOrder;
 
                 return base.renderOrderPriority;
             }
@@ -79,18 +79,31 @@ namespace UnityEngine.UI
             if (canvas == null)
                 return;
 
+            int displayIndex;
+            if (canvas.renderMode == RenderMode.ScreenSpaceOverlay || !eventCamera)
+                displayIndex = canvas.targetDisplay;
+            else
+                displayIndex = eventCamera.targetDisplay;
+
             var eventPosition = Display.RelativeMouseAt(eventData.position);
+            if (eventPosition != Vector3.zero)
+            {
+                // We support multiple display and display identification based on event position.
 
-            int displayIndex = canvas.targetDisplay;
+                int eventDisplayIndex = (int)eventPosition.z;
 
-            // Discard events that are not part of this display so the user does not interact with multiple displays at once.
-            if (eventPosition.z != displayIndex)
-                return;
-
-            // The multiple display system is not supported on all platforms, when it is not supported the returned position
-            // will be all zeros so when the returned index is 0 we will default to the event data to be safe.
-            if (eventPosition.z == 0)
+                // Discard events that are not part of this display so the user does not interact with multiple displays at once.
+                if (eventDisplayIndex != displayIndex)
+                    return;
+            }
+            else
+            {
+                // The multiple display system is not supported on all platforms, when it is not supported the returned position
+                // will be all zeros so when the returned index is 0 we will default to the event data to be safe.
                 eventPosition = eventData.position;
+
+                // We dont really know in which display the event occured. We will process the event assuming it occured in our display.
+            }
 
             // Convert to view space
             Vector2 pos;
@@ -204,7 +217,7 @@ namespace UnityEngine.UI
                         screenPosition = eventPosition,
                         index = resultAppendList.Count,
                         depth = m_RaycastResults[index].depth,
-                        sortingLayer =  canvas.sortingLayerID,
+                        sortingLayer = canvas.sortingLayerID,
                         sortingOrder = canvas.sortingOrder
                     };
                     resultAppendList.Add(castResult);
@@ -237,6 +250,9 @@ namespace UnityEngine.UI
             {
                 Graphic graphic = foundGraphics[i];
 
+                if (graphic.canvasRenderer.cull)
+                    continue;
+
                 // -1 means it hasn't been processed by the canvas, which means it isn't actually drawn
                 if (graphic.depth == -1 || !graphic.raycastTarget)
                     continue;
@@ -251,10 +267,10 @@ namespace UnityEngine.UI
             }
 
             s_SortedGraphics.Sort((g1, g2) => g2.depth.CompareTo(g1.depth));
-            //		StringBuilder cast = new StringBuilder();
+            //      StringBuilder cast = new StringBuilder();
             for (int i = 0; i < s_SortedGraphics.Count; ++i)
                 results.Add(s_SortedGraphics[i]);
-            //		Debug.Log (cast.ToString());
+            //      Debug.Log (cast.ToString());
 
             s_SortedGraphics.Clear();
         }

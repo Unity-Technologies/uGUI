@@ -261,7 +261,6 @@ namespace UnityEngine.UI
             }
         }
 
-        #region Unity Lifetime calls
         /// <summary>
         /// Mark the Graphic and the canvas as having been changed.
         /// </summary>
@@ -298,8 +297,6 @@ namespace UnityEngine.UI
 
             base.OnDisable();
         }
-
-        #endregion
 
         protected override void OnCanvasHierarchyChanged()
         {

@@ -199,8 +199,6 @@ namespace UnityEngine.EventSystems
             return m_CurrentInputModule.IsPointerOverGameObject(pointerId);
         }
 
-        #region Unity Lifetime calls
-
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -227,8 +225,6 @@ namespace UnityEngine.EventSystems
 
             base.OnDisable();
         }
-
-        #endregion
 
         private void TickModules()
         {

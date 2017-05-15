@@ -88,9 +88,6 @@ namespace UnityEngine.UI
 
         public virtual void Cull(Rect clipRect, bool validRect)
         {
-            if (!canvasRenderer.hasMoved)
-                return;
-
             var cull = !validRect || !clipRect.Overlaps(rootCanvasRect, true);
             UpdateCull(cull);
         }

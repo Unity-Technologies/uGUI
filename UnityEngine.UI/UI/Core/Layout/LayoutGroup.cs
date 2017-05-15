@@ -91,8 +91,6 @@ namespace UnityEngine.UI
                 m_Padding = new RectOffset();
         }
 
-        #region Unity Lifetime calls
-
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -110,8 +108,6 @@ namespace UnityEngine.UI
         {
             SetDirty();
         }
-
-        #endregion
 
         protected float GetTotalMinSize(int axis)
         {

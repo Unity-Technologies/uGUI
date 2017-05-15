@@ -9,6 +9,8 @@ namespace UnityEngine.UI
         private List<Color32> m_Colors = ListPool<Color32>.Get();
         private List<Vector2> m_Uv0S = ListPool<Vector2>.Get();
         private List<Vector2> m_Uv1S = ListPool<Vector2>.Get();
+        private List<Vector2> m_Uv2S = ListPool<Vector2>.Get();
+        private List<Vector2> m_Uv3S = ListPool<Vector2>.Get();
         private List<Vector3> m_Normals = ListPool<Vector3>.Get();
         private List<Vector4> m_Tangents = ListPool<Vector4>.Get();
         private List<int> m_Indices = ListPool<int>.Get();
@@ -25,6 +27,8 @@ namespace UnityEngine.UI
             m_Colors.AddRange(m.colors32);
             m_Uv0S.AddRange(m.uv);
             m_Uv1S.AddRange(m.uv2);
+            m_Uv2S.AddRange(m.uv3);
+            m_Uv3S.AddRange(m.uv4);
             m_Normals.AddRange(m.normals);
             m_Tangents.AddRange(m.tangents);
             m_Indices.AddRange(m.GetIndices(0));
@@ -36,6 +40,8 @@ namespace UnityEngine.UI
             m_Colors.Clear();
             m_Uv0S.Clear();
             m_Uv1S.Clear();
+            m_Uv2S.Clear();
+            m_Uv3S.Clear();
             m_Normals.Clear();
             m_Tangents.Clear();
             m_Indices.Clear();
@@ -56,6 +62,8 @@ namespace UnityEngine.UI
             vertex.color = m_Colors[i];
             vertex.uv0 = m_Uv0S[i];
             vertex.uv1 = m_Uv1S[i];
+            vertex.uv2 = m_Uv2S[i];
+            vertex.uv3 = m_Uv3S[i];
             vertex.normal = m_Normals[i];
             vertex.tangent = m_Tangents[i];
         }
@@ -66,6 +74,8 @@ namespace UnityEngine.UI
             m_Colors[i] = vertex.color;
             m_Uv0S[i] = vertex.uv0;
             m_Uv1S[i] = vertex.uv1;
+            m_Uv2S[i] = vertex.uv2;
+            m_Uv3S[i] = vertex.uv3;
             m_Normals[i] = vertex.normal;
             m_Tangents[i] = vertex.tangent;
         }
@@ -81,6 +91,8 @@ namespace UnityEngine.UI
             mesh.SetColors(m_Colors);
             mesh.SetUVs(0, m_Uv0S);
             mesh.SetUVs(1, m_Uv1S);
+            mesh.SetUVs(2, m_Uv2S);
+            mesh.SetUVs(3, m_Uv3S);
             mesh.SetNormals(m_Normals);
             mesh.SetTangents(m_Tangents);
             mesh.SetTriangles(m_Indices, 0);
@@ -93,6 +105,8 @@ namespace UnityEngine.UI
             ListPool<Color32>.Release(m_Colors);
             ListPool<Vector2>.Release(m_Uv0S);
             ListPool<Vector2>.Release(m_Uv1S);
+            ListPool<Vector2>.Release(m_Uv2S);
+            ListPool<Vector2>.Release(m_Uv3S);
             ListPool<Vector3>.Release(m_Normals);
             ListPool<Vector4>.Release(m_Tangents);
             ListPool<int>.Release(m_Indices);
@@ -101,6 +115,8 @@ namespace UnityEngine.UI
             m_Colors = null;
             m_Uv0S = null;
             m_Uv1S = null;
+            m_Uv2S = null;
+            m_Uv3S = null;
             m_Normals = null;
             m_Tangents = null;
             m_Indices = null;
@@ -112,6 +128,8 @@ namespace UnityEngine.UI
             m_Colors.Add(color);
             m_Uv0S.Add(uv0);
             m_Uv1S.Add(uv1);
+            m_Uv2S.Add(Vector2.zero);
+            m_Uv3S.Add(Vector2.zero);
             m_Normals.Add(normal);
             m_Tangents.Add(tangent);
         }
