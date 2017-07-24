@@ -25,6 +25,7 @@ If you want to contribute patches back, please keep it under the unmodified MIT 
     * Locate your Unity install location
     * Windows: Copy the contents of Output folder to: `Data\UnityExtensions\Unity\GUISystem\{UNITY_VERSION}`
     * OSX: Copy the contents of Output folder to: `Unity.app/Contents/UnityExtensions/Unity/GUISystem/{UNITY_VERSION}`
+        * {UNITY_VERSION} is either Editor or Standalone. Editor version is used inside the Editor where Standalone is used by ALL players.
 
 * If you want the dll's to copy automatically on build
     * For each visual studio project file
