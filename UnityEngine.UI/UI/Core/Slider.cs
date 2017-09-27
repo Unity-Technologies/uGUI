@@ -176,7 +176,10 @@ namespace UnityEngine.UI
             UpdateVisuals();
 
             if (oldNormalizedValue != normalizedValue)
+            {
+                UISystemProfilerApi.AddMarker("Slider.value", this);
                 onValueChanged.Invoke(m_Value);
+            }
         }
 
         void UpdateCachedReferences()
@@ -232,7 +235,10 @@ namespace UnityEngine.UI
             m_Value = newValue;
             UpdateVisuals();
             if (sendCallback)
+            {
+                UISystemProfilerApi.AddMarker("Slider.value", this);
                 m_OnValueChanged.Invoke(newValue);
+            }
         }
 
         protected override void OnRectTransformDimensionsChange()

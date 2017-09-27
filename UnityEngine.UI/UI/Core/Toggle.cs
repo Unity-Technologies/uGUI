@@ -185,7 +185,10 @@ namespace UnityEngine.UI
             // It's up to the user to ignore a selection being set to the same value it already was, if desired.
             PlayEffect(toggleTransition == ToggleTransition.None);
             if (sendCallback)
+            {
+                UISystemProfilerApi.AddMarker("Toggle.value", this);
                 onValueChanged.Invoke(m_IsOn);
+            }
         }
 
         /// <summary>

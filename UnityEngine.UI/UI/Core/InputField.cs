@@ -5,6 +5,9 @@ using System.Text;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace UnityEngine.UI
 {
@@ -371,8 +374,23 @@ namespace UnityEngine.UI
             get { return m_TextComponent; }
             set
             {
+                if (m_TextComponent != null)
+                {
+                    m_TextComponent.UnregisterDirtyVerticesCallback(MarkGeometryAsDirty);
+                    m_TextComponent.UnregisterDirtyVerticesCallback(UpdateLabel);
+                    m_TextComponent.UnregisterDirtyMaterialCallback(UpdateCaretMaterial);
+                }
+
                 if (SetPropertyUtility.SetClass(ref m_TextComponent, value))
+                {
                     EnforceTextHOverflow();
+                    if (m_TextComponent != null)
+                    {
+                        m_TextComponent.RegisterDirtyVerticesCallback(MarkGeometryAsDirty);
+                        m_TextComponent.RegisterDirtyVerticesCallback(UpdateLabel);
+                        m_TextComponent.RegisterDirtyMaterialCallback(UpdateCaretMaterial);
+                    }
+                }
             }
         }
 
@@ -414,7 +432,25 @@ namespace UnityEngine.UI
 
         public InputType inputType { get { return m_InputType; } set { if (SetPropertyUtility.SetStruct(ref m_InputType, value)) SetToCustom(); } }
 
-        public TouchScreenKeyboardType keyboardType { get { return m_KeyboardType; } set { if (SetPropertyUtility.SetStruct(ref m_KeyboardType, value)) SetToCustom(); } }
+        public TouchScreenKeyboardType keyboardType
+        {
+            get { return m_KeyboardType; }
+            set
+            {
+#if UNITY_EDITOR
+                if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.WiiU)
+                {
+                    if (value == TouchScreenKeyboardType.NintendoNetworkAccount)
+                        Debug.LogWarning("Invalid InputField.keyboardType value set. TouchScreenKeyboardType.NintendoNetworkAccount only applies to the Wii U. InputField.keyboardType will default to TouchScreenKeyboardType.Default .");
+                }
+#elif !UNITY_WIIU
+                if (value == TouchScreenKeyboardType.NintendoNetworkAccount)
+                    Debug.LogWarning("Invalid InputField.keyboardType value set. TouchScreenKeyboardType.NintendoNetworkAccount only applies to the Wii U. InputField.keyboardType will default to TouchScreenKeyboardType.Default .");
+#endif
+                if (SetPropertyUtility.SetStruct(ref m_KeyboardType, value))
+                    SetToCustom();
+            }
+        }
 
         public CharacterValidation characterValidation { get { return m_CharacterValidation; } set { if (SetPropertyUtility.SetStruct(ref m_CharacterValidation, value)) SetToCustom(); } }
 
@@ -1530,6 +1566,7 @@ namespace UnityEngine.UI
 
         private void SendOnValueChanged()
         {
+            UISystemProfilerApi.AddMarker("InputField.value", this);
             if (onValueChanged != null)
                 onValueChanged.Invoke(text);
         }
@@ -1540,6 +1577,7 @@ namespace UnityEngine.UI
 
         protected void SendOnSubmit()
         {
+            UISystemProfilerApi.AddMarker("InputField.onSubmit", this);
             if (onEndEdit != null)
                 onEndEdit.Invoke(m_Text);
         }
@@ -2077,8 +2115,9 @@ namespace UnityEngine.UI
             {
                 // Integer and decimal
                 bool cursorBeforeDash = (pos == 0 && text.Length > 0 && text[0] == '-');
+                bool dashInSelection = text.Length > 0 && text[0] == '-' && ((caretPositionInternal == 0 && caretSelectPositionInternal > 0) || (caretSelectPositionInternal == 0 && caretPositionInternal > 0));
                 bool selectionAtStart = caretPositionInternal == 0 || caretSelectPositionInternal == 0;
-                if (!cursorBeforeDash)
+                if (!cursorBeforeDash || dashInSelection)
                 {
                     if (ch >= '0' && ch <= '9') return ch;
                     if (ch == '-' && (pos == 0 || selectionAtStart)) return ch;
@@ -2332,7 +2371,7 @@ namespace UnityEngine.UI
                 {
                     m_LineType = LineType.SingleLine;
                     m_InputType = InputType.Standard;
-                    m_KeyboardType = TouchScreenKeyboardType.Default;
+                    m_KeyboardType = TouchScreenKeyboardType.NamePhonePad;
                     m_CharacterValidation = CharacterValidation.Name;
                     break;
                 }

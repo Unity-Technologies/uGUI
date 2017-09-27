@@ -161,6 +161,7 @@ namespace UnityEngine.UI
                 RefreshShownValue();
 
                 // Notify all listeners
+                UISystemProfilerApi.AddMarker("Dropdown.value", this);
                 m_OnValueChanged.Invoke(m_Value);
             }
         }

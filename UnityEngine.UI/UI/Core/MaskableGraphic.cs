@@ -99,6 +99,7 @@ namespace UnityEngine.UI
 
             if (cullingChanged)
             {
+                UISystemProfilerApi.AddMarker("MaskableGraphic.cullingChanged", this);
                 m_OnCullStateChanged.Invoke(cull);
                 SetVerticesDirty();
             }

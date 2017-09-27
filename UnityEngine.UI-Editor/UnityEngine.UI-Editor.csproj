@@ -105,7 +105,8 @@
     </Compile>
     <Compile Include="..\UnityEngine.UI\EventSystem\InputModules\BaseInput.cs">
       <Link>EventSystem\InputModules\BaseInput.cs</Link>
-      <SubType>Code</SubType>
+      <SubType>
+      </SubType>
     </Compile>
     <Compile Include="..\UnityEngine.UI\EventSystem\InputModules\BaseInputModule.cs">
       <Link>EventSystem\InputModules\BaseInputModule.cs</Link>
@@ -216,8 +217,6 @@
     </Compile>
     <Compile Include="..\UnityEngine.UI\UI\Core\GraphicRebuildTracker.cs">
       <Link>UI\Core\GraphicRebuildTracker.cs</Link>
-      <SubType>
-      </SubType>
     </Compile>
     <Compile Include="..\UnityEngine.UI\UI\Core\GraphicRegistry.cs">
       <Link>UI\Core\GraphicRegistry.cs</Link>

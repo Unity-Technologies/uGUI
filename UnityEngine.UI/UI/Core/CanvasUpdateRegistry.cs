@@ -106,6 +106,7 @@ namespace UnityEngine.UI
         private static readonly Comparison<ICanvasElement> s_SortLayoutFunction = SortLayoutList;
         private void PerformUpdate()
         {
+            UISystemProfilerApi.BeginSample(UISystemProfilerApi.SampleType.Layout);
             CleanInvalidItems();
 
             m_PerformingLayoutUpdate = true;
@@ -160,6 +161,7 @@ namespace UnityEngine.UI
 
             instance.m_GraphicRebuildQueue.Clear();
             m_PerformingGraphicUpdate = false;
+            UISystemProfilerApi.EndSample(UISystemProfilerApi.SampleType.Layout);
         }
 
         private static int ParentCount(Transform child)

@@ -79,11 +79,17 @@ namespace UnityEngine.UI
             if (canvas == null)
                 return;
 
+            var canvasGraphics = GraphicRegistry.GetGraphicsForCanvas(canvas);
+            if (canvasGraphics == null || canvasGraphics.Count == 0)
+                return;
+
             int displayIndex;
-            if (canvas.renderMode == RenderMode.ScreenSpaceOverlay || !eventCamera)
+            var currentEventCamera = eventCamera; // Propery can call Camera.main, so cache the reference
+
+            if (canvas.renderMode == RenderMode.ScreenSpaceOverlay || currentEventCamera == null)
                 displayIndex = canvas.targetDisplay;
             else
-                displayIndex = eventCamera.targetDisplay;
+                displayIndex = currentEventCamera.targetDisplay;
 
             var eventPosition = Display.RelativeMouseAt(eventData.position);
             if (eventPosition != Vector3.zero)
@@ -107,7 +113,7 @@ namespace UnityEngine.UI
 
             // Convert to view space
             Vector2 pos;
-            if (eventCamera == null)
+            if (currentEventCamera == null)
             {
                 // Multiple display support only when not the main display. For display 0 the reported
                 // resolution is always the desktops resolution since its part of the display API,
@@ -122,7 +128,7 @@ namespace UnityEngine.UI
                 pos = new Vector2(eventPosition.x / w, eventPosition.y / h);
             }
             else
-                pos = eventCamera.ScreenToViewportPoint(eventPosition);
+                pos = currentEventCamera.ScreenToViewportPoint(eventPosition);
 
             // If it's outside the camera's viewport, do nothing
             if (pos.x < 0f || pos.x > 1f || pos.y < 0f || pos.y > 1f)
@@ -132,23 +138,28 @@ namespace UnityEngine.UI
 
             Ray ray = new Ray();
 
-            if (eventCamera != null)
-                ray = eventCamera.ScreenPointToRay(eventPosition);
+            if (currentEventCamera != null)
+                ray = currentEventCamera.ScreenPointToRay(eventPosition);
 
             if (canvas.renderMode != RenderMode.ScreenSpaceOverlay && blockingObjects != BlockingObjects.None)
             {
-                float dist = 100.0f;
+                float distanceToClipPlane = 100.0f;
 
-                if (eventCamera != null)
-                    dist = eventCamera.farClipPlane - eventCamera.nearClipPlane;
+                if (currentEventCamera != null)
+                {
+                    float projectionDirection = ray.direction.z;
+                    distanceToClipPlane = Mathf.Approximately(0.0f, projectionDirection)
+                        ? Mathf.Infinity
+                        : Mathf.Abs((currentEventCamera.farClipPlane - currentEventCamera.nearClipPlane) / projectionDirection);
+                }
 
                 if (blockingObjects == BlockingObjects.ThreeD || blockingObjects == BlockingObjects.All)
                 {
                     if (ReflectionMethodsCache.Singleton.raycast3D != null)
                     {
-                        RaycastHit hit;
-                        if (ReflectionMethodsCache.Singleton.raycast3D(ray, out hit, dist, m_BlockingMask))
-                            hitDistance = hit.distance;
+                        var hits = ReflectionMethodsCache.Singleton.raycast3DAll(ray, distanceToClipPlane, (int)m_BlockingMask);
+                        if (hits.Length > 0)
+                            hitDistance = hits[0].distance;
                     }
                 }
 
@@ -156,24 +167,25 @@ namespace UnityEngine.UI
                 {
                     if (ReflectionMethodsCache.Singleton.raycast2D != null)
                     {
-                        var hit = ReflectionMethodsCache.Singleton.raycast2D((Vector2)ray.origin, (Vector2)ray.direction, dist, (int)m_BlockingMask);
-                        if (hit.collider)
-                            hitDistance = hit.fraction * dist;
+                        var hits = ReflectionMethodsCache.Singleton.getRayIntersectionAll(ray, distanceToClipPlane, (int)m_BlockingMask);
+                        if (hits.Length > 0)
+                            hitDistance = hits[0].distance;
                     }
                 }
             }
 
             m_RaycastResults.Clear();
-            Raycast(canvas, eventCamera, eventPosition, m_RaycastResults);
+            Raycast(canvas, currentEventCamera, eventPosition, canvasGraphics, m_RaycastResults);
 
-            for (var index = 0; index < m_RaycastResults.Count; index++)
+            int totalCount = m_RaycastResults.Count;
+            for (var index = 0; index < totalCount; index++)
             {
                 var go = m_RaycastResults[index].gameObject;
                 bool appendGraphic = true;
 
                 if (ignoreReversedGraphics)
                 {
-                    if (eventCamera == null)
+                    if (currentEventCamera == null)
                     {
                         // If we dont have a camera we know that we should always be facing forward
                         var dir = go.transform.rotation * Vector3.forward;
@@ -182,7 +194,7 @@ namespace UnityEngine.UI
                     else
                     {
                         // If we have a camera compare the direction against the cameras forward.
-                        var cameraFoward = eventCamera.transform.rotation * Vector3.forward;
+                        var cameraFoward = currentEventCamera.transform.rotation * Vector3.forward;
                         var dir = go.transform.rotation * Vector3.forward;
                         appendGraphic = Vector3.Dot(cameraFoward, dir) > 0;
                     }
@@ -192,14 +204,14 @@ namespace UnityEngine.UI
                 {
                     float distance = 0;
 
-                    if (eventCamera == null || canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+                    if (currentEventCamera == null || canvas.renderMode == RenderMode.ScreenSpaceOverlay)
                         distance = 0;
                     else
                     {
                         Transform trans = go.transform;
                         Vector3 transForward = trans.forward;
                         // http://geomalgorithms.com/a06-_intersect-2.html
-                        distance = (Vector3.Dot(transForward, trans.position - ray.origin) / Vector3.Dot(transForward, ray.direction));
+                        distance = (Vector3.Dot(transForward, trans.position - currentEventCamera.transform.position) / Vector3.Dot(transForward, ray.direction));
 
                         // Check to see if the go is behind the camera.
                         if (distance < 0)
@@ -229,8 +241,7 @@ namespace UnityEngine.UI
         {
             get
             {
-                if (canvas.renderMode == RenderMode.ScreenSpaceOverlay
-                    || (canvas.renderMode == RenderMode.ScreenSpaceCamera && canvas.worldCamera == null))
+                if (canvas.renderMode == RenderMode.ScreenSpaceOverlay || (canvas.renderMode == RenderMode.ScreenSpaceCamera && canvas.worldCamera == null))
                     return null;
 
                 return canvas.worldCamera != null ? canvas.worldCamera : Camera.main;
@@ -241,20 +252,17 @@ namespace UnityEngine.UI
         /// Perform a raycast into the screen and collect all graphics underneath it.
         /// </summary>
         [NonSerialized] static readonly List<Graphic> s_SortedGraphics = new List<Graphic>();
-        private static void Raycast(Canvas canvas, Camera eventCamera, Vector2 pointerPosition, List<Graphic> results)
+        private static void Raycast(Canvas canvas, Camera eventCamera, Vector2 pointerPosition, IList<Graphic> foundGraphics, List<Graphic> results)
         {
             // Debug.Log("ttt" + pointerPoision + ":::" + camera);
             // Necessary for the event system
-            var foundGraphics = GraphicRegistry.GetGraphicsForCanvas(canvas);
-            for (int i = 0; i < foundGraphics.Count; ++i)
+            int totalCount = foundGraphics.Count;
+            for (int i = 0; i < totalCount; ++i)
             {
                 Graphic graphic = foundGraphics[i];
 
-                if (graphic.canvasRenderer.cull)
-                    continue;
-
                 // -1 means it hasn't been processed by the canvas, which means it isn't actually drawn
-                if (graphic.depth == -1 || !graphic.raycastTarget)
+                if (graphic.depth == -1 || !graphic.raycastTarget || graphic.canvasRenderer.cull)
                     continue;
 
                 if (!RectTransformUtility.RectangleContainsScreenPoint(graphic.rectTransform, pointerPosition, eventCamera))
@@ -268,7 +276,8 @@ namespace UnityEngine.UI
 
             s_SortedGraphics.Sort((g1, g2) => g2.depth.CompareTo(g1.depth));
             //      StringBuilder cast = new StringBuilder();
-            for (int i = 0; i < s_SortedGraphics.Count; ++i)
+            totalCount = s_SortedGraphics.Count;
+            for (int i = 0; i < totalCount; ++i)
                 results.Add(s_SortedGraphics[i]);
             //      Debug.Log (cast.ToString());
 

@@ -484,24 +484,24 @@ namespace UnityEngine.UI
                 // Evaluate how many vertices we will generate. Limit this number to something sane,
                 // especially since meshes can not have more than 65000 vertices.
 
-                int nTilesW = 0;
-                int nTilesH = 0;
+                long nTilesW = 0;
+                long nTilesH = 0;
                 if (m_FillCenter)
                 {
-                    nTilesW = (int)Math.Ceiling((xMax - xMin) / tileWidth);
-                    nTilesH = (int)Math.Ceiling((yMax - yMin) / tileHeight);
+                    nTilesW = (long)Math.Ceiling((xMax - xMin) / tileWidth);
+                    nTilesH = (long)Math.Ceiling((yMax - yMin) / tileHeight);
 
-                    int nVertices = 0;
+                    double nVertices = 0;
                     if (hasBorder)
                     {
-                        nVertices = (nTilesW + 2) * (nTilesH + 2) * 4; // 4 vertices per tile
+                        nVertices = (nTilesW + 2.0) * (nTilesH + 2.0) * 4.0; // 4 vertices per tile
                     }
                     else
                     {
-                        nVertices = nTilesW * nTilesH * 4; // 4 vertices per tile
+                        nVertices = nTilesW * nTilesH * 4.0; // 4 vertices per tile
                     }
 
-                    if (nVertices > 65000)
+                    if (nVertices > 65000.0)
                     {
                         Debug.LogError("Too many sprite tiles on Image \"" + name + "\". The tile size will be increased. To remove the limit on the number of tiles, convert the Sprite to an Advanced texture, remove the borders, clear the Packing tag and set the Wrap mode to Repeat.", this);
 
@@ -524,8 +524,8 @@ namespace UnityEngine.UI
                             targetTilesH -= 2;
                         }
 
-                        nTilesW = (int)Math.Floor(targetTilesW);
-                        nTilesH = (int)Math.Floor(targetTilesH);
+                        nTilesW = (long)Math.Floor(targetTilesW);
+                        nTilesH = (long)Math.Floor(targetTilesH);
                         tileWidth = (xMax - xMin) / nTilesW;
                         tileHeight = (yMax - yMin) / nTilesH;
                     }
@@ -535,10 +535,10 @@ namespace UnityEngine.UI
                     if (hasBorder)
                     {
                         // Texture on the border is repeated only in one direction.
-                        nTilesW = (int)Math.Ceiling((xMax - xMin) / tileWidth);
-                        nTilesH = (int)Math.Ceiling((yMax - yMin) / tileHeight);
-                        int nVertices = (nTilesH + nTilesW + 2 /*corners*/) * 2 /*sides*/ * 4 /*vertices per tile*/;
-                        if (nVertices > 65000)
+                        nTilesW = (long)Math.Ceiling((xMax - xMin) / tileWidth);
+                        nTilesH = (long)Math.Ceiling((yMax - yMin) / tileHeight);
+                        double nVertices = (nTilesH + nTilesW + 2.0 /*corners*/) * 2.0 /*sides*/ * 4.0 /*vertices per tile*/;
+                        if (nVertices > 65000.0)
                         {
                             Debug.LogError("Too many sprite tiles on Image \"" + name + "\". The tile size will be increased. To remove the limit on the number of tiles, convert the Sprite to an Advanced texture, remove the borders, clear the Packing tag and set the Wrap mode to Repeat.", this);
 
@@ -547,8 +547,8 @@ namespace UnityEngine.UI
                             double targetTilesW = (maxTiles - 4 /*corners*/) / (2 * (1.0 + imageRatio));
                             double targetTilesH = targetTilesW * imageRatio;
 
-                            nTilesW = (int)Math.Floor(targetTilesW);
-                            nTilesH = (int)Math.Floor(targetTilesH);
+                            nTilesW = (long)Math.Floor(targetTilesW);
+                            nTilesH = (long)Math.Floor(targetTilesH);
                             tileWidth = (xMax - xMin) / nTilesW;
                             tileHeight = (yMax - yMin) / nTilesH;
                         }
@@ -562,7 +562,7 @@ namespace UnityEngine.UI
                 if (m_FillCenter)
                 {
                     // TODO: we could share vertices between quads. If vertex sharing is implemented. update the computation for the number of vertices accordingly.
-                    for (int j = 0; j < nTilesH; j++)
+                    for (long j = 0; j < nTilesH; j++)
                     {
                         float y1 = yMin + j * tileHeight;
                         float y2 = yMin + (j + 1) * tileHeight;
@@ -572,7 +572,7 @@ namespace UnityEngine.UI
                             y2 = yMax;
                         }
                         clipped.x = uvMax.x;
-                        for (int i = 0; i < nTilesW; i++)
+                        for (long i = 0; i < nTilesW; i++)
                         {
                             float x1 = xMin + i * tileWidth;
                             float x2 = xMin + (i + 1) * tileWidth;
@@ -588,7 +588,7 @@ namespace UnityEngine.UI
                 if (hasBorder)
                 {
                     clipped = uvMax;
-                    for (int j = 0; j < nTilesH; j++)
+                    for (long j = 0; j < nTilesH; j++)
                     {
                         float y1 = yMin + j * tileHeight;
                         float y2 = yMin + (j + 1) * tileHeight;
@@ -613,7 +613,7 @@ namespace UnityEngine.UI
 
                     // Bottom and top tiled border
                     clipped = uvMax;
-                    for (int i = 0; i < nTilesW; i++)
+                    for (long i = 0; i < nTilesW; i++)
                     {
                         float x1 = xMin + i * tileWidth;
                         float x2 = xMin + (i + 1) * tileWidth;

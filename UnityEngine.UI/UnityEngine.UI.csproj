@@ -41,8 +41,10 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="UnityEditor">
+      <HintPath>..\lib\UnityEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
       <HintPath>..\lib\UnityEngine.dll</HintPath>
     </Reference>
   </ItemGroup>
@@ -74,9 +76,7 @@
     <Compile Include="EventSystem\ExecuteEvents.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="EventSystem\InputModules\BaseInput.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="EventSystem\InputModules\BaseInput.cs" />
     <Compile Include="EventSystem\InputModules\BaseInputModule.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -295,6 +295,9 @@
     <Compile Include="UI\Core\VertexModifiers\Shadow.cs">
       <SubType>Code</SubType>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="UI\Core\GraphicRaycaster.cs.orig" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

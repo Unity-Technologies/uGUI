@@ -162,7 +162,10 @@ namespace UnityEngine.UI
 
             UpdateVisuals();
             if (sendCallback)
+            {
+                UISystemProfilerApi.AddMarker("Scrollbar.value", this);
                 m_OnValueChanged.Invoke(value);
+            }
         }
 
         protected override void OnRectTransformDimensionsChange()

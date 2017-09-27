@@ -87,6 +87,8 @@ namespace UnityEngine.UI
                 {
                     if (!m_Interactable && EventSystem.current != null && EventSystem.current.currentSelectedGameObject == gameObject)
                         EventSystem.current.SetSelectedGameObject(null);
+                    if (m_Interactable)
+                        UpdateSelectionState(null);
                     OnSetProperty();
                 }
             }

@@ -119,8 +119,28 @@ namespace UnityEngine.EventSystems
             set { m_CancelButton = value; }
         }
 
+        private bool ShouldIgnoreEventsOnNoFocus()
+        {
+            switch (SystemInfo.operatingSystemFamily)
+            {
+                case OperatingSystemFamily.Windows:
+                case OperatingSystemFamily.Linux:
+                case OperatingSystemFamily.MacOSX:
+#if UNITY_EDITOR
+                    if (UnityEditor.EditorApplication.isRemoteConnected)
+                        return false;
+#endif
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         public override void UpdateModule()
         {
+            if (!eventSystem.isFocused && ShouldIgnoreEventsOnNoFocus())
+                return;
+
             m_LastMousePosition = m_MousePosition;
             m_MousePosition = input.mousePosition;
         }
@@ -151,6 +171,9 @@ namespace UnityEngine.EventSystems
 
         public override void ActivateModule()
         {
+            if (!eventSystem.isFocused && ShouldIgnoreEventsOnNoFocus())
+                return;
+
             base.ActivateModule();
             m_MousePosition = input.mousePosition;
             m_LastMousePosition = input.mousePosition;
@@ -170,6 +193,9 @@ namespace UnityEngine.EventSystems
 
         public override void Process()
         {
+            if (!eventSystem.isFocused && ShouldIgnoreEventsOnNoFocus())
+                return;
+
             bool usedEvent = SendUpdateEventToSelectedObject();
 
             if (eventSystem.sendNavigationEvents)
@@ -304,11 +330,6 @@ namespace UnityEngine.EventSystems
                     ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.endDragHandler);
 
                 pointerEvent.dragging = false;
-                pointerEvent.pointerDrag = null;
-
-                if (pointerEvent.pointerDrag != null)
-                    ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.endDragHandler);
-
                 pointerEvent.pointerDrag = null;
 
                 // send exit events as we need to simulate this on touch up on touch device

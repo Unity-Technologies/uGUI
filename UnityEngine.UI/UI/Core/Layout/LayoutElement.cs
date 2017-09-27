@@ -14,6 +14,7 @@ namespace UnityEngine.UI
         [SerializeField] private float m_PreferredHeight = -1;
         [SerializeField] private float m_FlexibleWidth = -1;
         [SerializeField] private float m_FlexibleHeight = -1;
+        [SerializeField] private int m_LayoutPriority = 1;
 
 
         public virtual bool ignoreLayout { get { return m_IgnoreLayout; } set { if (SetPropertyUtility.SetStruct(ref m_IgnoreLayout, value)) SetDirty(); } }
@@ -26,7 +27,7 @@ namespace UnityEngine.UI
         public virtual float preferredHeight { get { return m_PreferredHeight; } set { if (SetPropertyUtility.SetStruct(ref m_PreferredHeight, value)) SetDirty(); } }
         public virtual float flexibleWidth { get { return m_FlexibleWidth; } set { if (SetPropertyUtility.SetStruct(ref m_FlexibleWidth, value)) SetDirty(); } }
         public virtual float flexibleHeight { get { return m_FlexibleHeight; } set { if (SetPropertyUtility.SetStruct(ref m_FlexibleHeight, value)) SetDirty(); } }
-        public virtual int layoutPriority { get { return 1; } }
+        public virtual int layoutPriority { get { return m_LayoutPriority; } set { if (SetPropertyUtility.SetStruct(ref m_LayoutPriority, value)) SetDirty(); } }
 
 
         protected LayoutElement()

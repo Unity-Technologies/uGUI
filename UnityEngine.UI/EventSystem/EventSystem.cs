@@ -63,7 +63,12 @@ namespace UnityEngine.EventSystems
             get { return null; }
         }
 
-        private bool m_Paused;
+        private bool m_HasFocus = true;
+
+        public bool isFocused
+        {
+            get { return m_HasFocus; }
+        }
 
         protected EventSystem()
         {}
@@ -129,12 +134,14 @@ namespace UnityEngine.EventSystems
         {
             if (lhs.module != rhs.module)
             {
-                if (lhs.module.eventCamera != null && rhs.module.eventCamera != null && lhs.module.eventCamera.depth != rhs.module.eventCamera.depth)
+                var lhsEventCamera = lhs.module.eventCamera;
+                var rhsEventCamera = rhs.module.eventCamera;
+                if (lhsEventCamera != null && rhsEventCamera != null && lhsEventCamera.depth != rhsEventCamera.depth)
                 {
                     // need to reverse the standard compareTo
-                    if (lhs.module.eventCamera.depth < rhs.module.eventCamera.depth)
+                    if (lhsEventCamera.depth < rhsEventCamera.depth)
                         return 1;
-                    if (lhs.module.eventCamera.depth == rhs.module.eventCamera.depth)
+                    if (lhsEventCamera.depth == rhsEventCamera.depth)
                         return 0;
 
                     return -1;
@@ -237,15 +244,12 @@ namespace UnityEngine.EventSystems
 
         protected virtual void OnApplicationFocus(bool hasFocus)
         {
-            if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Windows ||
-                SystemInfo.operatingSystemFamily == OperatingSystemFamily.Linux ||
-                SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX)
-                m_Paused = !hasFocus;
+            m_HasFocus = hasFocus;
         }
 
         protected virtual void Update()
         {
-            if (current != this || m_Paused)
+            if (current != this)
                 return;
             TickModules();
 

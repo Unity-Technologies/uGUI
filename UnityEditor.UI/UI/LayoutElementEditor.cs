@@ -16,6 +16,7 @@ namespace UnityEditor.UI
         SerializedProperty m_PreferredHeight;
         SerializedProperty m_FlexibleWidth;
         SerializedProperty m_FlexibleHeight;
+        SerializedProperty m_LayoutPriority;
 
         protected virtual void OnEnable()
         {
@@ -26,6 +27,7 @@ namespace UnityEditor.UI
             m_PreferredHeight = serializedObject.FindProperty("m_PreferredHeight");
             m_FlexibleWidth = serializedObject.FindProperty("m_FlexibleWidth");
             m_FlexibleHeight = serializedObject.FindProperty("m_FlexibleHeight");
+            m_LayoutPriority = serializedObject.FindProperty("m_LayoutPriority");
         }
 
         public override void OnInspectorGUI()
@@ -45,6 +47,8 @@ namespace UnityEditor.UI
                 LayoutElementField(m_FlexibleWidth, 1);
                 LayoutElementField(m_FlexibleHeight, 1);
             }
+
+            EditorGUILayout.PropertyField(m_LayoutPriority);
 
             serializedObject.ApplyModifiedProperties();
         }

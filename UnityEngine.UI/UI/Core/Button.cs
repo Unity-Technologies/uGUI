@@ -32,6 +32,7 @@ namespace UnityEngine.UI
             if (!IsActive() || !IsInteractable())
                 return;
 
+            UISystemProfilerApi.AddMarker("Button.onClick", this);
             m_OnClick.Invoke();
         }
 

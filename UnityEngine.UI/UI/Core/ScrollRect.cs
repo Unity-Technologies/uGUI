@@ -433,6 +433,7 @@ namespace UnityEngine.UI
             if (m_ViewBounds != m_PrevViewBounds || m_ContentBounds != m_PrevContentBounds || m_Content.anchoredPosition != m_PrevPosition)
             {
                 UpdateScrollbars(offset);
+                UISystemProfilerApi.AddMarker("ScrollRect.value", this);
                 m_OnValueChanged.Invoke(normalizedPosition);
                 UpdatePrevData();
             }
@@ -716,10 +717,10 @@ namespace UnityEngine.UI
             if (movementType == MovementType.Clamped)
             {
                 // Adjust content so that content bounds bottom (right side) is never higher (to the left) than the view bounds bottom (right side).
-                //                                       top (left side) is never lower (to the right) than the view bounds top (left side).
+                // top (left side) is never lower (to the right) than the view bounds top (left side).
                 // All this can happen if content has shrunk.
                 // This works because content size is at least as big as view size (because of the call to InternalUpdateBounds above).
-                Vector3 delta = Vector3.zero;
+                Vector2 delta = Vector2.zero;
                 if (m_ViewBounds.max.x > m_ContentBounds.max.x)
                 {
                     delta.x = Math.Min(m_ViewBounds.min.x - m_ContentBounds.min.x, m_ViewBounds.max.x - m_ContentBounds.max.x);
@@ -737,18 +738,14 @@ namespace UnityEngine.UI
                 {
                     delta.y = Math.Min(m_ViewBounds.min.y - m_ContentBounds.min.y, m_ViewBounds.max.y - m_ContentBounds.max.y);
                 }
-                if (delta != Vector3.zero)
+                if (delta.sqrMagnitude > float.Epsilon)
                 {
-                    m_Content.Translate(delta);
-
-                    // Content position changed; recompute content bounds.
-                    m_ContentBounds = GetBounds();
-                    contentSize = m_ContentBounds.size;
-                    contentPos = m_ContentBounds.center;
-                    contentPivot = m_Content.pivot;
+                    contentPos = m_Content.anchoredPosition + delta;
+                    if (!m_Horizontal)
+                        contentPos.x = m_Content.anchoredPosition.x;
+                    if (!m_Vertical)
+                        contentPos.y = m_Content.anchoredPosition.y;
                     AdjustBounds(ref m_ViewBounds, ref contentPivot, ref contentSize, ref contentPos);
-                    m_ContentBounds.size = contentSize;
-                    m_ContentBounds.center = contentPos;
                 }
             }
         }
