@@ -153,7 +153,7 @@ namespace UnityEngine.UI
 
         protected override void OnDisable()
         {
-            m_Tracker.Clear(true);
+            m_Tracker.Clear();
             base.OnDisable();
         }
 
@@ -184,7 +184,7 @@ namespace UnityEngine.UI
 
         void UpdateCachedReferences()
         {
-            if (m_FillRect)
+            if (m_FillRect && m_FillRect != (RectTransform)transform)
             {
                 m_FillTransform = m_FillRect.transform;
                 m_FillImage = m_FillRect.GetComponent<Image>();
@@ -193,11 +193,12 @@ namespace UnityEngine.UI
             }
             else
             {
+                m_FillRect = null;
                 m_FillContainerRect = null;
                 m_FillImage = null;
             }
 
-            if (m_HandleRect)
+            if (m_HandleRect && m_HandleRect != (RectTransform)transform)
             {
                 m_HandleTransform = m_HandleRect.transform;
                 if (m_HandleTransform.parent != null)
@@ -205,6 +206,7 @@ namespace UnityEngine.UI
             }
             else
             {
+                m_HandleRect = null;
                 m_HandleContainerRect = null;
             }
         }
@@ -269,7 +271,7 @@ namespace UnityEngine.UI
                 UpdateCachedReferences();
 #endif
 
-            m_Tracker.Clear(true);
+            m_Tracker.Clear();
 
             if (m_FillContainerRect != null)
             {

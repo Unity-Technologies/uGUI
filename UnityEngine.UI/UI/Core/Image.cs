@@ -189,9 +189,14 @@ namespace UnityEngine.UI
             {
                 if (m_Material != null)
                     return m_Material;
+#if UNITY_EDITOR
+                if (Application.isPlaying && activeSprite && activeSprite.associatedAlphaSplitTexture != null)
+                    return defaultETC1GraphicMaterial;
+#else
 
                 if (activeSprite && activeSprite.associatedAlphaSplitTexture != null)
                     return defaultETC1GraphicMaterial;
+#endif
 
                 return defaultMaterial;
             }

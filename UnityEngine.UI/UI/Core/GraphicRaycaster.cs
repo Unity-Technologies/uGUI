@@ -268,6 +268,9 @@ namespace UnityEngine.UI
                 if (!RectTransformUtility.RectangleContainsScreenPoint(graphic.rectTransform, pointerPosition, eventCamera))
                     continue;
 
+                if (eventCamera != null && eventCamera.WorldToScreenPoint(graphic.rectTransform.position).z > eventCamera.farClipPlane)
+                    continue;
+
                 if (graphic.Raycast(pointerPosition, eventCamera))
                 {
                     s_SortedGraphics.Add(graphic);

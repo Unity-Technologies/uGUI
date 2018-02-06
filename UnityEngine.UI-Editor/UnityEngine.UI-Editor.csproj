@@ -83,11 +83,6 @@
     <!--<Copy SourceFiles="$(TargetDir)$(TargetName).dll" DestinationFiles="C:\Program Files (x86)\Unity\Editor\Data\UnityExtensions\Unity\GUISystem\4.6.0\$(TargetName).dll"/>-->
   </Target>
   <ItemGroup>
-    <None Include="..\UnityEngine.UI\UI\Core\GraphicRaycaster.cs.orig">
-      <Link>UI\Core\GraphicRaycaster.cs.orig</Link>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="..\UnityEngine.UI\EventSystem\EventData\AxisEventData.cs">
       <Link>EventSystem\EventData\AxisEventData.cs</Link>
       <SubType>Code</SubType>
@@ -126,8 +121,6 @@
     </Compile>
     <Compile Include="..\UnityEngine.UI\EventSystem\InputModules\BaseInput.cs">
       <Link>EventSystem\InputModules\BaseInput.cs</Link>
-      <SubType>
-      </SubType>
     </Compile>
     <Compile Include="..\UnityEngine.UI\EventSystem\InputModules\BaseInputModule.cs">
       <Link>EventSystem\InputModules\BaseInputModule.cs</Link>

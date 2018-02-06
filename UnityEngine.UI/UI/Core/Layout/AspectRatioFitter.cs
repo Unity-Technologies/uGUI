@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
@@ -36,12 +37,12 @@ namespace UnityEngine.UI
         protected override void OnEnable()
         {
             base.OnEnable();
-            SetDirty();
+            SetDirty(true);
         }
 
         protected override void OnDisable()
         {
-            m_Tracker.Clear(true);
+            m_Tracker.Clear();
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
             base.OnDisable();
         }
@@ -56,7 +57,7 @@ namespace UnityEngine.UI
             if (!IsActive())
                 return;
 
-            m_Tracker.Clear(false);
+            m_Tracker.Clear();
 
             switch (m_AspectMode)
             {
@@ -128,9 +129,18 @@ namespace UnityEngine.UI
 
         public virtual void SetLayoutVertical() {}
 
-        protected void SetDirty()
+        private IEnumerator DelayUpdate()
         {
+            yield return null;
             UpdateRect();
+        }
+
+        protected void SetDirty(bool delayUpdate = false)
+        {
+            if (delayUpdate)
+                StartCoroutine(DelayUpdate());
+            else
+                UpdateRect();
         }
 
     #if UNITY_EDITOR

@@ -241,7 +241,7 @@ namespace UnityEngine.UI
                 m_VerticalScrollbar.onValueChanged.RemoveListener(SetVerticalNormalizedPosition);
 
             m_HasRebuiltLayout = false;
-            m_Tracker.Clear(true);
+            m_Tracker.Clear();
             m_Velocity = Vector2.zero;
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
             base.OnDisable();
@@ -379,7 +379,6 @@ namespace UnityEngine.UI
                 return;
 
             EnsureLayoutHasRebuilt();
-            UpdateScrollbarVisibility();
             UpdateBounds();
             float deltaTime = Time.unscaledDeltaTime;
             Vector2 offset = CalculateOffset(Vector2.zero);
@@ -412,16 +411,13 @@ namespace UnityEngine.UI
                     }
                 }
 
-                if (m_Velocity != Vector2.zero)
+                if (m_MovementType == MovementType.Clamped)
                 {
-                    if (m_MovementType == MovementType.Clamped)
-                    {
-                        offset = CalculateOffset(position - m_Content.anchoredPosition);
-                        position += offset;
-                    }
-
-                    SetContentAnchoredPosition(position);
+                    offset = CalculateOffset(position - m_Content.anchoredPosition);
+                    position += offset;
                 }
+
+                SetContentAnchoredPosition(position);
             }
 
             if (m_Dragging && m_Inertia)
@@ -437,6 +433,7 @@ namespace UnityEngine.UI
                 m_OnValueChanged.Invoke(normalizedPosition);
                 UpdatePrevData();
             }
+            UpdateScrollbarVisibility();
         }
 
         protected void UpdatePrevData()
@@ -584,7 +581,7 @@ namespace UnityEngine.UI
 
         public virtual void SetLayoutHorizontal()
         {
-            m_Tracker.Clear(true);
+            m_Tracker.Clear();
 
             if (m_HSliderExpand || m_VSliderExpand)
             {
