@@ -1605,9 +1605,12 @@ namespace UnityEngine.UI
             }
         }
 
+        // cf. TextGenerator.cpp
+        private const int k_MaxTextLength = UInt16.MaxValue / 4 - 1;
+
         protected virtual void Append(char input)
         {
-            if (m_ReadOnly)
+            if (m_ReadOnly || text.Length >= k_MaxTextLength)
                 return;
 
             if (!InPlaceEditing())

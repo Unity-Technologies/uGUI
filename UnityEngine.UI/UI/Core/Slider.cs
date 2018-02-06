@@ -153,7 +153,7 @@ namespace UnityEngine.UI
 
         protected override void OnDisable()
         {
-            m_Tracker.Clear();
+            m_Tracker.Clear(true);
             base.OnDisable();
         }
 
@@ -269,7 +269,7 @@ namespace UnityEngine.UI
                 UpdateCachedReferences();
 #endif
 
-            m_Tracker.Clear();
+            m_Tracker.Clear(true);
 
             if (m_FillContainerRect != null)
             {

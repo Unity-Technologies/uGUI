@@ -241,7 +241,7 @@ namespace UnityEngine.UI
                 m_VerticalScrollbar.onValueChanged.RemoveListener(SetVerticalNormalizedPosition);
 
             m_HasRebuiltLayout = false;
-            m_Tracker.Clear();
+            m_Tracker.Clear(true);
             m_Velocity = Vector2.zero;
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
             base.OnDisable();
@@ -507,7 +507,7 @@ namespace UnityEngine.UI
                 UpdateBounds();
                 if (m_ContentBounds.size.y <= m_ViewBounds.size.y)
                     return (m_ViewBounds.min.y > m_ContentBounds.min.y) ? 1 : 0;
-                ;
+
                 return (m_ViewBounds.min.y - m_ContentBounds.min.y) / (m_ContentBounds.size.y - m_ViewBounds.size.y);
             }
             set
@@ -584,7 +584,7 @@ namespace UnityEngine.UI
 
         public virtual void SetLayoutHorizontal()
         {
-            m_Tracker.Clear();
+            m_Tracker.Clear(true);
 
             if (m_HSliderExpand || m_VSliderExpand)
             {

@@ -66,7 +66,7 @@ namespace UnityEngine.UI
                 }
             }
             ListPool<Component>.Release(toIgnoreList);
-            m_Tracker.Clear();
+            m_Tracker.Clear(true);
         }
 
         public abstract void CalculateLayoutInputVertical();
@@ -99,7 +99,7 @@ namespace UnityEngine.UI
 
         protected override void OnDisable()
         {
-            m_Tracker.Clear();
+            m_Tracker.Clear(true);
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
             base.OnDisable();
         }

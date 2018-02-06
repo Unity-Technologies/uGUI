@@ -44,7 +44,7 @@ namespace UnityEngine.UI
 
         protected override void OnDisable()
         {
-            m_Tracker.Clear();
+            m_Tracker.Clear(true);
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
             base.OnDisable();
         }
@@ -75,7 +75,7 @@ namespace UnityEngine.UI
 
         public virtual void SetLayoutHorizontal()
         {
-            m_Tracker.Clear();
+            m_Tracker.Clear(true);
             HandleSelfFittingAlongAxis(0);
         }
 

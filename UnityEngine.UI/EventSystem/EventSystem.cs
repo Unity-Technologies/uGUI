@@ -13,7 +13,22 @@ namespace UnityEngine.EventSystems
 
         private BaseInputModule m_CurrentInputModule;
 
-        public static EventSystem current { get; set; }
+        private  static List<EventSystem> m_EventSystems = new List<EventSystem>();
+
+        public static EventSystem current
+        {
+            get { return m_EventSystems.Count > 0 ? m_EventSystems[0] : null; }
+            set
+            {
+                int index = m_EventSystems.IndexOf(value);
+
+                if (index >= 0)
+                {
+                    m_EventSystems.RemoveAt(index);
+                    m_EventSystems.Insert(0, value);
+                }
+            }
+        }
 
         [SerializeField]
         [FormerlySerializedAs("m_Selected")]
@@ -209,14 +224,7 @@ namespace UnityEngine.EventSystems
         protected override void OnEnable()
         {
             base.OnEnable();
-            if (EventSystem.current == null)
-                EventSystem.current = this;
-#if UNITY_EDITOR
-            else
-            {
-                Debug.LogWarning("Multiple EventSystems in scene... this is not supported");
-            }
-#endif
+            m_EventSystems.Add(this);
         }
 
         protected override void OnDisable()
@@ -227,8 +235,7 @@ namespace UnityEngine.EventSystems
                 m_CurrentInputModule = null;
             }
 
-            if (EventSystem.current == this)
-                EventSystem.current = null;
+            m_EventSystems.Remove(this);
 
             base.OnDisable();
         }

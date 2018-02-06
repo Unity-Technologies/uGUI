@@ -138,17 +138,30 @@ namespace UnityEngine.UI
 
         public static void MarkLayoutForRebuild(RectTransform rect)
         {
-            if (rect == null)
+            if (rect == null || rect.gameObject == null)
                 return;
 
             var comps = ListPool<Component>.Get();
+            bool validLayoutGroup = true;
             RectTransform layoutRoot = rect;
-            while (true)
+            var parent = layoutRoot.parent as RectTransform;
+            while (validLayoutGroup && !(parent == null || parent.gameObject == null))
             {
-                var parent = layoutRoot.parent as RectTransform;
-                if (!ValidLayoutGroup(parent, comps))
-                    break;
-                layoutRoot = parent;
+                validLayoutGroup = false;
+                parent.GetComponents(typeof(ILayoutGroup), comps);
+
+                for (int i = 0; i < comps.Count; ++i)
+                {
+                    var cur = comps[i];
+                    if (cur != null && cur is Behaviour && ((Behaviour)cur).isActiveAndEnabled)
+                    {
+                        validLayoutGroup = true;
+                        layoutRoot = parent;
+                        break;
+                    }
+                }
+
+                parent = parent.parent as RectTransform;
             }
 
             // We know the layout root is valid if it's not the same as the rect,
@@ -163,26 +176,22 @@ namespace UnityEngine.UI
             ListPool<Component>.Release(comps);
         }
 
-        private static bool ValidLayoutGroup(RectTransform parent, List<Component> comps)
-        {
-            if (parent == null)
-                return false;
-
-            parent.GetComponents(typeof(ILayoutGroup), comps);
-            StripDisabledBehavioursFromList(comps);
-            var validCount = comps.Count > 0;
-            return validCount;
-        }
-
         private static bool ValidController(RectTransform layoutRoot, List<Component> comps)
         {
-            if (layoutRoot == null)
+            if (layoutRoot == null || layoutRoot.gameObject == null)
                 return false;
 
             layoutRoot.GetComponents(typeof(ILayoutController), comps);
-            StripDisabledBehavioursFromList(comps);
-            var valid =  comps.Count > 0;
-            return valid;
+            for (int i = 0; i < comps.Count; ++i)
+            {
+                var cur = comps[i];
+                if (cur != null && cur is Behaviour && ((Behaviour)cur).isActiveAndEnabled)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static void MarkLayoutRootForRebuild(RectTransform controller)

@@ -23,6 +23,15 @@ namespace UnityEngine.EventSystems
         [SerializeField]
         protected LayerMask m_EventMask = kNoEventMaskSet;
 
+        /// <summary>
+        /// The max number of intersections allowed. 0 = allocating version anything else is non alloc.
+        /// </summary>
+        [SerializeField]
+        protected int m_MaxRayIntersections = 0;
+        protected int m_LastMaxRayIntersections = 0;
+
+        RaycastHit[] m_Hits;
+
         protected PhysicsRaycaster()
         {}
 
@@ -62,6 +71,12 @@ namespace UnityEngine.EventSystems
             set { m_EventMask = value; }
         }
 
+        public int maxRayIntersections
+        {
+            get { return m_MaxRayIntersections; }
+            set { m_MaxRayIntersections = value; }
+        }
+
         protected void ComputeRayAndDistance(PointerEventData eventData, out Ray ray, out float distanceToClipPlane)
         {
             ray = eventCamera.ScreenPointToRay(eventData.position);
@@ -82,25 +97,44 @@ namespace UnityEngine.EventSystems
             float distanceToClipPlane;
             ComputeRayAndDistance(eventData, out ray, out distanceToClipPlane);
 
-            if (ReflectionMethodsCache.Singleton.raycast3DAll == null)
-                return;
+            int hitCount = 0;
 
-            var hits = ReflectionMethodsCache.Singleton.raycast3DAll(ray, distanceToClipPlane, finalEventMask);
-
-            if (hits.Length > 1)
-                System.Array.Sort(hits, (r1, r2) => r1.distance.CompareTo(r2.distance));
-
-            if (hits.Length != 0)
+            if (m_MaxRayIntersections == 0)
             {
-                for (int b = 0, bmax = hits.Length; b < bmax; ++b)
+                if (ReflectionMethodsCache.Singleton.raycast3DAll == null)
+                    return;
+
+                m_Hits = ReflectionMethodsCache.Singleton.raycast3DAll(ray, distanceToClipPlane, finalEventMask);
+                hitCount = m_Hits.Length;
+            }
+            else
+            {
+                if (ReflectionMethodsCache.Singleton.getRaycastNonAlloc == null)
+                    return;
+
+                if (m_LastMaxRayIntersections != m_MaxRayIntersections)
+                {
+                    m_Hits = new RaycastHit[m_MaxRayIntersections];
+                    m_LastMaxRayIntersections = m_MaxRayIntersections;
+                }
+
+                hitCount = ReflectionMethodsCache.Singleton.getRaycastNonAlloc(ray, m_Hits, distanceToClipPlane, finalEventMask);
+            }
+
+            if (hitCount > 1)
+                System.Array.Sort(m_Hits, (r1, r2) => r1.distance.CompareTo(r2.distance));
+
+            if (hitCount != 0)
+            {
+                for (int b = 0, bmax = hitCount; b < bmax; ++b)
                 {
                     var result = new RaycastResult
                     {
-                        gameObject = hits[b].collider.gameObject,
+                        gameObject = m_Hits[b].collider.gameObject,
                         module = this,
-                        distance = hits[b].distance,
-                        worldPosition = hits[b].point,
-                        worldNormal = hits[b].normal,
+                        distance = m_Hits[b].distance,
+                        worldPosition = m_Hits[b].point,
+                        worldNormal = m_Hits[b].normal,
                         screenPosition = eventData.position,
                         index = resultAppendList.Count,
                         sortingLayer = 0,
