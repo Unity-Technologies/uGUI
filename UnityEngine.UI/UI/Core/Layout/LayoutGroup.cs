@@ -168,9 +168,10 @@ namespace UnityEngine.UI
             m_Tracker.Add(this, rect,
                 DrivenTransformProperties.Anchors |
                 (axis == 0 ?
-                 (DrivenTransformProperties.AnchoredPositionX | DrivenTransformProperties.SizeDeltaX) :
-                 (DrivenTransformProperties.AnchoredPositionY | DrivenTransformProperties.SizeDeltaY)
-                ));
+                    (DrivenTransformProperties.AnchoredPositionX | DrivenTransformProperties.SizeDeltaX) :
+                    (DrivenTransformProperties.AnchoredPositionY | DrivenTransformProperties.SizeDeltaY)
+                )
+            );
 
             rect.SetInsetAndSizeFromParentEdge(axis == 0 ? RectTransform.Edge.Left : RectTransform.Edge.Top, pos, size);
         }

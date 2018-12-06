@@ -14,6 +14,8 @@ namespace UnityEngine.EventSystems
         private Vector2 m_LastMousePosition;
         private Vector2 m_MousePosition;
 
+        private PointerEventData m_InputPointerEvent;
+
         [SerializeField]
         [FormerlySerializedAs("m_AllowActivationOnStandalone")]
         private bool m_ForceModuleActive;
@@ -33,6 +35,14 @@ namespace UnityEngine.EventSystems
 
         public override void UpdateModule()
         {
+            if (!eventSystem.isFocused)
+            {
+                if (m_InputPointerEvent != null && m_InputPointerEvent.pointerDrag != null && m_InputPointerEvent.dragging)
+                    ExecuteEvents.Execute(m_InputPointerEvent.pointerDrag, m_InputPointerEvent, ExecuteEvents.endDragHandler);
+
+                m_InputPointerEvent = null;
+            }
+
             m_LastMousePosition = m_MousePosition;
             m_MousePosition = input.mousePosition;
         }
@@ -189,6 +199,8 @@ namespace UnityEngine.EventSystems
 
                 if (pointerEvent.pointerDrag != null)
                     ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.initializePotentialDrag);
+
+                m_InputPointerEvent = pointerEvent;
             }
 
             // PointerUp notification
@@ -230,6 +242,8 @@ namespace UnityEngine.EventSystems
                 // send exit events as we need to simulate this on touch up on touch device
                 ExecuteEvents.ExecuteHierarchy(pointerEvent.pointerEnter, pointerEvent, ExecuteEvents.pointerExitHandler);
                 pointerEvent.pointerEnter = null;
+
+                m_InputPointerEvent = pointerEvent;
             }
         }
 

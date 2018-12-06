@@ -171,13 +171,13 @@ namespace UnityEngine.UI
             }
 
             Vector2 requiredSpace = new Vector2(
-                    actualCellCountX * cellSize.x + (actualCellCountX - 1) * spacing.x,
-                    actualCellCountY * cellSize.y + (actualCellCountY - 1) * spacing.y
-                    );
+                actualCellCountX * cellSize.x + (actualCellCountX - 1) * spacing.x,
+                actualCellCountY * cellSize.y + (actualCellCountY - 1) * spacing.y
+            );
             Vector2 startOffset = new Vector2(
-                    GetStartOffset(0, requiredSpace.x),
-                    GetStartOffset(1, requiredSpace.y)
-                    );
+                GetStartOffset(0, requiredSpace.x),
+                GetStartOffset(1, requiredSpace.y)
+            );
 
             for (int i = 0; i < rectChildren.Count; i++)
             {

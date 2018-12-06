@@ -28,22 +28,36 @@ namespace UnityEngine.UI
         [NonSerialized]
         private Rect m_LastClipRectCanvasSpace;
         [NonSerialized]
-        private bool m_LastValidClipRect;
-        [NonSerialized]
         private bool m_ForceClip;
+
+        /// <remarks>
+        /// Returns a non-destroyed instance or a null reference.
+        /// </remarks>
+        [NonSerialized] private Canvas m_Canvas;
+        private Canvas Canvas
+        {
+            get
+            {
+                if (m_Canvas == null)
+                {
+                    var list = ListPool<Canvas>.Get();
+                    gameObject.GetComponentsInParent(false, list);
+                    if (list.Count > 0)
+                        m_Canvas = list[list.Count - 1];
+                    else
+                        m_Canvas = null;
+                    ListPool<Canvas>.Release(list);
+                }
+
+                return m_Canvas;
+            }
+        }
 
         public Rect canvasRect
         {
             get
             {
-                Canvas canvas = null;
-                var list = ListPool<Canvas>.Get();
-                gameObject.GetComponentsInParent(false, list);
-                if (list.Count > 0)
-                    canvas = list[list.Count - 1];
-                ListPool<Canvas>.Release(list);
-
-                return m_VertexClipper.GetCanvasRect(rectTransform, canvas);
+                return m_VertexClipper.GetCanvasRect(rectTransform, Canvas);
             }
         }
 
@@ -98,8 +112,32 @@ namespace UnityEngine.UI
             return RectTransformUtility.RectangleContainsScreenPoint(rectTransform, sp, eventCamera);
         }
 
+        private Vector3[] m_Corners = new Vector3[4];
+
+        private Rect rootCanvasRect
+        {
+            get
+            {
+                rectTransform.GetWorldCorners(m_Corners);
+
+                if (!ReferenceEquals(Canvas, null))
+                {
+                    Canvas rootCanvas = Canvas.rootCanvas;
+                    for (int i = 0; i < 4; ++i)
+                        m_Corners[i] = rootCanvas.transform.InverseTransformPoint(m_Corners[i]);
+                }
+
+                return new Rect(m_Corners[0].x, m_Corners[0].y, m_Corners[2].x - m_Corners[0].x, m_Corners[2].y - m_Corners[0].y);
+            }
+        }
+
         public virtual void PerformClipping()
         {
+            if (ReferenceEquals(Canvas, null))
+            {
+                return;
+            }
+
             //TODO See if an IsActive() test would work well here or whether it might cause unexpected side effects (re case 776771)
 
             // if the parents are changed
@@ -115,24 +153,39 @@ namespace UnityEngine.UI
             // the clippers that are valid
             bool validRect = true;
             Rect clipRect = Clipping.FindCullAndClipWorldRect(m_Clippers, out validRect);
+
+            // If the mask is in ScreenSpaceOverlay/Camera render mode, its content is only rendered when its rect
+            // overlaps that of the root canvas.
+            RenderMode renderMode = Canvas.rootCanvas.renderMode;
+            bool maskIsCulled =
+                (renderMode == RenderMode.ScreenSpaceCamera || renderMode == RenderMode.ScreenSpaceOverlay) &&
+                !clipRect.Overlaps(rootCanvasRect, true);
+
             bool clipRectChanged = clipRect != m_LastClipRectCanvasSpace;
-            if (clipRectChanged || m_ForceClip)
-            {
-                foreach (IClippable clipTarget in m_ClipTargets)
-                    clipTarget.SetClipRect(clipRect, validRect);
+            bool forceClip = m_ForceClip;
 
-                m_LastClipRectCanvasSpace = clipRect;
-                m_LastValidClipRect = validRect;
-            }
-
+            // Avoid looping multiple times.
             foreach (IClippable clipTarget in m_ClipTargets)
             {
+                if (clipRectChanged || forceClip)
+                {
+                    clipTarget.SetClipRect(clipRect, validRect);
+                }
+
                 var maskable = clipTarget as MaskableGraphic;
                 if (maskable != null && !maskable.canvasRenderer.hasMoved && !clipRectChanged)
                     continue;
 
-                clipTarget.Cull(m_LastClipRectCanvasSpace, m_LastValidClipRect);
+                // Children are only displayed when inside the mask. If the mask is culled, then the children
+                // inside the mask are also culled. In that situation, we pass an invalid rect to allow callees
+                // to avoid some processing.
+                clipTarget.Cull(
+                    maskIsCulled ? Rect.zero : clipRect,
+                    maskIsCulled ? false : validRect);
             }
+
+            m_LastClipRectCanvasSpace = clipRect;
+            m_ForceClip = false;
         }
 
         public void AddClippable(IClippable clippable)
@@ -166,6 +219,7 @@ namespace UnityEngine.UI
 
         protected override void OnCanvasHierarchyChanged()
         {
+            m_Canvas = null;
             base.OnCanvasHierarchyChanged();
             m_ShouldRecalculateClipRects = true;
         }

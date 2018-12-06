@@ -55,11 +55,18 @@ namespace UnityEngine.EventSystems
 
             pointerData.button = PointerEventData.InputButton.Left;
 
-            eventSystem.RaycastAll(pointerData, m_RaycastResultCache);
+            if (input.phase == TouchPhase.Canceled)
+            {
+                pointerData.pointerCurrentRaycast = new RaycastResult();
+            }
+            else
+            {
+                eventSystem.RaycastAll(pointerData, m_RaycastResultCache);
 
-            var raycast = FindFirstRaycast(m_RaycastResultCache);
-            pointerData.pointerCurrentRaycast = raycast;
-            m_RaycastResultCache.Clear();
+                var raycast = FindFirstRaycast(m_RaycastResultCache);
+                pointerData.pointerCurrentRaycast = raycast;
+                m_RaycastResultCache.Clear();
+            }
             return pointerData;
         }
 

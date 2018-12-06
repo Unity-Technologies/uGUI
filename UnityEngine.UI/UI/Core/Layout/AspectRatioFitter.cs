@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
@@ -20,6 +19,9 @@ namespace UnityEngine.UI
         [System.NonSerialized]
         private RectTransform m_Rect;
 
+        // This "delayed" mechanism is required for cases 713684 and 988706.
+        private bool m_DelayedSetDirty = false;
+
         private RectTransform rectTransform
         {
             get
@@ -37,7 +39,7 @@ namespace UnityEngine.UI
         protected override void OnEnable()
         {
             base.OnEnable();
-            SetDirty(true);
+            m_DelayedSetDirty = true;
         }
 
         protected override void OnDisable()
@@ -45,6 +47,15 @@ namespace UnityEngine.UI
             m_Tracker.Clear();
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
             base.OnDisable();
+        }
+
+        protected virtual void Update()
+        {
+            if (m_DelayedSetDirty)
+            {
+                m_DelayedSetDirty = false;
+                SetDirty();
+            }
         }
 
         protected override void OnRectTransformDimensionsChange()
@@ -129,18 +140,9 @@ namespace UnityEngine.UI
 
         public virtual void SetLayoutVertical() {}
 
-        private IEnumerator DelayUpdate()
+        protected void SetDirty()
         {
-            yield return null;
             UpdateRect();
-        }
-
-        protected void SetDirty(bool delayUpdate = false)
-        {
-            if (delayUpdate)
-                StartCoroutine(DelayUpdate());
-            else
-                UpdateRect();
         }
 
     #if UNITY_EDITOR

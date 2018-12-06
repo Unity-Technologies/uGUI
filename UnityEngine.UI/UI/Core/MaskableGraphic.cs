@@ -94,14 +94,12 @@ namespace UnityEngine.UI
 
         private void UpdateCull(bool cull)
         {
-            var cullingChanged = canvasRenderer.cull != cull;
-            canvasRenderer.cull = cull;
-
-            if (cullingChanged)
+            if (canvasRenderer.cull != cull)
             {
+                canvasRenderer.cull = cull;
                 UISystemProfilerApi.AddMarker("MaskableGraphic.cullingChanged", this);
                 m_OnCullStateChanged.Invoke(cull);
-                SetVerticesDirty();
+                OnCullingChanged();
             }
         }
 
@@ -188,9 +186,9 @@ namespace UnityEngine.UI
 
                 if (canvas)
                 {
-                    Canvas rootCanvas = canvas.rootCanvas;
+                    Matrix4x4 mat = canvas.rootCanvas.transform.worldToLocalMatrix;
                     for (int i = 0; i < 4; ++i)
-                        m_Corners[i] = rootCanvas.transform.InverseTransformPoint(m_Corners[i]);
+                        m_Corners[i] = mat.MultiplyPoint(m_Corners[i]);
                 }
 
                 return new Rect(m_Corners[0].x, m_Corners[0].y, m_Corners[2].x - m_Corners[0].x, m_Corners[2].y - m_Corners[0].y);

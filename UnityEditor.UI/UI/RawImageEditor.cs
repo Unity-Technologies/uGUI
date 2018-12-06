@@ -98,8 +98,8 @@ namespace UnityEditor.UI
 
             // Image size Text
             string text = string.Format("RawImage Size: {0}x{1}",
-                    Mathf.RoundToInt(Mathf.Abs(rawImage.rectTransform.rect.width)),
-                    Mathf.RoundToInt(Mathf.Abs(rawImage.rectTransform.rect.height)));
+                Mathf.RoundToInt(Mathf.Abs(rawImage.rectTransform.rect.width)),
+                Mathf.RoundToInt(Mathf.Abs(rawImage.rectTransform.rect.height)));
 
             return text;
         }

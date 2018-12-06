@@ -11,11 +11,15 @@ namespace UnityEngine.UI
 
         protected GraphicRegistry()
         {
-            // This is needed for AOT on IOS. Without it the compile doesn't get the definition of the Dictionarys
-#pragma warning disable 168
-            Dictionary<Graphic, int> emptyGraphicDic;
-            Dictionary<ICanvasElement, int> emptyElementDic;
-#pragma warning restore 168
+            // Avoid runtime generation of these types. Some platforms are AOT only and do not support
+            // JIT. What's more we actually create a instance of the required types instead of
+            // just declaring an unused variable which may be optimized away by some compilers (Mono vs MS).
+
+            // See: 877060
+
+            System.GC.KeepAlive(new Dictionary<Graphic, int>());
+            System.GC.KeepAlive(new Dictionary<ICanvasElement, int>());
+            System.GC.KeepAlive(new Dictionary<IClipper, int>());
         }
 
         public static GraphicRegistry instance

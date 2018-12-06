@@ -48,7 +48,7 @@ namespace UnityEngine.UI
         public virtual bool raycastTarget { get { return m_RaycastTarget; } set { m_RaycastTarget = value; } }
 
         [NonSerialized] private RectTransform m_RectTransform;
-        [NonSerialized] private CanvasRenderer m_CanvasRender;
+        [NonSerialized] private CanvasRenderer m_CanvasRenderer;
         [NonSerialized] private Canvas m_Canvas;
 
         [NonSerialized] private bool m_VertsDirty;
@@ -164,7 +164,16 @@ namespace UnityEngine.UI
         /// </summary>
         public RectTransform rectTransform
         {
-            get { return m_RectTransform ?? (m_RectTransform = GetComponent<RectTransform>()); }
+            get
+            {
+                // The RectTransform is a required component that must not be destroyed. Based on this assumption, a
+                // null-reference check is sufficient.
+                if (ReferenceEquals(m_RectTransform, null))
+                {
+                    m_RectTransform = GetComponent<RectTransform>();
+                }
+                return m_RectTransform;
+            }
         }
 
         public Canvas canvas
@@ -205,9 +214,13 @@ namespace UnityEngine.UI
         {
             get
             {
-                if (m_CanvasRender == null)
-                    m_CanvasRender = GetComponent<CanvasRenderer>();
-                return m_CanvasRender;
+                // The CanvasRenderer is a required component that must not be destroyed. Based on this assumption, a
+                // null-reference check is sufficient.
+                if (ReferenceEquals(m_CanvasRenderer, null))
+                {
+                    m_CanvasRenderer = GetComponent<CanvasRenderer>();
+                }
+                return m_CanvasRenderer;
             }
         }
 
@@ -319,6 +332,21 @@ namespace UnityEngine.UI
                 // during object destruction and we dont want to register ourself and then become null.
                 if (IsActive())
                     GraphicRegistry.RegisterGraphicForCanvas(canvas, this);
+            }
+        }
+
+        /// <summary>
+        /// This method must be called when <c>CanvasRenderer.cull</c> is modified.
+        /// </summary>
+        /// <remarks>
+        /// This can be used to perform operations that were previously skipped because the <c>Graphic</c> was culled.
+        /// </remarks>
+        public virtual void OnCullingChanged()
+        {
+            if (!canvasRenderer.cull && (m_VertsDirty || m_MaterialDirty))
+            {
+                /// When we were culled, we potentially skipped calls to <c>Rebuild</c>.
+                CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
             }
         }
 
@@ -599,8 +627,8 @@ namespace UnityEngine.UI
             }
 
             ColorTween.ColorTweenMode mode = (useRGB && useAlpha ?
-                                              ColorTween.ColorTweenMode.All :
-                                              (useRGB ? ColorTween.ColorTweenMode.RGB : ColorTween.ColorTweenMode.Alpha));
+                ColorTween.ColorTweenMode.All :
+                (useRGB ? ColorTween.ColorTweenMode.RGB : ColorTween.ColorTweenMode.Alpha));
 
             var colorTween = new ColorTween {duration = duration, startColor = canvasRenderer.GetColor(), targetColor = targetColor};
             colorTween.AddOnChangedCallback(canvasRenderer.SetColor);

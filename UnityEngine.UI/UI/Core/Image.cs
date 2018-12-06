@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine.Serialization;
+using UnityEngine.U2D;
 
 namespace UnityEngine.UI
 {
@@ -69,11 +70,33 @@ namespace UnityEngine.UI
 
         [FormerlySerializedAs("m_Frame")]
         [SerializeField] private Sprite m_Sprite;
-        public Sprite sprite { get { return m_Sprite; } set { if (SetPropertyUtility.SetClass(ref m_Sprite, value)) SetAllDirty(); } }
+        public Sprite sprite
+        {
+            get { return m_Sprite; }
+            set
+            {
+                if (SetPropertyUtility.SetClass(ref m_Sprite, value))
+                {
+                    SetAllDirty();
+                    TrackSprite();
+                }
+            }
+        }
 
         [NonSerialized]
         private Sprite m_OverrideSprite;
-        public Sprite overrideSprite { get { return activeSprite; } set { if (SetPropertyUtility.SetClass(ref m_OverrideSprite, value)) SetAllDirty(); } }
+        public Sprite overrideSprite
+        {
+            get { return activeSprite; }
+            set
+            {
+                if (SetPropertyUtility.SetClass(ref m_OverrideSprite, value))
+                {
+                    SetAllDirty();
+                    TrackSprite();
+                }
+            }
+        }
 
         private Sprite activeSprite { get { return m_OverrideSprite != null ? m_OverrideSprite : sprite; } }
 
@@ -106,6 +129,9 @@ namespace UnityEngine.UI
 
         // Not serialized until we support read-enabled sprites better.
         private float m_AlphaHitTestMinimumThreshold = 0;
+
+        // Whether this is being tracked for Atlas Binding.
+        private bool m_Tracked = false;
 
         [Obsolete("eventAlphaThreshold has been deprecated. Use eventMinimumAlphaThreshold instead (UnityUpgradable) -> alphaHitTestMinimumThreshold")]
         public float eventAlphaThreshold { get { return 1 - alphaHitTestMinimumThreshold; } set { alphaHitTestMinimumThreshold = 1 - value; } }
@@ -236,10 +262,10 @@ namespace UnityEngine.UI
             int spriteH = Mathf.RoundToInt(size.y);
 
             var v = new Vector4(
-                    padding.x / spriteW,
-                    padding.y / spriteH,
-                    (spriteW - padding.z) / spriteW,
-                    (spriteH - padding.w) / spriteH);
+                padding.x / spriteW,
+                padding.y / spriteH,
+                (spriteW - padding.z) / spriteW,
+                (spriteH - padding.w) / spriteH);
 
             if (shouldPreserveAspect && size.sqrMagnitude > 0.0f)
             {
@@ -261,11 +287,11 @@ namespace UnityEngine.UI
             }
 
             v = new Vector4(
-                    r.x + r.width * v.x,
-                    r.y + r.height * v.y,
-                    r.x + r.width * v.z,
-                    r.y + r.height * v.w
-                    );
+                r.x + r.width * v.x,
+                r.y + r.height * v.y,
+                r.x + r.width * v.z,
+                r.y + r.height * v.w
+            );
 
             return v;
         }
@@ -308,6 +334,29 @@ namespace UnityEngine.UI
                     GenerateFilledSprite(toFill, m_PreserveAspect);
                     break;
             }
+        }
+
+        private void TrackSprite()
+        {
+            if (activeSprite != null && activeSprite.texture == null)
+            {
+                TrackImage(this);
+                m_Tracked = true;
+            }
+        }
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            TrackSprite();
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+
+            if (m_Tracked)
+                UnTrackImage(this);
         }
 
         /// <summary>
@@ -1165,6 +1214,39 @@ namespace UnityEngine.UI
             }
 
             return local;
+        }
+
+        // To track textureless images, which will be rebuild if sprite atlas manager registered a Sprite Atlas that will give this image new texture
+        static List<Image> m_TrackedTexturelessImages = new List<Image>();
+        static bool s_Initialized;
+
+        static void RebuildImage(SpriteAtlas spriteAtlas)
+        {
+            for (var i = m_TrackedTexturelessImages.Count - 1; i >= 0; i--)
+            {
+                var g = m_TrackedTexturelessImages[i];
+                if (spriteAtlas.CanBindTo(g.activeSprite))
+                {
+                    g.SetAllDirty();
+                    m_TrackedTexturelessImages.RemoveAt(i);
+                }
+            }
+        }
+
+        private static void TrackImage(Image g)
+        {
+            if (!s_Initialized)
+            {
+                SpriteAtlasManager.atlasRegistered += RebuildImage;
+                s_Initialized = true;
+            }
+
+            m_TrackedTexturelessImages.Add(g);
+        }
+
+        private static void UnTrackImage(Image g)
+        {
+            m_TrackedTexturelessImages.Remove(g);
         }
     }
 }

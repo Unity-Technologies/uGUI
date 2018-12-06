@@ -16,6 +16,8 @@ namespace UnityEngine.EventSystems
 
         private GameObject m_CurrentFocusedGameObject;
 
+        private PointerEventData m_InputPointerEvent;
+
         protected StandaloneInputModule()
         {
         }
@@ -139,7 +141,14 @@ namespace UnityEngine.EventSystems
         public override void UpdateModule()
         {
             if (!eventSystem.isFocused && ShouldIgnoreEventsOnNoFocus())
+            {
+                if (m_InputPointerEvent != null && m_InputPointerEvent.pointerDrag != null && m_InputPointerEvent.dragging)
+                    ExecuteEvents.Execute(m_InputPointerEvent.pointerDrag, m_InputPointerEvent, ExecuteEvents.endDragHandler);
+
+                m_InputPointerEvent = null;
+
                 return;
+            }
 
             m_LastMousePosition = m_MousePosition;
             m_MousePosition = input.mousePosition;
@@ -299,6 +308,8 @@ namespace UnityEngine.EventSystems
 
                 if (pointerEvent.pointerDrag != null)
                     ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.initializePotentialDrag);
+
+                m_InputPointerEvent = pointerEvent;
             }
 
             // PointerUp notification
@@ -335,6 +346,8 @@ namespace UnityEngine.EventSystems
                 // send exit events as we need to simulate this on touch up on touch device
                 ExecuteEvents.ExecuteHierarchy(pointerEvent.pointerEnter, pointerEvent, ExecuteEvents.pointerExitHandler);
                 pointerEvent.pointerEnter = null;
+
+                m_InputPointerEvent = pointerEvent;
             }
         }
 
@@ -535,6 +548,8 @@ namespace UnityEngine.EventSystems
 
                 if (pointerEvent.pointerDrag != null)
                     ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.initializePotentialDrag);
+
+                m_InputPointerEvent = pointerEvent;
             }
 
             // PointerUp notification
@@ -577,6 +592,8 @@ namespace UnityEngine.EventSystems
                     HandlePointerExitAndEnter(pointerEvent, null);
                     HandlePointerExitAndEnter(pointerEvent, currentOverGo);
                 }
+
+                m_InputPointerEvent = pointerEvent;
             }
         }
 

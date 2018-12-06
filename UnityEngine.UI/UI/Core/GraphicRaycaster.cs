@@ -211,7 +211,7 @@ namespace UnityEngine.UI
                         Transform trans = go.transform;
                         Vector3 transForward = trans.forward;
                         // http://geomalgorithms.com/a06-_intersect-2.html
-                        distance = (Vector3.Dot(transForward, trans.position - currentEventCamera.transform.position) / Vector3.Dot(transForward, ray.direction));
+                        distance = (Vector3.Dot(transForward, trans.position - ray.origin) / Vector3.Dot(transForward, ray.direction));
 
                         // Check to see if the go is behind the camera.
                         if (distance < 0)
