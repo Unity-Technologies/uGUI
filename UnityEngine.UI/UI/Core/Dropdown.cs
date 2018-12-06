@@ -186,6 +186,13 @@ namespace UnityEngine.UI
                 m_Template.gameObject.SetActive(false);
         }
 
+        protected override void Start()
+        {
+            base.Start();
+
+            RefreshShownValue();
+        }
+
         #if UNITY_EDITOR
         protected override void OnValidate()
         {

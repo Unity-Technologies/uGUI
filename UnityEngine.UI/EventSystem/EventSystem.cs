@@ -44,7 +44,7 @@ namespace UnityEngine.EventSystems
         }
 
         [SerializeField]
-        private int m_DragThreshold = 5;
+        private int m_DragThreshold = 10;
         public int pixelDragThreshold
         {
             get { return m_DragThreshold; }

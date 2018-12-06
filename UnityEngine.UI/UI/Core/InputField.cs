@@ -411,7 +411,19 @@ namespace UnityEngine.UI
 
         public OnValidateInput onValidateInput { get { return m_OnValidateInput; } set { SetPropertyUtility.SetClass(ref m_OnValidateInput, value); } }
 
-        public int characterLimit { get { return m_CharacterLimit; } set { if (SetPropertyUtility.SetStruct(ref m_CharacterLimit, Math.Max(0, value))) UpdateLabel(); } }
+        public int characterLimit
+        {
+            get { return m_CharacterLimit; }
+            set
+            {
+                if (SetPropertyUtility.SetStruct(ref m_CharacterLimit, Math.Max(0, value)))
+                {
+                    UpdateLabel();
+                    if (m_Keyboard != null)
+                        m_Keyboard.characterLimit = value;
+                }
+            }
+        }
 
         // Content Type related
 
@@ -432,21 +444,13 @@ namespace UnityEngine.UI
 
         public InputType inputType { get { return m_InputType; } set { if (SetPropertyUtility.SetStruct(ref m_InputType, value)) SetToCustom(); } }
 
+        public TouchScreenKeyboard touchScreenKeyboard { get { return m_Keyboard; } }
+
         public TouchScreenKeyboardType keyboardType
         {
             get { return m_KeyboardType; }
             set
             {
-#if UNITY_EDITOR
-                if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.WiiU)
-                {
-                    if (value == TouchScreenKeyboardType.NintendoNetworkAccount)
-                        Debug.LogWarning("Invalid InputField.keyboardType value set. TouchScreenKeyboardType.NintendoNetworkAccount only applies to the Wii U. InputField.keyboardType will default to TouchScreenKeyboardType.Default .");
-                }
-#elif !UNITY_WIIU
-                if (value == TouchScreenKeyboardType.NintendoNetworkAccount)
-                    Debug.LogWarning("Invalid InputField.keyboardType value set. TouchScreenKeyboardType.NintendoNetworkAccount only applies to the Wii U. InputField.keyboardType will default to TouchScreenKeyboardType.Default .");
-#endif
                 if (SetPropertyUtility.SetStruct(ref m_KeyboardType, value))
                     SetToCustom();
             }
@@ -772,14 +776,14 @@ namespace UnityEngine.UI
 
             AssignPositioningIfNeeded();
 
-            if (m_Keyboard == null || m_Keyboard.done)
+            if (m_Keyboard == null || m_Keyboard.status != TouchScreenKeyboard.Status.Visible)
             {
                 if (m_Keyboard != null)
                 {
                     if (!m_ReadOnly)
                         text = m_Keyboard.text;
 
-                    if (m_Keyboard.wasCanceled)
+                    if (m_Keyboard.status == TouchScreenKeyboard.Status.Canceled)
                         m_WasCanceled = true;
                 }
 
@@ -843,15 +847,19 @@ namespace UnityEngine.UI
                     SendOnValueChangedAndUpdateLabel();
                 }
             }
-            else if (m_Keyboard.canGetSelection)
+            else if (m_HideMobileInput && m_Keyboard.canSetSelection)
+            {
+                m_Keyboard.selection = new RangeInt(caretPositionInternal, caretSelectPositionInternal - caretPositionInternal);
+            }
+            else if (m_Keyboard.canGetSelection && !m_HideMobileInput)
             {
                 UpdateCaretFromKeyboard();
             }
 
 
-            if (m_Keyboard.done)
+            if (m_Keyboard.status != TouchScreenKeyboard.Status.Visible)
             {
-                if (m_Keyboard.wasCanceled)
+                if (m_Keyboard.status == TouchScreenKeyboard.Status.Canceled)
                     m_WasCanceled = true;
 
                 OnDeselect(null);
@@ -959,7 +967,7 @@ namespace UnityEngine.UI
                 IsInteractable() &&
                 eventData.button == PointerEventData.InputButton.Left &&
                 m_TextComponent != null &&
-                m_Keyboard == null;
+                (m_Keyboard == null || m_HideMobileInput);
         }
 
         public virtual void OnBeginDrag(PointerEventData eventData)
@@ -978,6 +986,7 @@ namespace UnityEngine.UI
             Vector2 localMousePos;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(textComponent.rectTransform, eventData.position, eventData.pressEventCamera, out localMousePos);
             caretSelectPositionInternal = GetCharacterIndexFromPosition(localMousePos) + m_DrawStart;
+
             MarkGeometryAsDirty();
 
             m_DragPositionOutOfBounds = !RectTransformUtility.RectangleContainsScreenPoint(textComponent.rectTransform, eventData.position, eventData.pressEventCamera);
@@ -1050,9 +1059,9 @@ namespace UnityEngine.UI
             {
                 Vector2 localMousePos;
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(textComponent.rectTransform, eventData.position, eventData.pressEventCamera, out localMousePos);
-
                 caretSelectPositionInternal = caretPositionInternal = GetCharacterIndexFromPosition(localMousePos) + m_DrawStart;
             }
+
             UpdateLabel();
             eventData.Use();
         }
@@ -2242,8 +2251,8 @@ namespace UnityEngine.UI
                 }
 
                 m_Keyboard = (inputType == InputType.Password) ?
-                    TouchScreenKeyboard.Open(m_Text, keyboardType, false, multiLine, true) :
-                    TouchScreenKeyboard.Open(m_Text, keyboardType, inputType == InputType.AutoCorrect, multiLine);
+                    TouchScreenKeyboard.Open(m_Text, keyboardType, false, multiLine, true, false, "", characterLimit) :
+                    TouchScreenKeyboard.Open(m_Text, keyboardType, inputType == InputType.AutoCorrect, multiLine, false, false, "", characterLimit);
 
                 // Mimics OnFocus but as mobile doesn't properly support select all
                 // just set it to the end of the text (where it would move when typing starts)

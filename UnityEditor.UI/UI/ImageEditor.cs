@@ -34,9 +34,9 @@ namespace UnityEditor.UI
         {
             base.OnEnable();
 
-            m_SpriteContent = new GUIContent("Source Image");
-            m_SpriteTypeContent     = new GUIContent("Image Type");
-            m_ClockwiseContent      = new GUIContent("Clockwise");
+            m_SpriteContent = EditorGUIUtility.TrTextContent("Source Image");
+            m_SpriteTypeContent     = EditorGUIUtility.TrTextContent("Image Type");
+            m_ClockwiseContent      = EditorGUIUtility.TrTextContent("Clockwise");
 
             m_Sprite                = serializedObject.FindProperty("m_Sprite");
             m_Type                  = serializedObject.FindProperty("m_Type");

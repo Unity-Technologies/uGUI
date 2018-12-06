@@ -29,7 +29,7 @@ namespace UnityEditor.UI
 
         protected virtual void OnEnable()
         {
-            m_CorrectButtonContent = new GUIContent("Set Native Size", "Sets the size to match the content.");
+            m_CorrectButtonContent = EditorGUIUtility.TrTextContent("Set Native Size", "Sets the size to match the content.");
 
             m_Script = serializedObject.FindProperty("m_Script");
             m_Color = serializedObject.FindProperty("m_Color");

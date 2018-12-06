@@ -45,6 +45,12 @@ namespace UnityEngine.EventSystems
             }
         }
 
+        public BaseInput inputOverride
+        {
+            get { return m_InputOverride; }
+            set { m_InputOverride = value; }
+        }
+
         protected EventSystem eventSystem
         {
             get { return m_EventSystem; }

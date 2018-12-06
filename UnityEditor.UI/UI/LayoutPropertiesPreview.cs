@@ -38,7 +38,7 @@ namespace UnityEditor.Events
         {
             if (m_Title == null)
             {
-                m_Title = new GUIContent("Layout Properties");
+                m_Title = EditorGUIUtility.TrTextContent("Layout Properties");
             }
             return m_Title;
         }

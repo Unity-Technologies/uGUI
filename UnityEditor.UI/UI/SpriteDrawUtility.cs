@@ -151,9 +151,7 @@ namespace UnityEditor.UI
 
             if (mat == null)
             {
-                GL.sRGBWrite = QualitySettings.activeColorSpace == ColorSpace.Linear;
                 GUI.DrawTextureWithTexCoords(paddedTexArea, tex, uv, true);
-                GL.sRGBWrite = false;
             }
             else
             {

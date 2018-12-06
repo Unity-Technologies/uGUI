@@ -30,7 +30,7 @@ namespace UnityEditor.UI
 
             static Styles()
             {
-                m_EncodingContent = new GUIContent("Rich Text", "Use emoticons and colors");
+                m_EncodingContent = EditorGUIUtility.TrTextContent("Rich Text", "Use emoticons and colors");
 
                 // Horizontal Alignment Icons
                 m_LeftAlignText = EditorGUIUtility.IconContent(@"GUISystem/align_horizontally_left", "Left Align");
@@ -241,7 +241,7 @@ namespace UnityEditor.UI
 
         private void DoTextAligmentControl(Rect position, SerializedProperty alignment)
         {
-            GUIContent alingmentContent = new GUIContent("Alignment");
+            GUIContent alingmentContent = EditorGUIUtility.TrTextContent("Alignment");
 
             int id = EditorGUIUtility.GetControlID(s_TextAlignmentHash, FocusType.Keyboard, position);
 

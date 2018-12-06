@@ -229,6 +229,7 @@ namespace UnityEngine.UI
                 m_VerticalScrollbar.onValueChanged.AddListener(SetVerticalNormalizedPosition);
 
             CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(this);
+            SetDirty();
         }
 
         protected override void OnDisable()

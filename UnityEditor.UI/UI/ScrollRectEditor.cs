@@ -132,14 +132,14 @@ namespace UnityEditor.UI
             if (m_HorizontalScrollbar.objectReferenceValue && !m_HorizontalScrollbar.hasMultipleDifferentValues)
             {
                 EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(m_HorizontalScrollbarVisibility, new GUIContent("Visibility"));
+                EditorGUILayout.PropertyField(m_HorizontalScrollbarVisibility, EditorGUIUtility.TrTextContent("Visibility"));
 
                 if ((ScrollRect.ScrollbarVisibility)m_HorizontalScrollbarVisibility.enumValueIndex == ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport
                     && !m_HorizontalScrollbarVisibility.hasMultipleDifferentValues)
                 {
                     if (m_ViewportIsNotChild || m_HScrollbarIsNotChild)
                         EditorGUILayout.HelpBox(s_HError, MessageType.Error);
-                    EditorGUILayout.PropertyField(m_HorizontalScrollbarSpacing, new GUIContent("Spacing"));
+                    EditorGUILayout.PropertyField(m_HorizontalScrollbarSpacing, EditorGUIUtility.TrTextContent("Spacing"));
                 }
 
                 EditorGUI.indentLevel--;
@@ -149,14 +149,14 @@ namespace UnityEditor.UI
             if (m_VerticalScrollbar.objectReferenceValue && !m_VerticalScrollbar.hasMultipleDifferentValues)
             {
                 EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(m_VerticalScrollbarVisibility, new GUIContent("Visibility"));
+                EditorGUILayout.PropertyField(m_VerticalScrollbarVisibility, EditorGUIUtility.TrTextContent("Visibility"));
 
                 if ((ScrollRect.ScrollbarVisibility)m_VerticalScrollbarVisibility.enumValueIndex == ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport
                     && !m_VerticalScrollbarVisibility.hasMultipleDifferentValues)
                 {
                     if (m_ViewportIsNotChild || m_VScrollbarIsNotChild)
                         EditorGUILayout.HelpBox(s_VError, MessageType.Error);
-                    EditorGUILayout.PropertyField(m_VerticalScrollbarSpacing, new GUIContent("Spacing"));
+                    EditorGUILayout.PropertyField(m_VerticalScrollbarSpacing, EditorGUIUtility.TrTextContent("Spacing"));
                 }
 
                 EditorGUI.indentLevel--;
