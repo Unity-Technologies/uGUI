@@ -274,7 +274,6 @@ namespace UnityEngine.UI
                 {
                     case RuntimePlatform.Android:
                     case RuntimePlatform.IPhonePlayer:
-                    case RuntimePlatform.TizenPlayer:
                     case RuntimePlatform.tvOS:
                         return m_HideMobileInput;
                 }
@@ -2304,6 +2303,8 @@ namespace UnityEngine.UI
                 if (m_WasCanceled)
                     text = m_OriginalText;
 
+                SendOnSubmit();
+
                 if (m_Keyboard != null)
                 {
                     m_Keyboard.active = false;
@@ -2311,8 +2312,6 @@ namespace UnityEngine.UI
                 }
 
                 m_CaretPosition = m_CaretSelectPosition = 0;
-
-                SendOnSubmit();
 
                 input.imeCompositionMode = IMECompositionMode.Auto;
             }
