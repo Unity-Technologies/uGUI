@@ -5,6 +5,9 @@ using UnityEngine.UI;
 namespace UnityEditor.UI
 {
     [CustomPropertyDrawer(typeof(Dropdown.OptionDataList), true)]
+    /// <summary>
+    ///   This is a PropertyDrawer for Dropdown.OptionDataList it is implemented using the standard unity PropertyDrawer framework.
+    /// </summary>
     class DropdownOptionListDrawer : PropertyDrawer
     {
         private ReorderableList m_ReorderableList;

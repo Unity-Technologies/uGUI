@@ -5,6 +5,10 @@ namespace UnityEditor.UI
 {
     [CustomEditor(typeof(CanvasScaler), true)]
     [CanEditMultipleObjects]
+    /// <summary>
+    ///   Custom Editor for the CanvasScaler component.
+    ///   Extend this class to write a custom editor for an CanvasScaler-derived component.
+    /// </summary>
     public class CanvasScalerEditor : Editor
     {
         SerializedProperty m_UiScaleMode;

@@ -8,6 +8,10 @@ using UnityEditor.AnimatedValues;
 namespace UnityEditor.UI
 {
     [CustomEditor(typeof(Selectable), true)]
+    /// <summary>
+    ///   Custom Editor for the Selectable Component.
+    ///   Extend this class to write a custom editor for an Selectable-derived component.
+    /// </summary>
     public class SelectableEditor : Editor
     {
         SerializedProperty m_Script;
@@ -313,7 +317,9 @@ namespace UnityEditor.UI
 
             for (int i = 0; i < Selectable.allSelectables.Count; i++)
             {
-                DrawNavigationForSelectable(Selectable.allSelectables[i]);
+                Selectable selectable = Selectable.allSelectables[i];
+                if (SceneManagement.StageUtility.IsGameObjectRenderedByCamera(selectable.gameObject, Camera.current))
+                    DrawNavigationForSelectable(selectable);
             }
         }
 

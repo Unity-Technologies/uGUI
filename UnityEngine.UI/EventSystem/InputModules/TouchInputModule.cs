@@ -234,11 +234,6 @@ namespace UnityEngine.EventSystems
                 pointerEvent.dragging = false;
                 pointerEvent.pointerDrag = null;
 
-                if (pointerEvent.pointerDrag != null)
-                    ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.endDragHandler);
-
-                pointerEvent.pointerDrag = null;
-
                 // send exit events as we need to simulate this on touch up on touch device
                 ExecuteEvents.ExecuteHierarchy(pointerEvent.pointerEnter, pointerEvent, ExecuteEvents.pointerExitHandler);
                 pointerEvent.pointerEnter = null;

@@ -3,6 +3,12 @@ using UnityEngine.UI.Collections;
 
 namespace UnityEngine.UI
 {
+    /// <summary>
+    /// Registry class to keep track of all IClippers that exist in the scene
+    /// </summary>
+    /// <remarks>
+    /// This is used during the CanvasUpdate loop to cull clippable elements. The clipping is called after layout, but before Graphic update.
+    /// </remarks>
     public class ClipperRegistry
     {
         static ClipperRegistry s_Instance;
@@ -17,6 +23,9 @@ namespace UnityEngine.UI
 #pragma warning restore 168
         }
 
+        /// <summary>
+        /// The singleton instance of the clipper registry.
+        /// </summary>
         public static ClipperRegistry instance
         {
             get
@@ -27,6 +36,9 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// Perform the clipping on all registered IClipper
+        /// </summary>
         public void Cull()
         {
             for (var i = 0; i < m_Clippers.Count; ++i)
@@ -35,6 +47,10 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// Register a unique IClipper element
+        /// </summary>
+        /// <param name="c">The clipper element to add</param>
         public static void Register(IClipper c)
         {
             if (c == null)
@@ -42,6 +58,10 @@ namespace UnityEngine.UI
             instance.m_Clippers.AddUnique(c);
         }
 
+        /// <summary>
+        /// UnRegister a IClipper element
+        /// </summary>
+        /// <param name="c">The Element to try and remove.</param>
         public static void Unregister(IClipper c)
         {
             instance.m_Clippers.Remove(c);

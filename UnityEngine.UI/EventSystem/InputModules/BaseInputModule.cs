@@ -4,6 +4,34 @@ using System.Collections.Generic;
 namespace UnityEngine.EventSystems
 {
     [RequireComponent(typeof(EventSystem))]
+    /// <summary>
+    /// A base module that raises events and sends them to GameObjects.
+    /// </summary>
+    /// <remarks>
+    /// An Input Module is a component of the EventSystem that is responsible for raising events and sending them to GameObjects for handling. The BaseInputModule is a class that all Input Modules in the EventSystem inherit from. Examples of provided modules are TouchInputModule and StandaloneInputModule, if these are inadequate for your project you can create your own by extending from the BaseInputModule.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// using UnityEngine;
+    /// using UnityEngine.EventSystems;
+    ///
+    /// /**
+    ///  * Create a module that every tick sends a 'Move' event to
+    ///  * the target object
+    ///  */
+    /// public class MyInputModule : BaseInputModule
+    /// {
+    ///     public GameObject m_TargetObject;
+    ///
+    ///     public override void Process()
+    ///     {
+    ///         if (m_TargetObject == null)
+    ///             return;
+    ///         ExecuteEvents.Execute (m_TargetObject, new BaseEventData (eventSystem), ExecuteEvents.moveHandler);
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
     public abstract class BaseInputModule : UIBehaviour
     {
         [NonSerialized]
@@ -17,6 +45,9 @@ namespace UnityEngine.EventSystems
         protected BaseInput m_InputOverride;
         private BaseInput m_DefaultInput;
 
+        /// <summary>
+        /// The current BaseInput being used by the input module.
+        /// </summary>
         public BaseInput input
         {
             get
@@ -45,6 +76,12 @@ namespace UnityEngine.EventSystems
             }
         }
 
+        /// <summary>
+        /// Used to override the default BaseInput for the input module.
+        /// </summary>
+        /// <remarks>
+        /// With this it is possible to bypass the Input system with your own but still use the same InputModule. For example this can be used to feed fake input into the UI or interface with a different input system.
+        /// </remarks>
         public BaseInput inputOverride
         {
             get { return m_InputOverride; }
@@ -69,8 +106,14 @@ namespace UnityEngine.EventSystems
             base.OnDisable();
         }
 
+        /// <summary>
+        /// Process the current tick for the module.
+        /// </summary>
         public abstract void Process();
 
+        /// <summary>
+        /// Return the first valid RaycastResult.
+        /// </summary>
         protected static RaycastResult FindFirstRaycast(List<RaycastResult> candidates)
         {
             for (var i = 0; i < candidates.Count; ++i)
@@ -83,11 +126,22 @@ namespace UnityEngine.EventSystems
             return new RaycastResult();
         }
 
+        /// <summary>
+        /// Given an input movement, determine the best MoveDirection.
+        /// </summary>
+        /// <param name="x">X movement.</param>
+        /// <param name="y">Y movement.</param>
         protected static MoveDirection DetermineMoveDirection(float x, float y)
         {
             return DetermineMoveDirection(x, y, 0.6f);
         }
 
+        /// <summary>
+        /// Given an input movement, determine the best MoveDirection.
+        /// </summary>
+        /// <param name="x">X movement.</param>
+        /// <param name="y">Y movement.</param>
+        /// <param name="deadZone">Dead zone.</param>
         protected static MoveDirection DetermineMoveDirection(float x, float y, float deadZone)
         {
             // if vector is too small... just return
@@ -108,6 +162,12 @@ namespace UnityEngine.EventSystems
             }
         }
 
+        /// <summary>
+        /// Given 2 GameObjects, return a common root GameObject (or null).
+        /// </summary>
+        /// <param name="g1">GameObject to compare</param>
+        /// <param name="g2">GameObject to compare</param>
+        /// <returns></returns>
         protected static GameObject FindCommonRoot(GameObject g1, GameObject g2)
         {
             if (g1 == null || g2 == null)
@@ -145,7 +205,7 @@ namespace UnityEngine.EventSystems
 
                 if (newEnterTarget == null)
                 {
-                    currentPointerData.pointerEnter = newEnterTarget;
+                    currentPointerData.pointerEnter = null;
                     return;
                 }
             }
@@ -190,6 +250,12 @@ namespace UnityEngine.EventSystems
             }
         }
 
+        /// <summary>
+        /// Given some input data generate an AxisEventData that can be used by the event system.
+        /// </summary>
+        /// <param name="x">X movement.</param>
+        /// <param name="y">Y movement.</param>
+        /// <param name="deadZone">Dead zone.</param>
         protected virtual AxisEventData GetAxisEventData(float x, float y, float moveDeadZone)
         {
             if (m_AxisEventData == null)
@@ -201,6 +267,9 @@ namespace UnityEngine.EventSystems
             return m_AxisEventData;
         }
 
+        /// <summary>
+        /// Generate a BaseEventData that can be used by the EventSystem.
+        /// </summary>
         protected virtual BaseEventData GetBaseEventData()
         {
             if (m_BaseEventData == null)
@@ -210,25 +279,46 @@ namespace UnityEngine.EventSystems
             return m_BaseEventData;
         }
 
+        /// <summary>
+        /// If the module is pointer based, then override this to return true if the pointer is over an event system object.
+        /// </summary>
+        /// <param name="pointerId">Pointer ID</param>
+        /// <returns>Is the given pointer over an event system object?</returns>
         public virtual bool IsPointerOverGameObject(int pointerId)
         {
             return false;
         }
 
+        /// <summary>
+        /// Should the module be activated.
+        /// </summary>
         public virtual bool ShouldActivateModule()
         {
             return enabled && gameObject.activeInHierarchy;
         }
 
+        /// <summary>
+        /// Called when the module is deactivated. Override this if you want custom code to execute when you deactivate your module.
+        /// </summary>
         public virtual void DeactivateModule()
         {}
 
+        /// <summary>
+        /// Called when the module is activated. Override this if you want custom code to execute when you activate your module.
+        /// </summary>
         public virtual void ActivateModule()
         {}
 
+        /// <summary>
+        /// Update the internal state of the Module.
+        /// </summary>
         public virtual void UpdateModule()
         {}
 
+        /// <summary>
+        /// Check to see if the module is supported. Override this if you have a platform specific module (eg. TouchInputModule that you do not want to activate on standalone.)
+        /// </summary>
+        /// <returns>Is the module supported.</returns>
         public virtual bool IsModuleSupported()
         {
             return true;

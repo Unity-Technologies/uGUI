@@ -4,6 +4,9 @@ using UnityEngine.UI;
 namespace UnityEditor.UI
 {
     [CustomPropertyDrawer(typeof(AnimationTriggers), true)]
+    /// <summary>
+    /// This is a PropertyDrawer for AnimationTriggers it is implemented using the standard unity PropertyDrawer framework.
+    /// </summary>
     public class AnimationTriggersDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect rect, SerializedProperty prop, GUIContent label)

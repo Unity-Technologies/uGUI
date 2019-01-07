@@ -100,7 +100,6 @@
     </Compile>
     <Compile Include="..\UnityEngine.UI\EventSystem\InputModules\BaseInput.cs">
       <Link>EventSystem\InputModules\BaseInput.cs</Link>
-      <SubType>Code</SubType>
     </Compile>
     <Compile Include="..\UnityEngine.UI\EventSystem\InputModules\BaseInputModule.cs">
       <Link>EventSystem\InputModules\BaseInputModule.cs</Link>

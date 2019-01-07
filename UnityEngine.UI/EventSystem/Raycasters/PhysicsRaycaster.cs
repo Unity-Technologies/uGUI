@@ -8,6 +8,9 @@ namespace UnityEngine.EventSystems
     /// </summary>
     [AddComponentMenu("Event/Physics Raycaster")]
     [RequireComponent(typeof(Camera))]
+    /// <summary>
+    /// Raycaster for casting against 3D Physics components.
+    /// </summary>
     public class PhysicsRaycaster : BaseRaycaster
     {
         /// <summary>
@@ -71,12 +74,24 @@ namespace UnityEngine.EventSystems
             set { m_EventMask = value; }
         }
 
+        /// <summary>
+        /// Max number of ray intersection allowed to be found.
+        /// </summary>
+        /// <remarks>
+        /// A value of zero will represent using the allocating version of the raycast function where as any other value will use the non allocating version.
+        /// </remarks>
         public int maxRayIntersections
         {
             get { return m_MaxRayIntersections; }
             set { m_MaxRayIntersections = value; }
         }
 
+        /// <summary>
+        /// Returns a ray going from camera through the event position and the distance between the near and far clipping planes along that ray.
+        /// </summary>
+        /// <param name="eventData">The pointer event for which we will cast a ray.</param>
+        /// <param name="ray">The ray to use.</param>
+        /// <param name="distanceToClipPlane">The distance between the near and far clipping planes along the ray.</param>
         protected void ComputeRayAndDistance(PointerEventData eventData, out Ray ray, out float distanceToClipPlane)
         {
             ray = eventCamera.ScreenPointToRay(eventData.position);

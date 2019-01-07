@@ -4,6 +4,9 @@ using UnityEngine;
 namespace UnityEngine.UI
 {
     [AddComponentMenu("UI/Effects/Shadow", 14)]
+    /// <summary>
+    /// Adds an outline to a graphic using IVertexModifier.
+    /// </summary>
     public class Shadow : BaseMeshEffect
     {
         [SerializeField]
@@ -28,7 +31,9 @@ namespace UnityEngine.UI
         }
 
 #endif
-
+        /// <summary>
+        /// Color for the effect
+        /// </summary>
         public Color effectColor
         {
             get { return m_EffectColor; }
@@ -40,6 +45,9 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// How far is the shadow from the graphic.
+        /// </summary>
         public Vector2 effectDistance
         {
             get { return m_EffectDistance; }
@@ -65,6 +73,9 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// Should the shadow inherit the alpha from the graphic?
+        /// </summary>
         public bool useGraphicAlpha
         {
             get { return m_UseGraphicAlpha; }
@@ -101,6 +112,15 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// Duplicate vertices from start to end and turn them into shadows with the given offset.
+        /// </summary>
+        /// <param name="verts">Vert list to copy</param>
+        /// <param name="color">Shadow color</param>
+        /// <param name="start">The start index in the verts list</param>
+        /// <param name="end">The end index in the vers list</param>
+        /// <param name="x">The shadows x offset</param>
+        /// <param name="y">The shadows y offset</param>
         protected void ApplyShadow(List<UIVertex> verts, Color32 color, int start, int end, float x, float y)
         {
             ApplyShadowZeroAlloc(verts, color, start, end, x, y);

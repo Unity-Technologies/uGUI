@@ -1,6 +1,12 @@
 namespace UnityEngine.UI
 {
     [AddComponentMenu("Layout/Vertical Layout Group", 151)]
+    /// <summary>
+    /// Layout child layout elements below each other.
+    /// </summary>
+    /// <remarks>
+    /// The VerticalLayoutGroup component is used to layout child layout elements below each other.
+    /// </remarks>
     public class VerticalLayoutGroup : HorizontalOrVerticalLayoutGroup
     {
         protected VerticalLayoutGroup()

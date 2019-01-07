@@ -3,21 +3,47 @@ using UnityEngine.EventSystems;
 namespace UnityEngine.UI
 {
     [AddComponentMenu("Layout/Content Size Fitter", 141)]
-    [ExecuteInEditMode]
+    [ExecuteAlways]
     [RequireComponent(typeof(RectTransform))]
+    /// <summary>
+    /// Resizes a RectTransform to fit the size of its content.
+    /// </summary>
+    /// <remarks>
+    /// The ContentSizeFitter can be used on GameObjects that have one or more ILayoutElement components, such as Text, Image, HorizontalLayoutGroup, VerticalLayoutGroup, and GridLayoutGroup.
+    /// </remarks>
     public class ContentSizeFitter : UIBehaviour, ILayoutSelfController
     {
+        /// <summary>
+        /// The size fit modes avaliable to use.
+        /// </summary>
         public enum FitMode
         {
+            /// <summary>
+            /// Don't perform any resizing.
+            /// </summary>
             Unconstrained,
+            /// <summary>
+            /// Resize to the minimum size of the content.
+            /// </summary>
             MinSize,
+            /// <summary>
+            /// Resize to the preferred size of the content.
+            /// </summary>
             PreferredSize
         }
 
         [SerializeField] protected FitMode m_HorizontalFit = FitMode.Unconstrained;
+
+        /// <summary>
+        /// The fit mode to use to determine the width.
+        /// </summary>
         public FitMode horizontalFit { get { return m_HorizontalFit; } set { if (SetPropertyUtility.SetStruct(ref m_HorizontalFit, value)) SetDirty(); } }
 
         [SerializeField] protected FitMode m_VerticalFit = FitMode.Unconstrained;
+
+        /// <summary>
+        /// The fit mode to use to determine the height.
+        /// </summary>
         public FitMode verticalFit { get { return m_VerticalFit; } set { if (SetPropertyUtility.SetStruct(ref m_VerticalFit, value)) SetDirty(); } }
 
         [System.NonSerialized] private RectTransform m_Rect;
@@ -73,12 +99,18 @@ namespace UnityEngine.UI
                 rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)axis, LayoutUtility.GetPreferredSize(m_Rect, axis));
         }
 
+        /// <summary>
+        /// Calculate and apply the horizontal component of the size to the RectTransform
+        /// </summary>
         public virtual void SetLayoutHorizontal()
         {
             m_Tracker.Clear();
             HandleSelfFittingAlongAxis(0);
         }
 
+        /// <summary>
+        /// Calculate and apply the vertical component of the size to the RectTransform
+        /// </summary>
         public virtual void SetLayoutVertical()
         {
             HandleSelfFittingAlongAxis(1);

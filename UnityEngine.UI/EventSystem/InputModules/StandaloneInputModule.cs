@@ -5,6 +5,12 @@ using UnityEngine.Serialization;
 namespace UnityEngine.EventSystems
 {
     [AddComponentMenu("Event/Standalone Input Module")]
+    /// <summary>
+    /// A BaseInputModule designed for mouse / keyboard / controller input.
+    /// </summary>
+    /// <remarks>
+    /// Input module for working with, mouse, keyboard, or controller.
+    /// </remarks>
     public class StandaloneInputModule : PointerInputModule
     {
         private float m_PrevActionTime;
@@ -73,18 +79,33 @@ namespace UnityEngine.EventSystems
             set { m_ForceModuleActive = value; }
         }
 
+        /// <summary>
+        /// Force this module to be active.
+        /// </summary>
+        /// <remarks>
+        /// If there is no module active with higher priority (ordered in the inspector) this module will be forced active even if valid enabling conditions are not met.
+        /// </remarks>
         public bool forceModuleActive
         {
             get { return m_ForceModuleActive; }
             set { m_ForceModuleActive = value; }
         }
 
+        /// <summary>
+        /// Number of keyboard / controller inputs allowed per second.
+        /// </summary>
         public float inputActionsPerSecond
         {
             get { return m_InputActionsPerSecond; }
             set { m_InputActionsPerSecond = value; }
         }
 
+        /// <summary>
+        /// Delay in seconds before the input actions per second repeat rate takes effect.
+        /// </summary>
+        /// <remarks>
+        /// If the same direction is sustained, the inputActionsPerSecond property can be used to control the rate at which events are fired. However, it can be desirable that the first repetition is delayed, so the user doesn't get repeated actions by accident.
+        /// </remarks>
         public float repeatDelay
         {
             get { return m_RepeatDelay; }
@@ -109,12 +130,18 @@ namespace UnityEngine.EventSystems
             set { m_VerticalAxis = value; }
         }
 
+        /// <summary>
+        /// Maximum number of input events handled per second.
+        /// </summary>
         public string submitButton
         {
             get { return m_SubmitButton; }
             set { m_SubmitButton = value; }
         }
 
+        /// <summary>
+        /// Input manager name for the 'cancel' button.
+        /// </summary>
         public string cancelButton
         {
             get { return m_CancelButton; }
@@ -178,6 +205,9 @@ namespace UnityEngine.EventSystems
             return shouldActivate;
         }
 
+        /// <summary>
+        /// See BaseInputModule.
+        /// </summary>
         public override void ActivateModule()
         {
             if (!eventSystem.isFocused && ShouldIgnoreEventsOnNoFocus())
@@ -194,6 +224,9 @@ namespace UnityEngine.EventSystems
             eventSystem.SetSelectedGameObject(toSelect, GetBaseEventData());
         }
 
+        /// <summary>
+        /// See BaseInputModule.
+        /// </summary>
         public override void DeactivateModule()
         {
             base.DeactivateModule();
@@ -247,6 +280,15 @@ namespace UnityEngine.EventSystems
             return input.touchCount > 0;
         }
 
+        /// <summary>
+        /// This method is called by Unity whenever a touch event is processed. Override this method with a custom implementation to process touch events yourself.
+        /// </summary>
+        /// <param name="pointerEvent">Event data relating to the touch event, such as position and ID to be passed to the touch event destination object.</param>
+        /// <param name="pressed">This is true for the first frame of a touch event, and false thereafter. This can therefore be used to determine the instant a touch event occurred.</param>
+        /// <param name="released">This is true only for the last frame of a touch event.</param>
+        /// <remarks>
+        /// This method can be overridden in derived classes to change how touch press events are handled.
+        /// </remarks>
         protected void ProcessTouchPress(PointerEventData pointerEvent, bool pressed, bool released)
         {
             var currentOverGo = pointerEvent.pointerCurrentRaycast.gameObject;
@@ -352,8 +394,9 @@ namespace UnityEngine.EventSystems
         }
 
         /// <summary>
-        /// Process submit keys.
+        /// Calculate and send a submit event to the current selected object.
         /// </summary>
+        /// <returns>If the submit event was used by the selected object.</returns>
         protected bool SendSubmitEventToSelectedObject()
         {
             if (eventSystem.currentSelectedGameObject == null)
@@ -392,8 +435,9 @@ namespace UnityEngine.EventSystems
         }
 
         /// <summary>
-        /// Process keyboard events.
+        /// Calculate and send a move event to the current selected object.
         /// </summary>
+        /// <returns>If the move event was used by the selected object.</returns>
         protected bool SendMoveEventToSelectedObject()
         {
             float time = Time.unscaledTime;
@@ -491,7 +535,7 @@ namespace UnityEngine.EventSystems
         }
 
         /// <summary>
-        /// Process the current mouse press.
+        /// Calculate and process any mouse button state changes.
         /// </summary>
         protected void ProcessMousePress(MouseButtonEventData data)
         {

@@ -4,28 +4,73 @@ using UnityEngine.UI.Collections;
 
 namespace UnityEngine.UI
 {
+    /// <summary>
+    /// Values of 'update' called on a Canvas update.
+    /// </summary>
     public enum CanvasUpdate
     {
+        /// <summary>
+        /// Called before layout.
+        /// </summary>
         Prelayout = 0,
+        /// <summary>
+        /// Called for layout.
+        /// </summary>
         Layout = 1,
+        /// <summary>
+        /// Called after layout.
+        /// </summary>
         PostLayout = 2,
+        /// <summary>
+        /// Called before rendering.
+        /// </summary>
         PreRender = 3,
+        /// <summary>
+        /// Called late, before render.
+        /// </summary>
         LatePreRender = 4,
+        /// <summary>
+        /// Max enum value. Always last.
+        /// </summary>
         MaxUpdateValue = 5
     }
 
+    /// <summary>
+    /// This is an element that can live on a Canvas.
+    /// </summary>
     public interface ICanvasElement
     {
+        /// <summary>
+        /// Rebuild the element for the given stage.
+        /// </summary>
+        /// <param name="executing">The current CanvasUpdate stage being rebuild.</param>
         void Rebuild(CanvasUpdate executing);
+
+        /// <summary>
+        /// Get the transform associated with the ICanvasElement.
+        /// </summary>
         Transform transform { get; }
+
+        /// <summary>
+        /// Callback sent when this ICanvasElement has completed layout.
+        /// </summary>
         void LayoutComplete();
+
+        /// <summary>
+        /// Callback sent when this ICanvasElement has completed Graphic rebuild.
+        /// </summary>
         void GraphicUpdateComplete();
-        // due to unity overriding null check
-        // we need this as something may not be null
-        // but may be destroyed
+
+        /// <summary>
+        /// Used if the native representation has been destroyed.
+        /// </summary>
+        /// <returns>Return true if the element is considered destroyed.</returns>
         bool IsDestroyed();
     }
 
+    /// <summary>
+    /// A place where CanvasElements can register themselves for rebuilding.
+    /// </summary>
     public class CanvasUpdateRegistry
     {
         private static CanvasUpdateRegistry s_Instance;
@@ -41,6 +86,9 @@ namespace UnityEngine.UI
             Canvas.willRenderCanvases += PerformUpdate;
         }
 
+        /// <summary>
+        /// Get the singleton registry instance.
+        /// </summary>
         public static CanvasUpdateRegistry instance
         {
             get
@@ -187,11 +235,24 @@ namespace UnityEngine.UI
             return ParentCount(t1) - ParentCount(t2);
         }
 
+        /// <summary>
+        /// Try and add the given element to the layout rebuild list.
+        /// Will not return if successfully added.
+        /// </summary>
+        /// <param name="element">The element that is needing rebuilt.</param>
         public static void RegisterCanvasElementForLayoutRebuild(ICanvasElement element)
         {
             instance.InternalRegisterCanvasElementForLayoutRebuild(element);
         }
 
+        /// <summary>
+        /// Try and add the given element to the layout rebuild list.
+        /// </summary>
+        /// <param name="element">The element that is needing rebuilt.</param>
+        /// <returns>
+        /// True if the element was successfully added to the rebuilt list.
+        /// False if either already inside a Graphic Update loop OR has already been added to the list.
+        /// </returns>
         public static bool TryRegisterCanvasElementForLayoutRebuild(ICanvasElement element)
         {
             return instance.InternalRegisterCanvasElementForLayoutRebuild(element);
@@ -212,11 +273,24 @@ namespace UnityEngine.UI
             return m_LayoutRebuildQueue.AddUnique(element);
         }
 
+        /// <summary>
+        /// Try and add the given element to the rebuild list.
+        /// Will not return if successfully added.
+        /// </summary>
+        /// <param name="element">The element that is needing rebuilt.</param>
         public static void RegisterCanvasElementForGraphicRebuild(ICanvasElement element)
         {
             instance.InternalRegisterCanvasElementForGraphicRebuild(element);
         }
 
+        /// <summary>
+        /// Try and add the given element to the rebuild list.
+        /// </summary>
+        /// <param name="element">The element that is needing rebuilt.</param>
+        /// <returns>
+        /// True if the element was successfully added to the rebuilt list.
+        /// False if either already inside a Graphic Update loop OR has already been added to the list.
+        /// </returns>
         public static bool TryRegisterCanvasElementForGraphicRebuild(ICanvasElement element)
         {
             return instance.InternalRegisterCanvasElementForGraphicRebuild(element);
@@ -233,6 +307,10 @@ namespace UnityEngine.UI
             return m_GraphicRebuildQueue.AddUnique(element);
         }
 
+        /// <summary>
+        /// Remove the given element from both the graphic and the layout rebuild lists.
+        /// </summary>
+        /// <param name="element"></param>
         public static void UnRegisterCanvasElementForRebuild(ICanvasElement element)
         {
             instance.InternalUnRegisterCanvasElementForLayoutRebuild(element);
@@ -262,11 +340,19 @@ namespace UnityEngine.UI
             instance.m_GraphicRebuildQueue.Remove(element);
         }
 
+        /// <summary>
+        /// Are graphics layouts currently being calculated..
+        /// </summary>
+        /// <returns>True if the rebuild loop is CanvasUpdate.Prelayout, CanvasUpdate.Layout or CanvasUpdate.Postlayout</returns>
         public static bool IsRebuildingLayout()
         {
             return instance.m_PerformingLayoutUpdate;
         }
 
+        /// <summary>
+        /// Are graphics currently being rebuild.
+        /// </summary>
+        /// <returns>True if the rebuild loop is CanvasUpdate.PreRender or CanvasUpdate.Render</returns>
         public static bool IsRebuildingGraphics()
         {
             return instance.m_PerformingGraphicUpdate;

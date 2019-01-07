@@ -5,6 +5,10 @@ namespace UnityEditor.UI
 {
     [CustomEditor(typeof(Toggle), true)]
     [CanEditMultipleObjects]
+    /// <summary>
+    ///   Custom Editor for the Toggle Component.
+    ///   Extend this class to write a custom editor for an Toggle-derived component.
+    /// </summary>
     public class ToggleEditor : SelectableEditor
     {
         SerializedProperty m_OnValueChangedProperty;

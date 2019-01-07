@@ -3,7 +3,10 @@ using UnityEngine;
 
 namespace UnityEditor.UI
 {
-    // Tools for the editor
+    /// <summary>
+    /// PropertyDrawer for [[SpriteState]].
+    /// This is a PropertyDrawer for SpriteState it is implemented using the standard unity PropertyDrawer framework.
+    /// </summary>
     internal class SpriteDrawUtility
     {
         static Texture2D s_ContrastTex;

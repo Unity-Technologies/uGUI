@@ -3,17 +3,12 @@ using UnityEngine.UI;
 
 namespace UnityEditor.UI
 {
-    // TODO REVIEW
-    // Have material live under text
-    // move stencil mask into effects *make an efects top level element like there is
-    // paragraph and character
-
-    /// <summary>
-    /// Editor class used to edit UI Labels.
-    /// </summary>
-
     [CustomEditor(typeof(Text), true)]
     [CanEditMultipleObjects]
+    /// <summary>
+    ///   Custom Editor for the Text Component.
+    ///   Extend this class to write a custom editor for an Text-derived component.
+    /// </summary>
     public class TextEditor : GraphicEditor
     {
         SerializedProperty m_Text;

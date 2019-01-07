@@ -3,23 +3,59 @@ using UnityEngine.EventSystems;
 namespace UnityEngine.UI
 {
     [AddComponentMenu("Layout/Aspect Ratio Fitter", 142)]
-    [ExecuteInEditMode]
+    [ExecuteAlways]
     [RequireComponent(typeof(RectTransform))]
     [DisallowMultipleComponent]
+    /// <summary>
+    ///   Resizes a RectTransform to fit a specified aspect ratio.
+    /// </summary>
     public class AspectRatioFitter : UIBehaviour, ILayoutSelfController
     {
-        public enum AspectMode { None, WidthControlsHeight, HeightControlsWidth, FitInParent, EnvelopeParent }
+        /// <summary>
+        /// Specifies a mode to use to enforce an aspect ratio.
+        /// </summary>
+        public enum AspectMode
+        {
+            /// <summary>
+            /// The aspect ratio is not enforced
+            /// </summary>
+            None,
+            /// <summary>
+            /// Changes the height of the rectangle to match the aspect ratio.
+            /// </summary>
+            WidthControlsHeight,
+            /// <summary>
+            /// Changes the width of the rectangle to match the aspect ratio.
+            /// </summary>
+            HeightControlsWidth,
+            /// <summary>
+            /// Sizes the rectangle such that it's fully contained within the parent rectangle.
+            /// </summary>
+            FitInParent,
+            /// <summary>
+            /// Sizes the rectangle such that the parent rectangle is fully contained within.
+            /// </summary>
+            EnvelopeParent
+        }
 
         [SerializeField] private AspectMode m_AspectMode = AspectMode.None;
+
+        /// <summary>
+        /// The mode to use to enforce the aspect ratio.
+        /// </summary>
         public AspectMode aspectMode { get { return m_AspectMode; } set { if (SetPropertyUtility.SetStruct(ref m_AspectMode, value)) SetDirty(); } }
 
         [SerializeField] private float m_AspectRatio = 1;
+
+        /// <summary>
+        /// The aspect ratio to enforce. This means width divided by height.
+        /// </summary>
         public float aspectRatio { get { return m_AspectRatio; } set { if (SetPropertyUtility.SetStruct(ref m_AspectRatio, value)) SetDirty(); } }
 
         [System.NonSerialized]
         private RectTransform m_Rect;
 
-        // This "delayed" mechanism is required for cases 713684 and 988706.
+        // This "delayed" mechanism is required for case 1014834.
         private bool m_DelayedSetDirty = false;
 
         private RectTransform rectTransform
@@ -39,7 +75,7 @@ namespace UnityEngine.UI
         protected override void OnEnable()
         {
             base.OnEnable();
-            m_DelayedSetDirty = true;
+            SetDirty();
         }
 
         protected override void OnDisable()
@@ -49,6 +85,10 @@ namespace UnityEngine.UI
             base.OnDisable();
         }
 
+        /// <summary>
+        /// Update the rect based on the delayed dirty.
+        /// Got around issue of calling onValidate from OnEnable function.
+        /// </summary>
         protected virtual void Update()
         {
             if (m_DelayedSetDirty)
@@ -58,6 +98,9 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// Function called when this RectTransform or parent RectTransform has changed dimensions.
+        /// </summary>
         protected override void OnRectTransformDimensionsChange()
         {
             UpdateRect();
@@ -136,10 +179,19 @@ namespace UnityEngine.UI
             return parent.rect.size;
         }
 
+        /// <summary>
+        /// Method called by the layout system. Has no effect
+        /// </summary>
         public virtual void SetLayoutHorizontal() {}
 
+        /// <summary>
+        /// Method called by the layout system. Has no effect
+        /// </summary>
         public virtual void SetLayoutVertical() {}
 
+        /// <summary>
+        /// Mark the AspectRatioFitter as dirty.
+        /// </summary>
         protected void SetDirty()
         {
             UpdateRect();
@@ -149,7 +201,7 @@ namespace UnityEngine.UI
         protected override void OnValidate()
         {
             m_AspectRatio = Mathf.Clamp(m_AspectRatio, 0.001f, 1000f);
-            SetDirty();
+            m_DelayedSetDirty = true;
         }
 
     #endif

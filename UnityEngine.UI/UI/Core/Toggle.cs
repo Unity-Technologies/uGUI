@@ -6,24 +6,41 @@ using UnityEngine.Serialization;
 namespace UnityEngine.UI
 {
     /// <summary>
-    /// Simple toggle -- something that has an 'on' and 'off' states: checkbox, toggle button, radio button, etc.
+    /// A standard toggle that has an on / off state.
     /// </summary>
+    /// <remarks>
+    /// The toggle component is a Selectable that controls a child graphic which displays the on / off state.
+    /// When a toggle event occurs a callback is sent to any registered listeners of UI.Toggle._onValueChanged.
+    /// </remarks>
     [AddComponentMenu("UI/Toggle", 31)]
     [RequireComponent(typeof(RectTransform))]
     public class Toggle : Selectable, IPointerClickHandler, ISubmitHandler, ICanvasElement
     {
+        /// <summary>
+        /// Display settings for when a toggle is activated or deactivated.
+        /// </summary>
         public enum ToggleTransition
         {
+            /// <summary>
+            /// Show / hide the toggle instantly
+            /// </summary>
             None,
+
+            /// <summary>
+            /// Fade the toggle in / out smoothly.
+            /// </summary>
             Fade
         }
 
         [Serializable]
+        /// <summary>
+        /// UnityEvent callback for when a toggle is toggled.
+        /// </summary>
         public class ToggleEvent : UnityEvent<bool>
         {}
 
         /// <summary>
-        /// Transition type.
+        /// Transition mode for the toggle.
         /// </summary>
         public ToggleTransition toggleTransition = ToggleTransition.Fade;
 
@@ -32,10 +49,12 @@ namespace UnityEngine.UI
         /// </summary>
         public Graphic graphic;
 
-        // group that this toggle can belong to
         [SerializeField]
         private ToggleGroup m_Group;
 
+        /// <summary>
+        /// Group the toggle belongs to.
+        /// </summary>
         public ToggleGroup group
         {
             get { return m_Group; }
@@ -55,10 +74,43 @@ namespace UnityEngine.UI
         /// <summary>
         /// Allow for delegate-based subscriptions for faster events than 'eventReceiver', and allowing for multiple receivers.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// //Attach this script to a Toggle GameObject. To do this, go to Create>UI>Toggle.
+        /// //Set your own Text in the Inspector window
+        ///
+        /// using UnityEngine;
+        /// using UnityEngine.UI;
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     Toggle m_Toggle;
+        ///     public Text m_Text;
+        ///
+        ///     void Start()
+        ///     {
+        ///         //Fetch the Toggle GameObject
+        ///         m_Toggle = GetComponent<Toggle>();
+        ///         //Add listener for when the state of the Toggle changes, to take action
+        ///         m_Toggle.onValueChanged.AddListener(delegate {
+        ///                 ToggleValueChanged(m_Toggle);
+        ///             });
+        ///
+        ///         //Initialise the Text to say the first state of the Toggle
+        ///         m_Text.text = "First Value : " + m_Toggle.isOn;
+        ///     }
+        ///
+        ///     //Output the new state of the Toggle into Text
+        ///     void ToggleValueChanged(Toggle change)
+        ///     {
+        ///         m_Text.text =  "New Value : " + m_Toggle.isOn;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public ToggleEvent onValueChanged = new ToggleEvent();
 
         // Whether the toggle is on
-        [FormerlySerializedAs("m_IsActive")]
         [Tooltip("Is the toggle currently on or off?")]
         [SerializeField]
         private bool m_IsOn;
@@ -71,8 +123,7 @@ namespace UnityEngine.UI
         {
             base.OnValidate();
 
-            var prefabType = UnityEditor.PrefabUtility.GetPrefabType(this);
-            if (prefabType != UnityEditor.PrefabType.Prefab && !Application.isPlaying)
+            if (!UnityEditor.PrefabUtility.IsPartOfPrefabAsset(this) && !Application.isPlaying)
                 CanvasUpdateRegistry.RegisterCanvasElementForLayoutRebuild(this);
         }
 
@@ -149,6 +200,40 @@ namespace UnityEngine.UI
         /// <summary>
         /// Whether the toggle is currently active.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// /Attach this script to a Toggle GameObject. To do this, go to Create>UI>Toggle.
+        /// //Set your own Text in the Inspector window
+        ///
+        /// using UnityEngine;
+        /// using UnityEngine.UI;
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     Toggle m_Toggle;
+        ///     public Text m_Text;
+        ///
+        ///     void Start()
+        ///     {
+        ///         //Fetch the Toggle GameObject
+        ///         m_Toggle = GetComponent<Toggle>();
+        ///         //Add listener for when the state of the Toggle changes, and output the state
+        ///         m_Toggle.onValueChanged.AddListener(delegate {
+        ///                 ToggleValueChanged(m_Toggle);
+        ///             });
+        ///
+        ///         //Initialize the Text to say whether the Toggle is in a positive or negative state
+        ///         m_Text.text = "Toggle is : " + m_Toggle.isOn;
+        ///     }
+        ///
+        ///     //Output the new state of the Toggle into Text when the user uses the Toggle
+        ///     void ToggleValueChanged(Toggle change)
+        ///     {
+        ///         m_Text.text =  "Toggle is : " + m_Toggle.isOn;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public bool isOn
         {
             get { return m_IsOn; }

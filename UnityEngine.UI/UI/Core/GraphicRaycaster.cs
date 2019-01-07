@@ -8,17 +8,42 @@ namespace UnityEngine.UI
 {
     [AddComponentMenu("Event/Graphic Raycaster")]
     [RequireComponent(typeof(Canvas))]
+    /// <summary>
+    /// A derived BaseRaycaster to raycast against Graphic elements.
+    /// </summary>
     public class GraphicRaycaster : BaseRaycaster
     {
         protected const int kNoEventMaskSet = -1;
+
+        /// <summary>
+        /// Type of raycasters to check against to check for canvas blocking elements.
+        /// </summary>
         public enum BlockingObjects
         {
+            /// <summary>
+            /// Perform no raycasts.
+            /// </summary>
             None = 0,
+            /// <summary>
+            /// Perform a 2D raycast check to check for blocking 2D elements
+            /// </summary>
             TwoD = 1,
+            /// <summary>
+            /// Perform a 3D raycast check to check for blocking 3D elements
+            /// </summary>
             ThreeD = 2,
+            /// <summary>
+            /// Perform a 2D and a 3D raycasts to check for blocking 2D and 3D elements.
+            /// </summary>
             All = 3,
         }
 
+        /// <summary>
+        /// Priority of the raycaster based upon sort order.
+        /// </summary>
+        /// <returns>
+        /// The sortOrder priority.
+        /// </returns>
         public override int sortOrderPriority
         {
             get
@@ -31,6 +56,12 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// Priority of the raycaster based upon render order.
+        /// </summary>
+        /// <returns>
+        /// The renderOrder priority.
+        /// </returns>
         public override int renderOrderPriority
         {
             get
@@ -51,6 +82,10 @@ namespace UnityEngine.UI
         private BlockingObjects m_BlockingObjects = BlockingObjects.None;
 
         public bool ignoreReversedGraphics { get {return m_IgnoreReversedGraphics; } set { m_IgnoreReversedGraphics = value; } }
+
+        /// <summary>
+        /// Type of objects that will be check for to determine if they are blocking block graphic raycasts.
+        /// </summary>
         public BlockingObjects blockingObjects { get {return m_BlockingObjects; } set { m_BlockingObjects = value; } }
 
         [SerializeField]
@@ -74,6 +109,12 @@ namespace UnityEngine.UI
         }
 
         [NonSerialized] private List<Graphic> m_RaycastResults = new List<Graphic>();
+
+        /// <summary>
+        /// Perform the raycast against the list of graphics associated with the Canvas.
+        /// </summary>
+        /// <param name="eventData">Current event data</param>
+        /// <param name="resultAppendList">List of hit objects to append new results to.</param>
         public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
         {
             if (canvas == null)
@@ -237,6 +278,14 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// The camera that will generate rays for this raycaster.
+        /// </summary>
+        /// <returns>
+        /// - Null if Camera mode is ScreenSpaceOverlay or ScreenSpaceCamera and has no camera.
+        /// - canvas.worldCanvas if not null
+        /// - Camera.main.
+        /// </returns>
         public override Camera eventCamera
         {
             get

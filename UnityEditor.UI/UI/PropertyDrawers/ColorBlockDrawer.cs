@@ -4,6 +4,9 @@ using UnityEngine.UI;
 namespace UnityEditor.UI
 {
     [CustomPropertyDrawer(typeof(ColorBlock), true)]
+    /// <summary>
+    ///   This is a PropertyDrawer for ColorBlock it is implemented using the standard unity PropertyDrawer framework.
+    /// </summary>
     public class ColorBlockDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect rect, SerializedProperty prop, GUIContent label)

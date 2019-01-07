@@ -7,6 +7,10 @@ namespace UnityEditor.UI
 {
     [CustomEditor(typeof(LayoutElement), true)]
     [CanEditMultipleObjects]
+    /// <summary>
+    ///   Custom editor for the LayoutElement component
+    ///   Extend this class to write a custom editor for an LayoutElement-derived component.
+    /// </summary>
     public class LayoutElementEditor : Editor
     {
         SerializedProperty m_IgnoreLayout;

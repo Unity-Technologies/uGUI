@@ -7,9 +7,15 @@ using UnityEngine.Serialization;
 namespace UnityEngine.UI
 {
     [AddComponentMenu("UI/Mask", 13)]
-    [ExecuteInEditMode]
+    [ExecuteAlways]
     [RequireComponent(typeof(RectTransform))]
     [DisallowMultipleComponent]
+    /// <summary>
+    /// A component for masking children elements.
+    /// </summary>
+    /// <remarks>
+    /// By using this element any children elements that have masking enabled will mask where a sibling Graphic would write 0 to the stencil buffer.
+    /// </remarks>
     public class Mask : UIBehaviour, ICanvasRaycastFilter, IMaterialModifier
     {
         [NonSerialized]
@@ -20,8 +26,11 @@ namespace UnityEngine.UI
         }
 
         [SerializeField]
-        [FormerlySerializedAs("m_ShowGraphic")]
         private bool m_ShowMaskGraphic = true;
+
+        /// <summary>
+        /// Show the graphic that is associated with the Mask render area.
+        /// </summary>
         public bool showMaskGraphic
         {
             get { return m_ShowMaskGraphic; }
@@ -38,6 +47,10 @@ namespace UnityEngine.UI
 
         [NonSerialized]
         private Graphic m_Graphic;
+
+        /// <summary>
+        /// The graphic associated with the Mask.
+        /// </summary>
         public Graphic graphic
         {
             get { return m_Graphic ?? (m_Graphic = GetComponent<Graphic>()); }

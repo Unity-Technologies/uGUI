@@ -5,10 +5,14 @@ using UnityEngine.Serialization;
 namespace UnityEngine.UI
 {
     /// <summary>
+    /// Displays a Texture2D for the UI System.
+    /// </summary>
+    /// <remarks>
     /// If you don't have or don't wish to create an atlas, you can simply use this script to draw a texture.
     /// Keep in mind though that this will create an extra draw call with each RawImage present, so it's
     /// best to use it only for backgrounds or temporary visible graphics.
-    /// </summary>
+    /// </remarks>
+
     [AddComponentMenu("UI/Raw Image", 12)]
     public class RawImage : MaskableGraphic
     {
@@ -42,8 +46,36 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Texture to be used.
+        /// The RawImage's texture to be used.
         /// </summary>
+        /// <remarks>
+        /// Use this to alter or return the Texture the RawImage displays. The Raw Image can display any Texture whereas an Image component can only show a Sprite Texture.
+        /// Note : Keep in mind that using a RawImage creates an extra draw call with each RawImage present, so it's best to use it only for backgrounds or temporary visible graphics.Note: Keep in mind that using a RawImage creates an extra draw call with each RawImage present, so it's best to use it only for backgrounds or temporary visible graphics.
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// //Create a new RawImage by going to Create>UI>Raw Image in the hierarchy.
+        /// //Attach this script to the RawImage GameObject.
+        ///
+        /// using UnityEngine;
+        /// using UnityEngine.UI;
+        ///
+        /// public class RawImageTexture : MonoBehaviour
+        /// {
+        ///     RawImage m_RawImage;
+        ///     //Select a Texture in the Inspector to change to
+        ///     public Texture m_Texture;
+        ///
+        ///     void Start()
+        ///     {
+        ///         //Fetch the RawImage component from the GameObject
+        ///         m_RawImage = GetComponent<RawImage>();
+        ///         //Change the Texture to be the one you define in the Inspector
+        ///         m_RawImage.texture = m_Texture;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public Texture texture
         {
             get
@@ -82,7 +114,9 @@ namespace UnityEngine.UI
         /// <summary>
         /// Adjust the scale of the Graphic to make it pixel-perfect.
         /// </summary>
-
+        /// <remarks>
+        /// This means setting the RawImage's RectTransform.sizeDelta  to be equal to the Texture dimensions.
+        /// </remarks>
         public override void SetNativeSize()
         {
             Texture tex = mainTexture;

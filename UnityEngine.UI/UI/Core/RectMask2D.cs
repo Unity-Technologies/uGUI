@@ -5,9 +5,21 @@ using UnityEngine.EventSystems;
 namespace UnityEngine.UI
 {
     [AddComponentMenu("UI/Rect Mask 2D", 13)]
-    [ExecuteInEditMode]
+    [ExecuteAlways]
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
+    /// <summary>
+    /// A 2D rectangular mask that allows for clipping / masking of areas outside the mask.
+    /// </summary>
+    /// <remarks>
+    /// The RectMask2D behaves in a similar way to a standard Mask component. It differs though in some of the restrictions that it has.
+    /// A RectMask2D:
+    /// *Only works in the 2D plane
+    /// *Requires elements on the mask to be coplanar.
+    /// *Does not require stencil buffer / extra draw calls
+    /// *Requires fewer draw calls
+    /// *Culls elements that are outside the mask area.
+    /// </remarks>
     public class RectMask2D : UIBehaviour, IClipper, ICanvasRaycastFilter
     {
         [NonSerialized]
@@ -53,6 +65,9 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// Get the Rect for the mask in canvas space.
+        /// </summary>
         public Rect canvasRect
         {
             get
@@ -61,6 +76,9 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// Helper function to get the RectTransform for the mask.
+        /// </summary>
         public RectTransform rectTransform
         {
             get { return m_RectTransform ?? (m_RectTransform = GetComponent<RectTransform>()); }
@@ -188,6 +206,10 @@ namespace UnityEngine.UI
             m_ForceClip = false;
         }
 
+        /// <summary>
+        /// Add a IClippable to be tracked by the mask.
+        /// </summary>
+        /// <param name="clippable">Add the clippable object for this mask</param>
         public void AddClippable(IClippable clippable)
         {
             if (clippable == null)
@@ -199,6 +221,10 @@ namespace UnityEngine.UI
             m_ForceClip = true;
         }
 
+        /// <summary>
+        /// Remove an IClippable from being tracked by the mask.
+        /// </summary>
+        /// <param name="clippable">Remove the clippable object from this mask</param>
         public void RemoveClippable(IClippable clippable)
         {
             if (clippable == null)

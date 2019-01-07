@@ -6,6 +6,9 @@ using UnityEngine.UI;
 namespace UnityEditor.Events
 {
     [CustomPreview(typeof(GameObject))]
+    /// <summary>
+    ///   Custom preview drawing that will draw the layout properties of a given object.
+    /// </summary>
     class LayoutPropertiesPreview : ObjectPreview
     {
         private const float kLabelWidth = 110;

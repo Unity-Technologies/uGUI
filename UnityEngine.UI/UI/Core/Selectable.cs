@@ -5,11 +5,13 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
-    // Simple selectable object - derived from to create a control.
     [AddComponentMenu("UI/Selectable", 70)]
-    [ExecuteInEditMode]
+    [ExecuteAlways]
     [SelectionBase]
     [DisallowMultipleComponent]
+    /// <summary>
+    /// Simple selectable object - derived from to create a selectable control.
+    /// </summary>
     public class Selectable
         :
         UIBehaviour,
@@ -18,10 +20,30 @@ namespace UnityEngine.UI
         IPointerEnterHandler, IPointerExitHandler,
         ISelectHandler, IDeselectHandler
     {
-        // Selection state
-
-        // List of all the selectable objects currently active in the scene
         private static List<Selectable> s_List = new List<Selectable>();
+
+        /// <summary>
+        /// List of all the selectable objects currently active in the scene.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // required when using UI elements in scripts
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     //Displays the names of all selectable elements in the scene
+        ///     public void GetNames()
+        ///     {
+        ///         foreach (Selectable selectableUI in Selectable.allSelectables)
+        ///         {
+        ///             Debug.Log(selectableUI.name);
+        ///         }
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public static List<Selectable> allSelectables { get { return s_List; } }
 
         // Navigation information.
@@ -29,12 +51,29 @@ namespace UnityEngine.UI
         [SerializeField]
         private Navigation m_Navigation = Navigation.defaultNavigation;
 
-        // Highlighting state
+        /// <summary>
+        ///Transition mode for a Selectable.
+        /// </summary>
         public enum Transition
         {
+            /// <summary>
+            /// No Transition.
+            /// </summary>
             None,
+
+            /// <summary>
+            /// Use an color tint transition.
+            /// </summary>
             ColorTint,
+
+            /// <summary>
+            /// Use a sprite swap transition.
+            /// </summary>
             SpriteSwap,
+
+            /// <summary>
+            /// Use an animation transition.
+            /// </summary>
             Animation
         }
 
@@ -72,12 +111,166 @@ namespace UnityEngine.UI
 
         private SelectionState m_CurrentSelectionState;
 
+        /// <summary>
+        /// The Navigation setting for this selectable object.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class ExampleClass : MonoBehaviour
+        /// {
+        ///     public Button button;
+        ///
+        ///     void Start()
+        ///     {
+        ///         //Set the navigation to the default value. ("Automatic" is the default value).
+        ///         button.navigation = Navigation.defaultNavigation;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public Navigation        navigation        { get { return m_Navigation; } set { if (SetPropertyUtility.SetStruct(ref m_Navigation, value))        OnSetProperty(); } }
+
+        /// <summary>
+        /// The type of transition that will be applied to the targetGraphic when the state changes.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class ExampleClass : MonoBehaviour
+        /// {
+        ///     public Button btnMain;
+        ///
+        ///     void SomeFunction()
+        ///     {
+        ///         //Sets the main button's transition setting to "Color Tint".
+        ///         btnMain.transition = Selectable.Transition.ColorTint;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public Transition        transition        { get { return m_Transition; } set { if (SetPropertyUtility.SetStruct(ref m_Transition, value))        OnSetProperty(); } }
+
+        /// <summary>
+        /// The ColorBlock for this selectable object.
+        /// </summary>
+        /// <remarks>
+        /// Modifications will not be visible if  transition is not ColorTint.
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class ExampleClass : MonoBehaviour
+        /// {
+        ///     public Button button;
+        ///
+        ///     void Start()
+        ///     {
+        ///         //Resets the colors in the buttons transitions.
+        ///         button.colors = ColorBlock.defaultColorBlock;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public ColorBlock        colors            { get { return m_Colors; } set { if (SetPropertyUtility.SetStruct(ref m_Colors, value))            OnSetProperty(); } }
+
+        /// <summary>
+        /// The SpriteState for this selectable object.
+        /// </summary>
+        /// <remarks>
+        /// Modifications will not be visible if transition is not SpriteSwap.
+        /// </remarks>
+        /// <example>
+        // <code>
+        // using UnityEngine;
+        // using System.Collections;
+        // using UnityEngine.UI; // Required when Using UI elements.
+        //
+        // public class ExampleClass : MonoBehaviour
+        // {
+        //     //Creates an instance of a sprite state (This includes the highlighted, pressed and disabled sprite.
+        //     public SpriteState sprState = new SpriteState();
+        //     public Button btnMain;
+        //
+        //
+        //     void Start()
+        //     {
+        //         //Assigns the new sprite states to the button.
+        //         btnMain.spriteState = sprState;
+        //     }
+        // }
+        // </code>
+        // </example>
         public SpriteState       spriteState       { get { return m_SpriteState; } set { if (SetPropertyUtility.SetStruct(ref m_SpriteState, value))       OnSetProperty(); } }
+
+        /// <summary>
+        /// The AnimationTriggers for this selectable object.
+        /// </summary>
+        /// <remarks>
+        /// Modifications will not be visible if transition is not Animation.
+        /// </remarks>
         public AnimationTriggers animationTriggers { get { return m_AnimationTriggers; } set { if (SetPropertyUtility.SetClass(ref m_AnimationTriggers, value)) OnSetProperty(); } }
+
+        /// <summary>
+        /// Graphic that will be transitioned upon.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class ExampleClass : MonoBehaviour
+        /// {
+        ///     public Image newImage;
+        ///     public Button btnMain;
+        ///
+        ///     void SomeFunction()
+        ///     {
+        ///         //Displays the sprite transitions on the image when the transition to Highlighted,pressed or disabled is made.
+        ///         btnMain.targetGraphic = newImage;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public Graphic           targetGraphic     { get { return m_TargetGraphic; } set { if (SetPropertyUtility.SetClass(ref m_TargetGraphic, value))     OnSetProperty(); } }
+
+        /// <summary>
+        /// Is this object interactable.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // required when using UI elements in scripts
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     public Button startButton;
+        ///     public bool playersReady;
+        ///
+        ///
+        ///     void Update()
+        ///     {
+        ///         // checks if the players are ready and if the start button is useable
+        ///         if (playersReady == true && startButton.interactable == false)
+        ///         {
+        ///             //allows the start button to be used
+        ///             startButton.interactable = true;
+        ///         }
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public bool              interactable
         {
             get { return m_Interactable; }
@@ -101,14 +294,37 @@ namespace UnityEngine.UI
         protected Selectable()
         {}
 
-        // Convenience function that converts the Graphic to a Image, if possible
+        /// <summary>
+        /// Convenience function that converts the referenced Graphic to a Image, if possible.
+        /// </summary>
         public Image image
         {
             get { return m_TargetGraphic as Image; }
             set { m_TargetGraphic = value; }
         }
 
-        // Get the animator
+        /// <summary>
+        /// Convenience function to get the Animator component on the GameObject.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class ExampleClass : MonoBehaviour
+        /// {
+        ///     private Animator buttonAnimator;
+        ///     public Button button;
+        ///
+        ///     void Start()
+        ///     {
+        ///         //Assigns the "buttonAnimator" with the button's animator.
+        ///         buttonAnimator = button.animator;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public Animator animator
         {
             get { return GetComponent<Animator>(); }
@@ -159,6 +375,29 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// Is the object interactable.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // required when using UI elements in scripts
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     public Button startButton;
+        ///
+        ///     void Update()
+        ///     {
+        ///         if (!startButton.IsInteractable())
+        ///         {
+        ///             Debug.Log("Start Button has been Disabled");
+        ///         }
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public virtual bool IsInteractable()
         {
             return m_GroupsAllowInteraction && m_Interactable;
@@ -266,6 +505,11 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// Transition the Selectable to the entered state.
+        /// </summary>
+        /// <param name="state">State to transition to</param>
+        /// <param name="instant">Should the transition occur instantly.</param>
         protected virtual void DoStateTransition(SelectionState state, bool instant)
         {
             Color tintColor;
@@ -318,17 +562,64 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// An enumeration of selected states of objects
+        /// </summary>
         protected enum SelectionState
         {
+            /// <summary>
+            /// The UI object can be selected.
+            /// </summary>
             Normal,
+
+            /// <summary>
+            /// The UI object is highlighted.
+            /// </summary>
             Highlighted,
+
+            /// <summary>
+            /// The UI object is pressed.
+            /// </summary>
             Pressed,
+
+            /// <summary>
+            /// The UI object cannot be selected.
+            /// </summary>
             Disabled
         }
 
         // Selection logic
 
-        // Find the next selectable object in the specified world-space direction.
+        /// <summary>
+        /// Finds the selectable object next to this one.
+        /// </summary>
+        /// <remarks>
+        /// The direction is determined by a Vector3 variable.
+        /// </remarks>
+        /// <param name="dir">The direction in which to search for a neighbouring Selectable object.</param>
+        /// <returns>The neighbouring Selectable object. Null if none found.</returns>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // required when using UI elements in scripts
+        ///
+        /// public class ExampleClass : MonoBehaviour
+        /// {
+        ///     //Sets the direction as "Up" (Y is in positive).
+        ///     public Vector3 direction = new Vector3(0, 1, 0);
+        ///     public Button btnMain;
+        ///
+        ///     public void Start()
+        ///     {
+        ///         //Finds and assigns the selectable above the main button
+        ///         Selectable newSelectable = btnMain.FindSelectable(direction);
+        ///
+        ///         Debug.Log(newSelectable.name);
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public Selectable FindSelectable(Vector3 dir)
         {
             dir = dir.normalized;
@@ -345,6 +636,14 @@ namespace UnityEngine.UI
 
                 if (!sel.IsInteractable() || sel.navigation.mode == Navigation.Mode.None)
                     continue;
+
+#if UNITY_EDITOR
+                // Apart from runtime use, FindSelectable is used by custom editors to
+                // draw arrows between different selectables. For scene view cameras,
+                // only selectables in the same stage should be considered.
+                if (Camera.current != null && !UnityEditor.SceneManagement.StageUtility.IsGameObjectRenderedByCamera(sel.gameObject, Camera.current))
+                    continue;
+#endif
 
                 var selRect = sel.transform as RectTransform;
                 Vector3 selCenter = selRect != null ? (Vector3)selRect.rect.center : Vector3.zero;
@@ -400,7 +699,30 @@ namespace UnityEngine.UI
                 eventData.selectedObject = sel.gameObject;
         }
 
-        // Find the selectable object to the left of this one.
+        /// <summary>
+        /// Find the selectable object to the left of this one.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // required when using UI elements in scripts
+        ///
+        /// public class ExampleClass : MonoBehaviour
+        /// {
+        ///     public Button btnMain;
+        ///
+        ///     // Disables the selectable UI element directly to the left of the Start Button
+        ///     public void IgnoreSelectables()
+        ///     {
+        ///         //Finds the selectable UI element to the left the start button and assigns it to a variable of type "Selectable"
+        ///         Selectable secondButton = startButton.FindSelectableOnLeft();
+        ///         //Disables interaction with the selectable UI element
+        ///         secondButton.interactable = false;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public virtual Selectable FindSelectableOnLeft()
         {
             if (m_Navigation.mode == Navigation.Mode.Explicit)
@@ -414,7 +736,30 @@ namespace UnityEngine.UI
             return null;
         }
 
-        // Find the selectable object to the right of this one.
+        /// <summary>
+        /// Find the selectable object to the right of this one.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // required when using UI elements in scripts
+        ///
+        /// public class ExampleClass : MonoBehaviour
+        /// {
+        ///     public Button btnMain;
+        ///
+        ///     // Disables the selectable UI element directly to the right the Start Button
+        ///     public void IgnoreSelectables()
+        ///     {
+        ///         //Finds the selectable UI element to the right the start button and assigns it to a variable of type "Selectable"
+        ///         Selectable secondButton = startButton.FindSelectableOnRight();
+        ///         //Disables interaction with the selectable UI element
+        ///         secondButton.interactable = false;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public virtual Selectable FindSelectableOnRight()
         {
             if (m_Navigation.mode == Navigation.Mode.Explicit)
@@ -428,7 +773,30 @@ namespace UnityEngine.UI
             return null;
         }
 
-        // Find the selectable object above this one
+        /// <summary>
+        /// The Selectable object above current
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // required when using UI elements in scripts
+        ///
+        /// public class ExampleClass : MonoBehaviour
+        /// {
+        ///     public Button btnMain;
+        ///
+        ///     // Disables the selectable UI element directly above the Start Button
+        ///     public void IgnoreSelectables()
+        ///     {
+        ///         //Finds the selectable UI element above the start button and assigns it to a variable of type "Selectable"
+        ///         Selectable secondButton = startButton.FindSelectableOnUp();
+        ///         //Disables interaction with the selectable UI element
+        ///         secondButton.interactable = false;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public virtual Selectable FindSelectableOnUp()
         {
             if (m_Navigation.mode == Navigation.Mode.Explicit)
@@ -442,7 +810,30 @@ namespace UnityEngine.UI
             return null;
         }
 
-        // Find the selectable object below this one.
+        /// <summary>
+        /// Find the selectable object below this one.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // required when using UI elements in scripts
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     public Button startButton;
+        ///
+        ///     // Disables the selectable UI element directly below the Start Button
+        ///     public void IgnoreSelectables()
+        ///     {
+        ///         //Finds the selectable UI element below the start button and assigns it to a variable of type "Selectable"
+        ///         Selectable secondButton = startButton.FindSelectableOnDown();
+        ///         //Disables interaction with the selectable UI element
+        ///         secondButton.interactable = false;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public virtual Selectable FindSelectableOnDown()
         {
             if (m_Navigation.mode == Navigation.Mode.Explicit)
@@ -456,6 +847,31 @@ namespace UnityEngine.UI
             return null;
         }
 
+        /// <summary>
+        /// Determine in which of the 4 move directions the next selectable object should be found.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI;
+        /// using UnityEngine.EventSystems;// Required when using Event data.
+        ///
+        /// public class ExampleClass : MonoBehaviour, IMoveHandler
+        /// {
+        ///     //When the focus moves to another selectable object, Invoke this Method.
+        ///     public void OnMove(AxisEventData eventData)
+        ///     {
+        ///         //Assigns the move direction and the raw input vector representing the direction from the event data.
+        ///         MoveDirection moveDir = eventData.moveDir;
+        ///         Vector2 moveVector = eventData.moveVector;
+        ///
+        ///         //Displays the information in the console
+        ///         Debug.Log(moveDir + ", " + moveVector);
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public virtual void OnMove(AxisEventData eventData)
         {
             switch (eventData.moveDir)
@@ -507,7 +923,39 @@ namespace UnityEngine.UI
             animator.SetTrigger(triggername);
         }
 
-        // Whether the control should be 'selected'.
+        /// <summary>
+        /// Returns whether the selectable is currently 'highlighted' or not.
+        /// </summary>
+        /// <remarks>
+        /// Use this to check if the selectable UI element is currently highlighted.
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// //Create a UI element. To do this go to Create>UI and select from the list. Attach this script to the UI GameObject to see this script working. The script also works with non-UI elements, but highlighting works better with UI.
+        ///
+        /// using UnityEngine;
+        /// using UnityEngine.Events;
+        /// using UnityEngine.EventSystems;
+        /// using UnityEngine.UI;
+        ///
+        /// //Use the Selectable class as a base class to access the IsHighlighted method
+        /// public class Example : Selectable
+        /// {
+        ///     //Use this to check what Events are happening
+        ///     BaseEventData m_BaseEvent;
+        ///
+        ///     void Update()
+        ///     {
+        ///         //Check if the GameObject is being highlighted
+        ///         if (IsHighlighted(m_BaseEvent) == true)
+        ///         {
+        ///             //Output that the GameObject was highlighted, or do something else
+        ///             Debug.Log("Selectable is Highlighted");
+        ///         }
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         protected bool IsHighlighted(BaseEventData eventData)
         {
             if (!IsActive())
@@ -538,7 +986,9 @@ namespace UnityEngine.UI
             return IsPressed();
         }
 
-        // Whether the control should be pressed.
+        /// <summary>
+        /// Whether the current selectable is being pressed.
+        /// </summary>
         protected bool IsPressed()
         {
             if (!IsActive())
@@ -547,7 +997,9 @@ namespace UnityEngine.UI
             return isPointerInside && isPointerDown;
         }
 
-        // The current visual state of the control.
+        /// <summary>
+        /// Internally update the selection state of the Selectable.
+        /// </summary>
         protected void UpdateSelectionState(BaseEventData eventData)
         {
             if (IsPressed())
@@ -583,6 +1035,26 @@ namespace UnityEngine.UI
             DoStateTransition(transitionState, instant);
         }
 
+        /// <summary>
+        /// Evaluate current state and transition to pressed state.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI;
+        /// using UnityEngine.EventSystems;// Required when using Event data.
+        ///
+        /// public class ExampleClass : MonoBehaviour, IPointerDownHandler// required interface when using the OnPointerDown method.
+        /// {
+        ///     //Do this when the mouse is clicked over the selectable object this script is attached to.
+        ///     public void OnPointerDown(PointerEventData eventData)
+        ///     {
+        ///         Debug.Log(this.gameObject.name + " Was Clicked.");
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public virtual void OnPointerDown(PointerEventData eventData)
         {
             if (eventData.button != PointerEventData.InputButton.Left)
@@ -596,6 +1068,31 @@ namespace UnityEngine.UI
             EvaluateAndTransitionToSelectionState(eventData);
         }
 
+        /// <summary>
+        /// Evaluate eventData and transition to appropriate state.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI;
+        /// using UnityEngine.EventSystems;// Required when using Event data.
+        ///
+        /// public class ExampleClass : MonoBehaviour, IPointerUpHandler, IPointerDownHandler// These are the interfaces the OnPointerUp method requires.
+        /// {
+        ///     //OnPointerDown is also required to receive OnPointerUp callbacks
+        ///     public void OnPointerDown(PointerEventData eventData)
+        ///     {
+        ///     }
+        ///
+        ///     //Do this when the mouse click on this selectable UI object is released.
+        ///     public void OnPointerUp(PointerEventData eventData)
+        ///     {
+        ///         Debug.Log("The mouse click was released");
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public virtual void OnPointerUp(PointerEventData eventData)
         {
             if (eventData.button != PointerEventData.InputButton.Left)
@@ -605,30 +1102,133 @@ namespace UnityEngine.UI
             EvaluateAndTransitionToSelectionState(eventData);
         }
 
+        /// <summary>
+        /// Evaluate current state and transition to appropriate state.
+        /// New state could be pressed or hover depending on pressed state.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI;
+        /// using UnityEngine.EventSystems;// Required when using Event data.
+        ///
+        /// public class ExampleClass : MonoBehaviour, IPointerEnterHandler// required interface when using the OnPointerEnter method.
+        /// {
+        ///     //Do this when the cursor enters the rect area of this selectable UI object.
+        ///     public void OnPointerEnter(PointerEventData eventData)
+        ///     {
+        ///         Debug.Log("The cursor entered the selectable UI element.");
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public virtual void OnPointerEnter(PointerEventData eventData)
         {
             isPointerInside = true;
             EvaluateAndTransitionToSelectionState(eventData);
         }
 
+        /// <summary>
+        /// Evaluate current state and transition to normal state.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI;
+        /// using UnityEngine.EventSystems;// Required when using Event data.
+        ///
+        /// public class ExampleClass : MonoBehaviour, IPointerExitHandler// required interface when using the OnPointerExit method.
+        /// {
+        ///     //Do this when the cursor exits the rect area of this selectable UI object.
+        ///     public void OnPointerExit(PointerEventData eventData)
+        ///     {
+        ///         Debug.Log("The cursor exited the selectable UI element.");
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public virtual void OnPointerExit(PointerEventData eventData)
         {
             isPointerInside = false;
             EvaluateAndTransitionToSelectionState(eventData);
         }
 
+        /// <summary>
+        /// Set selection and transition to appropriate state.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI;
+        /// using UnityEngine.EventSystems;// Required when using Event data.
+        ///
+        /// public class ExampleClass : MonoBehaviour, ISelectHandler// required interface when using the OnSelect method.
+        /// {
+        ///     //Do this when the selectable UI object is selected.
+        ///     public void OnSelect(BaseEventData eventData)
+        ///     {
+        ///         Debug.Log(this.gameObject.name + " was selected");
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public virtual void OnSelect(BaseEventData eventData)
         {
             hasSelection = true;
             EvaluateAndTransitionToSelectionState(eventData);
         }
 
+        /// <summary>
+        /// Unset selection and transition to appropriate state.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI;
+        /// using UnityEngine.EventSystems;// Required when using Event data.
+        ///
+        /// public class ExampleClass : MonoBehaviour, IDeselectHandler //This Interface is required to receive OnDeselect callbacks.
+        /// {
+        ///     public void OnDeselect(BaseEventData data)
+        ///     {
+        ///         Debug.Log("Deselected");
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public virtual void OnDeselect(BaseEventData eventData)
         {
             hasSelection = false;
             EvaluateAndTransitionToSelectionState(eventData);
         }
 
+        /// <summary>
+        /// Selects this Selectable.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // required when using UI elements in scripts
+        /// using UnityEngine.EventSystems;// Required when using Event data.
+        ///
+        /// public class ExampleClass : MonoBehaviour// required interface when using the OnSelect method.
+        /// {
+        ///     public InputField myInputField;
+        ///
+        ///     //Do this OnClick.
+        ///     public void SaveGame()
+        ///     {
+        ///         //Makes the Input Field the selected UI Element.
+        ///         myInputField.Select();
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public virtual void Select()
         {
             if (EventSystem.current == null || EventSystem.current.alreadySelecting)

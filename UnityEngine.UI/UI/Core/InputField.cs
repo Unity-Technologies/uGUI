@@ -12,7 +12,7 @@ using UnityEditor;
 namespace UnityEngine.UI
 {
     /// <summary>
-    /// Editable text input field.
+    /// Turn a simple label into a interactable input field.
     /// </summary>
 
     [AddComponentMenu("UI/Input Field", 31)]
@@ -27,51 +27,170 @@ namespace UnityEngine.UI
         ICanvasElement,
         ILayoutElement
     {
-        // Setting the content type acts as a shortcut for setting a combination of InputType, CharacterValidation, LineType, and TouchScreenKeyboardType
+        /// <summary>
+        /// Setting the content type acts as a shortcut for setting a combination of InputType, CharacterValidation, LineType, and TouchScreenKeyboardType
+        /// </summary>
+        /// <remarks>
+        /// The ContentType affects character validation, keyboard type used (on platforms with on-screen keyboards), whether the InputField accepts multiple lines, and whether the text is autocorrected (on platforms that offer input auto-correction) or is treated as a password where the characters are not shown directly.
+        /// </remarks>
         public enum ContentType
         {
+            /// <summary>
+            /// Allows all input.
+            /// </summary>
             Standard,
+
+            /// <summary>
+            /// Allows all input and performs auto-correction on platforms that support it.
+            /// </summary>
             Autocorrected,
+            /// <summary>
+            /// Allow whole numbers (positive or negative).
+            /// </summary>
             IntegerNumber,
+
+            /// <summary>
+            /// Allows decimal numbers (positive or negative).
+            /// </summary>
             DecimalNumber,
+
+            /// <summary>
+            /// Allows letters A-Z, a-z and numbers 0-9.
+            /// </summary>
             Alphanumeric,
+
+            /// <summary>
+            /// The InputField is used for typing in a name, and enforces capitalization of the first letter of each word. Note that the user can circumvent the first letter capitalization rules by deleting automatically-capitalized letters.
+            /// </summary>
             Name,
+
+            /// <summary>
+            /// The input is used for typing in an email address.
+            /// </summary>
             EmailAddress,
+
+            /// <summary>
+            /// Allows all input and hides the typed characters by showing them as asterisks characters.
+            /// </summary>
             Password,
+
+            /// <summary>
+            /// Allows integer numbers and hides the typed characters by showing them as asterisks characters.
+            /// </summary>
             Pin,
+
+            /// <summary>
+            /// Custom types that allows user-defined settings.
+            /// </summary>
             Custom
         }
 
+        /// <summary>
+        /// Type of data expected by the input field mobile keyboard.
+        /// </summary>
         public enum InputType
         {
+            /// <summary>
+            /// The standard mobile keyboard
+            /// </summary>
             Standard,
+
+            /// <summary>
+            /// The mobile autocorrect keyboard.
+            /// </summary>
             AutoCorrect,
+
+            /// <summary>
+            /// The mobile password keyboard.
+            /// </summary>
             Password,
         }
 
+        /// <summary>
+        /// The type of characters that are allowed to be added to the string.
+        /// </summary>
+        /// <remarks>
+        /// Note that the character validation does not validate the entire string as being valid or not. It only does validation on a per-character level, resulting in the typed character either being added to the string or not
+        /// </remarks>
         public enum CharacterValidation
         {
+            /// <summary>
+            /// No validation. Any input is valid.
+            /// </summary>
             None,
+
+            /// <summary>
+            /// Allow whole numbers (positive or negative).
+            /// Characters 0-9 and - (dash / minus sign) are allowed. The dash is only allowed as the first character.
+            /// </summary>
             Integer,
+            /// <summary>
+            /// Allows decimal numbers (positive or negative).
+            /// </summary>
+            /// <remarks>
+            /// Characters 0-9, . (dot), and - (dash / minus sign) are allowed. The dash is only allowed as the first character. Only one dot in the string is allowed.
+            /// </remarks>
             Decimal,
+
+            /// <summary>
+            /// Allows letters A-Z, a-z and numbers 0-9.
+            /// </summary>
             Alphanumeric,
+
+            /// <summary>
+            /// Only allow names and enforces capitalization.
+            /// </summary>
+            /// <remarks>
+            /// Allows letters, spaces, and ' (apostrophe). A character after a space is automatically made upper case. A character not after a space is automatically made lowercase. A character after an apostrophe can be either upper or lower case. Only one apostrophe in the string is allowed. More than one space in a row is not allowed.
+            ///
+            /// A characters is considered a letter if it is categorized as a Unicode letter, as implemented by the Char.Isletter method in .Net.
+            /// </remarks>
             Name,
+
+            /// <summary>
+            /// Allows the characters that are allowed in an email address.
+            /// </summary>
+            /// <remarks>
+            /// Allows characters A-Z, a.z, 0-9, @, . (dot), !, #, $, %, &amp;, ', *, +, -, /, =, ?, ^, _, `, {, |, }, and ~.
+            ///
+            /// Only one @ is allowed in the string and more than one dot in a row are not allowed. Note that the character validation does not validate the entire string as being a valid email address since it only does validation on a per-character level, resulting in the typed character either being added to the string or not.
+            /// </remarks>
             EmailAddress
         }
 
+        /// <summary>
+        /// The LineType is used to describe the behavior of the InputField.
+        /// </summary>
         public enum LineType
         {
+            /// <summary>
+            /// Only allows 1 line to be entered. Has horizontal scrolling and no word wrap. Pressing enter will submit the InputField.
+            /// </summary>
             SingleLine,
+
+            /// <summary>
+            /// Is a multiline InputField with vertical scrolling and overflow. Pressing the return key will submit.
+            /// </summary>
             MultiLineSubmit,
+
+            /// <summary>
+            /// Is a multiline InputField with vertical scrolling and overflow. Pressing the return key will insert a new line character.
+            /// </summary>
             MultiLineNewline
         }
 
         public delegate char OnValidateInput(string text, int charIndex, char addedChar);
 
         [Serializable]
+        /// <summary>
+        ///   Unity Event with a inputfield as a param.
+        /// </summary>
         public class SubmitEvent : UnityEvent<string> {}
 
         [Serializable]
+        /// <summary>
+        /// The callback sent anytime the Inputfield is updated.
+        /// </summary>
         public class OnChangeEvent : UnityEvent<string> {}
 
         protected TouchScreenKeyboard m_Keyboard;
@@ -91,23 +210,14 @@ namespace UnityEngine.UI
         [SerializeField]
         private ContentType m_ContentType = ContentType.Standard;
 
-        /// <summary>
-        /// Type of data expected by the input field.
-        /// </summary>
         [FormerlySerializedAs("inputType")]
         [SerializeField]
         private InputType m_InputType = InputType.Standard;
 
-        /// <summary>
-        /// The character used to hide text in password field.
-        /// </summary>
         [FormerlySerializedAs("asteriskChar")]
         [SerializeField]
         private char m_AsteriskChar = '*';
 
-        /// <summary>
-        /// Keyboard type applies to mobile keyboards that get shown.
-        /// </summary>
         [FormerlySerializedAs("keyboardType")]
         [SerializeField]
         private TouchScreenKeyboardType m_KeyboardType = TouchScreenKeyboardType.Default;
@@ -115,65 +225,42 @@ namespace UnityEngine.UI
         [SerializeField]
         private LineType m_LineType = LineType.SingleLine;
 
-        /// <summary>
-        /// Should hide mobile input.
-        /// </summary>
-
         [FormerlySerializedAs("hideMobileInput")]
         [SerializeField]
         private bool m_HideMobileInput = false;
 
-        /// <summary>
-        /// What kind of validation to use with the input field's data.
-        /// </summary>
         [FormerlySerializedAs("validation")]
         [SerializeField]
         private CharacterValidation m_CharacterValidation = CharacterValidation.None;
 
-        /// <summary>
-        /// Maximum number of characters allowed before input no longer works.
-        /// </summary>
         [FormerlySerializedAs("characterLimit")]
         [SerializeField]
         private int m_CharacterLimit = 0;
 
-        /// <summary>
-        /// Event delegates triggered when the input field submits its data.
-        /// </summary>
         [FormerlySerializedAs("onSubmit")]
         [FormerlySerializedAs("m_OnSubmit")]
         [FormerlySerializedAs("m_EndEdit")]
         [SerializeField]
         private SubmitEvent m_OnEndEdit = new SubmitEvent();
 
-        /// <summary>
-        /// Event delegates triggered when the input field changes its data.
-        /// </summary>
         [FormerlySerializedAs("onValueChange")]
         [FormerlySerializedAs("m_OnValueChange")]
         [SerializeField]
         private OnChangeEvent m_OnValueChanged = new OnChangeEvent();
 
-        /// <summary>
-        /// Custom validation callback.
-        /// </summary>
         [FormerlySerializedAs("onValidateInput")]
         [SerializeField]
         private OnValidateInput m_OnValidateInput;
 
+        [FormerlySerializedAs("selectionColor")]
         [SerializeField]
         private Color m_CaretColor = new Color(50f / 255f, 50f / 255f, 50f / 255f, 1f);
 
         [SerializeField]
         private bool m_CustomCaretColor = false;
 
-        [FormerlySerializedAs("selectionColor")]
         [SerializeField]
         private Color m_SelectionColor = new Color(168f / 255f, 206f / 255f, 255f / 255f, 192f / 255f);
-
-        /// <summary>
-        /// Input field's value.
-        /// </summary>
 
         [SerializeField]
         [FormerlySerializedAs("mValue")]
@@ -213,6 +300,7 @@ namespace UnityEngine.UI
         private string m_OriginalText = "";
         private bool m_WasCanceled = false;
         private bool m_HasDoneFocusTransition = false;
+        private WaitForSecondsRealtime m_WaitForSecondsRealtime;
 
         private BaseInput input
         {
@@ -259,9 +347,26 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Should the mobile keyboard input be hidden.
+        /// Should the mobile keyboard input be hidden. This allows for input to happen with a caret in the InputField instead of a OS input box above the keyboard.
         /// </summary>
-
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     public InputField mainInputField;
+        ///
+        ///     public void Start()
+        ///     {
+        ///         //This setting can be toggled in the inspector.
+        ///         mainInputField.shouldHideMobileInput = true;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public bool shouldHideMobileInput
         {
             set
@@ -291,9 +396,28 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Input field's current text value.
+        /// Input field's current text value. This is not nessisarially the same as what is visible on screen.
         /// </summary>
-
+        /// <remarks>
+        /// Note that null is invalid value  for InputField.text.
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     public InputField mainInputField;
+        ///
+        ///     public void Start()
+        ///     {
+        ///         mainInputField.text = "Enter Text Here...";
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public string text
         {
             get
@@ -348,11 +472,38 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// Does the InputField currently have focus and is able to process events.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     public GameObject mainInputField;
+        ///
+        ///     void Update()
+        ///     {
+        ///         //If the input field is focused, change its color to green.
+        ///         if (mainInputField.GetComponent<InputField>().isFocused == true)
+        ///         {
+        ///             mainInputField.GetComponent<Image>().color = Color.green;
+        ///         }
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public bool isFocused
         {
             get { return m_AllowInput; }
         }
 
+        /// <summary>
+        /// The blinking rate of the input caret, defined as the number of times the blink cycle occurs per second.
+        /// </summary>
         public float caretBlinkRate
         {
             get { return m_CaretBlinkRate; }
@@ -366,8 +517,14 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// The width of the caret in pixels.
+        /// </summary>
         public int caretWidth { get { return m_CaretWidth; } set { if (SetPropertyUtility.SetStruct(ref m_CaretWidth, value)) MarkGeometryAsDirty(); } }
 
+        /// <summary>
+        /// The Text component that is going to be used to render the text to screen.
+        /// </summary>
         public Text textComponent
         {
             get { return m_TextComponent; }
@@ -393,23 +550,173 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// This is an optional ‘empty’ graphic to show that the InputField text field is empty. Note that this ‘empty' graphic still displays even when the InputField is selected (that is; when there is focus on it).
+        /// A placeholder graphic can be used to show subtle hints or make it more obvious that the control is an InputField.
+        /// </summary>
+        /// <remarks>
+        /// If a Text component is used as the placeholder, it's recommended to make the placeholder text look different from the real text of the InputField so they are not easily confused. For example, the placeholder text might be a more subtle color or have lower alpha value.
+        /// </remarks>
         public Graphic placeholder { get { return m_Placeholder; } set { SetPropertyUtility.SetClass(ref m_Placeholder, value); } }
 
+        /// <summary>
+        /// The custom caret color used if customCaretColor is set.
+        /// </summary>
         public Color caretColor { get { return customCaretColor ? m_CaretColor : textComponent.color; } set { if (SetPropertyUtility.SetColor(ref m_CaretColor, value)) MarkGeometryAsDirty(); } }
 
+        /// <summary>
+        /// Should a custom caret color be used or should the textComponent.color be used.
+        /// </summary>
         public bool customCaretColor { get { return m_CustomCaretColor; } set { if (m_CustomCaretColor != value) { m_CustomCaretColor = value; MarkGeometryAsDirty(); } } }
 
+        /// <summary>
+        /// The color of the highlight to show which characters are selected.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     public InputField mainInputField;
+        ///
+        ///     // Changes the color of the highlight that shows what characters are selected.
+        ///     void ChangeSelectionColor()
+        ///     {
+        ///         mainInputField.selectionColor = Color.red;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public Color selectionColor { get { return m_SelectionColor; } set { if (SetPropertyUtility.SetColor(ref m_SelectionColor, value)) MarkGeometryAsDirty(); } }
 
+        /// <summary>
+        /// The Unity Event to call when editing has ended
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     public InputField mainInputField;
+        ///
+        ///     // Checks if there is anything entered into the input field.
+        ///     void LockInput(InputField input)
+        ///     {
+        ///         if (input.text.Length > 0)
+        ///         {
+        ///             Debug.Log("Text has been entered");
+        ///         }
+        ///         else if (input.text.Length == 0)
+        ///         {
+        ///             Debug.Log("Main Input Empty");
+        ///         }
+        ///     }
+        ///
+        ///     public void Start()
+        ///     {
+        ///         //Adds a listener that invokes the "LockInput" method when the player finishes editing the main input field.
+        ///         //Passes the main input field into the method when "LockInput" is invoked
+        ///         mainInputField.onEndEdit.AddListener(delegate {LockInput(mainInputField); });
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public SubmitEvent onEndEdit { get { return m_OnEndEdit; } set { SetPropertyUtility.SetClass(ref m_OnEndEdit, value); } }
 
         [Obsolete("onValueChange has been renamed to onValueChanged")]
         public OnChangeEvent onValueChange { get { return onValueChanged; } set { onValueChanged = value; } }
 
+        /// <summary>
+        /// Accessor to the OnChangeEvent.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     public InputField mainInputField;
+        ///
+        ///     public void Start()
+        ///     {
+        ///         //Adds a listener to the main input field and invokes a method when the value changes.
+        ///         mainInputField.onValueChange.AddListener(delegate {ValueChangeCheck(); });
+        ///     }
+        ///
+        ///     // Invoked when the value of the text field changes.
+        ///     public void ValueChangeCheck()
+        ///     {
+        ///         Debug.Log("Value Changed");
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public OnChangeEvent onValueChanged { get { return m_OnValueChanged; } set { SetPropertyUtility.SetClass(ref m_OnValueChanged, value); } }
 
+        /// <summary>
+        /// The function to call to validate the input characters.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     public InputField mainInputField;
+        ///
+        ///     public void Start()
+        ///     {
+        ///         // Sets the MyValidate method to invoke after the input field's default input validation invoke (default validation happens every time a character is entered into the text field.)
+        ///         mainInputField.onValidateInput += delegate(string input, int charIndex, char addedChar) { return MyValidate(addedChar); };
+        ///     }
+        ///
+        ///     private char MyValidate(char charToValidate)
+        ///     {
+        ///         //Checks if a dollar sign is entered....
+        ///         if (charToValidate == '$')
+        ///         {
+        ///             // ... if it is change it to an empty character.
+        ///             charToValidate = '\0';
+        ///         }
+        ///         return charToValidate;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public OnValidateInput onValidateInput { get { return m_OnValidateInput; } set { SetPropertyUtility.SetClass(ref m_OnValidateInput, value); } }
 
+        /// <summary>
+        /// How many characters the input field is limited to. 0 = infinite.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     public InputField mainInputField;
+        ///     public string playerName;
+        ///
+        ///     void Start()
+        ///     {
+        ///         //Changes the character limit in the main input field.
+        ///         mainInputField.characterLimit = playerName.Length;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public int characterLimit
         {
             get { return m_CharacterLimit; }
@@ -424,10 +731,68 @@ namespace UnityEngine.UI
             }
         }
 
-        // Content Type related
-
+        /// <summary>
+        /// Specifies the type of the input text content.
+        /// </summary>
+        /// <remarks>
+        /// The ContentType affects character validation, keyboard type used (on platforms with on-screen keyboards), whether the InputField accepts multiple lines, and whether the text is autocorrected (on platforms that offer input auto-correction) or is treated as a password where the characters are not shown directly.
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     public InputField mainInputField;
+        ///     public string playerName;
+        ///
+        ///     void Start()
+        ///     {
+        ///         //Changes the character limit in the main input field.
+        ///         mainInputField.characterLimit = playerName.Length;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public ContentType contentType { get { return m_ContentType; } set { if (SetPropertyUtility.SetStruct(ref m_ContentType, value)) EnforceContentType(); } }
 
+        /// <summary>
+        /// The LineType used by the InputField.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     public GameObject mainInputField;
+        ///
+        ///     //When you press a button, this method is called.
+        ///     public void ChangeInputField(int type)
+        ///     {
+        ///         if (type == 0)
+        ///         {
+        ///             //Change the input field to "Single Line" line type.
+        ///             mainInputField.GetComponent<InputField>().lineType = InputField.LineType.SingleLine;
+        ///         }
+        ///         else if (type == 1)
+        ///         {
+        ///             //Change the input field to "MultiLine Newline" line type.
+        ///             mainInputField.GetComponent<InputField>().lineType = InputField.LineType.MultiLineNewline;
+        ///         }
+        ///         else if (type == 2)
+        ///         {
+        ///             //Change the input field to "MultiLine Submit" line type.
+        ///             mainInputField.GetComponent<InputField>().lineType = InputField.LineType.MultiLineSubmit;
+        ///         }
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public LineType lineType
         {
             get { return m_LineType; }
@@ -441,10 +806,19 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// The type of input expected. See InputField.InputType.
+        /// </summary>
         public InputType inputType { get { return m_InputType; } set { if (SetPropertyUtility.SetStruct(ref m_InputType, value)) SetToCustom(); } }
 
+        /// <summary>
+        /// The TouchScreenKeyboard being used to edit the Input Field.
+        /// </summary>
         public TouchScreenKeyboard touchScreenKeyboard { get { return m_Keyboard; } }
 
+        /// <summary>
+        /// They type of mobile keyboard that will be used.
+        /// </summary>
         public TouchScreenKeyboardType keyboardType
         {
             get { return m_KeyboardType; }
@@ -455,16 +829,83 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// The type of validation to perform on a character
+        /// </summary>
         public CharacterValidation characterValidation { get { return m_CharacterValidation; } set { if (SetPropertyUtility.SetStruct(ref m_CharacterValidation, value)) SetToCustom(); } }
 
+        /// <summary>
+        /// Set the InputField to be read only.
+        /// </summary>
+        /// <remarks>
+        /// Setting read only allows for highlighting of text without allowing modifications via keyboard.
+        /// </remarks>
         public bool readOnly { get { return m_ReadOnly; } set { m_ReadOnly = value; } }
 
-        // Derived property
+        /// <summary>
+        /// If the input field supports multiple lines.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     public InputField mainInputField;
+        ///
+        ///     public void Update()
+        ///     {
+        ///         //Check to see if the input field is set to allow multiple lines.
+        ///         if (mainInputField.multiLine)
+        ///         {
+        ///             //Set the input field to only allow Single Lines, if it is currently set to allow Multiple lines.
+        ///             mainInputField.lineType = InputField.LineType.SingleLine;
+        ///             //Print to console
+        ///             Debug.Log("The main input field is now set to allow single lines only!");
+        ///         }
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public bool multiLine { get { return m_LineType == LineType.MultiLineNewline || lineType == LineType.MultiLineSubmit; } }
-        // Not shown in Inspector.
+
+        /// <summary>
+        /// The character used to hide text in password field.
+        /// </summary>
+        /// <remarks>
+        /// Not shown in the inspector.
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     public InputField mainInputField;
+        ///
+        ///     void Start()
+        ///     {
+        ///         // changes the password symbol. 0 = $, 1 = ! 2 = £ and so on.
+        ///         mainInputField.asteriskChar = "$!£%&*"[0];
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public char asteriskChar { get { return m_AsteriskChar; } set { if (SetPropertyUtility.SetStruct(ref m_AsteriskChar, value)) UpdateLabel(); } }
+
+        /// <summary>
+        /// If the InputField was canceled and will revert back to the original text upon DeactivateInputField.
+        /// </summary>
         public bool wasCanceled { get { return m_WasCanceled; } }
 
+        /// <summary>
+        /// Clamp a value (by reference) between 0 and the current text length.
+        /// </summary>
+        /// <param name="pos">The input position to be clampped</param>
         protected void ClampPos(ref int pos)
         {
             if (pos < 0) pos = 0;
@@ -481,6 +922,7 @@ namespace UnityEngine.UI
         private bool hasSelection { get { return caretPositionInternal != caretSelectPositionInternal; } }
 
 #if UNITY_EDITOR
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         [Obsolete("caretSelectPosition has been deprecated. Use selectionFocusPosition instead (UnityUpgradable) -> selectionFocusPosition", true)]
         public int caretSelectPosition { get { return selectionFocusPosition; } protected set { selectionFocusPosition = value; } }
 #endif
@@ -497,10 +939,13 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Get: Returns the fixed position of selection
-        /// Set: If Input.compositionString is 0 set the fixed position
+        /// The beginning point of the selection.
         /// </summary>
-
+        /// <remarks>
+        /// When making a selection with a mouse, the anchor is where in the document the mouse button is initially pressed.
+        /// Get: Returns the beginning position of selection
+        /// Set: If Input.compositionString is 0 set the fixed position.
+        /// </remarks>
         public int selectionAnchorPosition
         {
             get { return m_CaretPosition + compositionString.Length; }
@@ -515,10 +960,13 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Get: Returns the variable position of selection
-        /// Set: If Input.compositionString is 0 set the variable position
+        /// The end point of the selection.
         /// </summary>
-
+        /// <remarks>
+        /// When making a selection with a mouse, the focus is where in the document the mouse button is released.
+        /// Get: Returns the end position of selection
+        /// Set: If Input.compositionString is 0 set the variable position.
+        /// </remarks>
         public int selectionFocusPosition
         {
             get { return m_CaretSelectPosition + compositionString.Length; }
@@ -660,17 +1108,61 @@ namespace UnityEngine.UI
                 m_CachedInputRenderer.SetMaterial(m_TextComponent.GetModifiedMaterial(Graphic.defaultGraphicMaterial), Texture2D.whiteTexture);
         }
 
+        /// <summary>
+        /// Focus the input field initializing properties.
+        /// </summary>
+        /// <remarks>
+        /// Handles what happens after a user selects an InputField. This is a protected property. To return the focus state use InputField.isFocused. To shift focus to another GameObject, use EventSystem.SetSelectedGameObject.
+        /// A common use of this is allowing the user to type once focussed. Another way is outputting a message when the user clicks on a field(often seen when creating passwords).
+        /// </remarks>
+        /// <example>
+        /// //Create an Input Field by going to __Create__>__UI__>__Input Field__. Attach this script to the Input Field GameObject
+        /// <code>
+        /// using UnityEngine;
+        /// using UnityEngine.UI;
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     InputField m_InputField;
+        ///     void Start()
+        ///     {
+        ///         //Fetch the Input Field component from the GameObject
+        ///         m_InputField = GetComponent<InputField>();
+        ///     }
+        ///
+        ///     void Update()
+        ///     {
+        ///         //Check if the Input Field is in focus and able to alter
+        ///         if (m_InputField.isFocused)
+        ///         {
+        ///             //Change the Color of the Input Field's Image to green
+        ///             m_InputField.GetComponent<Image>().color = Color.green;
+        ///         }
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         protected void OnFocus()
         {
             SelectAll();
         }
 
+        /// <summary>
+        /// Highlight the whole InputField.
+        /// </summary>
+        /// <remarks>
+        /// Sets the caretPosition to the length of the text and caretSelectPos to 0.
+        /// </remarks>
         protected void SelectAll()
         {
             caretPositionInternal = text.Length;
             caretSelectPositionInternal = 0;
         }
 
+        /// <summary>
+        /// Move the caret index to end of text.
+        /// </summary>
+        /// <param name="shift">Only move the selection position to facilate selection</param>
         public void MoveTextEnd(bool shift)
         {
             int position = text.Length;
@@ -687,6 +1179,10 @@ namespace UnityEngine.UI
             UpdateLabel();
         }
 
+        /// <summary>
+        /// Move the caret index to start of text.
+        /// </summary>
+        /// <param name="shift">Only move the selection position to facilate selection</param>
         public void MoveTextStart(bool shift)
         {
             int position = 0;
@@ -926,7 +1422,8 @@ namespace UnityEngine.UI
         /// <summary>
         /// Given an input position in local space on the Text return the index for the selection cursor at this position.
         /// </summary>
-
+        /// <param name="pos">Mouse position.</param>
+        /// <returns>Character index with in value.</returns>
         protected int GetCharacterIndexFromPosition(Vector2 pos)
         {
             TextGenerator gen = m_TextComponent.cachedTextGenerator;
@@ -969,6 +1466,10 @@ namespace UnityEngine.UI
                 (m_Keyboard == null || m_HideMobileInput);
         }
 
+        /// <summary>
+        /// Capture the OnBeginDrag callback from the EventSystem and ensure we should listen to the drag events to follow.
+        /// </summary>
+        /// <param name="eventData">The data passed by the EventSystem</param>
         public virtual void OnBeginDrag(PointerEventData eventData)
         {
             if (!MayDrag(eventData))
@@ -977,6 +1478,10 @@ namespace UnityEngine.UI
             m_UpdateDrag = true;
         }
 
+        /// <summary>
+        /// If we are able to drag, try and select the character range underneath the bounding rect.
+        /// </summary>
+        /// <param name="eventData"></param>
         public virtual void OnDrag(PointerEventData eventData)
         {
             if (!MayDrag(eventData))
@@ -1020,11 +1525,19 @@ namespace UnityEngine.UI
                 }
                 UpdateLabel();
                 float delay = multiLine ? kVScrollSpeed : kHScrollSpeed;
-                yield return new WaitForSecondsRealtime(delay);
+                if (m_WaitForSecondsRealtime == null)
+                    m_WaitForSecondsRealtime = new WaitForSecondsRealtime(delay);
+                else
+                    m_WaitForSecondsRealtime.waitTime = delay;
+                yield return m_WaitForSecondsRealtime;
             }
             m_DragCoroutine = null;
         }
 
+        /// <summary>
+        /// Capture the OnEndDrag callback from the EventSystem and cancel the listening of drag events.
+        /// </summary>
+        /// <param name="eventData">The eventData sent by the EventSystem.</param>
         public virtual void OnEndDrag(PointerEventData eventData)
         {
             if (!MayDrag(eventData))
@@ -1071,6 +1584,12 @@ namespace UnityEngine.UI
             Finish
         }
 
+
+        /// <summary>
+        /// Process the Event and perform the appropriate action for that key.
+        /// </summary>
+        /// <param name="evt">The Event that is currently being processed.</param>
+        /// <returns>If we should continue processing events or we have hit an end condition.</returns>
         protected EditState KeyPressed(Event evt)
         {
             var currentEventModifiers = evt.modifiers;
@@ -1240,11 +1759,19 @@ namespace UnityEngine.UI
         /// </summary>
         private Event m_ProcessingEvent = new Event();
 
+        /// <summary>
+        /// Helper function to allow separate events to be processed by the InputField.
+        /// </summary>
+        /// <param name="e">The Event to process</param>
         public void ProcessEvent(Event e)
         {
             KeyPressed(e);
         }
 
+        /// <summary>
+        /// What to do when the event system sends a Update selected Event.
+        /// </summary>
+        /// <param name="eventData">The data on which to process.</param>
         public virtual void OnUpdateSelected(BaseEventData eventData)
         {
             if (!isFocused)
@@ -1580,9 +2107,8 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Submit the input field's text.
+        /// Convenience function to make functionality to send the ::ref::SubmitEvent easier.
         /// </summary>
-
         protected void SendOnSubmit()
         {
             UISystemProfilerApi.AddMarker("InputField.onSubmit", this);
@@ -1591,9 +2117,9 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Append the specified text to the end of the current.
+        /// Append the specified text to the end of the current text string. Appends character by character testing validation criteria.
         /// </summary>
-
+        /// <param name="input">The String to append.</param>
         protected virtual void Append(string input)
         {
             if (m_ReadOnly)
@@ -1616,8 +2142,16 @@ namespace UnityEngine.UI
         // cf. TextGenerator.cpp
         private const int k_MaxTextLength = UInt16.MaxValue / 4 - 1;
 
+        /// <summary>
+        /// Append a character to the input field, taking into account the validation of each character.
+        /// </summary>
+        /// <param name="input">Character to append.</param>
         protected virtual void Append(char input)
         {
+            // We do not currently support surrogate pairs
+            if (char.IsSurrogate(input))
+                return;
+
             if (m_ReadOnly || text.Length >= k_MaxTextLength)
                 return;
 
@@ -1640,9 +2174,8 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Update the visual text Text.
+        /// Update the Text associated with this input field.
         /// </summary>
-
         protected void UpdateLabel()
         {
             if (m_TextComponent != null && m_TextComponent.font != null && !m_PreventFontCallback)
@@ -1856,6 +2389,9 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// Force the label to update immediatly. This will recalculate the positioning of the caret and the visible text.
+        /// </summary>
         public void ForceLabelUpdate()
         {
             UpdateLabel();
@@ -1864,13 +2400,17 @@ namespace UnityEngine.UI
         private void MarkGeometryAsDirty()
         {
 #if UNITY_EDITOR
-            if (!Application.isPlaying || UnityEditor.PrefabUtility.GetPrefabObject(gameObject) != null)
+            if (!Application.isPlaying || UnityEditor.PrefabUtility.IsPartOfPrefabAsset(gameObject))
                 return;
 #endif
 
             CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
         }
 
+        /// <summary>
+        /// Rebuild the input fields geometry. (caret and highlight).
+        /// </summary>
+        /// <param name="update">Which update loop we are in.</param>
         public virtual void Rebuild(CanvasUpdate update)
         {
             switch (update)
@@ -1881,9 +2421,15 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// See ICanvasElement.LayoutComplete. Does nothing by default.
+        /// </summary>
         public virtual void LayoutComplete()
         {}
 
+        /// <summary>
+        /// See ICanvasElement.GraphicUpdateComplete. Does nothing by default.
+        /// </summary>
         public virtual void GraphicUpdateComplete()
         {}
 
@@ -2113,9 +2659,12 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Validate the specified input.
+        /// Predefined validation functionality for different characterValidation types.
         /// </summary>
-
+        /// <param name="text">The whole text string to validate.</param>
+        /// <param name="pos">The position at which the current character is being inserted.</param>
+        /// <param name="ch">The character that is being inserted</param>
+        /// <returns>The character that should be inserted.</returns>
         protected char Validate(string text, int pos, char ch)
         {
             // Validation is disabled
@@ -2217,6 +2766,30 @@ namespace UnityEngine.UI
             return (char)0;
         }
 
+        /// <summary>
+        /// Function to activate the InputField to begin processing Events.
+        /// </summary>
+        /// <remarks>
+        /// Will only activate if deactivated.
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI;
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     public InputField mainInputField;
+        ///
+        ///     // Activate the main input field when the scene starts.
+        ///     void Start()
+        ///     {
+        ///         mainInputField.ActivateInputField();
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public void ActivateInputField()
         {
             if (m_TextComponent == null || m_TextComponent.font == null || !IsActive() || !IsInteractable())
@@ -2270,6 +2843,10 @@ namespace UnityEngine.UI
             UpdateLabel();
         }
 
+        /// <summary>
+        /// What to do when the event system sends a submit Event.
+        /// </summary>
+        /// <param name="eventData">The data on which to process</param>
         public override void OnSelect(BaseEventData eventData)
         {
             base.OnSelect(eventData);
@@ -2278,6 +2855,10 @@ namespace UnityEngine.UI
                 ActivateInputField();
         }
 
+        /// <summary>
+        /// What to do when the event system sends a pointer click Event
+        /// </summary>
+        /// <param name="eventData">The data on which to process</param>
         public virtual void OnPointerClick(PointerEventData eventData)
         {
             if (eventData.button != PointerEventData.InputButton.Left)
@@ -2286,6 +2867,27 @@ namespace UnityEngine.UI
             ActivateInputField();
         }
 
+        /// <summary>
+        /// Function to deactivate the InputField to stop the processing of Events and send OnSubmit if not canceled.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class Example : MonoBehaviour
+        /// {
+        ///     public InputField mainInputField;
+        ///
+        ///     // Deactivates the main input field when the scene starts.
+        ///     void Start()
+        ///     {
+        ///         mainInputField.DeactivateInputField();
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public void DeactivateInputField()
         {
             // Not activated do nothing.
@@ -2319,6 +2921,10 @@ namespace UnityEngine.UI
             MarkGeometryAsDirty();
         }
 
+        /// <summary>
+        /// What to do when the event system sends a Deselect Event. Defaults to deactivating the inputfield.
+        /// </summary>
+        /// <param name="eventData">The data sent by the EventSystem</param>
         public override void OnDeselect(BaseEventData eventData)
         {
             DeactivateInputField();
@@ -2459,11 +3065,24 @@ namespace UnityEngine.UI
             base.DoStateTransition(state, instant);
         }
 
+        /// <summary>
+        /// See ILayoutElement.CalculateLayoutInputHorizontal.
+        /// </summary>
         public virtual void CalculateLayoutInputHorizontal() {}
+
+        /// <summary>
+        /// See ILayoutElement.CalculateLayoutInputVertical.
+        /// </summary>
         public virtual void CalculateLayoutInputVertical() {}
 
+        /// <summary>
+        /// See ILayoutElement.minWidth.
+        /// </summary>
         public virtual float minWidth { get { return 0; } }
 
+        /// <summary>
+        /// Get the displayed with of all input characters.
+        /// </summary>
         public virtual float preferredWidth
         {
             get
@@ -2474,9 +3093,20 @@ namespace UnityEngine.UI
                 return textComponent.cachedTextGeneratorForLayout.GetPreferredWidth(m_Text, settings) / textComponent.pixelsPerUnit;
             }
         }
+
+        /// <summary>
+        /// See ILayoutElement.flexibleWidth.
+        /// </summary>
         public virtual float flexibleWidth { get { return -1; } }
+
+        /// <summary>
+        /// See ILayoutElement.minHeight.
+        /// </summary>
         public virtual float minHeight { get { return 0; } }
 
+        /// <summary>
+        /// Get the height of all the text if constrained to the height of the RectTransform.
+        /// </summary>
         public virtual float preferredHeight
         {
             get
@@ -2488,7 +3118,14 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// See ILayoutElement.flexibleHeight.
+        /// </summary>
         public virtual float flexibleHeight { get { return -1; } }
+
+        /// <summary>
+        /// See ILayoutElement.layoutPriority.
+        /// </summary>
         public virtual int layoutPriority { get { return 1; } }
     }
 }

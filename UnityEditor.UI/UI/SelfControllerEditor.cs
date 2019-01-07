@@ -3,6 +3,9 @@ using UnityEngine.UI;
 
 namespace UnityEditor.UI
 {
+    /// <summary>
+    ///   Base class for custom editors that are for components that implement the SelfControllerEditor interface.
+    /// </summary>
     public class SelfControllerEditor : Editor
     {
         static string s_Warning = "Parent has a type of layout group component. A child of a layout group should not have a {0} component, since it should be driven by the layout group.";

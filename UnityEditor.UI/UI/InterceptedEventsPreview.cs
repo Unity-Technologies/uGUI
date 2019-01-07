@@ -9,6 +9,9 @@ using UnityEngine.EventSystems;
 namespace UnityEditor.Events
 {
     [CustomPreview(typeof(GameObject))]
+    /// <summary>
+    ///   Custom preview drawing that will draw the intercepted events of a given object.
+    /// </summary>
     class InterceptedEventsPreview : ObjectPreview
     {
         protected class ComponentInterceptedEvents

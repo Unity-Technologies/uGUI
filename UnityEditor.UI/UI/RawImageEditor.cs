@@ -8,6 +8,10 @@ namespace UnityEditor.UI
     /// </summary>
     [CustomEditor(typeof(RawImage), true)]
     [CanEditMultipleObjects]
+    /// <summary>
+    ///   Custom editor for RawImage.
+    ///   Extend this class to write a custom editor for a RawImage-derived component.
+    /// </summary>
     public class RawImageEditor : GraphicEditor
     {
         SerializedProperty m_Texture;

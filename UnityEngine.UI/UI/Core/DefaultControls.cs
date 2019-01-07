@@ -3,16 +3,58 @@ using System.Collections.Generic;
 
 namespace UnityEngine.UI
 {
+    /// <summary>
+    /// Utility class for creating default implementations of builtin UI controls.
+    /// </summary>
+    /// <remarks>
+    /// The recommended workflow for using UI controls with the UI system is to create a prefab for each type of control and instantiate those when needed. This way changes can be made to the prefabs which immediately have effect on all used instances.
+    ///
+    /// However, in certain cases there can be reasons to create UI controls entirely from code. The DefaultControls class provide methods to create each of the builtin UI controls. The resulting objects are the same as are obtained from using the corresponding UI menu entries in the GameObject menu in the Editor.
+    ///
+    /// An example use of this is creating menu items for custom new UI controls that mimics the ones that are builtin in Unity. Some such UI controls may contain other UI controls. For example, a scroll view contains scrollbars.By using the DefaultControls methods to create those parts, it is ensured that they are identical in look and setup to the ones provided in the menu items builtin with Unity.
+    ///
+    /// Note that the details of the setup of the UI controls created by the methods in this class may change with later revisions of the UI system.As such, they are not guaranteed to be 100% backwards compatible. It is recommended not to rely on the specific hierarchies of the GameObjects created by these methods, and limit your code to only interface with the root GameObject created by each method.
+    /// </remarks>
     public static class DefaultControls
     {
+        /// <summary>
+        /// Object used to pass resources to use for the default controls.
+        /// </summary>
         public struct Resources
         {
+            /// <summary>
+            /// The primary sprite to be used for graphical UI elements, used by the button, toggle, and dropdown controls, among others.
+            /// </summary>
             public Sprite standard;
+
+            /// <summary>
+            /// Sprite used for background elements.
+            /// </summary>
             public Sprite background;
+
+            /// <summary>
+            /// Sprite used as background for input fields.
+            /// </summary>
             public Sprite inputField;
+
+            /// <summary>
+            /// Sprite used for knobs that can be dragged, such as on a slider.
+            /// </summary>
             public Sprite knob;
+
+            /// <summary>
+            /// Sprite used for representation of an "on" state when present, such as a checkmark.
+            /// </summary>
             public Sprite checkmark;
+
+            /// <summary>
+            /// Sprite used to indicate that a button will open a dropdown when clicked.
+            /// </summary>
             public Sprite dropdown;
+
+            /// <summary>
+            /// Sprite used for masking purposes, for example to be used for the viewport of a scroll view.
+            /// </summary>
             public Sprite mask;
         }
 
@@ -80,8 +122,16 @@ namespace UnityEngine.UI
                 SetLayerRecursively(t.GetChild(i).gameObject, layer);
         }
 
-        // Actual controls
-
+        /// <summary>
+        /// Create the basic UI Panel.
+        /// </summary>
+        /// <remarks>
+        /// Hierarchy:
+        /// (root)
+        ///     Image
+        /// </remarks>
+        /// <param name="resources">The resources to use for creation.</param>
+        /// <returns>The root GameObject of the created element.</returns>
         public static GameObject CreatePanel(Resources resources)
         {
             GameObject panelRoot = CreateUIElementRoot("Panel", s_ThickElementSize);
@@ -101,6 +151,17 @@ namespace UnityEngine.UI
             return panelRoot;
         }
 
+        /// <summary>
+        /// Create the basic UI button.
+        /// </summary>
+        /// <remarks>
+        /// Hierarchy:
+        /// (root)
+        ///     Button
+        ///         -Text
+        /// </remarks>
+        /// <param name="resources">The resources to use for creation.</param>
+        /// <returns>The root GameObject of the created element.</returns>
         public static GameObject CreateButton(Resources resources)
         {
             GameObject buttonRoot = CreateUIElementRoot("Button", s_ThickElementSize);
@@ -130,6 +191,16 @@ namespace UnityEngine.UI
             return buttonRoot;
         }
 
+        /// <summary>
+        /// Create the basic UI Text.
+        /// </summary>
+        /// <remarks>
+        /// Hierarchy:
+        /// (root)
+        ///     Text
+        /// </remarks>
+        /// <param name="resources">The resources to use for creation.</param>
+        /// <returns>The root GameObject of the created element.</returns>
         public static GameObject CreateText(Resources resources)
         {
             GameObject go = CreateUIElementRoot("Text", s_ThickElementSize);
@@ -141,6 +212,16 @@ namespace UnityEngine.UI
             return go;
         }
 
+        /// <summary>
+        /// Create the basic UI Image.
+        /// </summary>
+        /// <remarks>
+        /// Hierarchy:
+        /// (root)
+        ///     Image
+        /// </remarks>
+        /// <param name="resources">The resources to use for creation.</param>
+        /// <returns>The root GameObject of the created element.</returns>
         public static GameObject CreateImage(Resources resources)
         {
             GameObject go = CreateUIElementRoot("Image", s_ImageElementSize);
@@ -148,6 +229,16 @@ namespace UnityEngine.UI
             return go;
         }
 
+        /// <summary>
+        /// Create the basic UI RawImage.
+        /// </summary>
+        /// <remarks>
+        /// Hierarchy:
+        /// (root)
+        ///     RawImage
+        /// </remarks>
+        /// <param name="resources">The resources to use for creation.</param>
+        /// <returns>The root GameObject of the created element.</returns>
         public static GameObject CreateRawImage(Resources resources)
         {
             GameObject go = CreateUIElementRoot("RawImage", s_ImageElementSize);
@@ -155,6 +246,21 @@ namespace UnityEngine.UI
             return go;
         }
 
+        /// <summary>
+        /// Create the basic UI Slider.
+        /// </summary>
+        /// <remarks>
+        /// Hierarchy:
+        /// (root)
+        ///     Slider
+        ///         - Background
+        ///         - Fill Area
+        ///             - Fill
+        ///         - Handle Slide Area
+        ///             - Handle
+        /// </remarks>
+        /// <param name="resources">The resources to use for creation.</param>
+        /// <returns>The root GameObject of the created element.</returns>
         public static GameObject CreateSlider(Resources resources)
         {
             // Create GOs Hierarchy
@@ -217,6 +323,18 @@ namespace UnityEngine.UI
             return root;
         }
 
+        /// <summary>
+        /// Create the basic UI Scrollbar.
+        /// </summary>
+        /// <remarks>
+        /// Hierarchy:
+        /// (root)
+        ///     Scrollbar
+        ///         - Sliding Area
+        ///             - Handle
+        /// </remarks>
+        /// <param name="resources">The resources to use for creation.</param>
+        /// <returns>The root GameObject of the created element.</returns>
         public static GameObject CreateScrollbar(Resources resources)
         {
             // Create GOs Hierarchy
@@ -251,6 +369,19 @@ namespace UnityEngine.UI
             return scrollbarRoot;
         }
 
+        /// <summary>
+        /// Create the basic UI Toggle.
+        /// </summary>
+        /// <remarks>
+        /// Hierarchy:
+        /// (root)
+        ///     Toggle
+        ///         - Background
+        ///             - Checkmark
+        ///         - Label
+        /// </remarks>
+        /// <param name="resources">The resources to use for creation.</param>
+        /// <returns>The root GameObject of the created element.</returns>
         public static GameObject CreateToggle(Resources resources)
         {
             // Set up hierarchy
@@ -301,6 +432,18 @@ namespace UnityEngine.UI
             return toggleRoot;
         }
 
+        /// <summary>
+        /// Create the basic UI input field.
+        /// </summary>
+        /// <remarks>
+        /// Hierarchy:
+        /// (root)
+        ///     InputField
+        ///         - PlaceHolder
+        ///         - Text
+        /// </remarks>
+        /// <param name="resources">The resources to use for creation.</param>
+        /// <returns>The root GameObject of the created element.</returns>
         public static GameObject CreateInputField(Resources resources)
         {
             GameObject root = CreateUIElementRoot("InputField", s_ThickElementSize);
@@ -349,6 +492,28 @@ namespace UnityEngine.UI
             return root;
         }
 
+        /// <summary>
+        /// Create the basic UI dropdown.
+        /// </summary>
+        /// <remarks>
+        /// Hierarchy:
+        /// (root)
+        ///     Dropdown
+        ///         - Label
+        ///         - Arrow
+        ///         - Template
+        ///             - Viewport
+        ///                 - Content
+        ///                     - Item
+        ///                         - Item Background
+        ///                         - Item Checkmark
+        ///                         - Item Label
+        ///             - Scrollbar
+        ///                 - Sliding Area
+        ///                     - Handle
+        /// </remarks>
+        /// <param name="resources">The resources to use for creation.</param>
+        /// <returns>The root GameObject of the created element.</returns>
         public static GameObject CreateDropdown(Resources resources)
         {
             GameObject root = CreateUIElementRoot("Dropdown", s_ThickElementSize);
@@ -506,6 +671,24 @@ namespace UnityEngine.UI
             return root;
         }
 
+        /// <summary>
+        /// Create the basic UI Scrollview.
+        /// </summary>
+        /// <remarks>
+        /// Hierarchy:
+        /// (root)
+        ///     Scrollview
+        ///         - Viewport
+        ///             - Content
+        ///         - Scrollbar Horizontal
+        ///             - Sliding Area
+        ///                 - Handle
+        ///         - Scrollbar Vertical
+        ///             - Sliding Area
+        ///                 - Handle
+        /// </remarks>
+        /// <param name="resources">The resources to use for creation.</param>
+        /// <returns>The root GameObject of the created element.</returns>
         public static GameObject CreateScrollView(Resources resources)
         {
             GameObject root = CreateUIElementRoot("Scroll View", new Vector2(200, 200));

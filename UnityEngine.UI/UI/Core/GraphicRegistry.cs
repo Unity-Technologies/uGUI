@@ -3,6 +3,9 @@ using UnityEngine.UI.Collections;
 
 namespace UnityEngine.UI
 {
+    /// <summary>
+    ///   Registry which maps a Graphic to the canvas it belongs to
+    /// </summary>
     public class GraphicRegistry
     {
         private static GraphicRegistry s_Instance;
@@ -22,6 +25,9 @@ namespace UnityEngine.UI
             System.GC.KeepAlive(new Dictionary<IClipper, int>());
         }
 
+        /// <summary>
+        /// The singleton instance of the GraphicRegistry. Creates new if non exist.
+        /// </summary>
         public static GraphicRegistry instance
         {
             get
@@ -32,6 +38,11 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// Store a link between the given canvas and graphic in the registry.
+        /// </summary>
+        /// <param name="c">The canvas the graphic will be associated to</param>
+        /// <param name="graphic">The graphic in question.</param>
         public static void RegisterGraphicForCanvas(Canvas c, Graphic graphic)
         {
             if (c == null)
@@ -52,6 +63,11 @@ namespace UnityEngine.UI
             instance.m_Graphics.Add(c, graphics);
         }
 
+        /// <summary>
+        /// Deregister the given Graphic from a Canvas.
+        /// </summary>
+        /// <param name="c">The canvas that should be associated with the graphic</param>
+        /// <param name="graphic">The graphic to remove.</param>
         public static void UnregisterGraphicForCanvas(Canvas c, Graphic graphic)
         {
             if (c == null)
@@ -68,6 +84,12 @@ namespace UnityEngine.UI
         }
 
         private static readonly List<Graphic> s_EmptyList = new List<Graphic>();
+
+        /// <summary>
+        /// Get the list of associated graphics that are registered to a canvas.
+        /// </summary>
+        /// <param name="canvas">The canvas whose Graphics we are looking for</param>
+        /// <returns>The list of all Graphics for the given Canvas.</returns>
         public static IList<Graphic> GetGraphicsForCanvas(Canvas canvas)
         {
             IndexedSet<Graphic> graphics;

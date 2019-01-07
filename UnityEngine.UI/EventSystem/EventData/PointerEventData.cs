@@ -9,62 +9,176 @@ namespace UnityEngine.EventSystems
     /// </summary>
     public class PointerEventData : BaseEventData
     {
+        /// <summary>
+        /// Input press tracking.
+        /// </summary>
         public enum InputButton
         {
+            /// <summary>
+            /// Left button
+            /// </summary>
             Left = 0,
+
+            /// <summary>
+            /// Right button.
+            /// </summary>
             Right = 1,
+
+            /// <summary>
+            /// Middle button
+            /// </summary>
             Middle = 2
         }
 
+        /// <summary>
+        /// The state of a press for the given frame.
+        /// </summary>
         public enum FramePressState
         {
+            /// <summary>
+            /// Button was pressed this frame.
+            /// </summary>
             Pressed,
+
+            /// <summary>
+            /// Button was released this frame.
+            /// </summary>
             Released,
+
+            /// <summary>
+            /// Button was pressed and released this frame.
+            /// </summary>
             PressedAndReleased,
+
+            /// <summary>
+            /// Same as last frame.
+            /// </summary>
             NotChanged
         }
 
+        /// <summary>
+        /// The object that received 'OnPointerEnter'.
+        /// </summary>
         public GameObject pointerEnter { get; set; }
 
         // The object that received OnPointerDown
         private GameObject m_PointerPress;
-        // The object last received OnPointerDown
+
+        /// <summary>
+        /// The raw GameObject for the last press event. This means that it is the 'pressed' GameObject even if it can not receive the press event itself.
+        /// </summary>
         public GameObject lastPress { get; private set; }
-        // The object that the press happened on even if it can not handle the press event
+
+        /// <summary>
+        /// The object that the press happened on even if it can not handle the press event.
+        /// </summary>
         public GameObject rawPointerPress { get; set; }
-        // The object that received OnDrag
+
+        /// <summary>
+        /// The object that is receiving 'OnDrag'.
+        /// </summary>
         public GameObject pointerDrag { get; set; }
 
+        /// <summary>
+        /// RaycastResult associated with the current event.
+        /// </summary>
         public RaycastResult pointerCurrentRaycast { get; set; }
+
+        /// <summary>
+        /// RaycastResult associated with the pointer press.
+        /// </summary>
         public RaycastResult pointerPressRaycast { get; set; }
 
         public List<GameObject> hovered = new List<GameObject>();
 
+        /// <summary>
+        /// Is it possible to click this frame
+        /// </summary>
         public bool eligibleForClick { get; set; }
 
+        /// <summary>
+        /// Id of the pointer (touch id).
+        /// </summary>
         public int pointerId { get; set; }
 
-        // Current position of the mouse or touch event
+        /// <summary>
+        /// Current pointer position.
+        /// </summary>
         public Vector2 position { get; set; }
-        // Delta since last update
+
+        /// <summary>
+        /// Pointer delta since last update.
+        /// </summary>
         public Vector2 delta { get; set; }
-        // Position of the press event
+
+        /// <summary>
+        /// Position of the press.
+        /// </summary>
         public Vector2 pressPosition { get; set; }
-        // World-space position where a ray cast into the screen hits something
+
+        /// <summary>
+        /// World-space position where a ray cast into the screen hits something
+        /// </summary>
+
         [Obsolete("Use either pointerCurrentRaycast.worldPosition or pointerPressRaycast.worldPosition")]
         public Vector3 worldPosition { get; set; }
-        // World-space normal where a ray cast into the screen hits something
+
+        /// <summary>
+        /// World-space normal where a ray cast into the screen hits something
+        /// </summary>
         [Obsolete("Use either pointerCurrentRaycast.worldNormal or pointerPressRaycast.worldNormal")]
         public Vector3 worldNormal { get; set; }
-        // The last time a click event was sent out (used for double-clicks)
+
+        /// <summary>
+        /// The last time a click event was sent. Used for double click
+        /// </summary>
         public float clickTime { get; set; }
-        // Number of clicks in a row. 2 for a double-click for example.
+
+        /// <summary>
+        /// Number of clicks in a row.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI;
+        /// using UnityEngine.EventSystems;// Required when using Event data.
+        ///
+        /// public class ExampleClass : MonoBehaviour, IPointerDownHandler
+        /// {
+        ///     public void OnPointerDown(PointerEventData eventData)
+        ///     {
+        ///         //Grab the number of consecutive clicks and assign it to an integer varible.
+        ///         int i = eventData.clickCount;
+        ///         //Display the click count.
+        ///         Debug.Log(i);
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
         public int clickCount { get; set; }
 
+        /// <summary>
+        /// The amount of scroll since the last update.
+        /// </summary>
         public Vector2 scrollDelta { get; set; }
+
+        /// <summary>
+        /// Should a drag threshold be used?
+        /// </summary>
+        /// <remarks>
+        /// If you do not want a drag threshold set this to false in IInitializePotentialDragHandler.OnInitializePotentialDrag.
+        /// </remarks>
         public bool useDragThreshold { get; set; }
+
+        /// <summary>
+        /// Is a drag operation currently occuring.
+        /// </summary>
         public bool dragging { get; set; }
 
+        /// <summary>
+        /// The EventSystems.PointerEventData.InputButton for this event.
+        /// </summary>
         public InputButton button { get; set; }
 
         public PointerEventData(EventSystem eventSystem) : base(eventSystem)
@@ -84,26 +198,41 @@ namespace UnityEngine.EventSystems
             button = InputButton.Left;
         }
 
+        /// <summary>
+        /// Is the pointer moving.
+        /// </summary>
         public bool IsPointerMoving()
         {
             return delta.sqrMagnitude > 0.0f;
         }
 
+        /// <summary>
+        /// Is scroll being used on the input device.
+        /// </summary>
         public bool IsScrolling()
         {
             return scrollDelta.sqrMagnitude > 0.0f;
         }
 
+        /// <summary>
+        /// The camera associated with the last OnPointerEnter event.
+        /// </summary>
         public Camera enterEventCamera
         {
             get { return pointerCurrentRaycast.module == null ? null : pointerCurrentRaycast.module.eventCamera; }
         }
 
+        /// <summary>
+        /// The camera associated with the last OnPointerPress event.
+        /// </summary>
         public Camera pressEventCamera
         {
             get { return pointerPressRaycast.module == null ? null : pointerPressRaycast.module.eventCamera; }
         }
 
+        /// <summary>
+        /// The GameObject that received the OnPointerDown.
+        /// </summary>
         public GameObject pointerPress
         {
             get { return m_PointerPress; }

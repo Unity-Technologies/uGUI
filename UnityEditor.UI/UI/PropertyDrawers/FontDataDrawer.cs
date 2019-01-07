@@ -4,6 +4,9 @@ using UnityEngine.UI;
 namespace UnityEditor.UI
 {
     [CustomPropertyDrawer(typeof(FontData), true)]
+    /// <summary>
+    ///   This is a PropertyDrawer for FontData it is implemented using the standard unity PropertyDrawer framework.
+    /// </summary>
     public class FontDataDrawer : PropertyDrawer
     {
         static private class Styles
@@ -226,7 +229,6 @@ namespace UnityEditor.UI
 
                 if (m_ResizeTextForBestFit.boolValue)
                 {
-                    EditorGUILayout.EndFadeGroup();
                     rect.y += rect.height + EditorGUIUtility.standardVerticalSpacing;
                     rect.height = m_ResizeTextMinSizeHeight;
                     EditorGUI.PropertyField(rect, m_ResizeTextMinSize);

@@ -8,6 +8,9 @@ namespace UnityEngine.EventSystems
     /// </summary>
     [AddComponentMenu("Event/Physics 2D Raycaster")]
     [RequireComponent(typeof(Camera))]
+    /// <summary>
+    /// Raycaster for casting against 2D Physics components.
+    /// </summary>
     public class Physics2DRaycaster : PhysicsRaycaster
     {
         RaycastHit2D[] m_Hits;
@@ -15,6 +18,9 @@ namespace UnityEngine.EventSystems
         protected Physics2DRaycaster()
         {}
 
+        /// <summary>
+        /// Raycast against 2D elements in the scene.
+        /// </summary>
         public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
         {
             if (eventCamera == null)
