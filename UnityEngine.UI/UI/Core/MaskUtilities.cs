@@ -143,7 +143,7 @@ namespace UnityEngine.UI
             List<Canvas> canvasComponents = ListPool<Canvas>.Get();
             RectMask2D componentToReturn = null;
 
-            clippable.rectTransform.GetComponentsInParent(false, rectMaskComponents);
+            clippable.gameObject.GetComponentsInParent(false, rectMaskComponents);
 
             if (rectMaskComponents.Count > 0)
             {
@@ -160,7 +160,7 @@ namespace UnityEngine.UI
                         componentToReturn = null;
                         continue;
                     }
-                    clippable.rectTransform.GetComponentsInParent(false, canvasComponents);
+                    clippable.gameObject.GetComponentsInParent(false, canvasComponents);
                     for (int i = canvasComponents.Count - 1; i >= 0; i--)
                     {
                         if (!IsDescendantOrSelf(canvasComponents[i].transform, componentToReturn.transform) && canvasComponents[i].overrideSorting)

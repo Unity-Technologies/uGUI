@@ -470,6 +470,7 @@ namespace UnityEngine.UI
         public Vector2 velocity { get { return m_Velocity; } set { m_Velocity = value; } }
 
         private bool m_Dragging;
+        private bool m_Scrolling;
 
         private Vector2 m_PrevPosition = Vector2.zero;
         private Bounds m_PrevContentBounds;
@@ -564,6 +565,8 @@ namespace UnityEngine.UI
             if (m_VerticalScrollbar)
                 m_VerticalScrollbar.onValueChanged.RemoveListener(SetVerticalNormalizedPosition);
 
+            m_Dragging = false;
+            m_Scrolling = false;
             m_HasRebuiltLayout = false;
             m_Tracker.Clear();
             m_Velocity = Vector2.zero;
@@ -637,6 +640,9 @@ namespace UnityEngine.UI
                     delta.x = delta.y;
                 delta.y = 0;
             }
+
+            if (data.IsScrolling())
+                m_Scrolling = true;
 
             Vector2 position = m_Content.anchoredPosition;
             position += delta * m_ScrollSensitivity;
@@ -738,6 +744,9 @@ namespace UnityEngine.UI
         /// </example>
         public virtual void OnDrag(PointerEventData eventData)
         {
+            if (!m_Dragging)
+                return;
+
             if (eventData.button != PointerEventData.InputButton.Left)
                 return;
 
@@ -802,7 +811,10 @@ namespace UnityEngine.UI
                     if (m_MovementType == MovementType.Elastic && offset[axis] != 0)
                     {
                         float speed = m_Velocity[axis];
-                        position[axis] = Mathf.SmoothDamp(m_Content.anchoredPosition[axis], m_Content.anchoredPosition[axis] + offset[axis], ref speed, m_Elasticity, Mathf.Infinity, deltaTime);
+                        float smoothTime = m_Elasticity;
+                        if (m_Scrolling)
+                            smoothTime *= 3.0f;
+                        position[axis] = Mathf.SmoothDamp(m_Content.anchoredPosition[axis], m_Content.anchoredPosition[axis] + offset[axis], ref speed, smoothTime, Mathf.Infinity, deltaTime);
                         if (Mathf.Abs(speed) < 1)
                             speed = 0;
                         m_Velocity[axis] = speed;
@@ -845,6 +857,7 @@ namespace UnityEngine.UI
                 UpdatePrevData();
             }
             UpdateScrollbarVisibility();
+            m_Scrolling = false;
         }
 
         /// <summary>
@@ -945,7 +958,7 @@ namespace UnityEngine.UI
             get
             {
                 UpdateBounds();
-                if (m_ContentBounds.size.x <= m_ViewBounds.size.x)
+                if ((m_ContentBounds.size.x <= m_ViewBounds.size.x) || Mathf.Approximately(m_ContentBounds.size.x, m_ViewBounds.size.x))
                     return (m_ViewBounds.min.x > m_ContentBounds.min.x) ? 1 : 0;
                 return (m_ViewBounds.min.x - m_ContentBounds.min.x) / (m_ContentBounds.size.x - m_ViewBounds.size.x);
             }
@@ -983,7 +996,7 @@ namespace UnityEngine.UI
             get
             {
                 UpdateBounds();
-                if (m_ContentBounds.size.y <= m_ViewBounds.size.y)
+                if ((m_ContentBounds.size.y <= m_ViewBounds.size.y) || Mathf.Approximately(m_ContentBounds.size.y, m_ViewBounds.size.y))
                     return (m_ViewBounds.min.y > m_ContentBounds.min.y) ? 1 : 0;
 
                 return (m_ViewBounds.min.y - m_ContentBounds.min.y) / (m_ContentBounds.size.y - m_ViewBounds.size.y);
@@ -1327,24 +1340,34 @@ namespace UnityEngine.UI
             Vector2 min = contentBounds.min;
             Vector2 max = contentBounds.max;
 
+            // min/max offset extracted to check if approximately 0 and avoid recalculating layout every frame (case 1010178)
+
             if (horizontal)
             {
                 min.x += delta.x;
                 max.x += delta.x;
-                if (min.x > viewBounds.min.x)
-                    offset.x = viewBounds.min.x - min.x;
-                else if (max.x < viewBounds.max.x)
-                    offset.x = viewBounds.max.x - max.x;
+
+                float maxOffset = viewBounds.max.x - max.x;
+                float minOffset = viewBounds.min.x - min.x;
+
+                if (minOffset < -0.001f)
+                    offset.x = minOffset;
+                else if (maxOffset > 0.001f)
+                    offset.x = maxOffset;
             }
 
             if (vertical)
             {
                 min.y += delta.y;
                 max.y += delta.y;
-                if (max.y < viewBounds.max.y)
-                    offset.y = viewBounds.max.y - max.y;
-                else if (min.y > viewBounds.min.y)
-                    offset.y = viewBounds.min.y - min.y;
+
+                float maxOffset = viewBounds.max.y - max.y;
+                float minOffset = viewBounds.min.y - min.y;
+
+                if (maxOffset > 0.001f)
+                    offset.y = maxOffset;
+                else if (minOffset < -0.001f)
+                    offset.y = minOffset;
             }
 
             return offset;

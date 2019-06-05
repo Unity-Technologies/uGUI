@@ -186,7 +186,7 @@ namespace UnityEngine.EventSystems
 
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         [Obsolete("Please use triggers instead (UnityUpgradable) -> triggers", true)]
-        public List<Entry> delegates;
+        public List<Entry> delegates { get { return triggers; } set { triggers = value; } }
 
         protected EventTrigger()
         {}

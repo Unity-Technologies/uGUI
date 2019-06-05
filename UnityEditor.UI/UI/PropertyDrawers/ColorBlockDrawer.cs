@@ -17,6 +17,7 @@ namespace UnityEditor.UI
             SerializedProperty normalColor = prop.FindPropertyRelative("m_NormalColor");
             SerializedProperty highlighted = prop.FindPropertyRelative("m_HighlightedColor");
             SerializedProperty pressedColor = prop.FindPropertyRelative("m_PressedColor");
+            SerializedProperty selectedColor = prop.FindPropertyRelative("m_SelectedColor");
             SerializedProperty disabledColor = prop.FindPropertyRelative("m_DisabledColor");
             SerializedProperty colorMultiplier = prop.FindPropertyRelative("m_ColorMultiplier");
             SerializedProperty fadeDuration = prop.FindPropertyRelative("m_FadeDuration");
@@ -27,6 +28,8 @@ namespace UnityEditor.UI
             drawRect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
             EditorGUI.PropertyField(drawRect, pressedColor);
             drawRect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+            EditorGUI.PropertyField(drawRect, selectedColor);
+            drawRect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
             EditorGUI.PropertyField(drawRect, disabledColor);
             drawRect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
             EditorGUI.PropertyField(drawRect, colorMultiplier);
@@ -36,7 +39,7 @@ namespace UnityEditor.UI
 
         public override float GetPropertyHeight(SerializedProperty prop, GUIContent label)
         {
-            return 6 * EditorGUIUtility.singleLineHeight + 5 * EditorGUIUtility.standardVerticalSpacing;
+            return 7 * EditorGUIUtility.singleLineHeight + 6 * EditorGUIUtility.standardVerticalSpacing;
         }
     }
 }

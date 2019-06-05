@@ -34,9 +34,7 @@ namespace UnityEngine.UI
                 exists = new HashSet<Text>();
                 m_Tracked.Add(t.font, exists);
             }
-
-            if (!exists.Contains(t))
-                exists.Add(t);
+            exists.Add(t);
         }
 
         private static void RebuildForFont(Font f)

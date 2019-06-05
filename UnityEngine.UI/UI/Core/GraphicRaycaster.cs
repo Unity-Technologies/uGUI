@@ -125,7 +125,7 @@ namespace UnityEngine.UI
                 return;
 
             int displayIndex;
-            var currentEventCamera = eventCamera; // Propery can call Camera.main, so cache the reference
+            var currentEventCamera = eventCamera; // Property can call Camera.main, so cache the reference
 
             if (canvas.renderMode == RenderMode.ScreenSpaceOverlay || currentEventCamera == null)
                 displayIndex = canvas.targetDisplay;
@@ -216,6 +216,7 @@ namespace UnityEngine.UI
             }
 
             m_RaycastResults.Clear();
+
             Raycast(canvas, currentEventCamera, eventPosition, canvasGraphics, m_RaycastResults);
 
             int totalCount = m_RaycastResults.Count;
@@ -244,13 +245,13 @@ namespace UnityEngine.UI
                 if (appendGraphic)
                 {
                     float distance = 0;
+                    Transform trans = go.transform;
+                    Vector3 transForward = trans.forward;
 
                     if (currentEventCamera == null || canvas.renderMode == RenderMode.ScreenSpaceOverlay)
                         distance = 0;
                     else
                     {
-                        Transform trans = go.transform;
-                        Vector3 transForward = trans.forward;
                         // http://geomalgorithms.com/a06-_intersect-2.html
                         distance = (Vector3.Dot(transForward, trans.position - ray.origin) / Vector3.Dot(transForward, ray.direction));
 
@@ -271,7 +272,9 @@ namespace UnityEngine.UI
                         index = resultAppendList.Count,
                         depth = m_RaycastResults[index].depth,
                         sortingLayer = canvas.sortingLayerID,
-                        sortingOrder = canvas.sortingOrder
+                        sortingOrder = canvas.sortingOrder,
+                        worldPosition = ray.origin + ray.direction * distance,
+                        worldNormal = -transForward
                     };
                     resultAppendList.Add(castResult);
                 }
@@ -303,7 +306,6 @@ namespace UnityEngine.UI
         [NonSerialized] static readonly List<Graphic> s_SortedGraphics = new List<Graphic>();
         private static void Raycast(Canvas canvas, Camera eventCamera, Vector2 pointerPosition, IList<Graphic> foundGraphics, List<Graphic> results)
         {
-            // Debug.Log("ttt" + pointerPoision + ":::" + camera);
             // Necessary for the event system
             int totalCount = foundGraphics.Count;
             for (int i = 0; i < totalCount; ++i)
@@ -327,11 +329,9 @@ namespace UnityEngine.UI
             }
 
             s_SortedGraphics.Sort((g1, g2) => g2.depth.CompareTo(g1.depth));
-            //      StringBuilder cast = new StringBuilder();
             totalCount = s_SortedGraphics.Count;
             for (int i = 0; i < totalCount; ++i)
                 results.Add(s_SortedGraphics[i]);
-            //      Debug.Log (cast.ToString());
 
             s_SortedGraphics.Clear();
         }

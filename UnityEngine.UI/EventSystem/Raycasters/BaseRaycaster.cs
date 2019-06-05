@@ -12,6 +12,8 @@ namespace UnityEngine.EventSystems
     /// </remarks>
     public abstract class BaseRaycaster : UIBehaviour
     {
+        private BaseRaycaster m_RootRaycaster;
+
         /// <summary>
         /// Raycast against the scene.
         /// </summary>
@@ -46,6 +48,24 @@ namespace UnityEngine.EventSystems
             get { return int.MinValue; }
         }
 
+        /// <summary>
+        /// Raycaster on root canvas
+        /// </summary>
+        public BaseRaycaster rootRaycaster
+        {
+            get
+            {
+                if (m_RootRaycaster == null)
+                {
+                    var baseRaycasters = GetComponentsInParent<BaseRaycaster>();
+                    if (baseRaycasters.Length != 0)
+                        m_RootRaycaster = baseRaycasters[baseRaycasters.Length - 1];
+                }
+
+                return m_RootRaycaster;
+            }
+        }
+
         public override string ToString()
         {
             return "Name: " + gameObject + "\n" +
@@ -64,6 +84,18 @@ namespace UnityEngine.EventSystems
         {
             RaycasterManager.RemoveRaycasters(this);
             base.OnDisable();
+        }
+
+        protected override void OnCanvasHierarchyChanged()
+        {
+            base.OnCanvasHierarchyChanged();
+            m_RootRaycaster = null;
+        }
+
+        protected override void OnTransformParentChanged()
+        {
+            base.OnTransformParentChanged();
+            m_RootRaycaster = null;
         }
     }
 }

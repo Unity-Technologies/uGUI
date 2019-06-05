@@ -61,13 +61,8 @@ namespace UnityEngine.UI
             set
             {
                 m_Group = value;
-#if UNITY_EDITOR
-                if (Application.isPlaying)
-#endif
-                {
-                    SetToggleGroup(m_Group, true);
-                    PlayEffect(true);
-                }
+                SetToggleGroup(m_Group, true);
+                PlayEffect(true);
             }
         }
 
@@ -175,8 +170,6 @@ namespace UnityEngine.UI
 
         private void SetToggleGroup(ToggleGroup newGroup, bool setMemberValue)
         {
-            ToggleGroup oldGroup = m_Group;
-
             // Sometimes IsActive returns false in OnDisable so don't check for it.
             // Rather remove the toggle too often than too little.
             if (m_Group != null)
@@ -193,7 +186,7 @@ namespace UnityEngine.UI
 
             // If we are in a new group, and this toggle is on, notify group.
             // Note: Don't refer to m_Group here as it's not guaranteed to have been set.
-            if (newGroup != null && newGroup != oldGroup && isOn && IsActive())
+            if (newGroup != null && isOn && IsActive())
                 newGroup.NotifyToggleOn(this);
         }
 
@@ -234,21 +227,27 @@ namespace UnityEngine.UI
         /// }
         /// </code>
         /// </example>
+
         public bool isOn
         {
             get { return m_IsOn; }
+
             set
             {
                 Set(value);
             }
         }
 
-        void Set(bool value)
+        /// <summary>
+        /// Set isOn without invoking onValueChanged callback.
+        /// </summary>
+        /// <param name="value">New Value for isOn.</param>
+        public void SetIsOnWithoutNotify(bool value)
         {
-            Set(value, true);
+            Set(value, false);
         }
 
-        void Set(bool value, bool sendCallback)
+        void Set(bool value, bool sendCallback = true)
         {
             if (m_IsOn == value)
                 return;
@@ -260,7 +259,7 @@ namespace UnityEngine.UI
                 if (m_IsOn || (!m_Group.AnyTogglesOn() && !m_Group.allowSwitchOff))
                 {
                     m_IsOn = true;
-                    m_Group.NotifyToggleOn(this);
+                    m_Group.NotifyToggleOn(this, sendCallback);
                 }
             }
 

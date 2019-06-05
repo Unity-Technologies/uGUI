@@ -1,3 +1,5 @@
+using System;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
@@ -5,6 +7,7 @@ namespace UnityEngine.UI
     [RequireComponent(typeof(Canvas))]
     [ExecuteAlways]
     [AddComponentMenu("Layout/Canvas Scaler", 101)]
+    [DisallowMultipleComponent]
     /// <summary>
     ///   The Canvas Scaler component is used for controlling the overall scale and pixel density of UI elements in the Canvas. This scaling affects everything under the Canvas, including font sizes and image borders.
     /// </summary>
@@ -66,9 +69,13 @@ namespace UnityEngine.UI
         /// <summary>
         /// Scales all UI elements in the Canvas by this factor.
         /// </summary>
+
+        /// <summary>
+        /// Scales all UI elements in the Canvas by this factor.
+        /// </summary>
         public float scaleFactor { get { return m_ScaleFactor; } set { m_ScaleFactor = Mathf.Max(0.01f, value); } }
 
-
+        /// Scale the canvas area with the width as reference, the height as reference, or something in between.
         /// <summary>
         /// Scale the canvas area with the width as reference, the height as reference, or something in between.
         /// </summary>
@@ -219,6 +226,8 @@ namespace UnityEngine.UI
 
         private Canvas m_Canvas;
         [System.NonSerialized]
+        private float m_PrevScaleFactor = 1;
+        [System.NonSerialized]
         private float m_PrevReferencePixelsPerUnit = 100;
 
 
@@ -360,7 +369,11 @@ namespace UnityEngine.UI
         /// <param name="scaleFactor">The scale factor to use.</param>
         protected void SetScaleFactor(float scaleFactor)
         {
+            if (scaleFactor == m_PrevScaleFactor)
+                return;
+
             m_Canvas.scaleFactor = scaleFactor;
+            m_PrevScaleFactor = scaleFactor;
         }
 
         /// <summary>

@@ -2,6 +2,7 @@ using System;
 #if UNITY_EDITOR
 using System.Reflection;
 #endif
+using System.Collections.Generic;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
@@ -102,6 +103,9 @@ namespace UnityEngine.UI
 
         [SerializeField] private Color m_Color = Color.white;
 
+        [NonSerialized] protected bool m_SkipLayoutUpdate;
+        [NonSerialized] protected bool m_SkipMaterialUpdate;
+
         /// <summary>
         /// Base color of the Graphic.
         /// </summary>
@@ -168,6 +172,8 @@ namespace UnityEngine.UI
         [NonSerialized] protected static Mesh s_Mesh;
         [NonSerialized] private static readonly VertexHelper s_VertexHelper = new VertexHelper();
 
+        [NonSerialized] protected Mesh m_CachedMesh;
+        [NonSerialized] protected Vector2[] m_CachedUvs;
         // Tween controls for the Graphic
         [NonSerialized]
         private readonly TweenRunner<ColorTween> m_ColorTweenRunner;
@@ -190,9 +196,29 @@ namespace UnityEngine.UI
         /// </summary>
         public virtual void SetAllDirty()
         {
-            SetLayoutDirty();
+            // Optimization: Graphic layout doesn't need recalculation if
+            // the underlying Sprite is the same size with the same texture.
+            // (e.g. Sprite sheet texture animation)
+
+            if (m_SkipLayoutUpdate)
+            {
+                m_SkipLayoutUpdate = false;
+            }
+            else
+            {
+                SetLayoutDirty();
+            }
+
+            if (m_SkipMaterialUpdate)
+            {
+                m_SkipMaterialUpdate = false;
+            }
+            else
+            {
+                SetMaterialDirty();
+            }
+
             SetVerticesDirty();
-            SetMaterialDirty();
         }
 
         /// <summary>
@@ -351,7 +377,10 @@ namespace UnityEngine.UI
                 }
             }
             else
+            {
                 m_Canvas = null;
+            }
+
             ListPool<Canvas>.Release(list);
         }
 
@@ -475,6 +504,15 @@ namespace UnityEngine.UI
             base.OnDisable();
         }
 
+        protected override void OnDestroy()
+        {
+            if (m_CachedMesh)
+                Destroy(m_CachedMesh);
+            m_CachedMesh = null;
+
+            base.OnDestroy();
+        }
+
         protected override void OnCanvasHierarchyChanged()
         {
             // Use m_Cavas so we dont auto call CacheCanvas
@@ -523,7 +561,7 @@ namespace UnityEngine.UI
         /// </remarks>
         public virtual void Rebuild(CanvasUpdate update)
         {
-            if (canvasRenderer.cull)
+            if (canvasRenderer == null || canvasRenderer.cull)
                 return;
 
             switch (update)
@@ -568,9 +606,13 @@ namespace UnityEngine.UI
         protected virtual void UpdateGeometry()
         {
             if (useLegacyMeshGeneration)
+            {
                 DoLegacyMeshGeneration();
+            }
             else
+            {
                 DoMeshGeneration();
+            }
         }
 
         private void DoMeshGeneration()

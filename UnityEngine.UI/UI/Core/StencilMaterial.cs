@@ -116,10 +116,7 @@ namespace UnityEngine.UI
             newEnt.customMat.SetInt("_StencilReadMask", readMask);
             newEnt.customMat.SetInt("_StencilWriteMask", writeMask);
             newEnt.customMat.SetInt("_ColorMask", (int)colorWriteMask);
-
-            // left for backwards compatability
-            if (newEnt.customMat.HasProperty("_UseAlphaClip"))
-                newEnt.customMat.SetInt("_UseAlphaClip", newEnt.useAlphaClip ? 1 : 0);
+            newEnt.customMat.SetInt("_UseUIAlphaClip", newEnt.useAlphaClip ? 1 : 0);
 
             if (newEnt.useAlphaClip)
                 newEnt.customMat.EnableKeyword("UNITY_UI_ALPHACLIP");

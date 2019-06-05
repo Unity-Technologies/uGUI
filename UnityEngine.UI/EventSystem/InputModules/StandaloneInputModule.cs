@@ -170,7 +170,9 @@ namespace UnityEngine.EventSystems
             if (!eventSystem.isFocused && ShouldIgnoreEventsOnNoFocus())
             {
                 if (m_InputPointerEvent != null && m_InputPointerEvent.pointerDrag != null && m_InputPointerEvent.dragging)
-                    ExecuteEvents.Execute(m_InputPointerEvent.pointerDrag, m_InputPointerEvent, ExecuteEvents.endDragHandler);
+                {
+                    ReleaseMouse(m_InputPointerEvent, m_InputPointerEvent.pointerCurrentRaycast.gameObject);
+                }
 
                 m_InputPointerEvent = null;
 
@@ -179,6 +181,45 @@ namespace UnityEngine.EventSystems
 
             m_LastMousePosition = m_MousePosition;
             m_MousePosition = input.mousePosition;
+        }
+
+        private void ReleaseMouse(PointerEventData pointerEvent, GameObject currentOverGo)
+        {
+            ExecuteEvents.Execute(pointerEvent.pointerPress, pointerEvent, ExecuteEvents.pointerUpHandler);
+
+            var pointerUpHandler = ExecuteEvents.GetEventHandler<IPointerClickHandler>(currentOverGo);
+
+            // PointerClick and Drop events
+            if (pointerEvent.pointerPress == pointerUpHandler && pointerEvent.eligibleForClick)
+            {
+                ExecuteEvents.Execute(pointerEvent.pointerPress, pointerEvent, ExecuteEvents.pointerClickHandler);
+            }
+            else if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
+            {
+                ExecuteEvents.ExecuteHierarchy(currentOverGo, pointerEvent, ExecuteEvents.dropHandler);
+            }
+
+            pointerEvent.eligibleForClick = false;
+            pointerEvent.pointerPress = null;
+            pointerEvent.rawPointerPress = null;
+
+            if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
+                ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.endDragHandler);
+
+            pointerEvent.dragging = false;
+            pointerEvent.pointerDrag = null;
+
+            // redo pointer enter / exit to refresh state
+            // so that if we moused over something that ignored it before
+            // due to having pressed on something else
+            // it now gets it.
+            if (currentOverGo != pointerEvent.pointerEnter)
+            {
+                HandlePointerExitAndEnter(pointerEvent, null);
+                HandlePointerExitAndEnter(pointerEvent, currentOverGo);
+            }
+
+            m_InputPointerEvent = pointerEvent;
         }
 
         public override bool IsModuleSupported()
@@ -240,6 +281,13 @@ namespace UnityEngine.EventSystems
 
             bool usedEvent = SendUpdateEventToSelectedObject();
 
+            // case 1004066 - touch / mouse events should be processed before navigation events in case
+            // they change the current selected gameobject and the submit button is a touch / mouse button.
+
+            // touch needs to take precedence because of the mouse emulation layer
+            if (!ProcessTouchEvents() && input.mousePresent)
+                ProcessMouseEvent();
+
             if (eventSystem.sendNavigationEvents)
             {
                 if (!usedEvent)
@@ -248,10 +296,6 @@ namespace UnityEngine.EventSystems
                 if (!usedEvent)
                     SendSubmitEventToSelectedObject();
             }
-
-            // touch needs to take precedence because of the mouse emulation layer
-            if (!ProcessTouchEvents() && input.mousePresent)
-                ProcessMouseEvent();
         }
 
         private bool ProcessTouchEvents()
@@ -449,23 +493,21 @@ namespace UnityEngine.EventSystems
                 return false;
             }
 
-            // If user pressed key again, always allow event
-            bool allow = input.GetButtonDown(m_HorizontalAxis) || input.GetButtonDown(m_VerticalAxis);
             bool similarDir = (Vector2.Dot(movement, m_LastMoveVector) > 0);
-            if (!allow)
-            {
-                // Otherwise, user held down key or axis.
-                // If direction didn't change at least 90 degrees, wait for delay before allowing consequtive event.
-                if (similarDir && m_ConsecutiveMoveCount == 1)
-                    allow = (time > m_PrevActionTime + m_RepeatDelay);
-                // If direction changed at least 90 degree, or we already had the delay, repeat at repeat rate.
-                else
-                    allow = (time > m_PrevActionTime + 1f / m_InputActionsPerSecond);
-            }
-            if (!allow)
-                return false;
 
-            // Debug.Log(m_ProcessingEvent.rawType + " axis:" + m_AllowAxisEvents + " value:" + "(" + x + "," + y + ")");
+            // If direction didn't change at least 90 degrees, wait for delay before allowing consequtive event.
+            if (similarDir && m_ConsecutiveMoveCount == 1)
+            {
+                if (time <= m_PrevActionTime + m_RepeatDelay)
+                    return false;
+            }
+            // If direction changed at least 90 degree, or we already had the delay, repeat at repeat rate.
+            else
+            {
+                if (time <= m_PrevActionTime + 1f / m_InputActionsPerSecond)
+                    return false;
+            }
+
             var axisEventData = GetAxisEventData(movement.x, movement.y, 0.6f);
 
             if (axisEventData.moveDir != MoveDirection.None)
@@ -599,45 +641,7 @@ namespace UnityEngine.EventSystems
             // PointerUp notification
             if (data.ReleasedThisFrame())
             {
-                // Debug.Log("Executing pressup on: " + pointer.pointerPress);
-                ExecuteEvents.Execute(pointerEvent.pointerPress, pointerEvent, ExecuteEvents.pointerUpHandler);
-
-                // Debug.Log("KeyCode: " + pointer.eventData.keyCode);
-
-                // see if we mouse up on the same element that we clicked on...
-                var pointerUpHandler = ExecuteEvents.GetEventHandler<IPointerClickHandler>(currentOverGo);
-
-                // PointerClick and Drop events
-                if (pointerEvent.pointerPress == pointerUpHandler && pointerEvent.eligibleForClick)
-                {
-                    ExecuteEvents.Execute(pointerEvent.pointerPress, pointerEvent, ExecuteEvents.pointerClickHandler);
-                }
-                else if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
-                {
-                    ExecuteEvents.ExecuteHierarchy(currentOverGo, pointerEvent, ExecuteEvents.dropHandler);
-                }
-
-                pointerEvent.eligibleForClick = false;
-                pointerEvent.pointerPress = null;
-                pointerEvent.rawPointerPress = null;
-
-                if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
-                    ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.endDragHandler);
-
-                pointerEvent.dragging = false;
-                pointerEvent.pointerDrag = null;
-
-                // redo pointer enter / exit to refresh state
-                // so that if we moused over somethign that ignored it before
-                // due to having pressed on something else
-                // it now gets it.
-                if (currentOverGo != pointerEvent.pointerEnter)
-                {
-                    HandlePointerExitAndEnter(pointerEvent, null);
-                    HandlePointerExitAndEnter(pointerEvent, currentOverGo);
-                }
-
-                m_InputPointerEvent = pointerEvent;
+                ReleaseMouse(pointerEvent, currentOverGo);
             }
         }
 

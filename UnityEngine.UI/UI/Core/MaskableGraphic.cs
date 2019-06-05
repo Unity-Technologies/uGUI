@@ -215,7 +215,19 @@ namespace UnityEngine.UI
                         m_Corners[i] = mat.MultiplyPoint(m_Corners[i]);
                 }
 
-                return new Rect(m_Corners[0].x, m_Corners[0].y, m_Corners[2].x - m_Corners[0].x, m_Corners[2].y - m_Corners[0].y);
+                // bounding box is now based on the min and max of all corners (case 1013182)
+
+                Vector2 min = m_Corners[0];
+                Vector2 max = m_Corners[0];
+                for (int i = 1; i < 4; i++)
+                {
+                    min.x = Mathf.Min(m_Corners[i].x, min.x);
+                    min.y = Mathf.Min(m_Corners[i].y, min.y);
+                    max.x = Mathf.Max(m_Corners[i].x, max.x);
+                    max.y = Mathf.Max(m_Corners[i].y, max.y);
+                }
+
+                return new Rect(min, max - min);
             }
         }
 

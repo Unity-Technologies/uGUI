@@ -17,6 +17,7 @@ namespace UnityEditor.UI
             SerializedProperty normalTrigger = prop.FindPropertyRelative("m_NormalTrigger");
             SerializedProperty higlightedTrigger = prop.FindPropertyRelative("m_HighlightedTrigger");
             SerializedProperty pressedTrigger = prop.FindPropertyRelative("m_PressedTrigger");
+            SerializedProperty selectedTrigger = prop.FindPropertyRelative("m_SelectedTrigger");
             SerializedProperty disabledTrigger = prop.FindPropertyRelative("m_DisabledTrigger");
 
             EditorGUI.PropertyField(drawRect, normalTrigger);
@@ -25,12 +26,14 @@ namespace UnityEditor.UI
             drawRect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
             EditorGUI.PropertyField(drawRect, pressedTrigger);
             drawRect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+            EditorGUI.PropertyField(drawRect, selectedTrigger);
+            drawRect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
             EditorGUI.PropertyField(drawRect, disabledTrigger);
         }
 
         public override float GetPropertyHeight(SerializedProperty prop, GUIContent label)
         {
-            return 4 * EditorGUIUtility.singleLineHeight + 3 * EditorGUIUtility.standardVerticalSpacing;
+            return 5 * EditorGUIUtility.singleLineHeight + 4 * EditorGUIUtility.standardVerticalSpacing;
         }
     }
 }

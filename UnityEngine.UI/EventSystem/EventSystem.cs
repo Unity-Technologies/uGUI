@@ -222,11 +222,11 @@ namespace UnityEngine.EventSystems
                 return rid.CompareTo(lid);
             }
 
-
             if (lhs.sortingOrder != rhs.sortingOrder)
                 return rhs.sortingOrder.CompareTo(lhs.sortingOrder);
 
-            if (lhs.depth != rhs.depth)
+            // comparing depth only makes sense if the two raycast results have the same root canvas (case 912396)
+            if (lhs.depth != rhs.depth && lhs.module.rootRaycaster == rhs.module.rootRaycaster)
                 return rhs.depth.CompareTo(lhs.depth);
 
             if (lhs.distance != rhs.distance)

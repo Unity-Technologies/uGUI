@@ -14,13 +14,16 @@ namespace UnityEngine.UI
         private Color m_NormalColor;
 
         [FormerlySerializedAs("highlightedColor")]
-        [FormerlySerializedAs("m_SelectedColor")]
         [SerializeField]
         private Color m_HighlightedColor;
 
         [FormerlySerializedAs("pressedColor")]
         [SerializeField]
         private Color m_PressedColor;
+
+        [FormerlySerializedAs("m_HighlightedColor")]
+        [SerializeField]
+        private Color m_SelectedColor;
 
         [FormerlySerializedAs("disabledColor")]
         [SerializeField]
@@ -113,6 +116,32 @@ namespace UnityEngine.UI
         public Color pressedColor      { get { return m_PressedColor; } set { m_PressedColor = value; } }
 
         /// <summary>
+        /// The selected color for this color block.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class ExampleClass : MonoBehaviour
+        /// {
+        ///     public Button button;
+        ///     public Color newColor;
+        ///
+        ///     void Start()
+        ///     {
+        ///         //Changes the button's Selected color to the new color.
+        ///         ColorBlock cb = button.colors;
+        ///         cb.selectedColor = newColor;
+        ///         button.colors = cb;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
+        public Color selectedColor     { get { return m_SelectedColor; } set { m_SelectedColor = value; } }
+
+        /// <summary>
         /// The disabled color for this color block.
         /// </summary>
         /// <example>
@@ -160,6 +189,7 @@ namespace UnityEngine.UI
                     m_NormalColor      = new Color32(255, 255, 255, 255),
                     m_HighlightedColor = new Color32(245, 245, 245, 255),
                     m_PressedColor     = new Color32(200, 200, 200, 255),
+                    m_SelectedColor    = new Color32(245, 245, 245, 255),
                     m_DisabledColor    = new Color32(200, 200, 200, 128),
                     colorMultiplier    = 1.0f,
                     fadeDuration       = 0.1f
@@ -181,6 +211,7 @@ namespace UnityEngine.UI
             return normalColor == other.normalColor &&
                 highlightedColor == other.highlightedColor &&
                 pressedColor == other.pressedColor &&
+                selectedColor == other.selectedColor &&
                 disabledColor == other.disabledColor &&
                 colorMultiplier == other.colorMultiplier &&
                 fadeDuration == other.fadeDuration;

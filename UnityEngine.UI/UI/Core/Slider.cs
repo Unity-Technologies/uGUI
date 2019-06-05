@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 namespace UnityEngine.UI
 {
     [AddComponentMenu("UI/Slider", 33)]
+    [ExecuteInEditMode]
     [RequireComponent(typeof(RectTransform))]
     /// <summary>
     /// A standard slider that can be moved between a minimum and maximum value.
@@ -256,6 +257,15 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
+        /// Set the value of the slider without invoking onValueChanged callback.
+        /// </summary>
+        /// <param name="input">The new value for the slider.</param>
+        public virtual void SetValueWithoutNotify(float input)
+        {
+            Set(input, false);
+        }
+
+        /// <summary>
         /// The current value of the slider normalized into a value between 0 and 1.
         /// </summary>
         /// <example>
@@ -338,6 +348,9 @@ namespace UnityEngine.UI
 
         private DrivenRectTransformTracker m_Tracker;
 
+        // This "delayed" mechanism is required for case 1037681.
+        private bool m_DelayedUpdateVisuals = false;
+
         // Size of each step.
         float stepSize { get { return wholeNumbers ? 1 : (maxValue - minValue) * 0.1f; } }
 
@@ -360,8 +373,8 @@ namespace UnityEngine.UI
             {
                 UpdateCachedReferences();
                 Set(m_Value, false);
-                // Update rects since other things might affect them even if value didn't change.
-                UpdateVisuals();
+                // Update rects in next update since other things might affect them even if value didn't change.
+                m_DelayedUpdateVisuals = true;
             }
 
             if (!UnityEditor.PrefabUtility.IsPartOfPrefabAsset(this) && !Application.isPlaying)
@@ -403,6 +416,19 @@ namespace UnityEngine.UI
         {
             m_Tracker.Clear();
             base.OnDisable();
+        }
+
+        /// <summary>
+        /// Update the rect based on the delayed update visuals.
+        /// Got around issue of calling sendMessage from onValidate.
+        /// </summary>
+        protected virtual void Update()
+        {
+            if (m_DelayedUpdateVisuals)
+            {
+                m_DelayedUpdateVisuals = false;
+                UpdateVisuals();
+            }
         }
 
         protected override void OnDidApplyAnimationProperties()
@@ -471,20 +497,11 @@ namespace UnityEngine.UI
         /// Set the value of the slider.
         /// </summary>
         /// <param name="input">The new value for the slider.</param>
-        void Set(float input)
-        {
-            Set(input, true);
-        }
-
-        /// <summary>
-        /// Set the value of the slider.
-        /// </summary>
-        /// <param name="input">The new value for the slider.</param>
         /// <param name="sendCallback">If the OnValueChanged callback should be invoked.</param>
         /// <remarks>
         /// Process the input to ensure the value is between min and max value. If the input is different set the value and send the callback is required.
         /// </remarks>
-        protected virtual void Set(float input, bool sendCallback)
+        protected virtual void Set(float input, bool sendCallback = true)
         {
             // Clamp the input
             float newValue = ClampValue(input);

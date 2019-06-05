@@ -325,6 +325,14 @@ namespace UnityEngine.UI
         /// </example>
         public DropdownEvent onValueChanged { get { return m_OnValueChanged; } set { m_OnValueChanged = value; } }
 
+        [SerializeField]
+        private float m_AlphaFadeSpeed = 0.15f;
+
+        /// <summary>
+        /// The time interval at which a drop down will appear and disappear
+        /// </summary>
+        public float alphaFadeSpeed  { get { return m_AlphaFadeSpeed; } set { m_AlphaFadeSpeed = value; } }
+
         private GameObject m_Dropdown;
         private GameObject m_Blocker;
         private List<DropdownItem> m_Items = new List<DropdownItem>();
@@ -383,12 +391,28 @@ namespace UnityEngine.UI
             }
             set
             {
-                if (Application.isPlaying && (value == m_Value || options.Count == 0))
-                    return;
+                Set(value);
+            }
+        }
+        /// <summary>
+        /// Set index number of the current selection in the Dropdown without invoking onValueChanged callback.
+        /// </summary>
+        /// <param name="input"> The new index for the current selection. </param>
+        public void SetValueWithoutNotify(int input)
+        {
+            Set(input, false);
+        }
 
-                m_Value = Mathf.Clamp(value, 0, options.Count - 1);
-                RefreshShownValue();
+        void Set(int value, bool sendCallback = true)
+        {
+            if (Application.isPlaying && (value == m_Value || options.Count == 0))
+                return;
 
+            m_Value = Mathf.Clamp(value, 0, options.Count - 1);
+            RefreshShownValue();
+
+            if (sendCallback)
+            {
                 // Notify all listeners
                 UISystemProfilerApi.AddMarker("Dropdown.value", this);
                 m_OnValueChanged.Invoke(m_Value);
@@ -434,6 +458,17 @@ namespace UnityEngine.UI
         }
 
 #endif
+        protected override void OnDisable()
+        {
+            //Destroy dropdown and blocker in case user deactivates the dropdown when they click an option (case 935649)
+            ImmediateDestroyDropdownList();
+
+            if (m_Blocker != null)
+                DestroyBlocker(m_Blocker);
+            m_Blocker = null;
+
+            base.OnDisable();
+        }
 
         /// <summary>
         /// Refreshes the text and image (if available) of the currently selected option.
@@ -540,6 +575,7 @@ namespace UnityEngine.UI
         public void ClearOptions()
         {
             options.Clear();
+            m_Value = 0;
             RefreshShownValue();
         }
 
@@ -591,11 +627,40 @@ namespace UnityEngine.UI
             item.toggle = itemToggle;
             item.rectTransform = (RectTransform)itemToggle.transform;
 
+            // Find the Canvas that this dropdown is a part of
+            Canvas parentCanvas = null;
+            Transform parentTransform = m_Template.parent;
+            while (parentTransform != null)
+            {
+                parentCanvas = parentTransform.GetComponent<Canvas>();
+                if (parentCanvas != null)
+                    break;
+
+                parentTransform = parentTransform.parent;
+            }
+
             Canvas popupCanvas = GetOrAddComponent<Canvas>(templateGo);
             popupCanvas.overrideSorting = true;
             popupCanvas.sortingOrder = 30000;
 
-            GetOrAddComponent<GraphicRaycaster>(templateGo);
+            // If we have a parent canvas, apply the same raycasters as the parent for consistency.
+            if (parentCanvas != null)
+            {
+                Component[] components = parentCanvas.GetComponents<BaseRaycaster>();
+                for (int i = 0; i < components.Length; i++)
+                {
+                    Type raycasterType = components[i].GetType();
+                    if (templateGo.GetComponent(raycasterType) == null)
+                    {
+                        templateGo.AddComponent(raycasterType);
+                    }
+                }
+            }
+            else
+            {
+                GetOrAddComponent<GraphicRaycaster>(templateGo);
+            }
+
             GetOrAddComponent<CanvasGroup>(templateGo);
             templateGo.SetActive(false);
 
@@ -655,6 +720,25 @@ namespace UnityEngine.UI
             if (!IsActive() || !IsInteractable() || m_Dropdown != null)
                 return;
 
+            // Get root Canvas.
+            var list = ListPool<Canvas>.Get();
+            gameObject.GetComponentsInParent(false, list);
+            if (list.Count == 0)
+                return;
+
+            // case 1064466 rootCanvas should be last element returned by GetComponentsInParent()
+            Canvas rootCanvas = list[list.Count - 1];
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].isRootCanvas)
+                {
+                    rootCanvas = list[i];
+                    break;
+                }
+            }
+
+            ListPool<Canvas>.Release(list);
+
             if (!validTemplate)
             {
                 SetupTemplate();
@@ -662,15 +746,10 @@ namespace UnityEngine.UI
                     return;
             }
 
-            // Get root Canvas.
-            var list = ListPool<Canvas>.Get();
-            gameObject.GetComponentsInParent(false, list);
-            if (list.Count == 0)
-                return;
-            Canvas rootCanvas = list[0];
-            ListPool<Canvas>.Release(list);
-
             m_Template.gameObject.SetActive(true);
+
+            // popupCanvas used to assume the root canvas had the default sorting Layer, next line fixes (case 958281 - [UI] Dropdown list does not copy the parent canvas layer when the panel is opened)
+            m_Template.GetComponent<Canvas>().sortingLayerID = rootCanvas.sortingLayerID;
 
             // Instantiate the drop-down template
             m_Dropdown = CreateDropdownList(m_Template.gameObject);
@@ -759,7 +838,8 @@ namespace UnityEngine.UI
                 for (int i = 0; i < 4; i++)
                 {
                     Vector3 corner = rootCanvasRectTransform.InverseTransformPoint(corners[i]);
-                    if (corner[axis] < rootCanvasRect.min[axis] || corner[axis] > rootCanvasRect.max[axis])
+                    if ((corner[axis] < rootCanvasRect.min[axis] && !Mathf.Approximately(corner[axis], rootCanvasRect.min[axis])) ||
+                        (corner[axis] > rootCanvasRect.max[axis] && !Mathf.Approximately(corner[axis], rootCanvasRect.max[axis])))
                     {
                         outside = true;
                         break;
@@ -779,7 +859,7 @@ namespace UnityEngine.UI
             }
 
             // Fade in the popup
-            AlphaFadeList(0.15f, 0f, 1f);
+            AlphaFadeList(m_AlphaFadeSpeed, 0f, 1f);
 
             // Make drop-down template and item template inactive
             m_Template.gameObject.SetActive(false);
@@ -815,8 +895,37 @@ namespace UnityEngine.UI
             blockerCanvas.sortingLayerID = dropdownCanvas.sortingLayerID;
             blockerCanvas.sortingOrder = dropdownCanvas.sortingOrder - 1;
 
-            // Add raycaster since it's needed to block.
-            blocker.AddComponent<GraphicRaycaster>();
+            // Find the Canvas that this dropdown is a part of
+            Canvas parentCanvas = null;
+            Transform parentTransform = m_Template.parent;
+            while (parentTransform != null)
+            {
+                parentCanvas = parentTransform.GetComponent<Canvas>();
+                if (parentCanvas != null)
+                    break;
+
+                parentTransform = parentTransform.parent;
+            }
+
+            // If we have a parent canvas, apply the same raycasters as the parent for consistency.
+            if (parentCanvas != null)
+            {
+                Component[] components = parentCanvas.GetComponents<BaseRaycaster>();
+                for (int i = 0; i < components.Length; i++)
+                {
+                    Type raycasterType = components[i].GetType();
+                    if (blocker.GetComponent(raycasterType) == null)
+                    {
+                        blocker.AddComponent(raycasterType);
+                    }
+                }
+            }
+            else
+            {
+                // Add raycaster since it's needed to block.
+                GetOrAddComponent<GraphicRaycaster>(blocker);
+            }
+
 
             // Add image since it's needed to block, but make it clear.
             Image blockerImage = blocker.AddComponent<Image>();
@@ -951,11 +1060,11 @@ namespace UnityEngine.UI
         {
             if (m_Dropdown != null)
             {
-                AlphaFadeList(0.15f, 0f);
+                AlphaFadeList(m_AlphaFadeSpeed, 0f);
 
                 // User could have disabled the dropdown during the OnValueChanged call.
                 if (IsActive())
-                    StartCoroutine(DelayedDestroyDropdownList(0.15f));
+                    StartCoroutine(DelayedDestroyDropdownList(m_AlphaFadeSpeed));
             }
             if (m_Blocker != null)
                 DestroyBlocker(m_Blocker);
@@ -966,6 +1075,11 @@ namespace UnityEngine.UI
         private IEnumerator DelayedDestroyDropdownList(float delay)
         {
             yield return new WaitForSecondsRealtime(delay);
+            ImmediateDestroyDropdownList();
+        }
+
+        private void ImmediateDestroyDropdownList()
+        {
             for (int i = 0; i < m_Items.Count; i++)
             {
                 if (m_Items[i] != null)

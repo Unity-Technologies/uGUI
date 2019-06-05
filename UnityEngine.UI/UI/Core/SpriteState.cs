@@ -15,6 +15,10 @@ namespace UnityEngine.UI
         [SerializeField]
         private Sprite m_PressedSprite;
 
+        [FormerlySerializedAs("m_HighlightedSprite")]
+        [SerializeField]
+        private Sprite m_SelectedSprite;
+
         [SerializeField]
         private Sprite m_DisabledSprite;
 
@@ -29,6 +33,11 @@ namespace UnityEngine.UI
         public Sprite pressedSprite     { get { return m_PressedSprite; } set { m_PressedSprite = value; } }
 
         /// <summary>
+        /// Selected sprite.
+        /// </summary>
+        public Sprite selectedSprite    { get { return m_SelectedSprite; } set { m_SelectedSprite = value; } }
+
+        /// <summary>
         /// Disabled sprite.
         /// </summary>
         public Sprite disabledSprite    { get { return m_DisabledSprite; } set { m_DisabledSprite = value; } }
@@ -37,6 +46,7 @@ namespace UnityEngine.UI
         {
             return highlightedSprite == other.highlightedSprite &&
                 pressedSprite == other.pressedSprite &&
+                selectedSprite == other.selectedSprite &&
                 disabledSprite == other.disabledSprite;
         }
     }

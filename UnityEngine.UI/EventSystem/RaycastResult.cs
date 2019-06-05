@@ -17,7 +17,7 @@ namespace UnityEngine.EventSystems
         }
 
         /// <summary>
-        /// BaseInputModule that raised the hit.
+        /// BaseRaycaster that raised the hit.
         /// </summary>
         public BaseRaycaster module;
 

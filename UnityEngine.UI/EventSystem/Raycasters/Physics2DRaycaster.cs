@@ -23,12 +23,10 @@ namespace UnityEngine.EventSystems
         /// </summary>
         public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
         {
-            if (eventCamera == null)
+            Ray ray = new Ray();
+            float distanceToClipPlane = 0;
+            if (!ComputeRayAndDistance(eventData, ref ray, ref distanceToClipPlane))
                 return;
-
-            Ray ray;
-            float distanceToClipPlane;
-            ComputeRayAndDistance(eventData, out ray, out distanceToClipPlane);
 
             int hitCount = 0;
 

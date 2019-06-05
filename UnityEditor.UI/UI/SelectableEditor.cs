@@ -85,9 +85,9 @@ namespace UnityEditor.UI
 
         private void RegisterStaticOnSceneGUI()
         {
-            SceneView.onSceneGUIDelegate -= StaticOnSceneGUI;
+            SceneView.duringSceneGui -= StaticOnSceneGUI;
             if (s_Editors.Count > 0)
-                SceneView.onSceneGUIDelegate += StaticOnSceneGUI;
+                SceneView.duringSceneGui += StaticOnSceneGUI;
         }
 
         static Selectable.Transition GetTransition(SerializedProperty transition)
@@ -222,6 +222,7 @@ namespace UnityEditor.UI
             var normalName = string.IsNullOrEmpty(animationTriggers.normalTrigger) ? "Normal" : animationTriggers.normalTrigger;
             var highlightedName = string.IsNullOrEmpty(animationTriggers.highlightedTrigger) ? "Highlighted" : animationTriggers.highlightedTrigger;
             var pressedName = string.IsNullOrEmpty(animationTriggers.pressedTrigger) ? "Pressed" : animationTriggers.pressedTrigger;
+            var selectedName = string.IsNullOrEmpty(animationTriggers.selectedTrigger) ? "Selected" : animationTriggers.selectedTrigger;
             var disabledName = string.IsNullOrEmpty(animationTriggers.disabledTrigger) ? "Disabled" : animationTriggers.disabledTrigger;
 
             // Create controller and hook up transitions.
@@ -229,6 +230,7 @@ namespace UnityEditor.UI
             GenerateTriggerableTransition(normalName, controller);
             GenerateTriggerableTransition(highlightedName, controller);
             GenerateTriggerableTransition(pressedName, controller);
+            GenerateTriggerableTransition(selectedName, controller);
             GenerateTriggerableTransition(disabledName, controller);
 
             AssetDatabase.ImportAsset(path);
@@ -315,11 +317,13 @@ namespace UnityEditor.UI
             if (!s_ShowNavigation)
                 return;
 
-            for (int i = 0; i < Selectable.allSelectables.Count; i++)
+            Selectable[] selectables = Selectable.allSelectablesArray;
+
+            for (int i = 0; i < selectables.Length; i++)
             {
-                Selectable selectable = Selectable.allSelectables[i];
-                if (SceneManagement.StageUtility.IsGameObjectRenderedByCamera(selectable.gameObject, Camera.current))
-                    DrawNavigationForSelectable(selectable);
+                Selectable s = selectables[i];
+                if (SceneManagement.StageUtility.IsGameObjectRenderedByCamera(s.gameObject, Camera.current))
+                    DrawNavigationForSelectable(s);
             }
         }
 

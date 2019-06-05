@@ -34,10 +34,34 @@ namespace UnityEditor.UI
             EditorGUILayout.Space();
 
             serializedObject.Update();
+            EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(m_IsOnProperty);
+            if (EditorGUI.EndChangeCheck())
+            {
+                Toggle toggle = serializedObject.targetObject as Toggle;
+                ToggleGroup group = m_GroupProperty.objectReferenceValue as ToggleGroup;
+
+                toggle.isOn = m_IsOnProperty.boolValue;
+
+                if (group != null && toggle.IsActive())
+                {
+                    if (toggle.isOn || (!group.AnyTogglesOn() && !group.allowSwitchOff))
+                    {
+                        toggle.isOn = true;
+                        group.NotifyToggleOn(toggle);
+                    }
+                }
+            }
             EditorGUILayout.PropertyField(m_TransitionProperty);
             EditorGUILayout.PropertyField(m_GraphicProperty);
+            EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(m_GroupProperty);
+            if (EditorGUI.EndChangeCheck())
+            {
+                Toggle toggle = serializedObject.targetObject as Toggle;
+                ToggleGroup group = m_GroupProperty.objectReferenceValue as ToggleGroup;
+                toggle.group = group;
+            }
 
             EditorGUILayout.Space();
 
