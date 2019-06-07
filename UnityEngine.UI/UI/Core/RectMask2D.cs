@@ -29,9 +29,6 @@ namespace UnityEngine.UI
         private RectTransform m_RectTransform;
 
         [NonSerialized]
-        private HashSet<MaskableGraphic> m_MaskableTargets = new HashSet<MaskableGraphic>();
-
-        [NonSerialized]
         private HashSet<IClippable> m_ClipTargets = new HashSet<IClippable>();
 
         [NonSerialized]
@@ -106,7 +103,6 @@ namespace UnityEngine.UI
             // that the mask state has changed.
             base.OnDisable();
             m_ClipTargets.Clear();
-            m_MaskableTargets.Clear();
             m_Clippers.Clear();
             ClipperRegistry.Unregister(this);
             MaskUtilities.Notify2DMaskStateChanged(this);
@@ -183,50 +179,27 @@ namespace UnityEngine.UI
                 (renderMode == RenderMode.ScreenSpaceCamera || renderMode == RenderMode.ScreenSpaceOverlay) &&
                 !clipRect.Overlaps(rootCanvasRect, true);
 
-            if (maskIsCulled)
+            bool clipRectChanged = clipRect != m_LastClipRectCanvasSpace;
+            bool forceClip = m_ForceClip;
+
+            // Avoid looping multiple times.
+            foreach (IClippable clipTarget in m_ClipTargets)
             {
+                if (clipRectChanged || forceClip)
+                {
+                    clipTarget.SetClipRect(clipRect, validRect);
+                }
+
+                var maskable = clipTarget as MaskableGraphic;
+                if (maskable != null && !maskable.canvasRenderer.hasMoved && !clipRectChanged)
+                    continue;
+
                 // Children are only displayed when inside the mask. If the mask is culled, then the children
                 // inside the mask are also culled. In that situation, we pass an invalid rect to allow callees
                 // to avoid some processing.
-                clipRect = Rect.zero;
-                validRect = false;
-            }
-
-            if (clipRect != m_LastClipRectCanvasSpace)
-            {
-                foreach (IClippable clipTarget in m_ClipTargets)
-                {
-                    clipTarget.SetClipRect(clipRect, validRect);
-                }
-
-                foreach (MaskableGraphic maskableTarget in m_MaskableTargets)
-                {
-                    maskableTarget.SetClipRect(clipRect, validRect);
-                    maskableTarget.Cull(clipRect, validRect);
-                }
-            }
-            else if (m_ForceClip)
-            {
-                foreach (IClippable clipTarget in m_ClipTargets)
-                {
-                    clipTarget.SetClipRect(clipRect, validRect);
-                }
-
-                foreach (MaskableGraphic maskableTarget in m_MaskableTargets)
-                {
-                    maskableTarget.SetClipRect(clipRect, validRect);
-
-                    if (maskableTarget.canvasRenderer.hasMoved)
-                        maskableTarget.Cull(clipRect, validRect);
-                }
-            }
-            else
-            {
-                foreach (MaskableGraphic maskableTarget in m_MaskableTargets)
-                {
-                    if (maskableTarget.canvasRenderer.hasMoved)
-                        maskableTarget.Cull(clipRect, validRect);
-                }
+                clipTarget.Cull(
+                    maskIsCulled ? Rect.zero : clipRect,
+                    maskIsCulled ? false : validRect);
             }
 
             m_LastClipRectCanvasSpace = clipRect;
@@ -242,12 +215,8 @@ namespace UnityEngine.UI
             if (clippable == null)
                 return;
             m_ShouldRecalculateClipRects = true;
-            MaskableGraphic maskable = clippable as MaskableGraphic;
-
-            if (maskable == null)
+            if (!m_ClipTargets.Contains(clippable))
                 m_ClipTargets.Add(clippable);
-            else
-                m_MaskableTargets.Add(maskable);
 
             m_ForceClip = true;
         }
@@ -263,13 +232,7 @@ namespace UnityEngine.UI
 
             m_ShouldRecalculateClipRects = true;
             clippable.SetClipRect(new Rect(), false);
-
-            MaskableGraphic maskable = clippable as MaskableGraphic;
-
-            if (maskable == null)
-                m_ClipTargets.Remove(clippable);
-            else
-                m_MaskableTargets.Remove(maskable);
+            m_ClipTargets.Remove(clippable);
 
             m_ForceClip = true;
         }

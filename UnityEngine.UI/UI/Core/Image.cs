@@ -269,48 +269,17 @@ namespace UnityEngine.UI
         /// }
         /// </code>
         /// </example>
-
         public Sprite sprite
         {
             get { return m_Sprite; }
             set
             {
-                if (m_Sprite != null)
+                if (SetPropertyUtility.SetClass(ref m_Sprite, value))
                 {
-                    if (m_Sprite != value)
-                    {
-                        m_SkipLayoutUpdate = m_Sprite.rect.size.Equals(value ? value.rect.size : Vector2.zero);
-                        m_SkipMaterialUpdate = m_Sprite.texture == (value ? value.texture : null);
-                        m_Sprite = value;
-
-                        SetAllDirty();
-                        TrackSprite();
-                    }
-                }
-                else if (value != null)
-                {
-                    m_SkipLayoutUpdate = value.rect.size == Vector2.zero;
-                    m_SkipMaterialUpdate = value.texture == null;
-                    m_Sprite = value;
-
                     SetAllDirty();
                     TrackSprite();
                 }
             }
-        }
-
-
-        /// <summary>
-        /// Disable all automatic sprite optimizations.
-        /// </summary>
-        /// <remarks>
-        /// When a new Sprite is assigned update optimizations are automatically applied.
-        /// </remarks>
-
-        public void DisableSpriteOptimizations()
-        {
-            m_SkipLayoutUpdate = false;
-            m_SkipMaterialUpdate = false;
         }
 
         [NonSerialized]
@@ -671,9 +640,6 @@ namespace UnityEngine.UI
             }
         }
 
-        // case 1066689 cache referencePixelsPerUnit when canvas parent is disabled;
-        private float m_CachedReferencePixelsPerUnit = 100;
-
         public float pixelsPerUnit
         {
             get
@@ -682,10 +648,11 @@ namespace UnityEngine.UI
                 if (activeSprite)
                     spritePixelsPerUnit = activeSprite.pixelsPerUnit;
 
+                float referencePixelsPerUnit = 100;
                 if (canvas)
-                    m_CachedReferencePixelsPerUnit = canvas.referencePixelsPerUnit;
+                    referencePixelsPerUnit = canvas.referencePixelsPerUnit;
 
-                return spritePixelsPerUnit / m_CachedReferencePixelsPerUnit;
+                return spritePixelsPerUnit / referencePixelsPerUnit;
             }
         }
 
@@ -883,24 +850,6 @@ namespace UnityEngine.UI
             if (alphaTex != null)
             {
                 canvasRenderer.SetAlphaTexture(alphaTex);
-            }
-        }
-
-        protected override void OnCanvasHierarchyChanged()
-        {
-            base.OnCanvasHierarchyChanged();
-            if (canvas == null)
-            {
-                m_CachedReferencePixelsPerUnit = 100;
-            }
-            else if (canvas.referencePixelsPerUnit != m_CachedReferencePixelsPerUnit)
-            {
-                m_CachedReferencePixelsPerUnit = canvas.referencePixelsPerUnit;
-                if (type == Type.Sliced || type == Type.Tiled)
-                {
-                    SetVerticesDirty();
-                    SetLayoutDirty();
-                }
             }
         }
 
@@ -1115,7 +1064,7 @@ namespace UnityEngine.UI
 
                     if (nVertices > 65000.0)
                     {
-                        Debug.LogError("Too many sprite tiles on Image \"" + name + "\". The tile size will be increased. To remove the limit on the number of tiles, set the Wrap mode to Repeat in the Image Import Settings", this);
+                        Debug.LogError("Too many sprite tiles on Image \"" + name + "\". The tile size will be increased. To remove the limit on the number of tiles, convert the Sprite to an Advanced texture, remove the borders, clear the Packing tag and set the Wrap mode to Repeat.", this);
 
                         double maxTiles = 65000.0 / 4.0; // Max number of vertices is 65000; 4 vertices per tile.
                         double imageRatio;
@@ -1152,7 +1101,7 @@ namespace UnityEngine.UI
                         double nVertices = (nTilesH + nTilesW + 2.0 /*corners*/) * 2.0 /*sides*/ * 4.0 /*vertices per tile*/;
                         if (nVertices > 65000.0)
                         {
-                            Debug.LogError("Too many sprite tiles on Image \"" + name + "\". The tile size will be increased. To remove the limit on the number of tiles, set the Wrap mode to Repeat in the Image Import Settings", this);
+                            Debug.LogError("Too many sprite tiles on Image \"" + name + "\". The tile size will be increased. To remove the limit on the number of tiles, convert the Sprite to an Advanced texture, remove the borders, clear the Packing tag and set the Wrap mode to Repeat.", this);
 
                             double maxTiles = 65000.0 / 4.0; // Max number of vertices is 65000; 4 vertices per tile.
                             double imageRatio = (double)nTilesW / nTilesH;
@@ -1754,10 +1703,13 @@ namespace UnityEngine.UI
 
             local = MapCoordinate(local, rect);
 
-            // Convert local coordinates to texture space.
+            // Normalize local coordinates.
             Rect spriteRect = activeSprite.textureRect;
-            float x = (spriteRect.x + local.x) / activeSprite.texture.width;
-            float y = (spriteRect.y + local.y) / activeSprite.texture.height;
+            Vector2 normalized = new Vector2(local.x / spriteRect.width, local.y / spriteRect.height);
+
+            // Convert to texture space.
+            float x = Mathf.Lerp(spriteRect.x, spriteRect.xMax, normalized.x) / activeSprite.texture.width;
+            float y = Mathf.Lerp(spriteRect.y, spriteRect.yMax, normalized.y) / activeSprite.texture.height;
 
             try
             {

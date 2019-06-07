@@ -6,7 +6,6 @@ using UnityEngine.EventSystems;
 namespace UnityEngine.UI
 {
     [AddComponentMenu("UI/Scrollbar", 34)]
-    [ExecuteAlways]
     [RequireComponent(typeof(RectTransform))]
     /// <summary>
     /// A standard scrollbar with a variable sized handle that can be dragged between 0 and 1.
@@ -92,15 +91,6 @@ namespace UnityEngine.UI
             }
         }
 
-        /// <summary>
-        /// Set the value of the scrollbar without invoking onValueChanged callback.
-        /// </summary>
-        /// <param name="input">The new value for the scrollbar.</param>
-        public virtual void SetValueWithoutNotify(float input)
-        {
-            Set(input, false);
-        }
-
         [Range(0f, 1f)]
         [SerializeField]
         private float m_Size = 0.2f;
@@ -146,9 +136,6 @@ namespace UnityEngine.UI
         private Coroutine m_PointerDownRepeat;
         private bool isPointerDownAndNotDragging = false;
 
-        // This "delayed" mechanism is required for case 1037681.
-        private bool m_DelayedUpdateVisuals = false;
-
 #if UNITY_EDITOR
         protected override void OnValidate()
         {
@@ -161,8 +148,8 @@ namespace UnityEngine.UI
             {
                 UpdateCachedReferences();
                 Set(m_Value, false);
-                // Update rects (in next update) since other things might affect them even if value didn't change.
-                m_DelayedUpdateVisuals = true;
+                // Update rects since other things might affect them even if value didn't change.
+                UpdateVisuals();
             }
 
             if (!UnityEditor.PrefabUtility.IsPartOfPrefabAsset(this) && !Application.isPlaying)
@@ -206,19 +193,6 @@ namespace UnityEngine.UI
             base.OnDisable();
         }
 
-        /// <summary>
-        /// Update the rect based on the delayed update visuals.
-        /// Got around issue of calling sendMessage from onValidate.
-        /// </summary>
-        protected virtual void Update()
-        {
-            if (m_DelayedUpdateVisuals)
-            {
-                m_DelayedUpdateVisuals = false;
-                UpdateVisuals();
-            }
-        }
-
         void UpdateCachedReferences()
         {
             if (m_HandleRect && m_HandleRect.parent != null)
@@ -227,12 +201,17 @@ namespace UnityEngine.UI
                 m_ContainerRect = null;
         }
 
-        void Set(float input, bool sendCallback = true)
+        // Update the visible Image.
+        void Set(float input)
+        {
+            Set(input, true);
+        }
+
+        void Set(float input, bool sendCallback)
         {
             float currentValue = m_Value;
-
-            // bugfix (case 802330) clamp01 input in callee before calling this function, this allows inertia from dragging content to go past extremities without being clamped
-            m_Value = input;
+            // Clamp the input
+            m_Value = Mathf.Clamp01(input);
 
             // If the stepped value doesn't match the last one, it's time to update
             if (currentValue == value)
@@ -281,7 +260,7 @@ namespace UnityEngine.UI
                 Vector2 anchorMin = Vector2.zero;
                 Vector2 anchorMax = Vector2.one;
 
-                float movement = Mathf.Clamp01(value) * (1 - size);
+                float movement = value * (1 - size);
                 if (reverseValue)
                 {
                     anchorMin[(int)axis] = 1 - movement - size;
@@ -319,25 +298,19 @@ namespace UnityEngine.UI
             if (remainingSize <= 0)
                 return;
 
-            DoUpdateDrag(handleCorner, remainingSize);
-        }
-
-        //this function is testable, it is found using reflection in ScrollbarClamp test
-        private void DoUpdateDrag(Vector2 handleCorner, float remainingSize)
-        {
             switch (m_Direction)
             {
                 case Direction.LeftToRight:
-                    Set(Mathf.Clamp01(handleCorner.x / remainingSize));
+                    Set(handleCorner.x / remainingSize);
                     break;
                 case Direction.RightToLeft:
-                    Set(Mathf.Clamp01(1f - (handleCorner.x / remainingSize)));
+                    Set(1f - (handleCorner.x / remainingSize));
                     break;
                 case Direction.BottomToTop:
-                    Set(Mathf.Clamp01(handleCorner.y / remainingSize));
+                    Set(handleCorner.y / remainingSize);
                     break;
                 case Direction.TopToBottom:
-                    Set(Mathf.Clamp01(1f - (handleCorner.y / remainingSize)));
+                    Set(1f - (handleCorner.y / remainingSize));
                     break;
             }
         }
@@ -407,11 +380,10 @@ namespace UnityEngine.UI
                     if (RectTransformUtility.ScreenPointToLocalPointInRectangle(m_HandleRect, eventData.position, eventData.pressEventCamera, out localMousePos))
                     {
                         var axisCoordinate = axis == 0 ? localMousePos.x : localMousePos.y;
-
-                        // modifying value depending on direction, fixes (case 925824)
-
-                        float change = axisCoordinate < 0 ? size : -size;
-                        value += reverseValue ? change : -change;
+                        if (axisCoordinate < 0)
+                            value -= size;
+                        else
+                            value += size;
                     }
                 }
                 yield return new WaitForEndOfFrame();
@@ -443,25 +415,25 @@ namespace UnityEngine.UI
             {
                 case MoveDirection.Left:
                     if (axis == Axis.Horizontal && FindSelectableOnLeft() == null)
-                        Set(Mathf.Clamp01(reverseValue ? value + stepSize : value - stepSize));
+                        Set(reverseValue ? value + stepSize : value - stepSize);
                     else
                         base.OnMove(eventData);
                     break;
                 case MoveDirection.Right:
                     if (axis == Axis.Horizontal && FindSelectableOnRight() == null)
-                        Set(Mathf.Clamp01(reverseValue ? value - stepSize : value + stepSize));
+                        Set(reverseValue ? value - stepSize : value + stepSize);
                     else
                         base.OnMove(eventData);
                     break;
                 case MoveDirection.Up:
                     if (axis == Axis.Vertical && FindSelectableOnUp() == null)
-                        Set(Mathf.Clamp01(reverseValue ? value - stepSize : value + stepSize));
+                        Set(reverseValue ? value - stepSize : value + stepSize);
                     else
                         base.OnMove(eventData);
                     break;
                 case MoveDirection.Down:
                     if (axis == Axis.Vertical && FindSelectableOnDown() == null)
-                        Set(Mathf.Clamp01(reverseValue ? value + stepSize : value - stepSize));
+                        Set(reverseValue ? value + stepSize : value - stepSize);
                     else
                         base.OnMove(eventData);
                     break;

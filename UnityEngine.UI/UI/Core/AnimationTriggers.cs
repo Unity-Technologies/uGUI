@@ -7,9 +7,8 @@ namespace UnityEngine.UI
     public class AnimationTriggers
     {
         private const string kDefaultNormalAnimName      = "Normal";
-        private const string kDefaultHighlightedAnimName = "Highlighted";
+        private const string kDefaultSelectedAnimName = "Highlighted";
         private const string kDefaultPressedAnimName     = "Pressed";
-        private const string kDefaultSelectedAnimName    = "Selected";
         private const string kDefaultDisabledAnimName    = "Disabled";
 
         [FormerlySerializedAs("normalTrigger")]
@@ -17,16 +16,13 @@ namespace UnityEngine.UI
         private string m_NormalTrigger    = kDefaultNormalAnimName;
 
         [FormerlySerializedAs("highlightedTrigger")]
+        [FormerlySerializedAs("m_SelectedTrigger")]
         [SerializeField]
-        private string m_HighlightedTrigger = kDefaultHighlightedAnimName;
+        private string m_HighlightedTrigger = kDefaultSelectedAnimName;
 
         [FormerlySerializedAs("pressedTrigger")]
         [SerializeField]
         private string m_PressedTrigger = kDefaultPressedAnimName;
-
-        [FormerlySerializedAs("m_HighlightedTrigger")]
-        [SerializeField]
-        private string m_SelectedTrigger = kDefaultSelectedAnimName;
 
         [FormerlySerializedAs("disabledTrigger")]
         [SerializeField]
@@ -99,30 +95,8 @@ namespace UnityEngine.UI
         /// }
         /// </code>
         /// </example>
-        public string pressedTrigger     { get { return m_PressedTrigger; } set { m_PressedTrigger = value; } }
 
-        /// <summary>
-        /// Trigger to send to animator when entering selected state.
-        /// </summary>
-        /// <example>
-        /// <code>
-        /// using UnityEngine;
-        /// using System.Collections;
-        /// using UnityEngine.UI; // Required when Using UI elements.
-        ///
-        /// public class ExampleClass : MonoBehaviour
-        /// {
-        ///     public Animator buttonAnimator;
-        ///     public Button button;
-        ///     void SomeFunction()
-        ///     {
-        ///         //Sets the button to the Selected state (Useful when making tutorials).
-        ///         buttonAnimator.SetTrigger(button.animationTriggers.selectedTrigger);
-        ///     }
-        /// }
-        /// </code>
-        /// </example>
-        public string selectedTrigger    { get { return m_SelectedTrigger; } set { m_SelectedTrigger = value; } }
+        public string pressedTrigger     { get { return m_PressedTrigger; } set { m_PressedTrigger = value; } }
 
         /// <summary>
         /// Trigger to send to animator when entering disabled state.
@@ -145,6 +119,7 @@ namespace UnityEngine.UI
         /// }
         /// </code>
         /// </example>
+
         public string disabledTrigger    { get { return m_DisabledTrigger; } set { m_DisabledTrigger = value; } }
     }
 }

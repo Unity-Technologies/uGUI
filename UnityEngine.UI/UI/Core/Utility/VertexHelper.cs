@@ -228,7 +228,7 @@ namespace UnityEngine.UI
         /// <param name="uv3">UV3 of the vert</param>
         /// <param name="normal">Normal of the vert.</param>
         /// <param name="tangent">Tangent of the vert</param>
-        public void AddVert(Vector3 position, Color32 color, Vector2 uv0, Vector2 uv1, Vector2 uv2, Vector2 uv3, Vector3 normal, Vector4 tangent)
+        internal void AddVert(Vector3 position, Color32 color, Vector2 uv0, Vector2 uv1, Vector2 uv2, Vector2 uv3, Vector3 normal, Vector4 tangent)
         {
             InitializeListIfRequired();
 

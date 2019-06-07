@@ -375,6 +375,9 @@
       <Link>UI\Core\Utility\VertexHelper.cs</Link>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="..\UnityEngine.UI\UI\Core\Utility\VertexHelperExtension.cs">
+      <Link>UI\Core\Utility\VertexHelperExtension.cs</Link>
+    </Compile>
     <Compile Include="..\UnityEngine.UI\UI\Core\VertexModifiers\BaseMeshEffect.cs">
       <Link>UI\Core\VertexModifiers\BaseMeshEffect.cs</Link>
       <SubType>Code</SubType>

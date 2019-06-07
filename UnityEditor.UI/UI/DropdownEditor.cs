@@ -18,7 +18,6 @@ namespace UnityEditor.UI
         SerializedProperty m_OnSelectionChanged;
         SerializedProperty m_Value;
         SerializedProperty m_Options;
-        SerializedProperty m_AlphaFadeSpeed;
 
         protected override void OnEnable()
         {
@@ -31,7 +30,6 @@ namespace UnityEditor.UI
             m_OnSelectionChanged = serializedObject.FindProperty("m_OnValueChanged");
             m_Value = serializedObject.FindProperty("m_Value");
             m_Options = serializedObject.FindProperty("m_Options");
-            m_AlphaFadeSpeed = serializedObject.FindProperty("m_AlphaFadeSpeed");
         }
 
         public override void OnInspectorGUI()
@@ -46,7 +44,6 @@ namespace UnityEditor.UI
             EditorGUILayout.PropertyField(m_ItemText);
             EditorGUILayout.PropertyField(m_ItemImage);
             EditorGUILayout.PropertyField(m_Value);
-            EditorGUILayout.PropertyField(m_AlphaFadeSpeed);
             EditorGUILayout.PropertyField(m_Options);
             EditorGUILayout.PropertyField(m_OnSelectionChanged);
             serializedObject.ApplyModifiedProperties();

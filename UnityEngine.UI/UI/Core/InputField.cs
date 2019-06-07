@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Text;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
@@ -299,7 +301,6 @@ namespace UnityEngine.UI
         private bool m_WasCanceled = false;
         private bool m_HasDoneFocusTransition = false;
         private WaitForSecondsRealtime m_WaitForSecondsRealtime;
-        private bool m_TouchKeyboardAllowsInPlaceEditing = false;
 
         private BaseInput input
         {
@@ -395,7 +396,7 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Input field's current text value. This is not necessarily the same as what is visible on screen.
+        /// Input field's current text value. This is not nessisarially the same as what is visible on screen.
         /// </summary>
         /// <remarks>
         /// Note that null is invalid value  for InputField.text.
@@ -425,66 +426,50 @@ namespace UnityEngine.UI
             }
             set
             {
-                SetText(value);
-            }
-        }
+                if (this.text == value)
+                    return;
+                if (value == null)
+                    value = "";
+                value = value.Replace("\0", string.Empty); // remove embedded nulls
+                if (m_LineType == LineType.SingleLine)
+                    value = value.Replace("\n", "").Replace("\t", "");
 
-        /// <summary>
-        /// Set Input field's current text value without invoke onValueChanged. This is not necessarily the same as what is visible on screen.
-        /// </summary>
-        public void SetTextWithoutNotify(string input)
-        {
-            SetText(input, false);
-        }
-
-        void SetText(string value, bool sendCallback = true)
-        {
-            if (this.text == value)
-                return;
-            if (value == null)
-                value = "";
-            value = value.Replace("\0", string.Empty); // remove embedded nulls
-            if (m_LineType == LineType.SingleLine)
-                value = value.Replace("\n", "").Replace("\t", "");
-
-            // If we have an input validator, validate the input and apply the character limit at the same time.
-            if (onValidateInput != null || characterValidation != CharacterValidation.None)
-            {
-                m_Text = "";
-                OnValidateInput validatorMethod = onValidateInput ?? Validate;
-                m_CaretPosition = m_CaretSelectPosition = value.Length;
-                int charactersToCheck = characterLimit > 0 ? Math.Min(characterLimit, value.Length) : value.Length;
-                for (int i = 0; i < charactersToCheck; ++i)
+                // If we have an input validator, validate the input and apply the character limit at the same time.
+                if (onValidateInput != null || characterValidation != CharacterValidation.None)
                 {
-                    char c = validatorMethod(m_Text, m_Text.Length, value[i]);
-                    if (c != 0)
-                        m_Text += c;
+                    m_Text = "";
+                    OnValidateInput validatorMethod = onValidateInput ?? Validate;
+                    m_CaretPosition = m_CaretSelectPosition = value.Length;
+                    int charactersToCheck = characterLimit > 0 ? Math.Min(characterLimit, value.Length) : value.Length;
+                    for (int i = 0; i < charactersToCheck; ++i)
+                    {
+                        char c = validatorMethod(m_Text, m_Text.Length, value[i]);
+                        if (c != 0)
+                            m_Text += c;
+                    }
                 }
-            }
-            else
-            {
-                m_Text = characterLimit > 0 && value.Length > characterLimit ? value.Substring(0, characterLimit) : value;
-            }
+                else
+                {
+                    m_Text = characterLimit > 0 && value.Length > characterLimit ? value.Substring(0, characterLimit) : value;
+                }
 
 #if UNITY_EDITOR
-            if (!Application.isPlaying)
-            {
-                SendOnValueChangedAndUpdateLabel();
-                return;
-            }
+                if (!Application.isPlaying)
+                {
+                    SendOnValueChangedAndUpdateLabel();
+                    return;
+                }
 #endif
 
-            if (m_Keyboard != null)
-                m_Keyboard.text = m_Text;
+                if (m_Keyboard != null)
+                    m_Keyboard.text = m_Text;
 
-            if (m_CaretPosition > m_Text.Length)
-                m_CaretPosition = m_CaretSelectPosition = m_Text.Length;
-            else if (m_CaretSelectPosition > m_Text.Length)
-                m_CaretSelectPosition = m_Text.Length;
-
-            if (sendCallback)
-                SendOnValueChanged();
-            UpdateLabel();
+                if (m_CaretPosition > m_Text.Length)
+                    m_CaretPosition = m_CaretSelectPosition = m_Text.Length;
+                else if (m_CaretSelectPosition > m_Text.Length)
+                    m_CaretSelectPosition = m_Text.Length;
+                SendOnValueChangedAndUpdateLabel();
+            }
         }
 
         /// <summary>
@@ -1010,11 +995,6 @@ namespace UnityEngine.UI
             if (!IsActive())
                 return;
 
-            // fix case 1040277
-            ClampPos(ref m_CaretPosition);
-            ClampPos(ref m_CaretSelectPosition);
-
-
             UpdateLabel();
             if (m_AllowInput)
                 SetCaretActive();
@@ -1234,7 +1214,7 @@ namespace UnityEngine.UI
 
         private bool InPlaceEditing()
         {
-            return !TouchScreenKeyboard.isSupported || m_TouchKeyboardAllowsInPlaceEditing;
+            return !TouchScreenKeyboard.isSupported;
         }
 
         void UpdateCaretFromKeyboard()
@@ -1286,10 +1266,10 @@ namespace UnityEngine.UI
                 m_ShouldActivateNextUpdate = false;
             }
 
-            AssignPositioningIfNeeded();
-
-            if (!isFocused || InPlaceEditing())
+            if (InPlaceEditing() || !isFocused)
                 return;
+
+            AssignPositioningIfNeeded();
 
             if (m_Keyboard == null || m_Keyboard.status != TouchScreenKeyboard.Status.Visible)
             {
@@ -1483,7 +1463,7 @@ namespace UnityEngine.UI
                 IsInteractable() &&
                 eventData.button == PointerEventData.InputButton.Left &&
                 m_TextComponent != null &&
-                (InPlaceEditing() || m_HideMobileInput);
+                (m_Keyboard == null || m_HideMobileInput);
         }
 
         /// <summary>
@@ -1675,7 +1655,6 @@ namespace UnityEngine.UI
                     if (ctrlOnly)
                     {
                         Append(clipboard);
-                        UpdateLabel();
                         return EditState.Continue;
                     }
                     break;
@@ -1690,9 +1669,7 @@ namespace UnityEngine.UI
                             clipboard = GetSelectedString();
                         else
                             clipboard = "";
-
                         Delete();
-                        UpdateTouchKeyboardFromEditChanges();
                         SendOnValueChangedAndUpdateLabel();
                         return EditState.Continue;
                     }
@@ -2064,7 +2041,6 @@ namespace UnityEngine.UI
             if (hasSelection)
             {
                 Delete();
-                UpdateTouchKeyboardFromEditChanges();
                 SendOnValueChangedAndUpdateLabel();
             }
             else
@@ -2072,8 +2048,6 @@ namespace UnityEngine.UI
                 if (caretPositionInternal < text.Length)
                 {
                     m_Text = text.Remove(caretPositionInternal, 1);
-
-                    UpdateTouchKeyboardFromEditChanges();
                     SendOnValueChangedAndUpdateLabel();
                 }
             }
@@ -2087,7 +2061,6 @@ namespace UnityEngine.UI
             if (hasSelection)
             {
                 Delete();
-                UpdateTouchKeyboardFromEditChanges();
                 SendOnValueChangedAndUpdateLabel();
             }
             else
@@ -2096,8 +2069,6 @@ namespace UnityEngine.UI
                 {
                     m_Text = text.Remove(caretPositionInternal - 1, 1);
                     caretSelectPositionInternal = caretPositionInternal = caretPositionInternal - 1;
-
-                    UpdateTouchKeyboardFromEditChanges();
                     SendOnValueChangedAndUpdateLabel();
                 }
             }
@@ -2119,18 +2090,7 @@ namespace UnityEngine.UI
             m_Text = text.Insert(m_CaretPosition, replaceString);
             caretSelectPositionInternal = caretPositionInternal += replaceString.Length;
 
-            UpdateTouchKeyboardFromEditChanges();
             SendOnValueChanged();
-        }
-
-        private void UpdateTouchKeyboardFromEditChanges()
-        {
-            // Update the TouchKeyboard's text from edit changes
-            // if in-place editing is allowed
-            if (m_Keyboard != null && InPlaceEditing())
-            {
-                m_Keyboard.text = m_Text;
-            }
         }
 
         private void SendOnValueChangedAndUpdateLabel()
@@ -2545,7 +2505,7 @@ namespace UnityEngine.UI
                 if (!hasSelection)
                     GenerateCaret(helper, roundingOffset);
                 else
-                    GenerateHighlight(helper, roundingOffset);
+                    GenerateHightlight(helper, roundingOffset);
 
                 helper.FillMesh(vbo);
             }
@@ -2632,7 +2592,7 @@ namespace UnityEngine.UI
             }
         }
 
-        private void GenerateHighlight(VertexHelper vbo, Vector2 roundingOffset)
+        private void GenerateHightlight(VertexHelper vbo, Vector2 roundingOffset)
         {
             int startChar = Mathf.Max(0, caretPositionInternal - m_DrawStart);
             int endChar = Mathf.Max(0, caretSelectPositionInternal - m_DrawStart);
@@ -2721,7 +2681,7 @@ namespace UnityEngine.UI
                 {
                     if (ch >= '0' && ch <= '9') return ch;
                     if (ch == '-' && (pos == 0 || selectionAtStart)) return ch;
-                    if ((ch == '.' || ch == ',') && characterValidation == CharacterValidation.Decimal && text.IndexOfAny(new[] { '.', ',' }) == -1) return ch;
+                    if (ch == '.' && characterValidation == CharacterValidation.Decimal && !text.Contains(".")) return ch;
                 }
             }
             else if (characterValidation == CharacterValidation.Alphanumeric)
@@ -2775,13 +2735,10 @@ namespace UnityEngine.UI
 
                 if (ch == ' ')
                 {
-                    if (pos != 0) // Don't allow leading spaces
-                    {
-                        // Don't allow consecutive spaces and apostrophes.
-                        if (!(((pos > 0) && ((text[pos - 1] == ' ') || (text[pos - 1] == '\''))) ||
-                              ((pos < text.Length) && ((text[pos] == ' ') || (text[pos] == '\'')))))
-                            return ch;
-                    }
+                    // Don't allow consecutive spaces and apostrophes.
+                    if (!(((pos > 0) && ((text[pos - 1] == ' ') || (text[pos - 1] == '\''))) ||
+                          ((pos < text.Length) && ((text[pos] == ' ') || (text[pos] == '\'')))))
+                        return ch;
                 }
             }
             else if (characterValidation == CharacterValidation.EmailAddress)
@@ -2868,10 +2825,6 @@ namespace UnityEngine.UI
                 m_Keyboard = (inputType == InputType.Password) ?
                     TouchScreenKeyboard.Open(m_Text, keyboardType, false, multiLine, true, false, "", characterLimit) :
                     TouchScreenKeyboard.Open(m_Text, keyboardType, inputType == InputType.AutoCorrect, multiLine, false, false, "", characterLimit);
-
-                // Cache the value of isInPlaceEditingAllowed, because on UWP this involves calling into native code
-                // The value only needs to be updated once when the TouchKeyboard is opened.
-                m_TouchKeyboardAllowsInPlaceEditing = TouchScreenKeyboard.isInPlaceEditingAllowed;
 
                 // Mimics OnFocus but as mobile doesn't properly support select all
                 // just set it to the end of the text (where it would move when typing starts)

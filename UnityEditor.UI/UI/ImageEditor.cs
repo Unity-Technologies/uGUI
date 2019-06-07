@@ -139,7 +139,6 @@ namespace UnityEditor.UI
                         m_Type.enumValueIndex = (int)Image.Type.Simple;
                     }
                 }
-                (serializedObject.targetObject as Image).DisableSpriteOptimizations();
             }
         }
 

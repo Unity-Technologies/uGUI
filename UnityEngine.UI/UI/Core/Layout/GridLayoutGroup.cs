@@ -179,7 +179,7 @@ namespace UnityEngine.UI
             }
             else
             {
-                float width = rectTransform.rect.width;
+                float width = rectTransform.rect.size.x;
                 int cellCountX = Mathf.Max(1, Mathf.FloorToInt((width - padding.horizontal + spacing.x + 0.001f) / (cellSize.x + spacing.x)));
                 minRows = Mathf.CeilToInt(rectChildren.Count / (float)cellCountX);
             }
@@ -241,16 +241,12 @@ namespace UnityEngine.UI
             if (m_Constraint == Constraint.FixedColumnCount)
             {
                 cellCountX = m_ConstraintCount;
-
-                if (rectChildren.Count > cellCountX)
-                    cellCountY = rectChildren.Count / cellCountX + (rectChildren.Count % cellCountX > 0 ? 1 : 0);
+                cellCountY = Mathf.CeilToInt(rectChildren.Count / (float)cellCountX - 0.001f);
             }
             else if (m_Constraint == Constraint.FixedRowCount)
             {
                 cellCountY = m_ConstraintCount;
-
-                if (rectChildren.Count > cellCountY)
-                    cellCountX = rectChildren.Count / cellCountY + (rectChildren.Count % cellCountY > 0 ? 1 : 0);
+                cellCountX = Mathf.CeilToInt(rectChildren.Count / (float)cellCountY - 0.001f);
             }
             else
             {

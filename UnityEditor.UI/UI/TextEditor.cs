@@ -27,7 +27,6 @@ namespace UnityEditor.UI
 
             EditorGUILayout.PropertyField(m_Text);
             EditorGUILayout.PropertyField(m_FontData);
-
             AppearanceControlsGUI();
             RaycastControlsGUI();
             serializedObject.ApplyModifiedProperties();

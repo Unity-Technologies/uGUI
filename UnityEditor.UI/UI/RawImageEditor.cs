@@ -38,7 +38,6 @@ namespace UnityEditor.UI
             serializedObject.Update();
 
             EditorGUILayout.PropertyField(m_Texture);
-
             AppearanceControlsGUI();
             RaycastControlsGUI();
             EditorGUILayout.PropertyField(m_UVRect, m_UVRectContent);

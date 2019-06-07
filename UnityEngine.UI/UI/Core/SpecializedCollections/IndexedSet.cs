@@ -81,9 +81,8 @@ namespace UnityEngine.UI.Collections
         public int IndexOf(T item)
         {
             int index = -1;
-            if (m_Dictionary.TryGetValue(item, out index))
-                return index;
-            return -1;
+            m_Dictionary.TryGetValue(item, out index);
+            return index;
         }
 
         public void Insert(int index, T item)

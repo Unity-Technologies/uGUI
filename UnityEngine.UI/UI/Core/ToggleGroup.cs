@@ -41,19 +41,17 @@ namespace UnityEngine.UI
         /// Notify the group that the given toggle is enabled.
         /// </summary>
         /// <param name="toggle">The toggle that got triggered on</param>
-        public void NotifyToggleOn(Toggle toggle, bool sendCallback = true)
+        public void NotifyToggleOn(Toggle toggle)
         {
             ValidateToggleIsInGroup(toggle);
+
             // disable all toggles in the group
             for (var i = 0; i < m_Toggles.Count; i++)
             {
                 if (m_Toggles[i] == toggle)
                     continue;
 
-                if (sendCallback)
-                    m_Toggles[i].isOn = false;
-                else
-                    m_Toggles[i].SetIsOnWithoutNotify(false);
+                m_Toggles[i].isOn = false;
             }
         }
 
@@ -65,12 +63,6 @@ namespace UnityEngine.UI
         {
             if (m_Toggles.Contains(toggle))
                 m_Toggles.Remove(toggle);
-
-            if (!allowSwitchOff && !AnyTogglesOn() && m_Toggles.Count != 0)
-            {
-                m_Toggles[0].isOn = true;
-                NotifyToggleOn(m_Toggles[0]);
-            }
         }
 
         /// <summary>
@@ -81,12 +73,6 @@ namespace UnityEngine.UI
         {
             if (!m_Toggles.Contains(toggle))
                 m_Toggles.Add(toggle);
-
-            if (!allowSwitchOff && !AnyTogglesOn())
-            {
-                toggle.isOn = true;
-                NotifyToggleOn(toggle);
-            }
         }
 
         /// <summary>
@@ -116,21 +102,13 @@ namespace UnityEngine.UI
         /// <remarks>
         /// This method can be used to switch all toggles off, regardless of whether the allowSwitchOff property is enabled or not.
         /// </remarks>
-        public void SetAllTogglesOff(bool sendCallback = true)
+        public void SetAllTogglesOff()
         {
             bool oldAllowSwitchOff = m_AllowSwitchOff;
             m_AllowSwitchOff = true;
 
-            if (sendCallback)
-            {
-                for (var i = 0; i < m_Toggles.Count; i++)
-                    m_Toggles[i].isOn = false;
-            }
-            else
-            {
-                for (var i = 0; i < m_Toggles.Count; i++)
-                    m_Toggles[i].SetIsOnWithoutNotify(false);
-            }
+            for (var i = 0; i < m_Toggles.Count; i++)
+                m_Toggles[i].isOn = false;
 
             m_AllowSwitchOff = oldAllowSwitchOff;
         }

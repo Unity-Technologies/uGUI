@@ -20,14 +20,10 @@ namespace UnityEngine.UI
         IPointerEnterHandler, IPointerExitHandler,
         ISelectHandler, IDeselectHandler
     {
-        private static Selectable[] s_Selectables = new Selectable[10];
-        private static int s_SelectableCount = 0;
-
-        // If any selectable in s_Selectables are to be removed
-        private static bool s_IsDirty = false;
+        private static List<Selectable> s_List = new List<Selectable>();
 
         /// <summary>
-        /// Copy of the array of all the selectable objects currently active in the scene.
+        /// List of all the selectable objects currently active in the scene.
         /// </summary>
         /// <example>
         /// <code>
@@ -40,7 +36,7 @@ namespace UnityEngine.UI
         ///     //Displays the names of all selectable elements in the scene
         ///     public void GetNames()
         ///     {
-        ///         foreach (Selectable selectableUI in Selectable.allSelectablesArray)
+        ///         foreach (Selectable selectableUI in Selectable.allSelectables)
         ///         {
         ///             Debug.Log(selectableUI.name);
         ///         }
@@ -48,82 +44,7 @@ namespace UnityEngine.UI
         /// }
         /// </code>
         /// </example>
-        public static Selectable[] allSelectablesArray
-        {
-            get
-            {
-                if (s_IsDirty)
-                    RemoveInvalidSelectables();
-
-                Selectable[] temp = new Selectable[s_SelectableCount];
-                Array.Copy(s_Selectables, temp, s_SelectableCount);
-                return temp;
-            }
-        }
-
-        /// <summary>
-        /// How many selectable elements are currently active.
-        /// </summary>
-        public static int allSelectableCount { get { return s_SelectableCount; } }
-
-        /// <summary>
-        /// A List instance of the allSelectablesArray to maintain API compatibility.
-        /// </summary>
-
-        [Obsolete("Replaced with allSelectablesArray to have better performance when disabling a element", false)]
-        public static List<Selectable> allSelectables
-        {
-            get
-            {
-                return new List<Selectable>(allSelectablesArray);
-            }
-        }
-
-
-        /// <summary>
-        /// Non allocating version for getting the all selectables.
-        /// If selectables.Length is less then s_SelectableCount only selectables.Length elments will be copied which
-        /// could result in a incomplete list of elements.
-        /// </summary>
-        /// <param name="selectables">The array to be filled with current selectable objects</param>
-        /// <returns>The number of element copied.</returns>
-        /// <example>
-        /// <code>
-        /// using UnityEngine;
-        /// using System.Collections;
-        /// using UnityEngine.UI; // required when using UI elements in scripts
-        ///
-        /// public class Example : MonoBehaviour
-        /// {
-        ///     Selectable[] m_Selectables = new Selectable[10];
-        ///
-        ///     //Displays the names of all selectable elements in the scene
-        ///     public void GetNames()
-        ///     {
-        ///         if (m_Selectables.Length < Selectable.allSelectableCount)
-        ///             m_Selectables = new Selectable[Selectable.allSelectableCount];
-        ///
-        ///         int count = Selectable.AllSelectablesNoAlloc(ref m_Selectables);
-        ///
-        ///         for (int i = 0; i < count; ++i)
-        ///         {
-        ///             Debug.Log(m_Selectables[i].name);
-        ///         }
-        ///     }
-        /// }
-        /// </code>
-        /// </example>
-        public static int AllSelectablesNoAlloc(Selectable[] selectables)
-        {
-            if (s_IsDirty)
-                RemoveInvalidSelectables();
-
-            int copyCount = selectables.Length < s_SelectableCount ? selectables.Length : s_SelectableCount;
-
-            Array.Copy(s_Selectables, selectables, copyCount);
-
-            return copyCount;
-        }
+        public static List<Selectable> allSelectables { get { return s_List; } }
 
         // Navigation information.
         [FormerlySerializedAs("navigation")]
@@ -187,7 +108,8 @@ namespace UnityEngine.UI
 
 
         private bool m_GroupsAllowInteraction = true;
-        private bool m_WillRemove = false;
+
+        private SelectionState m_CurrentSelectionState;
 
         /// <summary>
         /// The Navigation setting for this selectable object.
@@ -358,6 +280,8 @@ namespace UnityEngine.UI
                 {
                     if (!m_Interactable && EventSystem.current != null && EventSystem.current.currentSelectedGameObject == gameObject)
                         EventSystem.current.SetSelectedGameObject(null);
+                    if (m_Interactable)
+                        UpdateSelectionState(null);
                     OnSetProperty();
                 }
             }
@@ -490,59 +414,36 @@ namespace UnityEngine.UI
         {
             base.OnEnable();
 
-            if (s_IsDirty)
-                RemoveInvalidSelectables();
+            s_List.Add(this);
+            var state = SelectionState.Normal;
 
-            m_WillRemove = false;
+            // The button will be highlighted even in some cases where it shouldn't.
+            // For example: We only want to set the State as Highlighted if the StandaloneInputModule.m_CurrentInputMode == InputMode.Buttons
+            // But we dont have access to this, and it might not apply to other InputModules.
+            // TODO: figure out how to solve this. Case 617348.
+            if (hasSelection)
+                state = SelectionState.Highlighted;
 
-            if (s_SelectableCount == s_Selectables.Length)
-            {
-                Selectable[] temp = new Selectable[s_Selectables.Length * 2];
-                Array.Copy(s_Selectables, temp, s_Selectables.Length);
-                s_Selectables = temp;
-            }
-            s_Selectables[s_SelectableCount++] = this;
-            isPointerDown = false;
-            DoStateTransition(currentSelectionState, true);
-        }
-
-        protected override void OnTransformParentChanged()
-        {
-            base.OnTransformParentChanged();
-
-            // If our parenting changes figure out if we are under a new CanvasGroup.
-            OnCanvasGroupChanged();
+            m_CurrentSelectionState = state;
+            InternalEvaluateAndTransitionToSelectionState(true);
         }
 
         private void OnSetProperty()
         {
 #if UNITY_EDITOR
             if (!Application.isPlaying)
-                DoStateTransition(currentSelectionState, true);
+                InternalEvaluateAndTransitionToSelectionState(true);
             else
 #endif
-            DoStateTransition(currentSelectionState, false);
+            InternalEvaluateAndTransitionToSelectionState(false);
         }
 
         // Remove from the list.
         protected override void OnDisable()
         {
-            m_WillRemove = true;
-            s_IsDirty = true;
-
+            s_List.Remove(this);
             InstantClearState();
             base.OnDisable();
-        }
-
-        private static void RemoveInvalidSelectables()
-        {
-            for (int i = s_SelectableCount - 1; i >= 0; --i)
-            {
-                // Swap last element in array with element to be removed
-                if (s_Selectables[i] == null || s_Selectables[i].m_WillRemove)
-                    s_Selectables[i] = s_Selectables[--s_SelectableCount];
-            }
-            s_IsDirty = false;
         }
 
 #if UNITY_EDITOR
@@ -566,7 +467,7 @@ namespace UnityEngine.UI
                 TriggerAnimation(m_AnimationTriggers.normalTrigger);
 
                 // And now go to the right state.
-                DoStateTransition(currentSelectionState, true);
+                InternalEvaluateAndTransitionToSelectionState(true);
             }
         }
 
@@ -579,18 +480,7 @@ namespace UnityEngine.UI
 
         protected SelectionState currentSelectionState
         {
-            get
-            {
-                if (!IsInteractable())
-                    return SelectionState.Disabled;
-                if (isPointerDown)
-                    return SelectionState.Pressed;
-                if (hasSelection)
-                    return SelectionState.Selected;
-                if (isPointerInside)
-                    return SelectionState.Highlighted;
-                return SelectionState.Normal;
-            }
+            get { return m_CurrentSelectionState; }
         }
 
         protected virtual void InstantClearState()
@@ -622,9 +512,6 @@ namespace UnityEngine.UI
         /// <param name="instant">Should the transition occur instantly.</param>
         protected virtual void DoStateTransition(SelectionState state, bool instant)
         {
-            if (!gameObject.activeInHierarchy)
-                return;
-
             Color tintColor;
             Sprite transitionSprite;
             string triggerName;
@@ -646,11 +533,6 @@ namespace UnityEngine.UI
                     transitionSprite = m_SpriteState.pressedSprite;
                     triggerName = m_AnimationTriggers.pressedTrigger;
                     break;
-                case SelectionState.Selected:
-                    tintColor = m_Colors.selectedColor;
-                    transitionSprite = m_SpriteState.selectedSprite;
-                    triggerName = m_AnimationTriggers.selectedTrigger;
-                    break;
                 case SelectionState.Disabled:
                     tintColor = m_Colors.disabledColor;
                     transitionSprite = m_SpriteState.disabledSprite;
@@ -663,17 +545,20 @@ namespace UnityEngine.UI
                     break;
             }
 
-            switch (m_Transition)
+            if (gameObject.activeInHierarchy)
             {
-                case Transition.ColorTint:
-                    StartColorTween(tintColor * m_Colors.colorMultiplier, instant);
-                    break;
-                case Transition.SpriteSwap:
-                    DoSpriteSwap(transitionSprite);
-                    break;
-                case Transition.Animation:
-                    TriggerAnimation(triggerName);
-                    break;
+                switch (m_Transition)
+                {
+                    case Transition.ColorTint:
+                        StartColorTween(tintColor * m_Colors.colorMultiplier, instant);
+                        break;
+                    case Transition.SpriteSwap:
+                        DoSpriteSwap(transitionSprite);
+                        break;
+                    case Transition.Animation:
+                        TriggerAnimation(triggerName);
+                        break;
+                }
             }
         }
 
@@ -698,14 +583,9 @@ namespace UnityEngine.UI
             Pressed,
 
             /// <summary>
-            /// The UI object is selected
-            /// </summary>
-            Selected,
-
-            /// <summary>
             /// The UI object cannot be selected.
             /// </summary>
-            Disabled,
+            Disabled
         }
 
         // Selection logic
@@ -747,15 +627,11 @@ namespace UnityEngine.UI
             Vector3 pos = transform.TransformPoint(GetPointOnRectEdge(transform as RectTransform, localDir));
             float maxScore = Mathf.NegativeInfinity;
             Selectable bestPick = null;
-
-            if (s_IsDirty)
-                RemoveInvalidSelectables();
-
-            for (int i = 0; i < s_SelectableCount; ++i)
+            for (int i = 0; i < s_List.Count; ++i)
             {
-                Selectable sel = s_Selectables[i];
+                Selectable sel = s_List[i];
 
-                if (sel == this)
+                if (sel == this || sel == null)
                     continue;
 
                 if (!sel.IsInteractable() || sel.navigation.mode == Navigation.Mode.None)
@@ -1040,9 +916,8 @@ namespace UnityEngine.UI
                 return;
 
             animator.ResetTrigger(m_AnimationTriggers.normalTrigger);
-            animator.ResetTrigger(m_AnimationTriggers.highlightedTrigger);
             animator.ResetTrigger(m_AnimationTriggers.pressedTrigger);
-            animator.ResetTrigger(m_AnimationTriggers.selectedTrigger);
+            animator.ResetTrigger(m_AnimationTriggers.highlightedTrigger);
             animator.ResetTrigger(m_AnimationTriggers.disabledTrigger);
 
             animator.SetTrigger(triggername);
@@ -1072,7 +947,7 @@ namespace UnityEngine.UI
         ///     void Update()
         ///     {
         ///         //Check if the GameObject is being highlighted
-        ///         if (IsHighlighted())
+        ///         if (IsHighlighted(m_BaseEvent) == true)
         ///         {
         ///             //Output that the GameObject was highlighted, or do something else
         ///             Debug.Log("Selectable is Highlighted");
@@ -1081,11 +956,34 @@ namespace UnityEngine.UI
         /// }
         /// </code>
         /// </example>
-        protected bool IsHighlighted()
+        protected bool IsHighlighted(BaseEventData eventData)
         {
-            if (!IsActive() || !IsInteractable())
+            if (!IsActive())
                 return false;
-            return isPointerInside && !isPointerDown && !hasSelection;
+
+            if (IsPressed())
+                return false;
+
+            bool selected = hasSelection;
+            if (eventData is PointerEventData)
+            {
+                var pointerData = eventData as PointerEventData;
+                selected |=
+                    (isPointerDown && !isPointerInside && pointerData.pointerPress == gameObject) // This object pressed, but pointer moved off
+                    || (!isPointerDown && isPointerInside && pointerData.pointerPress == gameObject) // This object pressed, but pointer released over (PointerUp event)
+                    || (!isPointerDown && isPointerInside && pointerData.pointerPress == null); // Nothing pressed, but pointer is over
+            }
+            else
+            {
+                selected |= isPointerInside;
+            }
+            return selected;
+        }
+
+        [Obsolete("Is Pressed no longer requires eventData", false)]
+        protected bool IsPressed(BaseEventData eventData)
+        {
+            return IsPressed();
         }
 
         /// <summary>
@@ -1093,18 +991,48 @@ namespace UnityEngine.UI
         /// </summary>
         protected bool IsPressed()
         {
-            if (!IsActive() || !IsInteractable())
+            if (!IsActive())
                 return false;
-            return isPointerDown;
+
+            return isPointerInside && isPointerDown;
+        }
+
+        /// <summary>
+        /// Internally update the selection state of the Selectable.
+        /// </summary>
+        protected void UpdateSelectionState(BaseEventData eventData)
+        {
+            if (IsPressed())
+            {
+                m_CurrentSelectionState = SelectionState.Pressed;
+                return;
+            }
+
+            if (IsHighlighted(eventData))
+            {
+                m_CurrentSelectionState = SelectionState.Highlighted;
+                return;
+            }
+
+            m_CurrentSelectionState = SelectionState.Normal;
         }
 
         // Change the button to the correct state
-        private void EvaluateAndTransitionToSelectionState()
+        private void EvaluateAndTransitionToSelectionState(BaseEventData eventData)
         {
             if (!IsActive() || !IsInteractable())
                 return;
 
-            DoStateTransition(currentSelectionState, false);
+            UpdateSelectionState(eventData);
+            InternalEvaluateAndTransitionToSelectionState(false);
+        }
+
+        private void InternalEvaluateAndTransitionToSelectionState(bool instant)
+        {
+            var transitionState = m_CurrentSelectionState;
+            if (IsActive() && !IsInteractable())
+                transitionState = SelectionState.Disabled;
+            DoStateTransition(transitionState, instant);
         }
 
         /// <summary>
@@ -1137,7 +1065,7 @@ namespace UnityEngine.UI
                 EventSystem.current.SetSelectedGameObject(gameObject, eventData);
 
             isPointerDown = true;
-            EvaluateAndTransitionToSelectionState();
+            EvaluateAndTransitionToSelectionState(eventData);
         }
 
         /// <summary>
@@ -1171,7 +1099,7 @@ namespace UnityEngine.UI
                 return;
 
             isPointerDown = false;
-            EvaluateAndTransitionToSelectionState();
+            EvaluateAndTransitionToSelectionState(eventData);
         }
 
         /// <summary>
@@ -1198,7 +1126,7 @@ namespace UnityEngine.UI
         public virtual void OnPointerEnter(PointerEventData eventData)
         {
             isPointerInside = true;
-            EvaluateAndTransitionToSelectionState();
+            EvaluateAndTransitionToSelectionState(eventData);
         }
 
         /// <summary>
@@ -1224,7 +1152,7 @@ namespace UnityEngine.UI
         public virtual void OnPointerExit(PointerEventData eventData)
         {
             isPointerInside = false;
-            EvaluateAndTransitionToSelectionState();
+            EvaluateAndTransitionToSelectionState(eventData);
         }
 
         /// <summary>
@@ -1250,7 +1178,7 @@ namespace UnityEngine.UI
         public virtual void OnSelect(BaseEventData eventData)
         {
             hasSelection = true;
-            EvaluateAndTransitionToSelectionState();
+            EvaluateAndTransitionToSelectionState(eventData);
         }
 
         /// <summary>
@@ -1275,7 +1203,7 @@ namespace UnityEngine.UI
         public virtual void OnDeselect(BaseEventData eventData)
         {
             hasSelection = false;
-            EvaluateAndTransitionToSelectionState();
+            EvaluateAndTransitionToSelectionState(eventData);
         }
 
         /// <summary>

@@ -93,9 +93,7 @@ namespace UnityEngine.UI
             if (CanvasUpdateRegistry.IsRebuildingGraphics() || CanvasUpdateRegistry.IsRebuildingLayout())
                 UpdateGeometry();
             else
-            {
                 SetAllDirty();
-            }
         }
 
         /// <summary>
@@ -660,7 +658,8 @@ namespace UnityEngine.UI
             // Apply the offset to the vertices
             IList<UIVertex> verts = cachedTextGenerator.verts;
             float unitsPerPixel = 1 / pixelsPerUnit;
-            int vertCount = verts.Count;
+            //Last 4 verts are always a new line... (\n)
+            int vertCount = verts.Count - 4;
 
             // We have no verts to process just return (case 1037923)
             if (vertCount <= 0)

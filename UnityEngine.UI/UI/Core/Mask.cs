@@ -138,7 +138,7 @@ namespace UnityEngine.UI
             var stencilDepth = MaskUtilities.GetStencilDepth(transform, rootSortCanvas);
             if (stencilDepth >= 8)
             {
-                Debug.LogWarning("Attempting to use a stencil mask with depth > 8", gameObject);
+                Debug.LogError("Attempting to use a stencil mask with depth > 8", gameObject);
                 return baseMaterial;
             }
 

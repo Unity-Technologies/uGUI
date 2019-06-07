@@ -97,7 +97,7 @@ namespace UnityEditor.UI
                 if (prefabStage != null && !prefabStage.IsPartOfPrefabContents(parent))
                     parent = prefabStage.prefabContentsRoot;
             }
-            if (parent.GetComponentsInParent<Canvas>(true).Length == 0)
+            if (parent.GetComponentInParent<Canvas>() == null)
             {
                 // Create canvas under context GameObject,
                 // and make that be the parent which UI element is added under.

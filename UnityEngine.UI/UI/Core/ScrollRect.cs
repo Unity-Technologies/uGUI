@@ -565,7 +565,6 @@ namespace UnityEngine.UI
             if (m_VerticalScrollbar)
                 m_VerticalScrollbar.onValueChanged.RemoveListener(SetVerticalNormalizedPosition);
 
-            m_Dragging = false;
             m_Scrolling = false;
             m_HasRebuiltLayout = false;
             m_Tracker.Clear();
@@ -744,9 +743,6 @@ namespace UnityEngine.UI
         /// </example>
         public virtual void OnDrag(PointerEventData eventData)
         {
-            if (!m_Dragging)
-                return;
-
             if (eventData.button != PointerEventData.InputButton.Left)
                 return;
 
@@ -1340,34 +1336,24 @@ namespace UnityEngine.UI
             Vector2 min = contentBounds.min;
             Vector2 max = contentBounds.max;
 
-            // min/max offset extracted to check if approximately 0 and avoid recalculating layout every frame (case 1010178)
-
             if (horizontal)
             {
                 min.x += delta.x;
                 max.x += delta.x;
-
-                float maxOffset = viewBounds.max.x - max.x;
-                float minOffset = viewBounds.min.x - min.x;
-
-                if (minOffset < -0.001f)
-                    offset.x = minOffset;
-                else if (maxOffset > 0.001f)
-                    offset.x = maxOffset;
+                if (min.x > viewBounds.min.x)
+                    offset.x = viewBounds.min.x - min.x;
+                else if (max.x < viewBounds.max.x)
+                    offset.x = viewBounds.max.x - max.x;
             }
 
             if (vertical)
             {
                 min.y += delta.y;
                 max.y += delta.y;
-
-                float maxOffset = viewBounds.max.y - max.y;
-                float minOffset = viewBounds.min.y - min.y;
-
-                if (maxOffset > 0.001f)
-                    offset.y = maxOffset;
-                else if (minOffset < -0.001f)
-                    offset.y = minOffset;
+                if (max.y < viewBounds.max.y)
+                    offset.y = viewBounds.max.y - max.y;
+                else if (min.y > viewBounds.min.y)
+                    offset.y = viewBounds.min.y - min.y;
             }
 
             return offset;

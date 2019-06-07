@@ -231,33 +231,11 @@ namespace UnityEngine.UI
             if (rect == null)
                 return;
 
-            SetChildAlongAxisWithScale(rect, axis, pos, 1.0f);
-        }
-
-        /// <summary>
-        /// Set the position and size of a child layout element along the given axis.
-        /// </summary>
-        /// <param name="rect">The RectTransform of the child layout element.</param>
-        /// <param name="axis">The axis to set the position and size along. 0 is horizontal and 1 is vertical.</param>
-        /// <param name="pos">The position from the left side or top.</param>
-        protected void SetChildAlongAxisWithScale(RectTransform rect, int axis, float pos, float scaleFactor)
-        {
-            if (rect == null)
-                return;
-
             m_Tracker.Add(this, rect,
                 DrivenTransformProperties.Anchors |
                 (axis == 0 ? DrivenTransformProperties.AnchoredPositionX : DrivenTransformProperties.AnchoredPositionY));
 
-            // Inlined rect.SetInsetAndSizeFromParentEdge(...) and refactored code in order to multiply desired size by scaleFactor.
-            // sizeDelta must stay the same but the size used in the calculation of the position must be scaled by the scaleFactor.
-
-            rect.anchorMin = Vector2.up;
-            rect.anchorMax = Vector2.up;
-
-            Vector2 anchoredPosition = rect.anchoredPosition;
-            anchoredPosition[axis] = (axis == 0) ? (pos + rect.sizeDelta[axis] * rect.pivot[axis] * scaleFactor) : (-pos - rect.sizeDelta[axis] * (1f - rect.pivot[axis]) * scaleFactor);
-            rect.anchoredPosition = anchoredPosition;
+            rect.SetInsetAndSizeFromParentEdge(axis == 0 ? RectTransform.Edge.Left : RectTransform.Edge.Top, pos, rect.sizeDelta[axis]);
         }
 
         /// <summary>
@@ -272,21 +250,6 @@ namespace UnityEngine.UI
             if (rect == null)
                 return;
 
-            SetChildAlongAxisWithScale(rect, axis, pos, size, 1.0f);
-        }
-
-        /// <summary>
-        /// Set the position and size of a child layout element along the given axis.
-        /// </summary>
-        /// <param name="rect">The RectTransform of the child layout element.</param>
-        /// <param name="axis">The axis to set the position and size along. 0 is horizontal and 1 is vertical.</param>
-        /// <param name="pos">The position from the left side or top.</param>
-        /// <param name="size">The size.</param>
-        protected void SetChildAlongAxisWithScale(RectTransform rect, int axis, float pos, float size, float scaleFactor)
-        {
-            if (rect == null)
-                return;
-
             m_Tracker.Add(this, rect,
                 DrivenTransformProperties.Anchors |
                 (axis == 0 ?
@@ -295,19 +258,7 @@ namespace UnityEngine.UI
                 )
             );
 
-            // Inlined rect.SetInsetAndSizeFromParentEdge(...) and refactored code in order to multiply desired size by scaleFactor.
-            // sizeDelta must stay the same but the size used in the calculation of the position must be scaled by the scaleFactor.
-
-            rect.anchorMin = Vector2.up;
-            rect.anchorMax = Vector2.up;
-
-            Vector2 sizeDelta = rect.sizeDelta;
-            sizeDelta[axis] = size;
-            rect.sizeDelta = sizeDelta;
-
-            Vector2 anchoredPosition = rect.anchoredPosition;
-            anchoredPosition[axis] = (axis == 0) ? (pos + size * rect.pivot[axis] * scaleFactor) : (-pos - size * (1f - rect.pivot[axis]) * scaleFactor);
-            rect.anchoredPosition = anchoredPosition;
+            rect.SetInsetAndSizeFromParentEdge(axis == 0 ? RectTransform.Edge.Left : RectTransform.Edge.Top, pos, size);
         }
 
         private bool isRootLayoutGroup
