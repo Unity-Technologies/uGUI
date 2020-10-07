@@ -2,6 +2,8 @@
 
 This document details how to get it up and running on your computer and start modifying the code!
 
+This repository is no longer being maintained and updated. uGUI source code as of 2019.2 is shipped as a package included with the Unity Editor. To locate the package look in the Unity Editor install directory Data\Resources\PackageManager\BuiltInPackages\com.unity.ugui
+
 ### What license is the UI system shipped under? ###
 Please see the LICENSE file.
 
