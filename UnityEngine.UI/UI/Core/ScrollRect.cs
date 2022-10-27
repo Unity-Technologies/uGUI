@@ -222,9 +222,6 @@ namespace UnityEngine.UI
         [SerializeField]
         private bool m_Inertia = true;
 
-        [SerializeField]
-        private float m_InertiaVelocityMultiplier = 10f;
-
         /// <summary>
         /// Should movement inertia be enabled?
         /// </summary>
@@ -232,6 +229,33 @@ namespace UnityEngine.UI
         /// Inertia means that the scrollrect content will keep scrolling for a while after being dragged. It gradually slows down according to the decelerationRate.
         /// </remarks>
         public bool inertia { get { return m_Inertia; } set { m_Inertia = value; } }
+
+        [SerializeField]
+        private float m_InertiaVelocityMultiplier = 10f; // Only used when inertia is enabled
+
+        /// <summary>
+        /// Multiplier of the velocity when moving due to inertia.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class ExampleClass : MonoBehaviour
+        /// {
+        ///     public ScrollRect myScrollRect;
+        ///
+        ///     public void Start()
+        ///     {
+        ///         // assigns a new value to the inertiaVelocityMultiplier of the scroll rect.
+        ///         // The higher the number the faster the initial speed.
+        ///         myScrollRect.inertiaVelocityMultiplier = 5.0f;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
+        public float inertiaVelocityMultiplier => m_InertiaVelocityMultiplier;
 
         [SerializeField]
         private float m_DecelerationRate = 0.135f; // Only used when inertia is enabled
