@@ -18,6 +18,7 @@ namespace UnityEditor.UI
         SerializedProperty m_MovementType;
         SerializedProperty m_Elasticity;
         SerializedProperty m_Inertia;
+        SerializedProperty m_InertiaVelocityMultiplier;
         SerializedProperty m_DecelerationRate;
         SerializedProperty m_ScrollSensitivity;
         SerializedProperty m_Viewport;
@@ -42,6 +43,7 @@ namespace UnityEditor.UI
             m_MovementType          = serializedObject.FindProperty("m_MovementType");
             m_Elasticity            = serializedObject.FindProperty("m_Elasticity");
             m_Inertia               = serializedObject.FindProperty("m_Inertia");
+            m_InertiaVelocityMultiplier     = serializedObject.FindProperty("m_InertiaVelocityMultiplier");
             m_DecelerationRate      = serializedObject.FindProperty("m_DecelerationRate");
             m_ScrollSensitivity     = serializedObject.FindProperty("m_ScrollSensitivity");
             m_Viewport              = serializedObject.FindProperty("m_Viewport");
@@ -121,6 +123,7 @@ namespace UnityEditor.UI
             if (EditorGUILayout.BeginFadeGroup(m_ShowDecelerationRate.faded))
             {
                 EditorGUI.indentLevel++;
+                EditorGUILayout.PropertyField(m_InertiaVelocityMultiplier);
                 EditorGUILayout.PropertyField(m_DecelerationRate);
                 EditorGUI.indentLevel--;
             }

@@ -222,6 +222,9 @@ namespace UnityEngine.UI
         [SerializeField]
         private bool m_Inertia = true;
 
+        [SerializeField]
+        private float m_InertiaVelocityMultiplier = 10f;
+
         /// <summary>
         /// Should movement inertia be enabled?
         /// </summary>
@@ -846,7 +849,7 @@ namespace UnityEngine.UI
             if (m_Dragging && m_Inertia)
             {
                 Vector3 newVelocity = (m_Content.anchoredPosition - m_PrevPosition) / deltaTime;
-                m_Velocity = Vector3.Lerp(m_Velocity, newVelocity, deltaTime * 10);
+                m_Velocity = Vector3.Lerp(m_Velocity, newVelocity, deltaTime * m_InertiaVelocityMultiplier);
             }
 
             if (m_ViewBounds != m_PrevViewBounds || m_ContentBounds != m_PrevContentBounds || m_Content.anchoredPosition != m_PrevPosition)
