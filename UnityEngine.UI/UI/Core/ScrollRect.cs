@@ -231,6 +231,33 @@ namespace UnityEngine.UI
         public bool inertia { get { return m_Inertia; } set { m_Inertia = value; } }
 
         [SerializeField]
+        private float m_InertiaVelocityMultiplier = 10f; // Only used when inertia is enabled
+
+        /// <summary>
+        /// Multiplier of the velocity when moving due to inertia.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when Using UI elements.
+        ///
+        /// public class ExampleClass : MonoBehaviour
+        /// {
+        ///     public ScrollRect myScrollRect;
+        ///
+        ///     public void Start()
+        ///     {
+        ///         // assigns a new value to the inertiaVelocityMultiplier of the scroll rect.
+        ///         // The higher the number the faster the initial speed.
+        ///         myScrollRect.inertiaVelocityMultiplier = 5.0f;
+        ///     }
+        /// }
+        /// </code>
+        /// </example>
+        public float inertiaVelocityMultiplier { get => m_InertiaVelocityMultiplier; set => m_InertiaVelocityMultiplier = value; }
+
+        [SerializeField]
         private float m_DecelerationRate = 0.135f; // Only used when inertia is enabled
 
         /// <summary>
@@ -846,7 +873,7 @@ namespace UnityEngine.UI
             if (m_Dragging && m_Inertia)
             {
                 Vector3 newVelocity = (m_Content.anchoredPosition - m_PrevPosition) / deltaTime;
-                m_Velocity = Vector3.Lerp(m_Velocity, newVelocity, deltaTime * 10);
+                m_Velocity = Vector3.Lerp(m_Velocity, newVelocity, deltaTime * m_InertiaVelocityMultiplier);
             }
 
             if (m_ViewBounds != m_PrevViewBounds || m_ContentBounds != m_PrevContentBounds || m_Content.anchoredPosition != m_PrevPosition)
