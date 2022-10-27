@@ -255,7 +255,7 @@ namespace UnityEngine.UI
         /// }
         /// </code>
         /// </example>
-        public float inertiaVelocityMultiplier => m_InertiaVelocityMultiplier;
+        public float inertiaVelocityMultiplier { get => m_InertiaVelocityMultiplier; set => m_InertiaVelocityMultiplier = value; }
 
         [SerializeField]
         private float m_DecelerationRate = 0.135f; // Only used when inertia is enabled
