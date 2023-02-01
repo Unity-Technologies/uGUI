@@ -583,7 +583,7 @@ namespace UnityEngine.UI
             {
                 if (!IsInteractable())
                     return SelectionState.Disabled;
-                if (isPointerDown)
+                if (isPointerDown && isPointerInside)
                     return SelectionState.Pressed;
                 if (hasSelection)
                     return SelectionState.Selected;
