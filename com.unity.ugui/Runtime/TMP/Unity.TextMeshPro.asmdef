@@ -1,0 +1,25 @@
+{
+    "name": "Unity.TextMeshPro",
+    "rootNamespace": "",
+    "references": ["GUID:343deaaf83e0cee4ca978e7df0b80d21","GUID:2bafac87e7f4b9b418d9448d219b01ab","GUID:0acc523941302664db1f4e527237feb3","GUID:27619889b8ba8c24980f49ee34dbb44a"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "Unity",
+            "expression": "[2022.3.16f1,2023.1)",
+            "define": "UNITY_XR_VISIONOS_SUPPORTED"
+        },
+        {
+            "name": "Unity",
+            "expression": "2023.3.0b4",
+            "define": "UNITY_XR_VISIONOS_SUPPORTED"
+        }
+    ],
+    "noEngineReferences": false
+}
