@@ -16,10 +16,19 @@ namespace InputfieldTests
     {
         protected const string kPrefabPath = "Assets/Resources/TouchInputFieldPrefab.prefab";
 
-        public void Setup()
+
+        void IPrebuildSetup.Setup()
         {
 #if UNITY_EDITOR
             CreateInputFieldAsset(kPrefabPath);
+#endif
+        }
+
+        [OneTimeSetUp]
+        public void Setup()
+        {
+#if UNITY_SWITCH && !UNITY_EDITOR
+            UnityEngine.Switch.TouchscreenKeyboard.useBackgroundThread = true;
 #endif
         }
 
@@ -46,6 +55,10 @@ namespace InputfieldTests
         {
 #if UNITY_EDITOR
             AssetDatabase.DeleteAsset(kPrefabPath);
+#endif
+
+#if UNITY_SWITCH && !UNITY_EDITOR
+            UnityEngine.Switch.TouchscreenKeyboard.useBackgroundThread = false;
 #endif
         }
 
@@ -194,6 +207,7 @@ namespace InputfieldTests
         }
 
         [UnityTest]
+        [UnityPlatform(exclude = new[] { RuntimePlatform.tvOS })] // UUM-71764 (tvOS)
         public IEnumerator SendsEndEditEventOnDeselect()
         {
             InputField inputField = m_PrefabRoot.GetComponentInChildren<InputField>();
@@ -240,6 +254,7 @@ namespace InputfieldTests
         }
 
         [UnityTest]
+        [UnityPlatform(exclude = new[] { RuntimePlatform.tvOS})] // UUM-71764 (tvOS)
         public IEnumerator FocusOpensTouchScreenKeyboard()
         {
             var isInPlaceEditingDisabled = typeof(TouchScreenKeyboard).GetProperty("disableInPlaceEditing",
@@ -251,7 +266,7 @@ namespace InputfieldTests
             InputField inputField = m_PrefabRoot.GetComponentInChildren<InputField>();
             BaseEventData eventData = new BaseEventData(m_PrefabRoot.GetComponentInChildren<EventSystem>());
 
-#if UNITY_GAMECORE && !UNITY_EDITOR
+#if (UNITY_GAMECORE || UNITY_SWITCH) && !UNITY_EDITOR
             do
             {
                 inputField.OnSelect(eventData);

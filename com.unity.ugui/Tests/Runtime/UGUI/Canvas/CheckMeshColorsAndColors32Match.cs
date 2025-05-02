@@ -66,6 +66,7 @@ public class CheckMeshColorsAndColors32Match
         GameObject.DestroyImmediate(m_ScreenTexture);
     }
 
+    [Ignore("UnityTest yielded WaitForEndOfFrame, which is not evoked in batchmode.")]
     [UnityTest]
     public IEnumerator CheckMeshColorsAndColors32Matches()
     {

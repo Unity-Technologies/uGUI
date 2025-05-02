@@ -30,6 +30,7 @@ public class RectTransformValidAfterEnable : IPrebuildSetup
 #endif
     }
 
+    [Ignore("UnityTest yielded WaitForEndOfFrame, which is not evoked in batchmode.")]
     [UnityTest]
     public IEnumerator CheckRectTransformValidAfterEnable()
     {

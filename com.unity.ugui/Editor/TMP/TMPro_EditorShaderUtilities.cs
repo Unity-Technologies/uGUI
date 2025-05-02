@@ -2,12 +2,13 @@
 using UnityEditor;
 using System.Linq;
 using System.Collections;
+using UnityEngine.Rendering;
 
 
 namespace TMPro.EditorUtilities
 {
 
-    public static class EditorShaderUtilities 
+    public static class EditorShaderUtilities
     {
 
         /// <summary>
@@ -24,22 +25,22 @@ namespace TMPro.EditorUtilities
                 int property_ID = Shader.PropertyToID(source_prop[i].name);
                 if (destination.HasProperty(property_ID))
                 {
-                    //Debug.Log(source_prop[i].name + "  Type:" + ShaderUtil.GetPropertyType(source.shader, i));
-                    switch (ShaderUtil.GetPropertyType(source.shader, i))
+                    //Debug.Log(source_prop[i].name + "  Type:" + source.shader.GetPropertyType(i));
+                    switch (source.shader.GetPropertyType(i))
                     {
-                        case ShaderUtil.ShaderPropertyType.Color:
-                            destination.SetColor(property_ID, source.GetColor(property_ID));                          
+                        case ShaderPropertyType.Color:
+                            destination.SetColor(property_ID, source.GetColor(property_ID));
                             break;
-                        case ShaderUtil.ShaderPropertyType.Float:
+                        case ShaderPropertyType.Float:
                             destination.SetFloat(property_ID, source.GetFloat(property_ID));
                             break;
-                        case ShaderUtil.ShaderPropertyType.Range:
+                        case ShaderPropertyType.Range:
                             destination.SetFloat(property_ID, source.GetFloat(property_ID));
                             break;
-                        case ShaderUtil.ShaderPropertyType.TexEnv:
+                        case ShaderPropertyType.Texture:
                             destination.SetTexture(property_ID, source.GetTexture(property_ID));
                             break;
-                        case ShaderUtil.ShaderPropertyType.Vector:
+                        case ShaderPropertyType.Vector:
                             destination.SetVector(property_ID, source.GetVector(property_ID));
                             break;
                     }
@@ -47,7 +48,7 @@ namespace TMPro.EditorUtilities
             }
 
         }
-      
+
     }
 
 }
