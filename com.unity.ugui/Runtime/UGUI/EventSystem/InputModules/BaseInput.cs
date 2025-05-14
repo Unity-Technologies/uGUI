@@ -84,6 +84,14 @@ namespace UnityEngine.EventSystems
         }
 
         /// <summary>
+        /// The magnitude of mouseScrollDelta that corresponds to exactly one tick of the scroll wheel.
+        /// </summary>
+        public virtual float mouseScrollDeltaPerTick
+        {
+            get { return 1.0f; }
+        }
+
+        /// <summary>
         /// Interface to Input.touchSupported. Can be overridden to provide custom input instead of using the Input class.
         /// </summary>
         public virtual bool touchSupported

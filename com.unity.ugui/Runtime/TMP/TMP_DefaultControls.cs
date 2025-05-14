@@ -87,7 +87,11 @@ namespace TMPro
             if (parent == null)
                 return;
 
+#if UNITY_EDITOR
+            Undo.SetTransformParent(child.transform, parent.transform, "");
+#else
             child.transform.SetParent(parent.transform, false);
+#endif
             SetLayerRecursively(child, parent.layer);
         }
 

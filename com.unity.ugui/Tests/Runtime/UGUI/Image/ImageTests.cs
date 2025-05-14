@@ -12,7 +12,8 @@ public class ImageTests
 
     GameObject m_CanvasGO;
     TestableImage m_Image;
-    private Texture2D m_defaultTexture;
+    private Texture2D m_DefaultTexture;
+    private static SecondarySpriteTexture [] s_EmptySecondaryTexArray = {};
 
     private bool m_dirtyLayout;
     private bool m_dirtyMaterial;
@@ -27,11 +28,18 @@ public class ImageTests
         m_Image.RegisterDirtyLayoutCallback(() => m_dirtyLayout = true);
         m_Image.RegisterDirtyMaterialCallback(() => m_dirtyMaterial = true);
 
-        m_defaultTexture = new Texture2D(Width, Height);
+        m_DefaultTexture = CreateTexture(Color.magenta);
+    }
+
+    Texture2D CreateTexture(Color color)
+    {
+        var tex = new Texture2D(Width, Height);
         Color[] colors = new Color[Width * Height];
         for (int i = 0; i < Width * Height; i++)
-            colors[i] = Color.magenta;
-        m_defaultTexture.Apply();
+            colors[i] = color;
+        tex.SetPixels(colors);
+        tex.Apply();
+        return tex;
     }
 
     [Test]
@@ -83,7 +91,7 @@ public class ImageTests
     [UnityTest]
     public IEnumerator Sprite_Layout()
     {
-        m_Image.sprite = Sprite.Create(m_defaultTexture, new Rect(0, 0, Width, Height), Vector2.zero);
+        m_Image.sprite = Sprite.Create(m_DefaultTexture, new Rect(0, 0, Width, Height), Vector2.zero);
         yield return null;
 
         m_Image.isGeometryUpdated = false;
@@ -108,12 +116,12 @@ public class ImageTests
     [UnityTest]
     public IEnumerator Sprite_Material()
     {
-        m_Image.sprite = Sprite.Create(m_defaultTexture, new Rect(0, 0, Width, Height), Vector2.zero);
+        m_Image.sprite = Sprite.Create(m_DefaultTexture, new Rect(0, 0, Width, Height), Vector2.zero);
         yield return null;
 
         m_Image.isGeometryUpdated = false;
         m_dirtyMaterial = false;
-        m_Image.sprite = Sprite.Create(m_defaultTexture, new Rect(0, 0, Width / 2, Height / 2), Vector2.zero);
+        m_Image.sprite = Sprite.Create(m_DefaultTexture, new Rect(0, 0, Width / 2, Height / 2), Vector2.zero);
         yield return new WaitUntil(() => m_Image.isGeometryUpdated);
 
         // validate that material change rebuild is not called
@@ -129,10 +137,134 @@ public class ImageTests
         Assert.IsTrue(m_dirtyMaterial);
     }
 
+    IEnumerator ValidateSecondaryTextures(SecondarySpriteTexture[] expectedSecondaryTextures)
+    {
+        yield return new WaitUntil(() => m_Image.isMaterialUpdated);
+
+        if (expectedSecondaryTextures.Length == 0)
+            Assert.Null(m_Image.secondaryTextures);
+        else
+        {
+            Assert.NotNull(m_Image.secondaryTextures);
+            Assert.AreEqual(expectedSecondaryTextures.Length, m_Image.secondaryTextures.Length);
+        }
+        Assert.AreEqual(expectedSecondaryTextures.Length, m_Image.canvasRenderer.GetSecondaryTextureCount());
+
+        for (int i = 0; i < expectedSecondaryTextures.Length; ++i)
+        {
+            Assert.AreEqual(expectedSecondaryTextures[i].name, m_Image.secondaryTextures[i].name);
+            Assert.AreEqual(expectedSecondaryTextures[i].texture, m_Image.secondaryTextures[i].texture);
+
+            // Canvas Renderer
+            Assert.AreEqual(expectedSecondaryTextures[i].name, m_Image.canvasRenderer.GetSecondaryTextureName(i));
+            Assert.AreEqual(expectedSecondaryTextures[i].texture, m_Image.canvasRenderer.GetSecondaryTexture(i));
+        }
+    }
+
+    [UnityTest]
+    public IEnumerator Sprite_NoSecondaryTextures()
+    {
+        var sprite = Sprite.Create(m_DefaultTexture, new Rect(0, 0, Width, Height), Vector2.zero);
+
+        m_dirtyMaterial = false;
+        m_Image.isMaterialUpdated = false;
+        m_Image.sprite = sprite;
+        Assert.IsTrue(m_dirtyMaterial);
+
+        yield return ValidateSecondaryTextures(s_EmptySecondaryTexArray);
+    }
+
+    [UnityTest]
+    public IEnumerator Sprite_SecondaryTextures()
+    {
+        var secondaryTextures = new[]
+        {
+            new SecondarySpriteTexture()
+            {
+                name = "_MaskTex",
+                texture = CreateTexture(Color.red)
+            },
+            new SecondarySpriteTexture()
+            {
+                name = "_GlowTex",
+                texture = CreateTexture(Color.yellow)
+            }
+        };
+
+        var sprite = Sprite.Create(m_DefaultTexture, new Rect(0, 0, Width, Height), Vector2.zero, 100, 0, SpriteMeshType.FullRect, Vector4.zero, false, secondaryTextures);
+
+        m_dirtyMaterial = false;
+        m_Image.isMaterialUpdated = false;
+        m_Image.sprite = sprite;
+        Assert.IsTrue(m_dirtyMaterial);
+
+        yield return ValidateSecondaryTextures(secondaryTextures);
+    }
+
+    [UnityTest]
+    public IEnumerator Sprite_SecondaryTexturesUpdatedAfterSpriteChanged()
+    {
+        var spriteWithNoSecTex = Sprite.Create(m_DefaultTexture, new Rect(0, 0, Width, Height), Vector2.zero);
+
+        m_dirtyMaterial = false;
+        m_Image.isMaterialUpdated = false;
+        m_Image.sprite = spriteWithNoSecTex;
+        Assert.IsTrue(m_dirtyMaterial);
+
+        yield return ValidateSecondaryTextures(s_EmptySecondaryTexArray);
+
+        var twoSecondaryTextures = new[]
+        {
+            new SecondarySpriteTexture()
+            {
+                name = "_MaskTex",
+                texture = CreateTexture(Color.red)
+            },
+            new SecondarySpriteTexture()
+            {
+                name = "_GlowTex",
+                texture = CreateTexture(Color.yellow)
+            }
+        };
+
+        var spriteWithTwoSecTexs = Sprite.Create(m_DefaultTexture, new Rect(0, 0, Width, Height), Vector2.zero, 100, 0, SpriteMeshType.FullRect, Vector4.zero, false, twoSecondaryTextures);
+
+        m_dirtyMaterial = false;
+        m_Image.isMaterialUpdated = false;
+        m_Image.sprite = spriteWithTwoSecTexs;
+        Assert.IsTrue(m_dirtyMaterial);
+
+        yield return ValidateSecondaryTextures(twoSecondaryTextures);
+
+        var oneSecondaryTexture = new[]
+        {
+            new SecondarySpriteTexture()
+            {
+                name = "_MaskTex",
+                texture = CreateTexture(Color.red)
+            }
+        };
+        var spriteWithOneSecTex = Sprite.Create(m_DefaultTexture, new Rect(0, 0, Width, Height), Vector2.zero, 100, 0,
+            SpriteMeshType.FullRect, Vector4.zero, false, oneSecondaryTexture);
+
+        m_dirtyMaterial = false;
+        m_Image.isMaterialUpdated = false;
+        m_Image.sprite = spriteWithOneSecTex;
+        Assert.IsTrue(m_dirtyMaterial);
+
+        yield return ValidateSecondaryTextures(oneSecondaryTexture);
+
+        m_Image.isMaterialUpdated = false;
+        m_Image.sprite = spriteWithNoSecTex;
+        Assert.IsTrue(m_dirtyMaterial);
+
+        yield return ValidateSecondaryTextures(s_EmptySecondaryTexArray);
+    }
+
     [TearDown]
     public void TearDown()
     {
         GameObject.DestroyImmediate(m_CanvasGO);
-        GameObject.DestroyImmediate(m_defaultTexture);
+        GameObject.DestroyImmediate(m_DefaultTexture);
     }
 }

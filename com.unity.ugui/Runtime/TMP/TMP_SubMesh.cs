@@ -558,15 +558,7 @@ namespace TMPro
         /// </summary>
         public void SetVerticesDirty()
         {
-            if (!this.enabled)
-                return;
-
-            // This is called on the parent TextMeshPro component.
-            if (m_TextComponent != null)
-            {
-                m_TextComponent.havePropertiesChanged = true;
-                m_TextComponent.SetVerticesDirty();
-            }
+            // Do nothing as updates of the text are driven by the parent text component
         }
 
 

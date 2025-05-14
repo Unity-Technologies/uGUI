@@ -229,7 +229,7 @@ namespace UnityEngine.EventSystems
         /// <seealso cref="UnityEngine.UIElements.IPointerEvent" />
         public float twist { get; set; }
         /// <summary>
-        /// Specifies the angle of the pen relative to the X & Y axis, in radians.
+        /// Specifies the angle of the pen relative to the X &amp; Y axis, in radians.
         /// </summary>
         /// <seealso cref="UnityEngine.UIElements.IPointerEvent" />
         public Vector2 tilt { get; set; }

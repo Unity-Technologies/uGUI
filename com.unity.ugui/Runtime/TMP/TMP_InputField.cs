@@ -17,7 +17,11 @@ namespace TMPro
     /// Editable text input field.
     /// </summary>
     [AddComponentMenu("UI/TextMeshPro - Input Field", 11)]
+        #if UNITY_2023_2_OR_NEWER
+    [HelpURL("https://docs.unity3d.com/Packages/com.unity.ugui@2.0/manual/TextMeshPro/index.html")]
+    #else
     [HelpURL("https://docs.unity3d.com/Packages/com.unity.textmeshpro@3.2")]
+    #endif
     public class TMP_InputField : Selectable,
         IUpdateSelectedHandler,
         IBeginDragHandler,
@@ -1532,6 +1536,7 @@ namespace TMPro
             switch (platform)
             {
                 case RuntimePlatform.Android:
+                case RuntimePlatform.WebGLPlayer:
                     if (s_IsQuestDevice)
                         return TouchScreenKeyboard.isSupported;
 
@@ -1550,8 +1555,8 @@ namespace TMPro
             if (m_HideMobileInput && m_SoftKeyboard != null && m_SoftKeyboard.canSetSelection &&
                 (Application.platform == RuntimePlatform.IPhonePlayer || Application.platform == RuntimePlatform.tvOS))
             {
-                var selectionStart = Mathf.Min(caretSelectPositionInternal, caretPositionInternal);
-                var selectionLength = Mathf.Abs(caretSelectPositionInternal - caretPositionInternal);
+                var selectionStart = Mathf.Min(stringSelectPositionInternal, stringPositionInternal);
+                var selectionLength = Mathf.Abs(stringSelectPositionInternal - stringPositionInternal);
                 m_SoftKeyboard.selection = new RangeInt(selectionStart, selectionLength);
             }
         }
@@ -1822,8 +1827,8 @@ namespace TMPro
             else if (m_HideMobileInput && m_SoftKeyboard != null && m_SoftKeyboard.canSetSelection &&
                      Application.platform != RuntimePlatform.IPhonePlayer && Application.platform != RuntimePlatform.tvOS)
             {
-                var selectionStart = Mathf.Min(caretSelectPositionInternal, caretPositionInternal);
-                var selectionLength = Mathf.Abs(caretSelectPositionInternal - caretPositionInternal);
+                var selectionStart = Mathf.Min(stringSelectPositionInternal, stringPositionInternal);
+                var selectionLength = Mathf.Abs(stringSelectPositionInternal - stringPositionInternal);
                 m_SoftKeyboard.selection = new RangeInt(selectionStart, selectionLength);
             }
             else if (m_HideMobileInput && Application.platform == RuntimePlatform.Android ||
@@ -3305,6 +3310,9 @@ namespace TMPro
 
                 if (input == 0) return;
 
+                if (!char.IsHighSurrogate(input))
+                    m_CaretSelectPosition = m_CaretPosition += 1;
+
                 SendOnValueChanged();
                 UpdateLabel();
 
@@ -4182,6 +4190,9 @@ namespace TMPro
 
                     var separator = Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator;
                     if (ch == Convert.ToChar(separator) && characterValidation == CharacterValidation.Decimal && !text.Contains(separator)) return ch;
+
+                    //Some keyboards including Samsung require double tapping a . to get a - this allows these keyboards to input negative integers
+                    if (characterValidation == CharacterValidation.Integer && ch == '.' && (pos == 0 || selectionAtStart)) return '-';
                 }
             }
             else if (characterValidation == CharacterValidation.Digit)
@@ -4514,7 +4525,7 @@ namespace TMPro
                     {
                         m_LineType = LineType.SingleLine;
                         m_InputType = InputType.Standard;
-                        m_KeyboardType = TouchScreenKeyboardType.NumberPad;
+                        m_KeyboardType = TouchScreenKeyboardType.NumbersAndPunctuation;
                         m_CharacterValidation = CharacterValidation.Integer;
                         break;
                     }

@@ -2,7 +2,8 @@
 using UnityEngine;
 using UnityEngine.TextCore.Text;
 using UnityEditor;
-
+using UnityEngine.TextCore.LowLevel;
+using UnityEngine.TextCore.Text;
 
 namespace TMPro.EditorUtilities
 {
@@ -407,6 +408,29 @@ namespace TMPro.EditorUtilities
             fontAsset.ClearCharacterAndGlyphTablesInternal();
 
             TextEventManager.ON_FONT_PROPERTY_CHANGED(true, fontAsset);
+
+        [MenuItem("CONTEXT/TMP_FontAsset/Reset FaceInfo", priority = 101)]
+        static void ResetFaceInfo(MenuCommand command)
+        {
+            TMP_FontAsset fontAsset = command.context as TMP_FontAsset;
+
+            if (fontAsset == null)
+                return;
+
+            if (Selection.activeObject != fontAsset)
+                Selection.activeObject = fontAsset;
+
+            if (fontAsset.LoadFontFace() != FontEngineError.Success)
+                return;
+
+            fontAsset.faceInfo = FontEngine.GetFaceInfo();
+            TextResourceManager.RebuildFontAssetCache();
+            TextEventManager.ON_FONT_PROPERTY_CHANGED(true, fontAsset);
+
+            EditorUtility.SetDirty(fontAsset);
+            AssetDatabase.SaveAssetIfDirty(fontAsset);
+            AssetDatabase.Refresh();
+        }
 
         /// <summary>
         /// Import all font features
