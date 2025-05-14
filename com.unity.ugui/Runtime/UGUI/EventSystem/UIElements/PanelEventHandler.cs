@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace UnityEngine.UIElements
 {
-    // This code is disabled unless the UI Toolkit package or the com.unity.modules.uielements module are present.
+    // This code is disabled unless the com.unity.modules.uielements module is present.
     // The UIElements module is always present in the Editor but it can be stripped from a project build if unused.
 #if PACKAGE_UITOOLKIT
     /// <summary>
@@ -124,6 +124,7 @@ namespace UnityEngine.UIElements
 
             using (var e = PointerMoveEvent.GetPooled(m_PointerEvent))
             {
+                UpdatePointerEventTarget(e, m_PointerEvent);
                 SendEvent(e, eventData);
             }
         }
@@ -135,10 +136,11 @@ namespace UnityEngine.UIElements
 
             using (var e = PointerUpEvent.GetPooled(m_PointerEvent))
             {
+                UpdatePointerEventTarget(e, m_PointerEvent);
                 SendEvent(e, eventData);
 
                 if (e.pressedButtons == 0)
-                    PointerDeviceState.SetPlayerPanelWithSoftPointerCapture(e.pointerId, null);
+                    PointerDeviceState.SetElementWithSoftPointerCapture(e.pointerId, null, null);
             }
         }
 
@@ -152,16 +154,21 @@ namespace UnityEngine.UIElements
 
             using (var e = PointerDownEvent.GetPooled(m_PointerEvent))
             {
+                UpdatePointerEventTarget(e, m_PointerEvent);
                 SendEvent(e, eventData);
 
-                PointerDeviceState.SetPlayerPanelWithSoftPointerCapture(e.pointerId, m_Panel);
+                PointerDeviceState.SetElementWithSoftPointerCapture(e.pointerId, e.elementTarget, eventData.pressEventCamera);
             }
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
             if (m_Panel == null || !ReadPointerData(m_PointerEvent, eventData))
+            {
+                if (m_Panel is { isFlat: false })
+                    m_Panel.PointerLeavesPanel(m_PointerEvent.pointerId);
                 return;
+            }
 
             // If a pointer exit is called while the pointer is still on top of this object, it means
             // there's something else removing the pointer, so we might need to send a PointerCancelEvent.
@@ -173,14 +180,15 @@ namespace UnityEngine.UIElements
             {
                 using (var e = PointerCancelEvent.GetPooled(m_PointerEvent))
                 {
+                    UpdatePointerEventTarget(e, m_PointerEvent);
                     SendEvent(e, eventData);
 
                     if (e.pressedButtons == 0)
-                        PointerDeviceState.SetPlayerPanelWithSoftPointerCapture(e.pointerId, null);
+                        PointerDeviceState.SetElementWithSoftPointerCapture(e.pointerId, null, null);
                 }
             }
 
-            m_Panel.PointerLeavesPanel(m_PointerEvent.pointerId, m_PointerEvent.position);
+            m_Panel.PointerLeavesPanel(m_PointerEvent.pointerId);
         }
 
         public void OnPointerEnter(PointerEventData eventData)
@@ -384,12 +392,22 @@ namespace UnityEngine.UIElements
 
             pe.Read(this, eventData, eventType);
 
-            // PointerEvents making it this far have been validated by PanelRaycaster already
-            m_Panel.ScreenToPanel(pe.position, pe.deltaPosition,
-                out var panelPosition, out var panelDelta, allowOutside:true);
+            if (!pe.ComputeTarget(m_Panel))
+                return false;
 
-            pe.SetPosition(panelPosition, panelDelta);
             return true;
+        }
+
+        private void UpdatePointerEventTarget<TPointerEvent>(TPointerEvent e, PointerEvent eventData)
+            where TPointerEvent : PointerEventBase<TPointerEvent>, new()
+        {
+            e.target = eventData.elementTarget;
+
+            if (!m_Panel.isFlat)
+            {
+                // World-space panels set their top element manually instead of using RecomputeElementUnderPointer.
+                m_Panel.SetTopElementUnderPointer(eventData.pointerId, eventData.elementUnderPointer, e);
+            }
         }
 
         private UIElements.NavigationDeviceType GetDeviceType(BaseEventData eventData)
@@ -438,6 +456,13 @@ namespace UnityEngine.UIElements
                 ? commandKey
                 : ctrlKey;
 
+            public Vector3 screenPosition { get; private set; }
+            public Vector3 screenDelta { get; private set; }
+            public Ray worldRay { get; private set; }
+            public UIDocument document { get; private set; }
+            public VisualElement elementTarget { get; private set; }
+            public VisualElement elementUnderPointer { get; private set; }
+
             public void Read(PanelEventHandler self, PointerEventData eventData, PointerEventType eventType)
             {
                 pointerId = self.eventSystem.currentInputModule.ConvertUIToolkitPointerId(eventData);
@@ -473,8 +498,8 @@ namespace UnityEngine.UIElements
                 eventPosition.y = h - eventPosition.y;
                 delta.y = -delta.y;
 
-                localPosition = position = eventPosition;
-                deltaPosition = delta;
+                screenPosition = eventPosition;
+                screenDelta = delta;
 
                 deltaTime = 0; //TODO: find out what's expected here. Time since last frame? Since last sent event?
                 pressure = eventData.pressure;
@@ -520,12 +545,47 @@ namespace UnityEngine.UIElements
                 }
 
                 pressedButtons = PointerDeviceState.GetPressedButtons(pointerId);
+
+                var origin = eventData.pointerCurrentRaycast.origin;
+                worldRay = new Ray(origin, eventData.pointerCurrentRaycast.worldPosition - origin);
+                document = eventData.pointerCurrentRaycast.document;
+                elementUnderPointer = eventData.pointerCurrentRaycast.element;
             }
 
-            public void SetPosition(Vector3 positionOverride, Vector3 deltaOverride)
+            public bool ComputeTarget(BaseRuntimePanel panel)
             {
-                localPosition = position = positionOverride;
-                deltaPosition = deltaOverride;
+                Vector3 panelPosition;
+                if (panel.isFlat)
+                {
+                    // PointerEvents making it this far have been validated by PanelRaycaster already
+                    panel.ScreenToPanel(screenPosition, screenDelta,
+                        out panelPosition, allowOutside:true);
+                    elementTarget = null;
+                }
+                else
+                {
+                    if (document == null)
+                        return false;
+
+                    var capturingElement = RuntimePanel.s_EventDispatcher.pointerState.GetCapturingElement(pointerId) as VisualElement;
+                    if (capturingElement != null && capturingElement.panel != panel)
+                        return false;
+
+                    elementTarget = capturingElement ?? elementUnderPointer ?? document.rootVisualElement;
+                    panelPosition = GetPanelPosition(elementTarget, document, worldRay);
+                }
+
+                localPosition = position = panelPosition;
+                deltaPosition = PointerDeviceState.GetPointerDeltaPosition(pointerId, ContextType.Player, position);
+                return true;
+            }
+
+            Vector3 GetPanelPosition(VisualElement pickedElement, UIDocument document, Ray worldRay)
+            {
+                var documentRay = document.transform.worldToLocalMatrix.TransformRay(worldRay);
+                pickedElement.IntersectWorldRay(documentRay, out var distanceWithinDocument, out _);
+                var documentPoint = documentRay.origin + documentRay.direction * distanceWithinDocument;
+                return documentPoint;
             }
         }
     }

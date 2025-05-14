@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace UnityEngine.UIElements
 {
-    // This code is disabled unless the UI Toolkit package or the com.unity.modules.uielements module are present.
+    // This code is disabled unless the com.unity.modules.uielements module is present.
     // The UIElements module is always present in the Editor but it can be stripped from a project build if unused.
 #if PACKAGE_UITOOLKIT
     /// <summary>
@@ -62,19 +62,16 @@ namespace UnityEngine.UIElements
         public override int sortOrderPriority => Mathf.FloorToInt(m_Panel?.sortingPriority ?? 0f);
         public override int renderOrderPriority => int.MaxValue - (UIElementsRuntimeUtility.s_ResolvedSortingIndexMax - (m_Panel?.resolvedSortingIndex ?? 0));
 
+        private static ScreenOverlayPanelPicker panelPicker = new ScreenOverlayPanelPicker();
+
         public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
         {
-            if (m_Panel == null)
+            if (m_Panel == null || !m_Panel.isFlat)
                 return;
 
             var displayIndex = m_Panel.targetDisplay;
 
             Vector3 eventPosition = MultipleDisplayUtilities.GetRelativeMousePositionForRaycast(eventData);
-
-            // Discard events that are not part of this display so the user does not interact with multiple displays at once.
-            if ((int) eventPosition.z != displayIndex)
-                return;
-
             var position = eventPosition;
             var delta = eventData.delta;
 
@@ -92,28 +89,13 @@ namespace UnityEngine.UIElements
             position.y = h - position.y;
             delta.y = -delta.y;
 
-            var eventSystem = UIElementsRuntimeUtility.activeEventSystem as EventSystem;
-            if (eventSystem == null || eventSystem.currentInputModule == null)
+            var currentInputModule = eventData.currentInputModule;
+            if (currentInputModule == null)
                 return;
-            var pointerId = eventSystem.currentInputModule.ConvertUIToolkitPointerId(eventData);
+            var pointerId = currentInputModule.ConvertUIToolkitPointerId(eventData);
 
-            var capturingElement = m_Panel.GetCapturingElement(pointerId);
-            if (capturingElement is VisualElement ve && ve.panel != m_Panel)
+            if (!panelPicker.TryPick((RuntimePanel)m_Panel, pointerId, position, delta, (int)eventPosition.z, out _))
                 return;
-
-            var capturingPanel = PointerDeviceState.GetPlayerPanelWithSoftPointerCapture(pointerId);
-            if (capturingPanel != null && capturingPanel != m_Panel)
-                return;
-
-            if (capturingElement == null && capturingPanel == null)
-            {
-                if (!m_Panel.ScreenToPanel(position, delta, out var panelPosition, out _))
-                    return;
-
-                var pick = m_Panel.Pick(panelPosition, pointerId);
-                if (pick == null)
-                    return;
-            }
 
             resultAppendList.Add(new RaycastResult
             {

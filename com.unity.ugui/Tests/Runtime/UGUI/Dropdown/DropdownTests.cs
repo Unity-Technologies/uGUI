@@ -155,7 +155,7 @@ public class DropdownTests : IPrebuildSetup
 
         SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
         SerializedProperty sortingLayers = tagManager.FindProperty("m_SortingLayers");
-        sortingLayers.DeleteArrayElementAtIndex(sortingLayers.arraySize);
+        sortingLayers.DeleteArrayElementAtIndex(sortingLayers.arraySize - 1);
         tagManager.ApplyModifiedProperties();
 #endif
     }

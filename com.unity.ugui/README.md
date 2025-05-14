@@ -13,4 +13,3 @@ No additional investment is planned, and we do **not** intend to merge it into t
 
 ## Getting Started
 The full Unity UI manual is available in the [Unity Documentation](https://docs.unity3d.com/Manual/UISystem.html).
-

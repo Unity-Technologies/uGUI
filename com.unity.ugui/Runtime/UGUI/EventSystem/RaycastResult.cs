@@ -1,3 +1,5 @@
+using UnityEngine.UIElements;
+
 namespace UnityEngine.EventSystems
 {
     /// <summary>
@@ -77,6 +79,11 @@ namespace UnityEngine.EventSystems
         public int sortingOrder;
 
         /// <summary>
+        /// The world position of the raycast ray origin.
+        /// </summary>
+        public Vector3 origin;
+
+        /// <summary>
         /// The world position of the where the raycast has hit.
         /// </summary>
         public Vector3 worldPosition;
@@ -104,6 +111,24 @@ namespace UnityEngine.EventSystems
             get { return module != null && gameObject != null; }
         }
 
+        // This code is disabled unless the com.unity.modules.uielements module is present.
+        // The UIElements module is always present in the Editor but it can be stripped from a project build if unused.
+#if PACKAGE_UITOOLKIT
+        /// <summary>
+        /// The UIToolkit Document that was intersected by this raycast, if any.
+        /// </summary>
+        /// <remarks>This is only useful in the context of EventSystem UI Toolkit interoperability.</remarks>
+        /// <seealso cref="UnityEngine.UIElements.EventSystemUIToolkitInteroperabilityBridge"/>
+        public UIDocument document;
+
+        /// <summary>
+        /// The UIToolkit Visual Element that was intersected by this raycast, if any.
+        /// </summary>
+        /// <remarks>This is only useful in the context of EventSystem UI Toolkit interoperability.</remarks>
+        /// <seealso cref="UnityEngine.UIElements.EventSystemUIToolkitInteroperabilityBridge"/>
+        public VisualElement element;
+#endif
+
         /// <summary>
         /// Reset the result.
         /// </summary>
@@ -116,9 +141,15 @@ namespace UnityEngine.EventSystems
             depth = 0;
             sortingLayer = 0;
             sortingOrder = 0;
+            origin = Vector3.zero;
             worldNormal = Vector3.up;
             worldPosition = Vector3.zero;
             screenPosition = Vector3.zero;
+            displayIndex = 0;
+#if PACKAGE_UITOOLKIT
+            document = null;
+            element = null;
+#endif
         }
 
         public override string ToString()

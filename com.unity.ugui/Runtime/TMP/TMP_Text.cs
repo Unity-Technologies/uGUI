@@ -20,13 +20,13 @@ namespace TMPro
         void Rebuild(CanvasUpdate update);
         int GetInstanceID();
     }
-    
+
     public static class FontWeightExtensions
     {
         public static TextFontWeight ToTextFontWeight(this FontWeight weight)
             => (TextFontWeight)(int)weight;
     }
-    
+
     public static class FontStyleExtensions
     {
         /// <summary>

@@ -63,8 +63,8 @@ namespace TMPro
         /// </summary>
         private static Character GetCharacterFromFontAsset_Internal(uint unicode, FontAsset sourceFontAsset, bool includeFallbacks, FontStyles fontStyle, FontWeight fontWeight, out bool isAlternativeTypeface)
         {
-            isAlternativeTypeface = false; 
-            Character character;
+            isAlternativeTypeface = false;
+            Character character = null;
 
             #region FONT WEIGHT AND FONT STYLE HANDLING
             // Determine if a font weight or style is used. If so check if an alternative typeface is assigned for the given weight and / or style.

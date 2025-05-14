@@ -16,10 +16,19 @@ namespace InputfieldTests
     {
         protected const string kPrefabPath = "Assets/Resources/TouchInputFieldPrefab.prefab";
 
-        public void Setup()
+
+        void IPrebuildSetup.Setup()
         {
 #if UNITY_EDITOR
             CreateInputFieldAsset(kPrefabPath);
+#endif
+        }
+
+        [OneTimeSetUp]
+        public void Setup()
+        {
+#if UNITY_SWITCH && !UNITY_EDITOR
+            UnityEngine.Switch.TouchscreenKeyboard.useBackgroundThread = true;
 #endif
         }
 
@@ -46,6 +55,10 @@ namespace InputfieldTests
         {
 #if UNITY_EDITOR
             AssetDatabase.DeleteAsset(kPrefabPath);
+#endif
+
+#if UNITY_SWITCH && !UNITY_EDITOR
+            UnityEngine.Switch.TouchscreenKeyboard.useBackgroundThread = false;
 #endif
         }
 
@@ -75,7 +88,6 @@ namespace InputfieldTests
         }
 
         [Test]
-        [UnityPlatform(exclude = new[] { RuntimePlatform.Switch })] //   PLAT-11124 (Switch)
         [TestCase("*Azé09", "*Azé09", InputField.CharacterValidation.None)]
         [TestCase("*Azé09?.", "Az09", InputField.CharacterValidation.Alphanumeric)]
         [TestCase("Abc10x", "10", InputField.CharacterValidation.Integer)]
@@ -106,7 +118,6 @@ namespace InputfieldTests
         }
 
         [UnityTest]
-        [UnityPlatform(exclude = new[] { RuntimePlatform.Switch })] //   PLAT-11127 (Switch)
         [TestCase("*Azé09", "*Azé09", InputField.CharacterValidation.None, ExpectedResult = null)]
         [TestCase("*Azé09?.", "Az09", InputField.CharacterValidation.Alphanumeric, ExpectedResult = null)]
         [TestCase("Abc10x", "10", InputField.CharacterValidation.Integer, ExpectedResult = null)]
@@ -196,7 +207,7 @@ namespace InputfieldTests
         }
 
         [UnityTest]
-        [UnityPlatform(exclude = new[] { RuntimePlatform.tvOS, RuntimePlatform.Switch })] // UUM-71764 (tvOS)  PLAT-11128 (Switch)
+        [UnityPlatform(exclude = new[] { RuntimePlatform.tvOS })] // UUM-71764 (tvOS)
         public IEnumerator SendsEndEditEventOnDeselect()
         {
             InputField inputField = m_PrefabRoot.GetComponentInChildren<InputField>();
@@ -243,7 +254,7 @@ namespace InputfieldTests
         }
 
         [UnityTest]
-        [UnityPlatform(exclude = new[] { RuntimePlatform.tvOS, RuntimePlatform.Switch })] // UUM-71764 (tvOS) PLAT-11119 (Switch)
+        [UnityPlatform(exclude = new[] { RuntimePlatform.tvOS})] // UUM-71764 (tvOS)
         public IEnumerator FocusOpensTouchScreenKeyboard()
         {
             var isInPlaceEditingDisabled = typeof(TouchScreenKeyboard).GetProperty("disableInPlaceEditing",
@@ -255,7 +266,7 @@ namespace InputfieldTests
             InputField inputField = m_PrefabRoot.GetComponentInChildren<InputField>();
             BaseEventData eventData = new BaseEventData(m_PrefabRoot.GetComponentInChildren<EventSystem>());
 
-#if UNITY_GAMECORE && !UNITY_EDITOR
+#if (UNITY_GAMECORE || UNITY_SWITCH) && !UNITY_EDITOR
             do
             {
                 inputField.OnSelect(eventData);
