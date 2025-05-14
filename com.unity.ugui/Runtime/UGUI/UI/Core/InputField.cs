@@ -3011,6 +3011,8 @@ namespace UnityEngine.UI
                     if (ch >= '0' && ch <= '9') return ch;
                     if (ch == '-' && (pos == 0 || selectionAtStart)) return ch;
                     if ((ch == '.' || ch == ',') && characterValidation == CharacterValidation.Decimal && text.IndexOfAny(new[] { '.', ',' }) == -1) return ch;
+                    //Some keyboards including Samsung require double tapping a . to get a - this allows these keyboards to input negative integers
+                    if (characterValidation == CharacterValidation.Integer && ch == '.' && (pos == 0 || selectionAtStart)) return '-';
                 }
             }
             else if (characterValidation == CharacterValidation.Alphanumeric)
@@ -3309,7 +3311,7 @@ namespace UnityEngine.UI
                 {
                     m_LineType = LineType.SingleLine;
                     m_InputType = InputType.Standard;
-                    m_KeyboardType = TouchScreenKeyboardType.NumberPad;
+                    m_KeyboardType = TouchScreenKeyboardType.NumbersAndPunctuation;
                     m_CharacterValidation = CharacterValidation.Integer;
                     break;
                 }

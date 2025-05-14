@@ -16,16 +16,18 @@ namespace TMPro
         bool m_ExamplesAndExtrasResourcesImported;
         bool m_EssentialResourcesNeedUpdate;
         bool m_ExamplesAndExtrasNeedUpdate;
+        bool m_LogErrors;
         internal bool m_IsImportingExamples;
 
-        public TMP_PackageResourceImporter()
+        public TMP_PackageResourceImporter(bool logErrors = true)
         {
+            m_LogErrors = logErrors;
             m_EssentialResourcesNeedUpdate = m_ExamplesAndExtrasNeedUpdate = !TMP_Settings.isTMPSettingsNull && TMP_Settings.instance.assetVersion != TMP_Settings.s_CurrentAssetVersion;
         }
 
         public void OnDestroy()
         {
-            if (TMP_Settings.isTMPSettingsNull || TMP_Settings.instance?.assetVersion != TMP_Settings.s_CurrentAssetVersion)
+            if (m_LogErrors && (TMP_Settings.isTMPSettingsNull || TMP_Settings.instance?.assetVersion != TMP_Settings.s_CurrentAssetVersion))
                 Debug.LogError("TextMesh Pro Essential Resources are missing, which are crucial for proper functionality. To import them, go to 'Window > Text Mesh Pro > Import TMP Essential Resources' in the menu.");
         }
 

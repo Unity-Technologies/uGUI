@@ -383,7 +383,7 @@ namespace UnityEngine.EventSystems
             if (sendEvents)
             {
                 var eventSystem = activeEventSystem != null ? activeEventSystem : EventSystem.current;
-                if (eventSystem.isActiveAndEnabled)
+                if (eventSystem != null && eventSystem.isActiveAndEnabled)
                     UIElementsRuntimeUtility.RegisterEventSystem(activeEventSystem);
             }
 #endif
@@ -392,6 +392,7 @@ namespace UnityEngine.EventSystems
 #if PACKAGE_UITOOLKIT
         private bool m_Started;
         private bool m_IsTrackingUIToolkitPanels;
+        private List<BaseRuntimePanel> m_NewPanels = new();
 
         private void StartTrackingUIToolkitPanels()
         {
@@ -401,7 +402,7 @@ namespace UnityEngine.EventSystems
                 {
                     CreateUIToolkitPanelGameObject(panel);
                 }
-                UIElementsRuntimeUtility.onCreatePanel += CreateUIToolkitPanelGameObject;
+                UIElementsRuntimeUtility.onCreatePanel += m_NewPanels.Add;
                 m_IsTrackingUIToolkitPanels = true;
             }
         }
@@ -410,9 +411,18 @@ namespace UnityEngine.EventSystems
         {
             if (m_IsTrackingUIToolkitPanels)
             {
-                UIElementsRuntimeUtility.onCreatePanel -= CreateUIToolkitPanelGameObject;
+                UIElementsRuntimeUtility.onCreatePanel -= m_NewPanels.Add;
                 m_IsTrackingUIToolkitPanels = false;
             }
+        }
+
+        private void UpdatePanelGameObjects()
+        {
+            foreach (var panel in m_NewPanels)
+            {
+                CreateUIToolkitPanelGameObject(panel);
+            }
+            m_NewPanels.Clear();
         }
 
         private void CreateUIToolkitPanelGameObject(BaseRuntimePanel panel)
@@ -422,7 +432,7 @@ namespace UnityEngine.EventSystems
                 var go = new GameObject(panel.name, typeof(PanelEventHandler), typeof(PanelRaycaster));
                 go.transform.SetParent(transform);
                 panel.selectableGameObject = go;
-                panel.destroyed += () => DestroyImmediate(go);
+                panel.destroyed += () => UIRUtility.Destroy(go);
             }
         }
 #endif
@@ -491,6 +501,10 @@ namespace UnityEngine.EventSystems
 
         protected virtual void Update()
         {
+#if PACKAGE_UITOOLKIT
+            UpdatePanelGameObjects();
+#endif
+
             if (current != this)
                 return;
             TickModules();

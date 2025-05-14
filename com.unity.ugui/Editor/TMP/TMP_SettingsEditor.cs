@@ -458,7 +458,7 @@ namespace TMPro.EditorUtilities
         {
             // Lazy creation that supports domain reload
             if (m_ResourceImporter == null)
-                m_ResourceImporter = new TMP_PackageResourceImporter();
+                m_ResourceImporter = new TMP_PackageResourceImporter(logErrors: false);
 
             m_ResourceImporter.OnGUI();
         }

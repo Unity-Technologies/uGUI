@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 
-[UnityPlatform(exclude = new[] { RuntimePlatform.OSXEditor, RuntimePlatform.WindowsEditor, RuntimePlatform.LinuxEditor })] // unstable test - https://jira.unity3d.com/browse/UUM-34730
 public class CanvasElementsMaintainValidPositionsWhenCameraOrthoSizeIsZero
 {
     GameObject image;

@@ -93,7 +93,7 @@ namespace UnityEngine.UIElements
             var pointerId = eventSystem.currentInputModule.ConvertUIToolkitPointerId(eventData);
 
             var capturingElement = m_Panel.GetCapturingElement(pointerId);
-            if (capturingElement is VisualElement ve && ve.panel != m_Panel)
+            if (capturingElement is VisualElement ve && ve.panel != m_Panel && ve.panel != null)
                 return;
 
             var capturingPanel = PointerDeviceState.GetPlayerPanelWithSoftPointerCapture(pointerId);

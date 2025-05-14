@@ -63,8 +63,8 @@ namespace TMPro
         /// </summary>
         private static Character GetCharacterFromFontAsset_Internal(uint unicode, FontAsset sourceFontAsset, bool includeFallbacks, FontStyles fontStyle, FontWeight fontWeight, out bool isAlternativeTypeface)
         {
-            isAlternativeTypeface = false;
-            Character character = null;
+            isAlternativeTypeface = false; 
+            Character character;
 
             #region FONT WEIGHT AND FONT STYLE HANDLING
             // Determine if a font weight or style is used. If so check if an alternative typeface is assigned for the given weight and / or style.
@@ -72,6 +72,20 @@ namespace TMPro
 
             if (isItalic || fontWeight != FontWeight.Regular)
             {
+                // Check if character is already cached using the composite Unicode value the takes into consideration the font style and weight
+                uint compositeUnicodeLookupKey = ((0x80u | ((uint)fontStyle << 4) | ((uint)fontWeight / 100)) << 24) | unicode;
+                if (sourceFontAsset.characterLookupTable.TryGetValue(compositeUnicodeLookupKey, out character))
+                {
+                    // Set isAlternativeTypeface
+                    isAlternativeTypeface = true;
+
+                    if (character.textAsset != null)
+                        return character;
+
+                    // Remove character from lookup table
+                    sourceFontAsset.characterLookupTable.Remove(unicode);
+                }
+
                 // Get reference to the font weight pairs of the given font asset.
                 FontWeightPair[] fontWeights = sourceFontAsset.fontWeightTable;
 
@@ -131,29 +145,18 @@ namespace TMPro
 
                             return character;
                         }
-
-                        // Check if the source font file contains the requested character.
-                        //if (TryGetCharacterFromFontFile(unicode, fontAsset, out characterData))
-                        //{
-                        //    isAlternativeTypeface = true;
-
-                        //    return characterData;
-                        //}
-
-                        // If we find the requested character, we add it to the font asset character table
-                        // and return its character data.
-                        // We also add this character to the list of characters we will need to add to the font atlas.
-                        // We assume the font atlas has room otherwise this font asset should not be marked as dynamic.
-                        // Alternatively, we could also add multiple pages of font atlas textures (feature consideration).
                     }
-
-                    // At this point, we were not able to find the requested character in the alternative typeface
-                    // so we check the source font asset and its potential fallbacks.
                 }
+
+                // Search potential fallbacks of the source font asset
+                if (includeFallbacks && sourceFontAsset.fallbackFontAssetTable != null)
+                    return SearchFallbacksForCharacter(unicode, sourceFontAsset, fontStyle, fontWeight, out isAlternativeTypeface);
+
+                return null;
             }
             #endregion
 
-            // Search the source font asset for the requested character.
+            // Search the source font asset for the requested character
             if (sourceFontAsset.characterLookupTable.TryGetValue(unicode, out character))
             {
                 if (character.textAsset != null)
@@ -170,36 +173,40 @@ namespace TMPro
             }
 
             // Search fallback font assets if we still don't have a valid character and include fallback is set to true.
-            if (character == null && includeFallbacks && sourceFontAsset.fallbackFontAssetTable != null)
-            {
-                // Get reference to the list of fallback font assets.
+            if (includeFallbacks && sourceFontAsset.fallbackFontAssetTable != null)
+                return SearchFallbacksForCharacter(unicode, sourceFontAsset, fontStyle, fontWeight, out isAlternativeTypeface);
+
+            return null;
+        }
+
+        private static Character SearchFallbacksForCharacter(uint unicode, FontAsset sourceFontAsset, FontStyles fontStyle, FontWeight fontWeight, out bool isAlternativeTypeface)
+        {
+            isAlternativeTypeface = false;
+
+            // Get reference to the list of fallback font assets.
                 List<FontAsset> fallbackFontAssets = sourceFontAsset.fallbackFontAssetTable;
-                int fallbackCount = fallbackFontAssets.Count;
+            int fallbackCount = fallbackFontAssets.Count;
 
-                if (fallbackCount == 0)
-                    return null;
+            if (fallbackCount == 0)
+                return null;
 
-                for (int i = 0; i < fallbackCount; i++)
-                {
+            for (int i = 0; i < fallbackCount; i++)
+            {
                     FontAsset temp = fallbackFontAssets[i];
 
-                    if (temp == null)
-                        continue;
+                if (temp == null)
+                    continue;
 
-                    int id = temp.instanceID;
+                int id = temp.instanceID;
 
-                    // Try adding font asset to search list. If already present skip to the next one otherwise check if it contains the requested character.
-                    if (k_SearchedAssets.Add(id) == false)
-                        continue;
+                // Try adding font asset to search list. If already present skip to the next one otherwise check if it contains the requested character.
+                if (k_SearchedAssets.Add(id) == false)
+                    continue;
 
-                    // Add reference to this search query
-                    //sourceFontAsset.FallbackSearchQueryLookup.Add(id);
+                Character character = GetCharacterFromFontAsset_Internal(unicode, temp, true, fontStyle, fontWeight, out isAlternativeTypeface);
 
-                    character = GetCharacterFromFontAsset_Internal(unicode, temp, true, fontStyle, fontWeight, out isAlternativeTypeface);
-
-                    if (character != null)
-                        return character;
-                }
+                if (character != null)
+                    return character;
             }
 
             return null;
@@ -410,6 +417,48 @@ namespace TMPro
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Extracts a Unicode code point from a string at the specified index, handling surrogate pairs if present.
+        /// </summary>
+        /// <param name="text">The input string containing the characters to process.</param>
+        /// <param name="index">The current index in the string. This will be incremented if a surrogate pair is found.</param>
+        /// <returns>The Unicode code point at the specified index.</returns>
+        internal static uint GetCodePoint(string text, ref int index)
+        {
+            char c = text[index];
+            if (char.IsHighSurrogate(c)
+                && index + 1 < text.Length
+                && char.IsLowSurrogate(text[index + 1]))
+            {
+                uint cp = (uint)char.ConvertToUtf32(c, text[index + 1]);
+                index++;
+                return cp;
+            }
+
+            return c;
+        }
+
+        /// <summary>
+        /// Extracts a Unicode code point from an array of uint values at the specified index, handling surrogate pairs if present.
+        /// </summary>
+        /// <param name="codesPoints">The array of uint values representing characters to process.</param>
+        /// <param name="index">The current index in the array. This will be incremented if a surrogate pair is found.</param>
+        /// <returns>The Unicode code point at the specified index.</returns>
+        internal static uint GetCodePoint(uint[] codesPoints, ref int index)
+        {
+            char c = (char)codesPoints[index];
+            if (char.IsHighSurrogate(c)
+                && index + 1 < codesPoints.Length
+                && char.IsLowSurrogate((char)codesPoints[index + 1]))
+            {
+                uint cp = (uint)char.ConvertToUtf32(c, (char)codesPoints[index + 1]);
+                index++;
+                return cp;
+            }
+
+            return c;
         }
 
 

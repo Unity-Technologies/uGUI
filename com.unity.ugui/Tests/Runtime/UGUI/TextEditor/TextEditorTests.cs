@@ -32,8 +32,8 @@ public class TextEditorTests
             yield return new TestCaseData(" ", new int[0], new int[0]);
             yield return new TestCaseData("one two three", new[] { 0, 4, 8 }, new[] { 3, 7, 13 });
 #if !UNITY_PLAYSTATION
-            yield return new TestCaseData("\U00010000 \U00010001 \U00010002\U00010003", new[] { 0, 3, 6 }, new[] { 2, 5, 10 }).SetName("(U+10000) (U+10001) (U+10002)(U+10003)");
-            yield return new TestCaseData("Hello 😁 World", new[] { 0, 6, 9 }, new[] { 5, 8, 14 }).SetName("Hello (U+1F601) World");
+            //yield return new TestCaseData("\U00010000 \U00010001 \U00010002\U00010003", new[] { 0, 3, 6 }, new[] { 2, 5, 10 }).SetName("(U+10000) (U+10001) (U+10002)(U+10003)"); // Disabled for Instability https://jira.unity3d.com/browse/UUM-71065
+            //yield return new TestCaseData("Hello 😁 World", new[] { 0, 6, 9 }, new[] { 5, 8, 14 }).SetName("Hello (U+1F601) World"); // Disabled for Instability https://jira.unity3d.com/browse/UUM-71070
 #endif
         }
     }

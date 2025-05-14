@@ -205,7 +205,7 @@ namespace UnityEngine.UIElements
             var target = currentFocusedElement ?? m_Panel.visualTree;
             ProcessImguiEvents(target);
 
-            using (var e = NavigationSubmitEvent.GetPooled(s_Modifiers))
+            using (var e = NavigationSubmitEvent.GetPooled(GetDeviceType(eventData), s_Modifiers))
             {
                 e.target = target;
                 SendEvent(e, eventData);
@@ -221,7 +221,7 @@ namespace UnityEngine.UIElements
             var target = currentFocusedElement ?? m_Panel.visualTree;
             ProcessImguiEvents(target);
 
-            using (var e = NavigationCancelEvent.GetPooled(s_Modifiers))
+            using (var e = NavigationCancelEvent.GetPooled(GetDeviceType(eventData), s_Modifiers))
             {
                 e.target = target;
                 SendEvent(e, eventData);
@@ -237,7 +237,7 @@ namespace UnityEngine.UIElements
             var target = currentFocusedElement ?? m_Panel.visualTree;
             ProcessImguiEvents(target);
 
-            using (var e = NavigationMoveEvent.GetPooled(eventData.moveVector, s_Modifiers))
+            using (var e = NavigationMoveEvent.GetPooled(eventData.moveVector, GetDeviceType(eventData), s_Modifiers))
             {
                 e.target = target;
                 SendEvent(e, eventData);
@@ -251,15 +251,14 @@ namespace UnityEngine.UIElements
             if (m_Panel == null || !ReadPointerData(m_PointerEvent, eventData))
                 return;
 
-            var scrollDelta = eventData.scrollDelta;
-            scrollDelta.y = -scrollDelta.y;
+            var uguiScrollDelta = eventData.scrollDelta;
+            var scrollTicks = eventSystem.currentInputModule.ConvertPointerEventScrollDeltaToTicks(uguiScrollDelta);
 
-            const float kPixelPerLine = 20;
-            // The old input system reported scroll deltas in lines, we report pixels.
-            // Need to scale as the UI system expects lines.
-            scrollDelta /= kPixelPerLine;
+            // ISXB-808: Scale scrollDelta to match the UIToolkit convention.
+            var uitkScrollDelta = scrollTicks * WheelEvent.scrollDeltaPerTick;
+            uitkScrollDelta.y = -uitkScrollDelta.y;
 
-            using (var e = WheelEvent.GetPooled(scrollDelta, m_PointerEvent))
+            using (var e = WheelEvent.GetPooled(uitkScrollDelta, m_PointerEvent))
             {
                 SendEvent(e, eventData);
             }
@@ -282,7 +281,11 @@ namespace UnityEngine.UIElements
             // See UGUIEventSystemTests.KeyDownStoppedDoesntPreventNavigationEvents for a test requires this.
         }
 
-        internal void Update()
+        /// <summary>
+        /// This method is automatically called on every frame.
+        /// It can also be called manually to force some queued events to be processed.
+        /// </summary>
+        public void Update()
         {
             if (isCurrentFocusedPanel)
                 ProcessImguiEvents(currentFocusedElement ?? m_Panel.visualTree);
@@ -389,6 +392,14 @@ namespace UnityEngine.UIElements
             return true;
         }
 
+        private UIElements.NavigationDeviceType GetDeviceType(BaseEventData eventData)
+        {
+            if (eventSystem == null || eventSystem.currentInputModule == null)
+                return NavigationDeviceType.Unknown;
+            return (UIElements.NavigationDeviceType)eventSystem.currentInputModule.GetNavigationEventDeviceType(
+                eventData);
+        }
+
         enum PointerEventType
         {
             Default, Down, Up
@@ -449,7 +460,14 @@ namespace UnityEngine.UIElements
                 int eventDisplayIndex = (int)eventPosition.z;
 
                 if (eventDisplayIndex > 0 && eventDisplayIndex < Display.displays.Length)
+                {
+#if UNITY_ANDROID
+                    // Changed for UITK to be coherent for Android which passes display-relative rendering coordinates
+                    h = Display.displays[eventDisplayIndex].renderingHeight;
+#else
                     h = Display.displays[eventDisplayIndex].systemHeight;
+#endif
+                }
 
                 var delta = eventData.delta;
                 eventPosition.y = h - eventPosition.y;

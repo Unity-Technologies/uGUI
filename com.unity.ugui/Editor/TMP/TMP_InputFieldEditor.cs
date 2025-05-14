@@ -260,11 +260,11 @@ namespace TMPro.EditorUtilities
                 EditorGUI.indentLevel++;
 
                 EditorGUILayout.PropertyField(m_OnFocusSelectAll, new GUIContent("OnFocus - Select All", "Should all the text be selected when the Input Field is selected?"));
-                EditorGUILayout.PropertyField(m_ResetOnDeActivation, new GUIContent("Reset On Deactivation", "Should the Text and Caret position be reset when Input Field looses focus and is Deactivated?"));
+                EditorGUILayout.PropertyField(m_ResetOnDeActivation, new GUIContent("Reset On Deactivation", "Should the Text and Caret position be reset when Input Field loses focus and is Deactivated?"));
 
                 EditorGUI.indentLevel++;
                 GUI.enabled = !m_ResetOnDeActivation.boolValue;
-                EditorGUILayout.PropertyField(m_KeepTextSelectionVisible, new GUIContent("Keep Text Selection Visible", "Should the text selection remain visible when the input field looses focus and is deactivated?"));
+                EditorGUILayout.PropertyField(m_KeepTextSelectionVisible, new GUIContent("Keep Text Selection Visible", "Should the text selection remain visible when the input field loses focus and is deactivated?"));
                 GUI.enabled = true;
                 EditorGUI.indentLevel--;
 
