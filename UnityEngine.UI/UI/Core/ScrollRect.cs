@@ -882,7 +882,7 @@ namespace UnityEngine.UI
                 else
                     m_HorizontalScrollbar.size = 1;
 
-                m_HorizontalScrollbar.value = horizontalNormalizedPosition;
+                m_HorizontalScrollbar.SetValueWithoutNotify(horizontalNormalizedPosition);
             }
 
             if (m_VerticalScrollbar)
@@ -892,7 +892,7 @@ namespace UnityEngine.UI
                 else
                     m_VerticalScrollbar.size = 1;
 
-                m_VerticalScrollbar.value = verticalNormalizedPosition;
+                m_VerticalScrollbar.SetValueWithoutNotify(verticalNormalizedPosition);
             }
         }
 
