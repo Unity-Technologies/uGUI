@@ -2395,16 +2395,15 @@ namespace TMPro
                         }
                         break;
                 }
-
             }
 
-            if (consumedEvent)
+            // We must also consume events when IME is active to prevent them from being passed to the text field. // UUM-100552
+            if (consumedEvent || (m_IsCompositionActive && compositionLength > 0))
             {
                 UpdateLabel();
                 eventData.Use();
             }
         }
-
 
         /// <summary>
         ///
@@ -4188,14 +4187,15 @@ namespace TMPro
                 if (!cursorBeforeDash)
                 {
                     if (ch >= '0' && ch <= '9') return ch;
-                    if (ch == '-' && (pos == 0 || selectionAtStart)) return ch;
+                    if (ch == '-' && (pos == 0 || selectionAtStart) && !text.Contains('-')) return ch;
 
                     var separator = Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator;
                     if (ch == Convert.ToChar(separator) && characterValidation == CharacterValidation.Decimal && !text.Contains(separator)) return ch;
 
                     //Some keyboards including Samsung require double tapping a . to get a - this allows these keyboards to input negative integers
-                    if (characterValidation == CharacterValidation.Integer && ch == '.' && (pos == 0 || selectionAtStart)) return '-';
+                    if (characterValidation == CharacterValidation.Integer && ch == '.' && (pos == 0 || selectionAtStart) && !text.Contains('-')) return '-';
                 }
+
             }
             else if (characterValidation == CharacterValidation.Digit)
             {
