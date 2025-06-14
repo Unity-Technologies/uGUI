@@ -1,5 +1,6 @@
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 namespace UnityEngine.UIElements
 {
@@ -44,6 +45,7 @@ namespace UnityEngine.UIElements
         private Focusable currentFocusedElement => m_Panel?.focusController.GetLeafFocusedElement();
 
         private readonly PointerEvent m_PointerEvent = new PointerEvent();
+        private readonly List<PointerEventData> m_ContainedPointers = new();
 
         private float m_LastClickTime = 0;
 
@@ -119,7 +121,7 @@ namespace UnityEngine.UIElements
 
         public void OnPointerMove(PointerEventData eventData)
         {
-            if (m_Panel == null || !ReadPointerData(m_PointerEvent, eventData))
+            if (!ReadPointerData(m_PointerEvent, eventData))
                 return;
 
             using (var e = PointerMoveEvent.GetPooled(m_PointerEvent))
@@ -131,7 +133,7 @@ namespace UnityEngine.UIElements
 
         public void OnPointerUp(PointerEventData eventData)
         {
-            if (m_Panel == null || !ReadPointerData(m_PointerEvent, eventData, PointerEventType.Up))
+            if (!ReadPointerData(m_PointerEvent, eventData, PointerEventType.Up))
                 return;
 
             using (var e = PointerUpEvent.GetPooled(m_PointerEvent))
@@ -146,7 +148,7 @@ namespace UnityEngine.UIElements
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            if (m_Panel == null || !ReadPointerData(m_PointerEvent, eventData, PointerEventType.Down))
+            if (!ReadPointerData(m_PointerEvent, eventData, PointerEventType.Down))
                 return;
 
             if (eventSystem != null)
@@ -163,9 +165,11 @@ namespace UnityEngine.UIElements
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            if (m_Panel == null || !ReadPointerData(m_PointerEvent, eventData))
+            m_ContainedPointers.Remove(eventData);
+
+            if (!ReadPointerData(m_PointerEvent, eventData))
             {
-                if (m_Panel is { isFlat: false })
+                if (m_Panel != null && !m_Panel.isFlat)
                     m_Panel.PointerLeavesPanel(m_PointerEvent.pointerId);
                 return;
             }
@@ -193,9 +197,10 @@ namespace UnityEngine.UIElements
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if (m_Panel == null || !ReadPointerData(m_PointerEvent, eventData))
+            if (!ReadPointerData(m_PointerEvent, eventData))
                 return;
 
+            m_ContainedPointers.Add(eventData);
             m_Panel.PointerEntersPanel(m_PointerEvent.pointerId, m_PointerEvent.position);
         }
 
@@ -256,7 +261,7 @@ namespace UnityEngine.UIElements
 
         public void OnScroll(PointerEventData eventData)
         {
-            if (m_Panel == null || !ReadPointerData(m_PointerEvent, eventData))
+            if (!ReadPointerData(m_PointerEvent, eventData))
                 return;
 
             var uguiScrollDelta = eventData.scrollDelta;
@@ -297,6 +302,8 @@ namespace UnityEngine.UIElements
         {
             if (isCurrentFocusedPanel)
                 ProcessImguiEvents(currentFocusedElement ?? m_Panel.visualTree);
+
+            UpdateWorldSpacePointers();
         }
 
         void LateUpdate()
@@ -387,7 +394,7 @@ namespace UnityEngine.UIElements
 
         private bool ReadPointerData(PointerEvent pe, PointerEventData eventData, PointerEventType eventType = PointerEventType.Default)
         {
-            if (eventSystem == null || eventSystem.currentInputModule == null)
+            if (m_Panel == null || eventSystem == null || eventSystem.currentInputModule == null)
                 return false;
 
             pe.Read(this, eventData, eventType);
@@ -418,6 +425,21 @@ namespace UnityEngine.UIElements
                 eventData);
         }
 
+        private void UpdateWorldSpacePointers()
+        {
+            if (m_Panel == null || m_Panel.isFlat || eventSystem == null || eventSystem.currentInputModule == null)
+                return;
+
+            foreach (var eventData in m_ContainedPointers)
+            {
+                if (!ReadPointerData(m_PointerEvent, eventData))
+                    continue;
+
+                m_Panel.SetTopElementUnderPointer(m_PointerEvent.pointerId, m_PointerEvent.elementUnderPointer, m_PointerEvent.position);
+                m_Panel.CommitElementUnderPointers();
+            }
+        }
+
         enum PointerEventType
         {
             Default, Down, Up
@@ -425,6 +447,7 @@ namespace UnityEngine.UIElements
 
         class PointerEvent : IPointerEvent
         {
+
             public int pointerId { get; private set; }
             public string pointerType { get; private set; }
             public bool isPrimary { get; private set; }
