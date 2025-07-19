@@ -1925,6 +1925,12 @@ namespace UnityEngine.UI
             float x = local.x / activeSprite.texture.width;
             float y = local.y / activeSprite.texture.height;
 
+            // Locations outside the image are always considered valid.
+            // This guarantees that the behavior remains consistent with the case where alphaHitTestMinimumThreshold <= 0.
+            // Without this check, we would continue to sample a pixel outside the texture.
+            if (x < 0 || x > 1 || y < 0 || y > 1)
+                return true;
+
             try
             {
                 return activeSprite.texture.GetPixelBilinear(x, y).a >= alphaHitTestMinimumThreshold;

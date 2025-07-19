@@ -6140,6 +6140,44 @@ namespace TMPro
                 }
             }
 
+            // Since we have been unable to locate the character thus far using the designated font style and weight. Attempt to locate this character using normal style and regular font weight to synthesize it.
+            if (fontStyle != FontStyles.Normal || fontWeight != FontWeight.Regular)
+            {
+                character = TMP_FontAssetUtilities.GetCharacterFromFontAsset(unicode, fontAsset, true, FontStyles.Normal, FontWeight.Regular, out isUsingAlternativeTypeface);
+
+                if (character != null)
+                {
+                    // Add character to font asset lookup cache
+                    fontAsset.AddCharacterToLookupCache(unicode, character, FontStyles.Normal, FontWeight.Regular, isUsingAlternativeTypeface);
+
+                    return character;
+                }
+
+                // Search potential Global fallback font assets.
+                if (TMP_Settings.fallbackFontAssets != null && TMP_Settings.fallbackFontAssets.Count > 0)
+                    character = TMP_FontAssetUtilities.GetCharacterFromFontAssets(unicode, fontAsset, TMP_Settings.fallbackFontAssets, true, FontStyles.Normal, FontWeight.Regular, out isUsingAlternativeTypeface);
+
+                if (character != null)
+                {
+                    // Add character to font asset lookup cache
+                    fontAsset.AddCharacterToLookupCache(unicode, character, FontStyles.Normal, FontWeight.Regular, isUsingAlternativeTypeface);
+
+                    return character;
+                }
+
+                // Search for the character in the Default Font Asset assigned in the TMP Settings file.
+                if (TMP_Settings.defaultFontAsset != null)
+                    character = TMP_FontAssetUtilities.GetCharacterFromFontAsset(unicode, TMP_Settings.defaultFontAsset, true, FontStyles.Normal, FontWeight.Regular, out isUsingAlternativeTypeface);
+
+                if (character != null)
+                {
+                    // Add character to font asset lookup cache
+                    fontAsset.AddCharacterToLookupCache(unicode, character, FontStyles.Normal, FontWeight.Regular, isUsingAlternativeTypeface);
+
+                    return character;
+                }
+            }
+
             // Search for the character in potential local Sprite Asset assigned to the text object.
             if (m_spriteAsset != null)
             {
@@ -6180,44 +6218,6 @@ namespace TMPro
 
                 if (spriteCharacter != null)
                     return spriteCharacter;
-            }
-
-            // Since we have been unable to locate the character thus far using the designated font style and weight. Attempt to locate this character using normal style and regular font weight in order to synthesize it.
-            if (fontStyle != FontStyles.Normal || fontWeight != FontWeight.Regular)
-            {
-                character = TMP_FontAssetUtilities.GetCharacterFromFontAsset(unicode, fontAsset, true, FontStyles.Normal, FontWeight.Regular, out isUsingAlternativeTypeface);
-
-                if (character != null)
-                {
-                    // Add character to font asset lookup cache
-                    fontAsset.AddCharacterToLookupCache(unicode, character, FontStyles.Normal, FontWeight.Regular, isUsingAlternativeTypeface);
-
-                    return character;
-                }
-
-                // Search potential Global fallback font assets.
-                if (TMP_Settings.fallbackFontAssets != null && TMP_Settings.fallbackFontAssets.Count > 0)
-                    character = TMP_FontAssetUtilities.GetCharacterFromFontAssets(unicode, fontAsset, TMP_Settings.fallbackFontAssets, true, FontStyles.Normal, FontWeight.Regular, out isUsingAlternativeTypeface);
-
-                if (character != null)
-                {
-                    // Add character to font asset lookup cache
-                    fontAsset.AddCharacterToLookupCache(unicode, character, FontStyles.Normal, FontWeight.Regular, isUsingAlternativeTypeface);
-
-                    return character;
-                }
-
-                // Search for the character in the Default Font Asset assigned in the TMP Settings file.
-                if (TMP_Settings.defaultFontAsset != null)
-                    character = TMP_FontAssetUtilities.GetCharacterFromFontAsset(unicode, TMP_Settings.defaultFontAsset, true, FontStyles.Normal, FontWeight.Regular, out isUsingAlternativeTypeface);
-
-                if (character != null)
-                {
-                    // Add character to font asset lookup cache
-                    fontAsset.AddCharacterToLookupCache(unicode, character, FontStyles.Normal, FontWeight.Regular, isUsingAlternativeTypeface);
-
-                    return character;
-                }
             }
 
             return null;
