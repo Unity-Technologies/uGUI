@@ -155,7 +155,7 @@ namespace UnityEngine.UI
                 // so we use the standard none multiple display method. (case 741751)
                 float w = Screen.width;
                 float h = Screen.height;
-                if (displayIndex > 0 && displayIndex < Display.displays.Length)
+                if (UnityEngineInternal.DisplayInternal.IsASecondaryDisplayIndex(displayIndex))
                 {
 #if UNITY_ANDROID
                     // Changed to be coherent for Android which passes display-relative rendering coordinates
