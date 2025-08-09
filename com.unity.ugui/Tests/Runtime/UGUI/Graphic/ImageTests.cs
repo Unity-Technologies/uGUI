@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using NUnit.Framework;
+using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI.Tests
 {
@@ -158,6 +159,29 @@ namespace UnityEngine.UI.Tests
 
             bool raycast = m_Image.Raycast(new Vector2(1000, 1000), m_camera);
             Assert.IsTrue(raycast);
+        }
+
+        [TestCase(typeof(Mask), true, false)]
+        [TestCase(typeof(Mask), false, true)]
+        [TestCase(typeof(RectMask2D), true, false)]
+        [TestCase(typeof(RectMask2D), false, true)]
+        public void RaycastImageOutsideOfMaskWithMaskableSet_ReturnsExpected(Type maskType, bool maskable, bool expectedHit)
+        {
+            var maskGameObject = new GameObject("Mask", typeof(RectTransform), maskType);
+            maskGameObject.transform.SetParent(m_CanvasRoot.transform);
+            var mask = maskGameObject.GetComponent(maskType);
+            m_Image.transform.SetParent(maskGameObject.transform);
+
+            var maskRect = mask.GetComponent<RectTransform>();
+            maskRect.position = new Vector3(0, 0, 0);
+            maskRect.sizeDelta = new Vector2(100, 100);
+            m_Image.rectTransform.position = new Vector3(500, 500, 0);
+            m_Image.rectTransform.sizeDelta = new Vector2(10, 10);
+
+            m_Image.maskable = maskable;
+
+            bool raycast = m_Image.Raycast(new Vector2(505, 505), m_camera);
+            Assert.AreEqual(expectedHit, raycast);
         }
 
         [Test]

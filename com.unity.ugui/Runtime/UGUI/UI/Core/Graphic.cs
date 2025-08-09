@@ -839,7 +839,16 @@ namespace UnityEngine.UI
         /// <param name="sp">Screen point being tested</param>
         /// <param name="eventCamera">Camera that is being used for the testing.</param>
         /// <returns>True if the provided point is a valid location for GraphicRaycaster raycasts.</returns>
-        public virtual bool Raycast(Vector2 sp, Camera eventCamera)
+        public virtual bool Raycast(Vector2 sp, Camera eventCamera) => Raycast(sp, eventCamera, false);
+
+        /// <summary>
+        /// When a GraphicRaycaster raycasts into the scene, it first filters the elements based on their RectTransform rect, then uses this Raycast function to determine which elements are hit.
+        /// </summary>
+        /// <param name="sp">Screen point being tested.</param>
+        /// <param name="eventCamera">Camera used for testing.</param>
+        /// <param name="ignoreMasks">If true, masks are ignored and do not prevent raycasts. </param>
+        /// <returns>True if the provided point is a valid location for GraphicRaycaster raycasts.</returns>
+        protected bool Raycast(Vector2 sp, Camera eventCamera, bool ignoreMasks)
         {
             if (!isActiveAndEnabled)
                 return false;
@@ -862,6 +871,9 @@ namespace UnityEngine.UI
                     var filter = components[i] as ICanvasRaycastFilter;
 
                     if (filter == null)
+                        continue;
+
+                    if (ignoreMasks && components[i] is Mask or RectMask2D)
                         continue;
 
                     var raycastValid = true;

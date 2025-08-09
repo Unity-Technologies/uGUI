@@ -300,5 +300,8 @@ namespace UnityEngine.UI
             m_ShouldRecalculateStencil = true;
             SetMaterialDirty();
         }
+
+        /// <inheritdoc/>
+        public override bool Raycast(Vector2 sp, Camera eventCamera) => Raycast(sp, eventCamera, !maskable);
     }
 }
