@@ -26,7 +26,6 @@ public class SiblingOrderChangesLayout
 #endif
     }
 
-    [Ignore("UnityTest yielded WaitForEndOfFrame, which is not evoked in batchmode.")]
     [UnityTest]
     public IEnumerator ReorderingSiblingChangesLayout()
     {
@@ -39,7 +38,7 @@ public class SiblingOrderChangesLayout
         m_ParentGO.AddComponent<VerticalLayoutGroup>();
         m_ParentGO.AddComponent<ContentSizeFitter>();
 
-        yield return new WaitForEndOfFrame();
+        yield return null;
 
         Vector2 child1Pos = m_Child1GO.GetComponent<RectTransform>().anchoredPosition;
         Vector2 child2Pos = m_Child2GO.GetComponent<RectTransform>().anchoredPosition;
