@@ -373,7 +373,7 @@ namespace UnityEngine.UI
         /// <param name="scaleFactor">The scale factor to use.</param>
         protected void SetScaleFactor(float scaleFactor)
         {
-            if (scaleFactor == m_PrevScaleFactor)
+            if (Mathf.Abs(scaleFactor - m_PrevScaleFactor) < 0.000005f)
                 return;
 
             m_Canvas.scaleFactor = scaleFactor;

@@ -117,6 +117,8 @@ namespace TMPro
 
             CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
 
+            ObjectUtilsBridge.MarkDirty(this);
+
             if (m_OnDirtyVertsCallback != null)
                 m_OnDirtyVertsCallback();
         }
@@ -4437,9 +4439,13 @@ namespace TMPro
                         }
                     }
                     // Special handling for Latin characters followed by a CJK character.
-                    else if (m_isNonBreakingSpace == false && m_characterCount + 1 < totalCharacterCount && TMP_TextParsingUtilities.IsCJK(m_textInfo.characterInfo[m_characterCount + 1].character))
+                    else if (!m_isNonBreakingSpace && (m_characterCount + 1) < totalCharacterCount && TMP_TextParsingUtilities.IsCJK(m_textInfo.characterInfo[m_characterCount + 1].character))
                     {
-                        shouldSaveHardLineBreak = true;
+                        uint nextChar = m_textInfo.characterInfo[m_characterCount + 1].character;
+                        bool prevIsLeading = TMP_Settings.linebreakingRules.leadingCharacters.Contains(charCode);
+                        bool nextIsFollowing = TMP_Settings.linebreakingRules.followingCharacters.Contains(nextChar);
+                        if (!prevIsLeading && !nextIsFollowing)
+                            shouldSaveHardLineBreak = true;
                     }
                     else if (isFirstWordOfLine)
                     {

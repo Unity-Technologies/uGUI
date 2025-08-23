@@ -1,0 +1,5 @@
+apiRules:
+  - exclude:
+      uidRegex: ^TMPro\.ObjectUtilsBridge$
+      type: Class
+      

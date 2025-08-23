@@ -4349,8 +4349,8 @@ namespace TMPro
                     OnFocus();
 
                     // Opening the soft keyboard sets its selection to the end of the text.
-                    // As such, we set the selection to match the Input Field's internal selection.
-                    if (m_SoftKeyboard != null && m_SoftKeyboard.canSetSelection)
+                    // As such, we set the selection to match the Input Field's internal selection. // UUM-112457
+                    if (m_SoftKeyboard != null)
                     {
                         int length = stringPositionInternal < stringSelectPositionInternal ? stringSelectPositionInternal - stringPositionInternal : stringPositionInternal - stringSelectPositionInternal;
                         m_SoftKeyboard.selection = new RangeInt(stringPositionInternal < stringSelectPositionInternal ? stringPositionInternal : stringSelectPositionInternal, length);

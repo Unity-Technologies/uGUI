@@ -1,7 +1,9 @@
 {
     "name": "Unity.TextMeshPro",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:43b111c4a445f446abd2c02e77750ff5"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
