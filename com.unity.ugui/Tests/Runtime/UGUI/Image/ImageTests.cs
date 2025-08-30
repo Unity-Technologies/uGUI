@@ -261,6 +261,20 @@ public class ImageTests
         yield return ValidateSecondaryTextures(s_EmptySecondaryTexArray);
     }
 
+    //UUM-114080 Prevent a crash caused by calling DestroyImmediate on the default uGUI material
+    [Test]
+    public void DestroyImmediate_OnDefaultMaterial_LogError()
+    {
+        var defaultMaterial = m_Image.defaultMaterial;
+        var name = defaultMaterial.name;
+        Object.DestroyImmediate(defaultMaterial, true);
+
+        LogAssert.Expect(LogType.Error, $"Destroying object \"{name}\" is not allowed at this time.");
+
+        //This is to ensure that the cached default material pointer in native is still valid.
+        Assert.That(m_Image.defaultMaterial.name, Is.EqualTo(name));
+    }
+
     [TearDown]
     public void TearDown()
     {
