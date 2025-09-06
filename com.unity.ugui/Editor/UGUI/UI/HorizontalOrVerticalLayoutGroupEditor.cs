@@ -41,15 +41,17 @@ namespace UnityEditor.UI
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
+            EditorGUIUtility.labelWidth = 130;
             EditorGUILayout.PropertyField(m_Padding, true);
             EditorGUILayout.PropertyField(m_Spacing, true);
             EditorGUILayout.PropertyField(m_ChildAlignment, true);
             EditorGUILayout.PropertyField(m_ReverseArrangement, true);
+            EditorGUIUtility.labelWidth = 0;
 
             Rect rect = EditorGUILayout.GetControlRect();
             rect = EditorGUI.PrefixLabel(rect, -1, EditorGUIUtility.TrTextContent("Control Child Size"));
-            rect.width = Mathf.Max(50, (rect.width - 4) / 3);
-            EditorGUIUtility.labelWidth = 50;
+            rect.width = Mathf.Max(60, (rect.width - 4) / 3);
+            EditorGUIUtility.labelWidth = 60;
             ToggleLeft(rect, m_ChildControlWidth, EditorGUIUtility.TrTextContent("Width"));
             rect.x += rect.width + 2;
             ToggleLeft(rect, m_ChildControlHeight, EditorGUIUtility.TrTextContent("Height"));
@@ -57,8 +59,8 @@ namespace UnityEditor.UI
 
             rect = EditorGUILayout.GetControlRect();
             rect = EditorGUI.PrefixLabel(rect, -1, EditorGUIUtility.TrTextContent("Use Child Scale"));
-            rect.width = Mathf.Max(50, (rect.width - 4) / 3);
-            EditorGUIUtility.labelWidth = 50;
+            rect.width = Mathf.Max(60, (rect.width - 4) / 3);
+            EditorGUIUtility.labelWidth = 60;
             ToggleLeft(rect, m_ChildScaleWidth, EditorGUIUtility.TrTextContent("Width"));
             rect.x += rect.width + 2;
             ToggleLeft(rect, m_ChildScaleHeight, EditorGUIUtility.TrTextContent("Height"));
@@ -66,8 +68,8 @@ namespace UnityEditor.UI
 
             rect = EditorGUILayout.GetControlRect();
             rect = EditorGUI.PrefixLabel(rect, -1, EditorGUIUtility.TrTextContent("Child Force Expand"));
-            rect.width = Mathf.Max(50, (rect.width - 4) / 3);
-            EditorGUIUtility.labelWidth = 50;
+            rect.width = Mathf.Max(60, (rect.width - 4) / 3);
+            EditorGUIUtility.labelWidth = 60;
             ToggleLeft(rect, m_ChildForceExpandWidth, EditorGUIUtility.TrTextContent("Width"));
             rect.x += rect.width + 2;
             ToggleLeft(rect, m_ChildForceExpandHeight, EditorGUIUtility.TrTextContent("Height"));

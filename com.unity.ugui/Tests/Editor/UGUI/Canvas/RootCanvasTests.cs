@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [Category("Canvas")]
-public class RootCanvasTests : TestBehaviourBase<UnityEngine.Canvas>
+internal class RootCanvasTests : TestBehaviourBase<UnityEngine.Canvas>
 {
     // A simple nested canvas hierarchy
     // m_TestObject

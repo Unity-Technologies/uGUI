@@ -2,7 +2,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class EventTriggerRemoveDuringExecution
+internal class EventTriggerRemoveDuringExecution
 {
     [Test]
     [Description("ArgumentOutOfRange Exception is thrown when removing handler in callback in EventTrigger (case 1401557)")]

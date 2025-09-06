@@ -2,7 +2,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools.Utils;
 
-public class CanvasSizeCorrectInAwakeAndStartScript : MonoBehaviour
+internal class CanvasSizeCorrectInAwakeAndStartScript : MonoBehaviour
 {
     public bool isStartCalled { get; private set; }
     public bool isAwakeCalled { get; private set; }

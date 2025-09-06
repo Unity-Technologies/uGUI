@@ -5,7 +5,7 @@ using System.Collections;
 using UnityEngine.UI;
 
 [TestFixture]
-public class CanvasGroupTests
+internal class CanvasGroupTests
 {
     GameObject m_CanvasObject;
     CanvasGroup m_CanvasGroup;

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class MouseUpdate : MonoBehaviour
+internal class MouseUpdate : MonoBehaviour
 {
     FakeBaseInput m_FakeBaseInput;
 

@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class FakeBaseInput : BaseInput
+internal class FakeBaseInput : BaseInput
 {
     [NonSerialized]
     public String CompositionString = "";

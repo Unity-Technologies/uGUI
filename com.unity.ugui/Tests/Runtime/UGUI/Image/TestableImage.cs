@@ -2,7 +2,7 @@ using NUnit.Framework;
 using UnityEngine.UI;
 using System.Reflection;
 
-public class TestableImage : Image
+internal class TestableImage : Image
 {
     public bool isOnPopulateMeshCalled = false;
     public bool isGeometryUpdated = false;

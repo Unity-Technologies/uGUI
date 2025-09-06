@@ -4,7 +4,7 @@ using NUnit.Framework;
 using System.Collections;
 using UnityEditor.SceneManagement;
 
-public class ChangingHierarchyOfCanvasRenderer
+internal class ChangingHierarchyOfCanvasRenderer
 {
     [Test]
     public void ChangingHierarchyOfCanvasRenderer_DoesntCrash()

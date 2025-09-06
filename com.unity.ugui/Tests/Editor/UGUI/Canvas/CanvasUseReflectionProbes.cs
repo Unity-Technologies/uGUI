@@ -2,7 +2,7 @@ using NUnit.Framework;
 using UnityEngine;
 
 [Category("Canvas")]
-public class CanvasUseReflectionProbes : TestBehaviourBase<UnityEngine.Canvas>
+internal class CanvasUseReflectionProbes : TestBehaviourBase<UnityEngine.Canvas>
 {
     [Test]
     public void OnlyWorldSpaceCanvasCanUseReflectionProbes()

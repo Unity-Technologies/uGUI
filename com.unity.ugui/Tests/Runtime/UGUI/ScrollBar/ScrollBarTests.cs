@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 
-public class ScrollBarTests : IPrebuildSetup
+internal class ScrollBarTests : IPrebuildSetup
 {
     GameObject m_PrefabRoot;
     const string kPrefabPath = "Assets/Resources/ScrollBarPrefab.prefab";

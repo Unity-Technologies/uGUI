@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 
-public class CanvasElementsMaintainValidPositionsWhenCameraOrthoSizeIsZero
+internal class CanvasElementsMaintainValidPositionsWhenCameraOrthoSizeIsZero
 {
     GameObject image;
     GameObject canvas;

@@ -2,7 +2,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools.Utils;
 
-public class SceneWithNestedLayoutElementsLoadScript : MonoBehaviour
+internal class SceneWithNestedLayoutElementsLoadScript : MonoBehaviour
 {
     public bool isStartCalled { get; private set; }
 
