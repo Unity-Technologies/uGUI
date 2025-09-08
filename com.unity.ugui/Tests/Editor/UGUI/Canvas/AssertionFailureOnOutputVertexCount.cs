@@ -5,7 +5,7 @@ using UnityEngine.TestTools;
 using UnityEditor.SceneManagement;
 using UnityEditor;
 
-internal class AssertionFailureOnOutputVertexCount
+public class AssertionFailureOnOutputVertexCount
 {
     const string scenePath = "Assets/AssertionFailureOnOutputVertexCountTestScene.unity";
     [Test]

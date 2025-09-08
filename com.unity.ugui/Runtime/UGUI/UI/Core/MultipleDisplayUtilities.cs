@@ -69,18 +69,17 @@ namespace UnityEngine.UI
             // For most platforms, if the main display is not the same resolution as the system then we will have to scale the mouse position. (case 1141732)
             var display = Display.main;
 #if ENABLE_INPUT_SYSTEM && PACKAGE_INPUTSYSTEM
-            // With the new input system, passed positions are always relative to a surface and scaled accordingly to the rendering resolution.
+            if (displayIndex >= Display.displays.Length)
+                displayIndex = 0;
 
-            // If not in fullscreen, assume UaaL multi-view multi-screen multi-touch scenario, where the position is already in the correct scaled coordinates for the displayIndex
+            // With the new input system, passed positions are always relative to a surface and scaled accordingly to the rendering resolution.
+            display = Display.displays[displayIndex];
+            // So, if not in fullscreen, assume UaaL multi-view multi-screen multi-touch scenario, where the position is already in the correct scaled coordinates for the displayIndex
             if (!Screen.fullScreen)
             {
                 return new Vector3(position.x, position.y, displayIndex);
             }
-
             // Otherwise, in full screen, we add some padding if rendering and system resolution differs, as for other platforms' main display. (So behavior is unchanged for Android main display, untested for non-main displays)
-            if (displayIndex >= Display.displays.Length)
-                displayIndex = 0; // use position relative to first display if displayIndex is out of bounds
-            display = Display.displays[displayIndex];
 #endif
             if (display.renderingWidth != display.systemWidth || display.renderingHeight != display.systemHeight)
             {

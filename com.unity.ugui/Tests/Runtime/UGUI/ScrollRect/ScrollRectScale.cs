@@ -6,7 +6,7 @@ using System.Collections;
 using UnityEngine.UI;
 using UnityEditor;
 
-internal class ScrollRectScale : IPrebuildSetup
+public class ScrollRectScale : IPrebuildSetup
 {
     const string kPrefabPath = "Assets/Resources/ScrollRectScalePrefab.prefab";
     public void Setup()

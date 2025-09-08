@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace InputfieldTests
 {
-    internal class TouchInputFieldTests : BaseInputFieldTests, IPrebuildSetup
+    public class TouchInputFieldTests : BaseInputFieldTests, IPrebuildSetup
     {
         protected const string kPrefabPath = "Assets/Resources/TouchInputFieldPrefab.prefab";
 

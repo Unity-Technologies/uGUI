@@ -3,7 +3,7 @@ using UnityEngine.UI;
 namespace UnityEngine.UI.Tests
 {
     // Make a non-abstract Graphic.
-    internal class ConcreteGraphic : Graphic
+    public class ConcreteGraphic : Graphic
     {
         public override string ToString()
         {

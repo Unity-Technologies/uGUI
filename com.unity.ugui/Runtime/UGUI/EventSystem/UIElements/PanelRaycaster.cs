@@ -76,7 +76,7 @@ namespace UnityEngine.UIElements
             var delta = eventData.delta;
 
             float h = Screen.height;
-            if (UnityEngineInternal.DisplayInternal.IsASecondaryDisplayIndex(displayIndex))
+            if (displayIndex > 0 && displayIndex < Display.displays.Length)
             {
 #if UNITY_ANDROID
                     // Changed for UITK to be coherent for Android which passes display-relative rendering coordinates

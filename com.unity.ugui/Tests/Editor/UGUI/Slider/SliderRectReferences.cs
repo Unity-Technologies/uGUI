@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using UnityEngine;
 
 [Category("Slider")]
-internal class SliderRectRefernces : Behaviour
+public class SliderRectRefernces : Behaviour
 {
     private Slider slider;
     private GameObject emptyGO;

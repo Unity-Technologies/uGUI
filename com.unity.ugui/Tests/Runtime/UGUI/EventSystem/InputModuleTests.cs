@@ -6,7 +6,7 @@ using UnityEngine.TestTools;
 using UnityEngine.UI;
 
 [UnityPlatform()]
-internal class InputModuleTests
+public class InputModuleTests
 {
     EventSystem m_EventSystem;
     FakeBaseInput m_FakeBaseInput;

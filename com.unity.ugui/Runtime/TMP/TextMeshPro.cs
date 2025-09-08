@@ -225,8 +225,6 @@ namespace TMPro
                 return;
 
             TMP_UpdateManager.RegisterTextElementForGraphicRebuild(this);
-
-            ObjectUtilsBridge.MarkDirty(this);
         }
 
 

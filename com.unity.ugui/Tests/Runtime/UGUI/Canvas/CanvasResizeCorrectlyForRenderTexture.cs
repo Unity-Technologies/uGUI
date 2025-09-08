@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 using UnityEditor;
 
 [TestFixture]
-internal class CanvasResizeCorrectlyForRenderTexture
+public class CanvasResizeCorrectlyForRenderTexture
 {
     Canvas m_Canvas;
     Camera m_Camera;

@@ -7,7 +7,7 @@ using UnityEngine.TestTools;
 using UnityEngine.UI;
 using UnityEngine;
 
-internal class ButtonTests : IPrebuildSetup
+public class ButtonTests : IPrebuildSetup
 {
     GameObject m_PrefabRoot;
     const string kPrefabPath = "Assets/Resources/ButtonPrefab.prefab";

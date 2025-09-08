@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using System.Linq;
 
-internal class RectangleContainsScreenPointTest : MonoBehaviour
+public class RectangleContainsScreenPointTest : MonoBehaviour
 {
     RectTransform m_RectTransform;
     Camera m_MainCamera;

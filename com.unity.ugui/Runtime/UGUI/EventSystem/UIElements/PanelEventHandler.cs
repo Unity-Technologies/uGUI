@@ -507,7 +507,7 @@ namespace UnityEngine.UIElements
                 Vector3 eventPosition = MultipleDisplayUtilities.GetRelativeMousePositionForRaycast(eventData);
                 int eventDisplayIndex = (int)eventPosition.z;
 
-                if (UnityEngineInternal.DisplayInternal.IsASecondaryDisplayIndex(eventDisplayIndex))
+                if (eventDisplayIndex > 0 && eventDisplayIndex < Display.displays.Length)
                 {
 #if UNITY_ANDROID
                     // Changed for UITK to be coherent for Android which passes display-relative rendering coordinates

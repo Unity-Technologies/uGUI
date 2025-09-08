@@ -117,8 +117,6 @@ namespace TMPro
 
             CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
 
-            ObjectUtilsBridge.MarkDirty(this);
-
             if (m_OnDirtyVertsCallback != null)
                 m_OnDirtyVertsCallback();
         }
