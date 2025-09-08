@@ -321,7 +321,6 @@ namespace TMPro
 
         /// <summary>
         /// Function returning the index of the character at the given position (if any).
-        /// Returns @@-1@@ if no character is found at the specified position.
         /// </summary>
         /// <param name="text">A reference to the TextMeshPro component.</param>
         /// <param name="position">Position to check for intersection.</param>

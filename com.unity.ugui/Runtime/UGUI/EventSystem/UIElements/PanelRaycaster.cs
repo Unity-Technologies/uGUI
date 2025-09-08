@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace UnityEngine.UIElements
 {
-    // This code is disabled unless the com.unity.modules.uielements module is present.
+    // This code is disabled unless the UI Toolkit package or the com.unity.modules.uielements module are present.
     // The UIElements module is always present in the Editor but it can be stripped from a project build if unused.
 #if PACKAGE_UITOOLKIT
     /// <summary>
@@ -62,40 +62,53 @@ namespace UnityEngine.UIElements
         public override int sortOrderPriority => Mathf.FloorToInt(m_Panel?.sortingPriority ?? 0f);
         public override int renderOrderPriority => int.MaxValue - (UIElementsRuntimeUtility.s_ResolvedSortingIndexMax - (m_Panel?.resolvedSortingIndex ?? 0));
 
-        private static ScreenOverlayPanelPicker panelPicker = new ScreenOverlayPanelPicker();
-
         public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
         {
-            if (m_Panel == null || !m_Panel.isFlat)
+            if (m_Panel == null)
                 return;
 
             var displayIndex = m_Panel.targetDisplay;
 
             Vector3 eventPosition = MultipleDisplayUtilities.GetRelativeMousePositionForRaycast(eventData);
+
+            // Discard events that are not part of this display so the user does not interact with multiple displays at once.
+            if ((int) eventPosition.z != displayIndex)
+                return;
+
             var position = eventPosition;
             var delta = eventData.delta;
 
             float h = Screen.height;
-            if (UnityEngineInternal.DisplayInternal.IsASecondaryDisplayIndex(displayIndex))
+            if (displayIndex > 0 && displayIndex < Display.displays.Length)
             {
-#if UNITY_ANDROID
-                    // Changed for UITK to be coherent for Android which passes display-relative rendering coordinates
-                    h = Display.displays[displayIndex].renderingHeight;
-#else
-                    h = Display.displays[displayIndex].systemHeight;
-#endif
+                h = Display.displays[displayIndex].systemHeight;
             }
 
             position.y = h - position.y;
             delta.y = -delta.y;
 
-            var currentInputModule = eventData.currentInputModule;
-            if (currentInputModule == null)
+            var eventSystem = UIElementsRuntimeUtility.activeEventSystem as EventSystem;
+            if (eventSystem == null || eventSystem.currentInputModule == null)
                 return;
-            var pointerId = currentInputModule.ConvertUIToolkitPointerId(eventData);
+            var pointerId = eventSystem.currentInputModule.ConvertUIToolkitPointerId(eventData);
 
-            if (!panelPicker.TryPick((RuntimePanel)m_Panel, pointerId, position, delta, (int)eventPosition.z, out _))
+            var capturingElement = m_Panel.GetCapturingElement(pointerId);
+            if (capturingElement is VisualElement ve && ve.panel != m_Panel && ve.panel != null)
                 return;
+
+            var capturingPanel = PointerDeviceState.GetPlayerPanelWithSoftPointerCapture(pointerId);
+            if (capturingPanel != null && capturingPanel != m_Panel)
+                return;
+
+            if (capturingElement == null && capturingPanel == null)
+            {
+                if (!m_Panel.ScreenToPanel(position, delta, out var panelPosition, out _))
+                    return;
+
+                var pick = m_Panel.Pick(panelPosition);
+                if (pick == null)
+                    return;
+            }
 
             resultAppendList.Add(new RaycastResult
             {

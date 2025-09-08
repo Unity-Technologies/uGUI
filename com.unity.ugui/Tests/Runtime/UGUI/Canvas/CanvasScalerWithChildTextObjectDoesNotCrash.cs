@@ -7,7 +7,7 @@ using UnityEngine.UI;
 [TestFixture]
 [Category("RegressionTest")]
 [Description("CoveredBugID = 734299")]
-internal class CanvasScalerWithChildTextObjectDoesNotCrash
+public class CanvasScalerWithChildTextObjectDoesNotCrash
 {
     GameObject m_CanvasObject;
 

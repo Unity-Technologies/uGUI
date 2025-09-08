@@ -7,7 +7,7 @@ using System.IO;
 using UnityEditor;
 using System.Collections.Generic;
 
-internal class DropdownTests : IPrebuildSetup
+public class DropdownTests : IPrebuildSetup
 {
     GameObject m_PrefabRoot;
     GameObject m_CameraGO;
@@ -155,7 +155,7 @@ internal class DropdownTests : IPrebuildSetup
 
         SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
         SerializedProperty sortingLayers = tagManager.FindProperty("m_SortingLayers");
-        sortingLayers.DeleteArrayElementAtIndex(sortingLayers.arraySize - 1);
+        sortingLayers.DeleteArrayElementAtIndex(sortingLayers.arraySize);
         tagManager.ApplyModifiedProperties();
 #endif
     }

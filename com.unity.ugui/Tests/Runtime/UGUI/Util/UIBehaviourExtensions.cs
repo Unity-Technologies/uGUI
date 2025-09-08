@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI.Tests
 {
-    internal static class UIBehaviourExtensions
+    public static class UIBehaviourExtensions
     {
         private static object InvokeMethodAndRethrow(Type type, Object obj, string methodName, params object[] args)
         {
@@ -90,7 +90,7 @@ namespace UnityEngine.UI.Tests
         }
     }
 
-    internal static class SelectableExtensions
+    public static class SelectableExtensions
     {
         public static void InvokeOnPointerDown(this Selectable selectable, PointerEventData data)
         {
@@ -123,7 +123,7 @@ namespace UnityEngine.UI.Tests
         }
     }
 
-    internal static class GraphicExtension
+    public static class GraphicExtension
     {
         public static void InvokeOnPopulateMesh(this Graphic graphic, VertexHelper vh)
         {
@@ -131,7 +131,7 @@ namespace UnityEngine.UI.Tests
         }
     }
 
-    internal static class GraphicRaycasterExtension
+    public static class GraphicRaycasterExtension
     {
         public static void InvokeRaycast(Canvas canvas, Camera eventCamera, Vector2 pointerPosition, List<Graphic> results)
         {
@@ -139,7 +139,7 @@ namespace UnityEngine.UI.Tests
         }
     }
 
-    internal static class ToggleGroupExtension
+    public static class ToggleGroupExtension
     {
         public static void InvokeValidateToggleIsInGroup(this ToggleGroup tgroup, Toggle toggle)
         {

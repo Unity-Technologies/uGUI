@@ -225,8 +225,6 @@ namespace TMPro
                 return;
 
             TMP_UpdateManager.RegisterTextElementForGraphicRebuild(this);
-
-            ObjectUtilsBridge.MarkDirty(this);
         }
 
 
@@ -479,9 +477,6 @@ namespace TMPro
             }
         }
 
-        /// <summary>
-        /// Loads either the default font or a newly assigned font asset, and assigns the appropriate material to the renderer.
-        /// </summary>
         public void UpdateFontAsset()
         {
             LoadFontAsset();

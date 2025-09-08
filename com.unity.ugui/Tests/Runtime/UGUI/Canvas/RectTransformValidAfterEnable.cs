@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using UnityEditor;
 
 [TestFixture]
-internal class RectTransformValidAfterEnable : IPrebuildSetup
+public class RectTransformValidAfterEnable : IPrebuildSetup
 {
     const string kSceneName = "DisabledCanvasScene";
     const string kGameObjectName = "DisabledCanvas";
@@ -30,6 +30,7 @@ internal class RectTransformValidAfterEnable : IPrebuildSetup
 #endif
     }
 
+    [Ignore("UnityTest yielded WaitForEndOfFrame, which is not evoked in batchmode.")]
     [UnityTest]
     public IEnumerator CheckRectTransformValidAfterEnable()
     {
@@ -51,6 +52,8 @@ internal class RectTransformValidAfterEnable : IPrebuildSetup
 
         RectTransform rectTransform = canvasGameObject.GetComponent<RectTransform>();
         canvasGameObject.SetActive(true);
+
+        yield return new WaitForEndOfFrame();
 
         Rect rect = rectTransform.rect;
         Assert.Greater(rect.width, 0);

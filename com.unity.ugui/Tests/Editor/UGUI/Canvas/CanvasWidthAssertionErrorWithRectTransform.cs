@@ -5,7 +5,7 @@ using UnityEngine.UI;
 [TestFixture]
 [Category("RegressionTest")]
 [Description("CoveredBugID = 913932")]
-internal class CanvasWidthAssertionErrorWithRectTransform
+public class CanvasWidthAssertionErrorWithRectTransform
 {
     GameObject m_CanvasMaster;
     GameObject m_CanvasChild;

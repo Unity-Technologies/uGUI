@@ -1,13 +1,1 @@
-default:
-  area: uGUI Controls
-
-ugui-framework:
-  when:
-    path:
-      - ^*Canvas.*$
-      - ^*CanvasRenderer.*$
-      - ^*Clipping.*$
-      - ^*UnityEvent.*$
-      - ^*EventSystem.*$
-      - ^*Vertex.*$
-  area: uGUI Framework
+area: uGUI Controls

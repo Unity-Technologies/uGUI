@@ -4,7 +4,6 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using UnityEngine.TestTools;
 
 namespace TMPro
 {
@@ -275,57 +274,5 @@ namespace TMPro
         //    }
         //}
 
-        [Test]
-        public void SettingIsTextObjectScaleStatic_OnDisabledObject_DoesntProduceErrors()
-        {
-            // Reset the text component to before its OnEnable
-            var textObject = m_TextComponent.gameObject;
-            Object.DestroyImmediate(m_TextComponent);
-            textObject.SetActive(false);
-            m_TextComponent = textObject.AddComponent<TextMeshPro>();
-
-            // UUM-92041: verify that we only register if enabled
-            m_TextComponent.isTextObjectScaleStatic = true; // Make sure we're not starting false
-            m_TextComponent.isTextObjectScaleStatic = false;
-            Canvas.ForceUpdateCanvases();
-
-            LogAssert.NoUnexpectedReceived();
-        }
-
-        [Test]
-        public void SettingIsTextObjectScaleStatic_OnDisabledObject_IsAppliedCorrectlyAfterObjectIsEnabled()
-        {
-            m_TextComponent.text = "Test";
-
-            // Reset the text component to before its OnEnable
-            var textObject = m_TextComponent.gameObject;
-            Object.DestroyImmediate(m_TextComponent);
-            textObject.SetActive(false);
-            m_TextComponent = textObject.AddComponent<TextMeshPro>();
-
-            // Set isTextObjectScaleStatic to false while the object is disabled
-            m_TextComponent.isTextObjectScaleStatic = true;
-            m_TextComponent.isTextObjectScaleStatic = false; // Make sure we're not starting false
-            Canvas.ForceUpdateCanvases();
-
-            m_TextComponent.gameObject.SetActive(true);
-            Canvas.ForceUpdateCanvases();
-            var w = m_TextComponent.textInfo.meshInfo[0].uvs0[0].w;
-
-            // When isTextObjectScaleStatic is false, scale is updated in mesh uv
-            m_TextComponent.transform.localScale = Vector3.one * 2;
-            Canvas.ForceUpdateCanvases();
-            Assert.AreEqual(w * 2, m_TextComponent.textInfo.meshInfo[0].uvs0[0].w);
-
-            // Setting isTextObjectScaleStatic to true shouldn't change mesh
-            m_TextComponent.isTextObjectScaleStatic = true;
-            Canvas.ForceUpdateCanvases();
-            Assert.AreEqual(w * 2, m_TextComponent.textInfo.meshInfo[0].uvs0[0].w);
-
-            // When isTextObjectScaleStatic is true, scale is NOT updated in mesh
-            m_TextComponent.transform.localScale = Vector3.one;
-            Canvas.ForceUpdateCanvases();
-            Assert.AreEqual(w * 2, m_TextComponent.textInfo.meshInfo[0].uvs0[0].w);
-        }
     }
 }

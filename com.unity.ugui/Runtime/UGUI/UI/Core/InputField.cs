@@ -1485,6 +1485,7 @@ namespace UnityEngine.UI
                         SendOnSubmit();
                 }
 
+                OnDeselect(null);
                 return;
             }
 

@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 namespace UnityEngine.UI.Tests
 {
     [TestFixture]
-    internal class ImageTests
+    class ImageTests
     {
         Image m_Image;
         private Sprite m_Sprite;

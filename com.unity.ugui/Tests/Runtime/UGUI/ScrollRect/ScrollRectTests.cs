@@ -10,7 +10,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.TestTools;
 using System.Runtime.CompilerServices;
 
-internal class ScrollRectTests : IPrebuildSetup
+public class ScrollRectTests : IPrebuildSetup
 {
     const int ScrollSensitivity = 3;
     GameObject m_PrefabRoot;

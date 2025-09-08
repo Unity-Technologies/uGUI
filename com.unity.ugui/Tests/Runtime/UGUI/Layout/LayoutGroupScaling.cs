@@ -9,7 +9,7 @@ using UnityEngine.UI;
 // test for case 879374 - Checks that layout group children scale properly when scaleWidth / scaleHeight are toggled
 namespace LayoutTests
 {
-    internal class LayoutGroupScaling : IPrebuildSetup
+    public class LayoutGroupScaling : IPrebuildSetup
     {
         GameObject m_PrefabRoot;
         GameObject m_CameraGO;

@@ -8,7 +8,7 @@ using UnityEngine.UI;
 [UnityPlatform(include = new RuntimePlatform[] { RuntimePlatform.OSXEditor, RuntimePlatform.LinuxEditor, RuntimePlatform.WindowsEditor })]
 [Category("RegressionTest")]
 [Description("CoveredBugID = 904415")]
-internal class CoroutineWorksIfUIObjectIsAttached
+public class CoroutineWorksIfUIObjectIsAttached
 {
     GameObject m_CanvasMaster;
     GameObject m_ImageObject;
@@ -48,7 +48,7 @@ internal class CoroutineWorksIfUIObjectIsAttached
     }
 }
 
-internal class BugObject : MonoBehaviour
+public class BugObject : MonoBehaviour
 {
     void Awake()
     {
@@ -58,7 +58,7 @@ internal class BugObject : MonoBehaviour
     }
 }
 
-internal class CoroutineObject : MonoBehaviour
+public class CoroutineObject : MonoBehaviour
 {
     public int coroutineCount { get; private set; }
 

@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace InputfieldTests
 {
-    internal class BaseInputFieldTests
+    public class BaseInputFieldTests
     {
         protected GameObject m_PrefabRoot;
 

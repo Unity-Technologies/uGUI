@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-internal class RawImageTestHook : RawImage
+public class RawImageTestHook : RawImage
 {
     public bool isGeometryUpdated;
     public bool isCacheUsed;

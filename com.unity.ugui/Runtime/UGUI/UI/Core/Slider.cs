@@ -533,7 +533,6 @@ namespace UnityEngine.UI
                 return;
 
             m_Value = newValue;
-            MarkDirty();
             UpdateVisuals();
             if (sendCallback)
             {

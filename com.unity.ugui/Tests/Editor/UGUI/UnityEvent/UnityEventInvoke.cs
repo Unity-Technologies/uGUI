@@ -3,7 +3,7 @@ using UnityEditor.Events;
 using UnityEngine;
 using UnityEngine.Events;
 
-internal class UnityEventInvoke
+public class UnityEventInvoke
 {
     class SimpleCounter : MonoBehaviour
     {

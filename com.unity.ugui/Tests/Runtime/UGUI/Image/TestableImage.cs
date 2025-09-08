@@ -2,11 +2,10 @@ using NUnit.Framework;
 using UnityEngine.UI;
 using System.Reflection;
 
-internal class TestableImage : Image
+public class TestableImage : Image
 {
     public bool isOnPopulateMeshCalled = false;
     public bool isGeometryUpdated = false;
-    public bool isMaterialUpdated = false;
 
     // Hook into the mesh generation so we can do our check.
     protected override void OnPopulateMesh(VertexHelper toFill)
@@ -20,12 +19,6 @@ internal class TestableImage : Image
     {
         base.UpdateGeometry();
         isGeometryUpdated = true;
-    }
-
-    protected override void UpdateMaterial()
-    {
-        base.UpdateMaterial();
-        isMaterialUpdated = true;
     }
 
     public void GenerateImageData(VertexHelper vh)

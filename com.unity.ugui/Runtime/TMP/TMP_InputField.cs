@@ -473,7 +473,6 @@ namespace TMPro
                     case RuntimePlatform.GameCoreXboxSeries:
                     #endif
                     case RuntimePlatform.Switch:
-                    case RuntimePlatform.Switch2:
                     #if UNITY_2022_1_OR_NEWER
                     case RuntimePlatform.WebGLPlayer:
                     #endif
@@ -507,7 +506,6 @@ namespace TMPro
                     case RuntimePlatform.GameCoreXboxSeries:
                     #endif
                     case RuntimePlatform.Switch:
-                    case RuntimePlatform.Switch2:
                     #if UNITY_2022_1_OR_NEWER
                     case RuntimePlatform.WebGLPlayer:
                     #endif
@@ -549,7 +547,6 @@ namespace TMPro
                 case RuntimePlatform.GameCoreXboxSeries:
                 #endif
                 case RuntimePlatform.Switch:
-                case RuntimePlatform.Switch2:
                     return false;
                 #if UNITY_2022_1_OR_NEWER
                 case RuntimePlatform.WebGLPlayer:
@@ -1766,6 +1763,7 @@ namespace TMPro
                     }
                 }
 
+                OnDeselect(null);
                 return;
             }
 
@@ -3349,7 +3347,7 @@ namespace TMPro
             // Can't go past the character limit
             if (characterLimit > 0 && text.Length >= characterLimit)
                 return;
-
+            
             m_Text = text.Insert(m_StringPosition, replaceString);
 
             if (!char.IsHighSurrogate(c))
@@ -3902,7 +3900,6 @@ namespace TMPro
             TMP_FontAsset fontAsset = m_TextComponent.font;
             float baseScale = (m_TextComponent.fontSize / fontAsset.m_FaceInfo.pointSize * fontAsset.m_FaceInfo.scale);
             float width = m_CaretWidth * fontAsset.faceInfo.lineHeight * baseScale * 0.05f;
-            width = Mathf.Max(width, 1.0f);
 
             m_CursorVerts[0].position = new Vector3(startPosition.x, bottom, 0.0f);
             m_CursorVerts[1].position = new Vector3(startPosition.x, top, 0.0f);

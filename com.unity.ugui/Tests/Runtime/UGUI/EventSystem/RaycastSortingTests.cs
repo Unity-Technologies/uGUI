@@ -8,7 +8,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 
-internal class RaycastSortingTests : IPrebuildSetup
+public class RaycastSortingTests : IPrebuildSetup
 {
     // Test to check that a a raycast over two canvases will not use hierarchal depth to compare two results
     // from different canvases (case 912396 - Raycast hits ignores 2nd Canvas which is drawn in front)
