@@ -2,7 +2,7 @@ using UnityEngine.EventSystems;
 
 namespace InputfieldTests
 {
-    internal class FakeInputModule : BaseInputModule
+    public class FakeInputModule : BaseInputModule
     {
         public override void Process()
         {

@@ -2,7 +2,7 @@ using NUnit.Framework;
 
 namespace Core.InputField
 {
-    internal class CharacterLimitValidation : TestBehaviourBase<UnityEngine.UI.InputField>
+    public class CharacterLimitValidation : TestBehaviourBase<UnityEngine.UI.InputField>
     {
         [Test]
         public void LimitCanNotBeNegative()

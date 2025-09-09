@@ -3,7 +3,7 @@ using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 
-internal class TextEditorTests
+public class TextEditorTests
 {
     TextEditor m_TextEditor;
 

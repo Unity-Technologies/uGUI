@@ -4,7 +4,7 @@ using UnityEditor.EventSystems;
 using UnityEngine.EventSystems;
 
 [TestFixture]
-internal class InputModuleTests
+public class InputModuleTests
 {
     private EventSystem m_EventSystem;
 
@@ -40,7 +40,7 @@ internal class InputModuleTests
         Assert.IsInstanceOf<StandaloneInputModule>(inputModule);
     }
 
-    internal class TestInputModule : BaseInputModule
+    public class TestInputModule : BaseInputModule
     {
         public override void Process() { }
     }

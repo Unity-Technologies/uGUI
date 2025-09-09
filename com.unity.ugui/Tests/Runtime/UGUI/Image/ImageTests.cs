@@ -5,7 +5,7 @@ using System.Collections;
 using UnityEngine.UI;
 using System.Reflection;
 
-internal class ImageTests
+public class ImageTests
 {
     private const int Width = 32;
     private const int Height = 32;

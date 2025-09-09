@@ -10,7 +10,7 @@ using UnityEngine.UI.Tests;
 
 namespace LayoutTests
 {
-    internal class VerticalLayoutGroupTests : IPrebuildSetup
+    public class VerticalLayoutGroupTests : IPrebuildSetup
     {
         GameObject m_PrefabRoot;
         const string kPrefabPath = "Assets/Resources/VerticalLayoutGroupPrefab.prefab";

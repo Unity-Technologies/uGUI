@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using UnityEditor;
 
 [TestFixture]
-internal class RectTransformValidAfterEnable : IPrebuildSetup
+public class RectTransformValidAfterEnable : IPrebuildSetup
 {
     const string kSceneName = "DisabledCanvasScene";
     const string kGameObjectName = "DisabledCanvas";

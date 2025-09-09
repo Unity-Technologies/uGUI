@@ -3,7 +3,7 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
-internal class PhysicsRaycasterTests
+public class PhysicsRaycasterTests
 {
     GameObject m_CamGO;
     GameObject m_Collider;

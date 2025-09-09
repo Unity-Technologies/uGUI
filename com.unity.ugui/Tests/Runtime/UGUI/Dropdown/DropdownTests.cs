@@ -7,7 +7,7 @@ using System.IO;
 using UnityEditor;
 using System.Collections.Generic;
 
-internal class DropdownTests : IPrebuildSetup
+public class DropdownTests : IPrebuildSetup
 {
     GameObject m_PrefabRoot;
     GameObject m_CameraGO;

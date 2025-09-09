@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 using UnityEditor;
 
 [TestFixture]
-internal class CanvasSizeCorrectInAwakeAndStart : IPrebuildSetup
+public class CanvasSizeCorrectInAwakeAndStart : IPrebuildSetup
 {
     const string k_SceneName = "CanvasSizeCorrectInAwakeAndStartScene";
     GameObject m_CanvasGameObject;

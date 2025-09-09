@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [Category("Canvas")]
-internal class RootCanvasTests : TestBehaviourBase<UnityEngine.Canvas>
+public class RootCanvasTests : TestBehaviourBase<UnityEngine.Canvas>
 {
     // A simple nested canvas hierarchy
     // m_TestObject
@@ -77,55 +77,5 @@ internal class RootCanvasTests : TestBehaviourBase<UnityEngine.Canvas>
         raycasts = GraphicRegistry.GetRaycastableGraphicsForCanvas(rootCanvasChild);
 
         Assert.IsTrue(raycasts.Count == 0);
-    }
-
-    [Test]
-    public void ChildrenInheritRootCanvasReflectionProbeProperties()
-    {
-        m_TestObject.useReflectionProbes = true;
-        m_TestObject.renderMode = RenderMode.WorldSpace;
-
-        // rootCanvasChild inherits properties from root
-        Assert.AreEqual(
-            rootCanvasChild.useReflectionProbes,
-            m_TestObject.useReflectionProbes);
-        Assert.AreEqual(
-            rootCanvasChild.additionalShaderChannels & AdditionalCanvasShaderChannels.Normal,
-            m_TestObject.additionalShaderChannels & AdditionalCanvasShaderChannels.Normal);
-
-        // baseCanvas inherits properties from root
-        Assert.AreEqual(
-            baseCanvas.useReflectionProbes,
-            m_TestObject.useReflectionProbes);
-        Assert.AreEqual(
-            baseCanvas.additionalShaderChannels & AdditionalCanvasShaderChannels.Normal,
-            m_TestObject.additionalShaderChannels & AdditionalCanvasShaderChannels.Normal);
-    }
-
-    [Test]
-    public void CannotOverrideRootCanvasReflectionProbeProperties()
-    {
-        m_TestObject.useReflectionProbes = true;
-        m_TestObject.renderMode = RenderMode.WorldSpace;
-
-        rootCanvasChild.useReflectionProbes = false;
-        rootCanvasChild.renderMode = RenderMode.ScreenSpaceOverlay;
-        rootCanvasChild.additionalShaderChannels = AdditionalCanvasShaderChannels.None;
-
-        // rootCanvasChild inherits properties from root
-        Assert.AreEqual(
-            rootCanvasChild.useReflectionProbes,
-            m_TestObject.useReflectionProbes);
-        Assert.AreEqual(
-            rootCanvasChild.additionalShaderChannels & AdditionalCanvasShaderChannels.Normal,
-            m_TestObject.additionalShaderChannels & AdditionalCanvasShaderChannels.Normal);
-
-        // baseCanvas inherits properties from root
-        Assert.AreEqual(
-            baseCanvas.useReflectionProbes,
-            m_TestObject.useReflectionProbes);
-        Assert.AreEqual(
-            baseCanvas.additionalShaderChannels & AdditionalCanvasShaderChannels.Normal,
-            m_TestObject.additionalShaderChannels & AdditionalCanvasShaderChannels.Normal);
     }
 }

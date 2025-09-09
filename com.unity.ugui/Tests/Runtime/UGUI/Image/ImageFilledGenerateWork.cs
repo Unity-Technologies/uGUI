@@ -6,7 +6,7 @@ using UnityEngine;
 
 [TestFixture]
 [Category("RegressionTest")]
-internal class ImageFilledGenerateWork
+public class ImageFilledGenerateWork
 {
     GameObject m_CanvasGO;
     GameObject m_ImageGO;

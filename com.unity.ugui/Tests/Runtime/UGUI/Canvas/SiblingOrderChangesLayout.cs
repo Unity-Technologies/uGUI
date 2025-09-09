@@ -7,7 +7,7 @@ using UnityEngine.UI;
 [TestFixture]
 [Category("RegressionTest")]
 [Description("Case 723062")]
-internal class SiblingOrderChangesLayout
+public class SiblingOrderChangesLayout
 {
     GameObject m_CanvasGO;
     GameObject m_ParentGO;

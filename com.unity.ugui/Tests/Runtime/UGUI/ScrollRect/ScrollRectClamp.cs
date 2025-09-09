@@ -4,7 +4,7 @@ using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
 
-internal class ScrollRectClamp
+public class ScrollRectClamp
 {
     // Prefab has the following hierarchy:
     // - PrefabRoot

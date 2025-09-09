@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace InputfieldTests
 {
-    internal class DesktopInputFieldTests : BaseInputFieldTests, IPrebuildSetup
+    public class DesktopInputFieldTests : BaseInputFieldTests, IPrebuildSetup
     {
         protected const string kPrefabPath = "Assets/Resources/DesktopInputFieldPrefab.prefab";
 
