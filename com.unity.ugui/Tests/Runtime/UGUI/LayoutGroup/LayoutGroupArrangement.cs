@@ -6,7 +6,7 @@ using UnityEngine.TestTools;
 using UnityEngine.UI;
 
 [TestFixture]
-public class LayoutGroupArrangement
+internal class LayoutGroupArrangement
 {
     const float k_LayoutDefaultSize = 100f;
 

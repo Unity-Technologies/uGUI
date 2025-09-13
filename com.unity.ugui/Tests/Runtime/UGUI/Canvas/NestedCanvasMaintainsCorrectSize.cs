@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using NUnit.Framework;
 
-public class NestedCanvasMaintainsCorrectSize : IPrebuildSetup
+internal class NestedCanvasMaintainsCorrectSize : IPrebuildSetup
 {
     BridgeScriptForRetainingObjects m_BridgeComponent;
 

@@ -11,7 +11,7 @@ using UnityEngine.UIElements;
 using UnityEngine.Search;
 
 [Timeout(360000)]
-public class PropertyDrawerTests
+internal class PropertyDrawerTests
 {
     class PropertyDrawerTestsWindow : EditorWindow
     {

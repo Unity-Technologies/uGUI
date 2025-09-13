@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using UnityEngine;
 
-public class TestBehaviourBase<T> where T : Behaviour
+internal class TestBehaviourBase<T> where T : Behaviour
 {
     protected T m_TestObject;
 

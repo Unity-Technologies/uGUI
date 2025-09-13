@@ -1,7 +1,7 @@
 using UnityEngine;
 using NUnit.Framework;
 
-public class CanvasRendererTests
+internal class CanvasRendererTests
 {
     private const int Width = 32;
     private const int Height = 32;

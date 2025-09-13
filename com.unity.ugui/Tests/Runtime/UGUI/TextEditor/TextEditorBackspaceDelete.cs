@@ -4,7 +4,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-public class TextEditorBackspaceDelete
+internal class TextEditorBackspaceDelete
 {
     private const string kFailedToRemoveCharacterMessage = "Backspace or Delete Failed To Remove The Expected Character";
     private const string kFailedToChangeCursor = "Backspace or Delete Failed To Move The Cursor To The Expected Index";

@@ -9,7 +9,7 @@ using NUnit.Framework;
 using UnityEngine.EventSystems;
 using UnityEditor;
 
-public class ScrollBarClamp : IPrebuildSetup
+internal class ScrollBarClamp : IPrebuildSetup
 {
     // This test tests that setting scrollBar.value will not be clamped (case 802330 - Scrollbar stops velocity of 'Scroll Rect' unexpectedly)
     GameObject m_PrefabRoot;

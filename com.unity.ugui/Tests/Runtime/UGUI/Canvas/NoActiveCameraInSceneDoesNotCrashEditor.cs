@@ -11,7 +11,7 @@ using UnityEditor;
 [UnityPlatform(include = new RuntimePlatform[] { RuntimePlatform.OSXEditor, RuntimePlatform.LinuxEditor, RuntimePlatform.WindowsEditor })]
 [Category("RegressionTest")]
 [Description("CoveredBugID = 883807, CoveredBugDescription = \"Object::GetInstanceID crash when trying to switch canvas\"")]
-public class NoActiveCameraInSceneDoesNotCrashEditor : IPrebuildSetup
+internal class NoActiveCameraInSceneDoesNotCrashEditor : IPrebuildSetup
 {
     Scene m_InitScene;
     const string k_SceneName = "NoActiveCameraInSceneDoesNotCrashEditorScene";

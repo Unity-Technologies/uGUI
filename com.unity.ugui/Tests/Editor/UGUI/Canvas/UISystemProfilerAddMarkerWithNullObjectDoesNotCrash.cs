@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace Tests
 {
-    public class UISystemProfilerAddMarkerWithNullObjectDoesNotCrash
+    internal class UISystemProfilerAddMarkerWithNullObjectDoesNotCrash
     {
         [Test]
         public void AddMarkerShouldNotCrashWithNullObject()

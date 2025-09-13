@@ -6,7 +6,7 @@ using UnityEngine;
 namespace UnityEngine.UI.Tests
 {
     // Hook into the graphic callback so we can do our check.
-    public class ImageHook : Image
+    internal class ImageHook : Image
     {
         public bool isGeometryUpdated;
         public bool isLayoutRebuild;

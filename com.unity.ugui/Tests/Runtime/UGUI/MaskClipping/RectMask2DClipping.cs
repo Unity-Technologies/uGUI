@@ -12,7 +12,7 @@ using UnityEditor;
 */
 namespace UnityEngine.UI.Tests
 {
-    public class RectMask2DClipping : IPrebuildSetup
+    internal class RectMask2DClipping : IPrebuildSetup
     {
         GameObject m_PrefabRoot;
         GameObject m_CameraGO;

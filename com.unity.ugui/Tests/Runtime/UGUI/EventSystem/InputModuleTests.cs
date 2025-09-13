@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -6,7 +7,7 @@ using UnityEngine.TestTools;
 using UnityEngine.UI;
 
 [UnityPlatform()]
-public class InputModuleTests
+internal class InputModuleTests
 {
     EventSystem m_EventSystem;
     FakeBaseInput m_FakeBaseInput;
@@ -249,6 +250,61 @@ public class InputModuleTests
         m_FakeBaseInput.MousePosition = screenMiddle - new Vector2(150, 150);
         yield return null;
         Assert.IsTrue(callbackCheck.pointerData.fullyExited == true);
+    }
+
+    [UnityTest]
+    public IEnumerator AllDragsAreReleasedOnLoseFocus()
+    {
+        // When the application loses focus, OnEndDrag and OnDrop should be called for all pointers
+        // involved in an active drag.
+
+        var screenMiddle = new Vector2(Screen.width / 2, Screen.height / 2);
+
+        // Add scripts to Image which implement OnBeginDrag, OnDrag & OnEndDrag callbacks
+        var callbackCheckLmb = m_Image.gameObject.AddComponent<DragCallbackCheck>();
+        callbackCheckLmb.pointerId = -1;
+        var callbackCheckRmb = m_Image.gameObject.AddComponent<DragCallbackCheck>();
+        callbackCheckRmb.pointerId = -2;
+
+        // Setting required to fake mouse presence
+        m_FakeBaseInput.MousePresent = true;
+
+        // Press both mouse buttons
+        m_FakeBaseInput.MouseButtonDown[0] = true;
+        m_FakeBaseInput.MouseButtonDown[1] = true;
+        m_FakeBaseInput.MousePosition = screenMiddle;
+
+        yield return null;
+
+        // Reset mouse down events and move pointer somewhere else -> initiates drag
+        m_FakeBaseInput.MouseButtonDown[0] = false;
+        m_FakeBaseInput.MouseButtonDown[1] = false;
+        m_FakeBaseInput.MousePosition = screenMiddle - new Vector2(150, 150);
+
+        yield return null;
+
+        // We should be mid-drag for both mouse buttons now
+        Assert.IsTrue(callbackCheckLmb.onBeginDragCalled, "OnBeginDrag not called for LMB");
+        Assert.IsTrue(callbackCheckRmb.onBeginDragCalled, "OnBeginDrag not called for RMB");
+        Assert.IsTrue(callbackCheckLmb.onDragCalled, "OnDrag not called for LMB");
+        Assert.IsTrue(callbackCheckRmb.onDragCalled, "OnDrag not called for RMB");
+        Assert.IsFalse(callbackCheckLmb.onEndDragCalled, "OnEndDrag called prematurely for LMB");
+        Assert.IsFalse(callbackCheckRmb.onEndDragCalled, "OnEndDrag called prematurely for RMB");
+        Assert.IsFalse(callbackCheckLmb.onDropCalled, "OnDrop called prematurely for LMB");
+        Assert.IsFalse(callbackCheckRmb.onDropCalled, "OnDrop called prematurely for RMB");
+
+        // Fake the application losing focus
+        typeof(EventSystem)
+            .GetMethod("OnApplicationFocus", BindingFlags.Instance | BindingFlags.NonPublic)
+            .Invoke(m_EventSystem, new object[] { false });
+
+        yield return null;
+
+        // Losing focus should have released the drags for both mouse buttons
+        Assert.IsTrue(callbackCheckLmb.onEndDragCalled, "OnEndDrag not called for LMB");
+        Assert.IsTrue(callbackCheckRmb.onEndDragCalled, "OnEndDrag not called for RMB");
+        Assert.IsTrue(callbackCheckLmb.onDropCalled, "OnDrop not called for LMB");
+        Assert.IsTrue(callbackCheckRmb.onDropCalled, "OnDrop not called for RMB");
     }
 
     [TearDown]

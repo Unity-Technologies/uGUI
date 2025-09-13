@@ -6,7 +6,7 @@ namespace Graphics
 {
     [Category("RegressionTest")]
     [Description("CoveredBugID = 1395695, CoveredBugDescription = \"RectMask2D hides all content when parented from other display to first dislpay in the Game view window\"")]
-    public class RectMask2DReparentedToDifferentCanvas
+    internal class RectMask2DReparentedToDifferentCanvas
     {
         GameObject m_GameObjectA;
         GameObject m_GameObjectB;

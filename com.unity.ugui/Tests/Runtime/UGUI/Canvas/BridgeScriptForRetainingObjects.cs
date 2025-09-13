@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BridgeScriptForRetainingObjects : MonoBehaviour
+internal class BridgeScriptForRetainingObjects : MonoBehaviour
 {
     public const string bridgeObjectName = "BridgeGameObject";
 
