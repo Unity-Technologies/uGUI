@@ -2,7 +2,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class RectMask2DCulling : TestBehaviourBase<UnityEngine.Canvas>
+internal class RectMask2DCulling : TestBehaviourBase<UnityEngine.Canvas>
 {
     [Test]
     public void CullFlagNotResetWhenReparented740604()

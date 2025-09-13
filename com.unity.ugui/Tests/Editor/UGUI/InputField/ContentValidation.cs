@@ -3,7 +3,7 @@ using ContentType = UnityEngine.UI.InputField.ContentType;
 
 namespace Core.InputField
 {
-    public class ContentValidation : TestBehaviourBase<UnityEngine.UI.InputField>
+    internal class ContentValidation : TestBehaviourBase<UnityEngine.UI.InputField>
     {
         [Test]
         [TestCase(ContentType.Alphanumeric, "0", "0")]

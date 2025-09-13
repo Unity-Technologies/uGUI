@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using UnityEngine;
 
 [Category("Slider")]
-public class SliderTests
+internal class SliderTests
 {
     private Slider slider;
     private GameObject emptyGO;

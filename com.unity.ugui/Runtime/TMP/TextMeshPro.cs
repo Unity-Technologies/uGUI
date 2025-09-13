@@ -2211,9 +2211,10 @@ namespace TMPro
 
             // Calculate the scale of the font based on selected font size and sampling point size.
             // baseScale is calculated using the font asset assigned to the text object.
-            float baseScale = (m_fontSize / m_fontAsset.m_FaceInfo.pointSize * m_fontAsset.m_FaceInfo.scale * (m_isOrthographic ? 1 : 0.1f));
+            float orthographicMultiplier = m_isOrthographic ? 1 : 0.1f;
+            float baseScale = m_fontSize / m_fontAsset.m_FaceInfo.pointSize * m_fontAsset.m_FaceInfo.scale * orthographicMultiplier;
             float currentElementScale = baseScale;
-            float currentEmScale = m_fontSize * 0.01f * (m_isOrthographic ? 1 : 0.1f);
+            float currentEmScale = m_fontSize * 0.01f * orthographicMultiplier;
             m_fontScaleMultiplier = 1;
 
             m_currentFontSize = m_fontSize;
@@ -2509,44 +2510,48 @@ namespace TMPro
                 float baselineOffset = 0;
                 float elementAscentLine = 0;
                 float elementDescentLine = 0;
+
+                FaceInfo fontFace = m_currentFontAsset.m_FaceInfo;
+
                 if (m_textElementType == TMP_TextElementType.Sprite)
                 {
                     // If a sprite is used as a fallback then get a reference to it and set the color to white.
                     TMP_SpriteCharacter sprite = (TMP_SpriteCharacter)textInfo.characterInfo[m_characterCount].textElement;
-                    m_currentSpriteAsset = sprite.textAsset as TMP_SpriteAsset;
-                    m_spriteIndex = (int)sprite.glyphIndex;
-
                     if (sprite == null)
                     {
                         k_CharacterLookupMarker.End();
                         continue;
                     }
 
+                    m_currentSpriteAsset = sprite.textAsset as TMP_SpriteAsset;
+                    m_spriteIndex = (int)sprite.glyphIndex;
+
                     // Sprites are assigned in the E000 Private Area + sprite Index
                     if (charCode == '<')
-                        charCode = 57344 + (uint)m_spriteIndex;
+                        charCode = 0xE000 + (uint)m_spriteIndex;
                     else
                         m_spriteColor = s_colorWhite;
 
-                    float fontScale = (m_currentFontSize / m_currentFontAsset.faceInfo.pointSize * m_currentFontAsset.faceInfo.scale * (m_isOrthographic ? 1 : 0.1f));
+                    float fontScale = m_currentFontSize / fontFace.pointSize * fontFace.scale * orthographicMultiplier;
+                    FaceInfo spriteFace = m_currentSpriteAsset.m_FaceInfo;
 
-                    // The sprite scale calculations are based on the font asset assigned to the text object.
-                    if (m_currentSpriteAsset.m_FaceInfo.pointSize > 0)
+                    // Use sprite asset's own metrics when available. Otherwise, scale sprite based on current font asset face metrics.
+                    if (spriteFace.pointSize > 0)
                     {
-                        float spriteScale = m_currentFontSize / m_currentSpriteAsset.m_FaceInfo.pointSize * m_currentSpriteAsset.m_FaceInfo.scale * (m_isOrthographic ? 1 : 0.1f);
+                        float spriteScale = m_currentFontSize / spriteFace.pointSize * spriteFace.scale * orthographicMultiplier;
                         currentElementScale = sprite.m_Scale * sprite.m_Glyph.scale * spriteScale;
-                        elementAscentLine = m_currentSpriteAsset.m_FaceInfo.ascentLine;
-                        baselineOffset = m_currentSpriteAsset.m_FaceInfo.baseline * fontScale * m_fontScaleMultiplier * m_currentSpriteAsset.m_FaceInfo.scale;
-                        elementDescentLine = m_currentSpriteAsset.m_FaceInfo.descentLine;
+                        elementAscentLine = spriteFace.ascentLine;
+                        baselineOffset = spriteFace.baseline * fontScale * m_fontScaleMultiplier * spriteFace.scale;
+                        elementDescentLine = spriteFace.descentLine;
                     }
                     else
                     {
-                        float spriteScale = m_currentFontSize / m_currentFontAsset.m_FaceInfo.pointSize * m_currentFontAsset.m_FaceInfo.scale * (m_isOrthographic ? 1 : 0.1f);
-                        currentElementScale = m_currentFontAsset.m_FaceInfo.ascentLine / sprite.m_Glyph.metrics.height * sprite.m_Scale * sprite.m_Glyph.scale * spriteScale;
-                        float scaleDelta = spriteScale / currentElementScale;
-                        elementAscentLine = m_currentFontAsset.m_FaceInfo.ascentLine * scaleDelta;
-                        baselineOffset = m_currentFontAsset.m_FaceInfo.baseline * fontScale * m_fontScaleMultiplier * m_currentFontAsset.m_FaceInfo.scale;
-                        elementDescentLine = m_currentFontAsset.m_FaceInfo.descentLine * scaleDelta;
+                        float spriteScale = m_currentFontSize / fontFace.pointSize * fontFace.scale * orthographicMultiplier;
+                        currentElementScale = fontFace.ascentLine / sprite.m_Glyph.metrics.height * sprite.m_Scale * sprite.m_Glyph.scale * spriteScale;
+                        float scaleDelta = currentElementScale != 0 ? spriteScale / currentElementScale : 0;
+                        elementAscentLine = fontFace.ascentLine * scaleDelta;
+                        baselineOffset = fontFace.baseline * fontScale * m_fontScaleMultiplier * fontFace.scale;
+                        elementDescentLine = fontFace.descentLine * scaleDelta;
                     }
 
                     m_cached_TextElement = sprite;
@@ -2576,9 +2581,9 @@ namespace TMPro
                     // Special handling if replaced character was a line feed where in this case we have to use the scale of the previous character.
                     float adjustedScale;
                     if (isInjectedCharacter && m_TextProcessingArray[i].unicode == 0x0A && m_characterCount != m_firstCharacterOfLine)
-                        adjustedScale = m_textInfo.characterInfo[m_characterCount - 1].pointSize * smallCapsMultiplier / m_currentFontAsset.m_FaceInfo.pointSize * m_currentFontAsset.m_FaceInfo.scale * (m_isOrthographic ? 1 : 0.1f);
+                        adjustedScale = m_textInfo.characterInfo[m_characterCount - 1].pointSize * smallCapsMultiplier / fontFace.pointSize * fontFace.scale * orthographicMultiplier;
                     else
-                        adjustedScale = m_currentFontSize * smallCapsMultiplier / m_currentFontAsset.m_FaceInfo.pointSize * m_currentFontAsset.m_FaceInfo.scale * (m_isOrthographic ? 1 : 0.1f);
+                        adjustedScale = m_currentFontSize * smallCapsMultiplier / fontFace.pointSize * fontFace.scale * orthographicMultiplier;
 
                     // Special handling for injected Ellipsis
                     if (isInjectedCharacter && charCode == 0x2026)
@@ -2588,12 +2593,12 @@ namespace TMPro
                     }
                     else
                     {
-                        elementAscentLine = m_currentFontAsset.m_FaceInfo.ascentLine;
-                        elementDescentLine = m_currentFontAsset.m_FaceInfo.descentLine;
+                        elementAscentLine = fontFace.ascentLine;
+                        elementDescentLine = fontFace.descentLine;
                     }
 
                     currentElementScale = adjustedScale * m_fontScaleMultiplier * m_cached_TextElement.m_Scale * m_cached_TextElement.m_Glyph.scale;
-                    baselineOffset = m_currentFontAsset.m_FaceInfo.baseline * adjustedScale * m_fontScaleMultiplier * m_currentFontAsset.m_FaceInfo.scale;
+                    baselineOffset = fontFace.baseline * adjustedScale * m_fontScaleMultiplier * fontFace.scale;
 
                     m_textInfo.characterInfo[m_characterCount].elementType = TMP_TextElementType.Character;
                     m_textInfo.characterInfo[m_characterCount].scale = currentElementScale;
@@ -3763,7 +3768,7 @@ namespace TMPro
                 #region Track Potential Insertion Location for Ellipsis
                 if (m_overflowMode == TextOverflowModes.Ellipsis && (isInjectedCharacter == false || charCode == 0x2D))
                 {
-                    float fontScale = m_currentFontSize / m_Ellipsis.fontAsset.m_FaceInfo.pointSize * m_Ellipsis.fontAsset.m_FaceInfo.scale * (m_isOrthographic ? 1 : 0.1f);
+                    float fontScale = m_currentFontSize / m_Ellipsis.fontAsset.m_FaceInfo.pointSize * m_Ellipsis.fontAsset.m_FaceInfo.scale * orthographicMultiplier;
                     float scale = fontScale * m_fontScaleMultiplier * m_Ellipsis.character.m_Scale * m_Ellipsis.character.m_Glyph.scale;
                     float marginLeft = m_marginLeft;
                     float marginRight = m_marginRight;
@@ -3771,7 +3776,7 @@ namespace TMPro
                     // Use the scale and margins of the previous character if Line Feed (LF) is not the first character of a line.
                     if (charCode == 0x0A && m_characterCount != m_firstCharacterOfLine)
                     {
-                        fontScale = m_textInfo.characterInfo[m_characterCount - 1].pointSize / m_Ellipsis.fontAsset.m_FaceInfo.pointSize * m_Ellipsis.fontAsset.m_FaceInfo.scale * (m_isOrthographic ? 1 : 0.1f);
+                        fontScale = m_textInfo.characterInfo[m_characterCount - 1].pointSize / m_Ellipsis.fontAsset.m_FaceInfo.pointSize * m_Ellipsis.fontAsset.m_FaceInfo.scale * orthographicMultiplier;
                         scale = fontScale * m_fontScaleMultiplier * m_Ellipsis.character.m_Scale * m_Ellipsis.character.m_Glyph.scale;
                         marginLeft = m_textInfo.lineInfo[m_lineNumber].marginLeft;
                         marginRight = m_textInfo.lineInfo[m_lineNumber].marginRight;
@@ -4328,7 +4333,7 @@ namespace TMPro
                             {
                                 float gap = !m_isRightToLeft ? lineInfo.width - lineInfo.maxAdvance : lineInfo.width + lineInfo.maxAdvance;
                                 int visibleCount = lineInfo.visibleCharacterCount - 1 + lineInfo.controlCharacterCount;
-                                int spaces = lineInfo.spaceCount - lineInfo.controlCharacterCount;
+                                int spaces = lineInfo.visibleSpaceCount - lineInfo.controlCharacterCount;
 
                                 if (isFirstSeperator) { spaces -= 1; visibleCount += 1; }
 

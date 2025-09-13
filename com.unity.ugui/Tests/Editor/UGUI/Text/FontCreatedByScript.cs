@@ -3,7 +3,7 @@ using NUnit.Framework;
 using UnityEngine;
 
 [Category("Text")]
-public class FontCreatedByScript
+internal class FontCreatedByScript
 {
     static Font CreateDefaultFontWithOneCharacter(int character)
     {

@@ -10,7 +10,7 @@ namespace Graphics
     [Category("RegressionTest")]
     [Description(
         "CoveredBugID = 782957, CoveredBugDescription = \"Some element from scroll view are invisible when they're masked with RectMask2D and sub-canvases\"")]
-    public class RectMask2DWithNestedCanvasCullsUsingCorrectCanvasRect
+    internal class RectMask2DWithNestedCanvasCullsUsingCorrectCanvasRect
     {
         GameObject m_RootCanvasGO;
         GameObject m_MaskGO;

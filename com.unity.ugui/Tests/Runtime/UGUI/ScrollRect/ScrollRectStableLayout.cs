@@ -11,7 +11,7 @@ using UnityEditor;
  Test for case (1010178-Clamped ScrollRect with scalling cause a large spike in performance)
 */
 
-public class ScrollRectStableLayout : IPrebuildSetup
+internal class ScrollRectStableLayout : IPrebuildSetup
 {
     GameObject m_PrefabRoot;
     GameObject m_CameraGO;

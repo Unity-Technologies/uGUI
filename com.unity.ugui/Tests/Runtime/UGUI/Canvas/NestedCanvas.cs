@@ -6,7 +6,7 @@ using NUnit.Framework;
 using System.Collections;
 using UnityEditor;
 
-public class NestedCanvas : IPrebuildSetup
+internal class NestedCanvas : IPrebuildSetup
 {
     Object m_GO1;
     Object m_GO2;

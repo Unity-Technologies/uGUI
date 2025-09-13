@@ -4,11 +4,11 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
-public class WrapperWindowFixture
+internal class WrapperWindowFixture
 {
     private static WrapperWindow s_MostRecentWrapperWindow;
 
-    public class WrapperWindow : EditorWindow
+    internal class WrapperWindow : EditorWindow
     {
         // Return true to end the test
         public Func<WrapperWindow, bool> onGUIDelegate;

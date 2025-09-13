@@ -1,7 +1,7 @@
 using UnityEngine;
 using NUnit.Framework;
 
-public class RectTransformPosition
+internal class RectTransformPosition
 {
     [Test]
     public void SettingPositionBeforeGameObjectIsActivatedWorks_953409()

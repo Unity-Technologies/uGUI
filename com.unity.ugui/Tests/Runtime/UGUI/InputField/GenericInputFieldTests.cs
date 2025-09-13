@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace InputfieldTests
 {
-    public class GenericInputFieldTests : BaseInputFieldTests, IPrebuildSetup
+    internal class GenericInputFieldTests : BaseInputFieldTests, IPrebuildSetup
     {
         protected const string kPrefabPath = "Assets/Resources/GenericInputFieldPrefab.prefab";
 

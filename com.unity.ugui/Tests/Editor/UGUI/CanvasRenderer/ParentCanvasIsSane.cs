@@ -4,7 +4,7 @@ using NUnit.Framework;
 using System.Collections;
 using UnityEngine.UI;
 
-public class ParentCanvasIsSane
+internal class ParentCanvasIsSane
 {
     GameObject rootCanvas;
     GameObject rootObject;

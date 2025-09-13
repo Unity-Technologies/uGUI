@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEditor;
 using NUnit.Framework;
 
-public class InterceptedEventsPreviewTests
+internal class InterceptedEventsPreviewTests
 {
     [Test]
     public void InterceptedEventsPreviewCacheUsingTypeCacheReturnsSameTypes()
