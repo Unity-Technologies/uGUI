@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 
 namespace LayoutTests
 {
-    public class HorizontalLayoutGroupTests : IPrebuildSetup
+    internal class HorizontalLayoutGroupTests : IPrebuildSetup
     {
         GameObject m_PrefabRoot;
         const string kPrefabPath = "Assets/Resources/HorizontalLayoutGroupPrefab.prefab";

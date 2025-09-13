@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
 
-public class Physics2DRaycasterTests
+internal class Physics2DRaycasterTests
 {
     GameObject m_CamGO;
     SpriteRenderer m_RedSprite;

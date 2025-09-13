@@ -5,7 +5,7 @@ using System.Collections;
 using UnityEngine.TestTools.Utils;
 
 [TestFixture]
-public class CheckMeshColorsAndColors32Match
+internal class CheckMeshColorsAndColors32Match
 {
     GameObject m_CanvasGO;
     GameObject m_ColorMeshGO;

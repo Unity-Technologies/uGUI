@@ -5,9 +5,9 @@ using UnityEngine.UI;
 using UnityEditor;
 using NUnit.Framework;
 
-public class DropdownOptionsListDrawer : WrapperWindowFixture
+internal class DropdownOptionsListDrawer : WrapperWindowFixture
 {
-    public class Fixture : MonoBehaviour
+    internal class Fixture : MonoBehaviour
     {
         public Dropdown.OptionDataList options = new Dropdown.OptionDataList();
     }

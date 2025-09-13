@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace Graphics
 {
-    public class RawImageTest : IPrebuildSetup
+    internal class RawImageTest : IPrebuildSetup
     {
         private const int Width = 32;
         private const int Height = 32;

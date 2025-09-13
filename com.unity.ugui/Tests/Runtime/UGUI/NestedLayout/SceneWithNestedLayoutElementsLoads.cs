@@ -9,7 +9,7 @@ using UnityEditor;
 
 [TestFixture]
 [Category("RegressionTest")]
-public class SceneWithNestedLayoutElementsLoad : IPrebuildSetup
+internal class SceneWithNestedLayoutElementsLoad : IPrebuildSetup
 {
     Scene m_InitScene;
     const string aspectRatioFitterSceneName = "AspectRatioFitter";

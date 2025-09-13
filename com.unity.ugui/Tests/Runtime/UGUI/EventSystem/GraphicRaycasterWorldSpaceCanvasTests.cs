@@ -7,7 +7,7 @@ using UnityEngine.TestTools;
 using UnityEngine.UI;
 using UnityEngine.TestTools.Utils;
 
-public class GraphicRaycasterWorldSpaceCanvasTests
+internal class GraphicRaycasterWorldSpaceCanvasTests
 {
     Camera m_Camera;
     EventSystem m_EventSystem;
