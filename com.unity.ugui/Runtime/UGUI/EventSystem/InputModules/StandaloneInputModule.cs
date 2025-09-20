@@ -1,5 +1,6 @@
 using System;
-using UnityEngine;
+using System.Collections.Generic;
+using UnityEngine.Pool;
 using UnityEngine.Serialization;
 
 namespace UnityEngine.EventSystems
@@ -22,7 +23,7 @@ namespace UnityEngine.EventSystems
 
         private GameObject m_CurrentFocusedGameObject;
 
-        private PointerEventData m_InputPointerEvent;
+        private readonly Dictionary<int, PointerEventData> m_InputPointerEvents = new();
 
         private const float doubleClickTime = 0.3f;
 
@@ -166,18 +167,40 @@ namespace UnityEngine.EventSystems
         {
             if (!eventSystem.isFocused && ShouldIgnoreEventsOnNoFocus())
             {
-                if (m_InputPointerEvent != null && m_InputPointerEvent.pointerDrag != null && m_InputPointerEvent.dragging)
-                {
-                    ReleaseMouse(m_InputPointerEvent, m_InputPointerEvent.pointerCurrentRaycast.gameObject);
-                }
-
-                m_InputPointerEvent = null;
-
+                ReleasePointerDrags();
                 return;
             }
 
             m_LastMousePosition = m_MousePosition;
             m_MousePosition = input.mousePosition;
+        }
+
+        private void ReleasePointerDrags()
+        {
+            using (ListPool<int>.Get(out var pointerIds))
+            {
+                // Copy all current pointer IDs into a temporary list so we can iterate over them safely.
+                // We cannot iterate m_InputPointerEvents directly because ReleaseMouse() modifies
+                // m_InputPointerEvents, which would invalidate any active enumeration.
+                foreach (var key in m_InputPointerEvents.Keys)
+                {
+                    pointerIds.Add(key);
+                }
+
+                // Release drag events for all pointers
+                foreach (var pointerId in pointerIds)
+                {
+                    if (!m_InputPointerEvents.TryGetValue(pointerId, out var inputPointerEvent))
+                        continue;
+
+                    if (inputPointerEvent != null && inputPointerEvent.pointerDrag != null && inputPointerEvent.dragging)
+                    {
+                        ReleaseMouse(inputPointerEvent, inputPointerEvent.pointerCurrentRaycast.gameObject);
+                    }
+                }
+            }
+
+            m_InputPointerEvents.Clear();
         }
 
         private void ReleaseMouse(PointerEventData pointerEvent, GameObject currentOverGo)
@@ -217,7 +240,7 @@ namespace UnityEngine.EventSystems
                 HandlePointerExitAndEnter(pointerEvent, currentOverGo);
             }
 
-            m_InputPointerEvent = pointerEvent;
+            m_InputPointerEvents[pointerEvent.pointerId] = pointerEvent;
         }
 
         public override bool ShouldActivateModule()
@@ -436,7 +459,7 @@ namespace UnityEngine.EventSystems
                 pointerEvent.pointerEnter = null;
             }
 
-            m_InputPointerEvent = pointerEvent;
+            m_InputPointerEvents[pointerEvent.pointerId] = pointerEvent;
         }
 
         /// <summary>
@@ -645,7 +668,7 @@ namespace UnityEngine.EventSystems
                 if (pointerEvent.pointerDrag != null)
                     ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.initializePotentialDrag);
 
-                m_InputPointerEvent = pointerEvent;
+                m_InputPointerEvents[pointerEvent.pointerId] = pointerEvent;
             }
 
             // PointerUp notification
