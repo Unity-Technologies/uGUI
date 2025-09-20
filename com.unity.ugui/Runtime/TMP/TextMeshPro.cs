@@ -1831,9 +1831,11 @@ namespace TMPro
                 }
 
                 // Handle Multi Atlas Texture support
-                if (character != null && character.glyph.atlasIndex > 0)
+                int atlasIndex = m_textInfo.characterInfo[m_totalCharacterCount].alternativeGlyph != null ? m_textInfo.characterInfo[m_totalCharacterCount].alternativeGlyph.atlasIndex : character == null ? 0 : character.glyph.atlasIndex;
+
+                if (character != null && atlasIndex > 0)
                 {
-                    m_currentMaterial = TMP_MaterialManager.GetFallbackMaterial(m_currentFontAsset, m_currentMaterial, character.glyph.atlasIndex);
+                    m_currentMaterial = TMP_MaterialManager.GetFallbackMaterial(m_currentFontAsset, m_currentMaterial, atlasIndex);
 
                     m_currentMaterialIndex = MaterialReference.AddMaterialReference(m_currentMaterial, m_currentFontAsset, ref m_materialReferences, m_materialReferenceIndexLookup);
 
