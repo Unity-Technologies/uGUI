@@ -103,7 +103,7 @@ namespace InputfieldTests
         }
 
         [UnityTest]
-        [UnityPlatform(exclude = new[] { RuntimePlatform.Switch, RuntimePlatform.tvOS })] // Currently InputField.ActivateInputFieldInternal calls Switch SoftwareKeyboard screen ; without user input or a command to close the SoftwareKeyboard this blocks the tests suite. tvOS UUM-71764
+        [UnityPlatform(exclude = new[] { RuntimePlatform.Switch, RuntimePlatform.Switch2 , RuntimePlatform.tvOS })] // Currently InputField.ActivateInputFieldInternal calls Switch SoftwareKeyboard screen ; without user input or a command to close the SoftwareKeyboard this blocks the tests suite. tvOS UUM-71764
         public IEnumerator FocusesOnSelect()
         {
             InputField inputField = m_PrefabRoot.GetComponentInChildren<InputField>();

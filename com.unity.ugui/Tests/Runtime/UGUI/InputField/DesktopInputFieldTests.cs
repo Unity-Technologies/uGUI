@@ -49,7 +49,7 @@ namespace InputfieldTests
         }
 
         [UnityTest]
-        [UnityPlatform(exclude = new[] { RuntimePlatform.Switch })] // Currently InputField.ActivateInputFieldInternal calls Switch SoftwareKeyboard screen ; without user input or a command to close the SoftwareKeyboard this blocks the tests suite
+        [UnityPlatform(exclude = new[] { RuntimePlatform.Switch, RuntimePlatform.Switch2 })] // Currently InputField.ActivateInputFieldInternal calls Switch SoftwareKeyboard screen ; without user input or a command to close the SoftwareKeyboard this blocks the tests suite
         public IEnumerator FocusOnPointerClickWithLeftButton()
         {
             InputField inputField = m_PrefabRoot.GetComponentInChildren<InputField>();
@@ -63,7 +63,7 @@ namespace InputfieldTests
 #if UNITY_GAMECORE && !UNITY_EDITOR
             if (TouchScreenKeyboard.isSupported)
             {
-                // On Xbox, the onScreenKeyboard is going to constrain the application and make it go out of focus. 
+                // On Xbox, the onScreenKeyboard is going to constrain the application and make it go out of focus.
                 // We need to wait for the application to go out of focus before we can close the onScreenKeyboard.
                 while (Application.isFocused)
                 {

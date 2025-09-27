@@ -473,6 +473,7 @@ namespace TMPro
                     case RuntimePlatform.GameCoreXboxSeries:
                     #endif
                     case RuntimePlatform.Switch:
+                    case RuntimePlatform.Switch2:
                     #if UNITY_2022_1_OR_NEWER
                     case RuntimePlatform.WebGLPlayer:
                     #endif
@@ -506,6 +507,7 @@ namespace TMPro
                     case RuntimePlatform.GameCoreXboxSeries:
                     #endif
                     case RuntimePlatform.Switch:
+                    case RuntimePlatform.Switch2:
                     #if UNITY_2022_1_OR_NEWER
                     case RuntimePlatform.WebGLPlayer:
                     #endif
@@ -547,6 +549,7 @@ namespace TMPro
                 case RuntimePlatform.GameCoreXboxSeries:
                 #endif
                 case RuntimePlatform.Switch:
+                case RuntimePlatform.Switch2:
                     return false;
                 #if UNITY_2022_1_OR_NEWER
                 case RuntimePlatform.WebGLPlayer:
@@ -3347,7 +3350,7 @@ namespace TMPro
             // Can't go past the character limit
             if (characterLimit > 0 && text.Length >= characterLimit)
                 return;
-            
+
             m_Text = text.Insert(m_StringPosition, replaceString);
 
             if (!char.IsHighSurrogate(c))
