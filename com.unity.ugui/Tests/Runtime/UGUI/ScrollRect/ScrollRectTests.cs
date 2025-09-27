@@ -83,7 +83,6 @@ internal class ScrollRectTests : IPrebuildSetup
 
     #region Enable disable scrollbars
 
-    [UnityTest, Ignore("Disabled for Instability https://jira.unity3d.com/browse/UUM-42513")]
     [TestCase(true, ExpectedResult = null)]
     [TestCase(false, ExpectedResult = null)]
     public IEnumerator OnEnableShouldAddListeners(bool isHorizontal)
@@ -107,7 +106,6 @@ internal class ScrollRectTests : IPrebuildSetup
         Assert.AreEqual(callCount + 1, (int)property.GetValue(invokeableCallList, null));
     }
 
-    [UnityTest, Ignore("Disabled for Instability https://jira.unity3d.com/browse/UUM-42513")]
     [TestCase(true, ExpectedResult = null)]
     [TestCase(false, ExpectedResult = null)]
     public IEnumerator OnDisableShouldRemoveListeners(bool isHorizontal)
@@ -129,7 +127,6 @@ internal class ScrollRectTests : IPrebuildSetup
         Assert.AreEqual(0, (int)property.GetValue(invokeableCallList, null));
     }
 
-    [Test, Ignore("Disabled for Instability https://jira.unity3d.com/browse/UUM-42513")]
     [TestCase(true)]
     [TestCase(false)]
     public void SettingScrollbarShouldRemoveThenAddListeners(bool testHorizontal)

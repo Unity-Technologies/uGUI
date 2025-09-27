@@ -3,11 +3,10 @@ using UnityEditor;
 using NUnit.Framework;
 using UnityEngine.TextCore.LowLevel;
 
-
 namespace TMPro
 {
     [Category("Text Parsing & Layout")]
-    class FontEngineTests
+    internal class FontEngineTests
     {
         [OneTimeSetUp]
         public void Setup()
