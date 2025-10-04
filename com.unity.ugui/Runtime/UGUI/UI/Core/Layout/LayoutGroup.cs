@@ -344,7 +344,8 @@ namespace UnityEngine.UI
         /// </summary>
         protected virtual void OnChildRectTransformDimensionsChange()
         {
-            SetDirty();
+            if (!CanvasUpdateRegistry.IsRebuildingLayout())
+                SetDirty();
         }
 
         /// <summary>

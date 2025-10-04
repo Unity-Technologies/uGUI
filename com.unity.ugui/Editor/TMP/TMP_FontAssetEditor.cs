@@ -2599,6 +2599,22 @@ namespace TMPro.EditorUtilities
         }
 
 
+        static List<uint> ParseGlyphIndexList(string pattern)
+        {
+            var list = new List<uint>();
+            if (string.IsNullOrWhiteSpace(pattern)) return list;
+
+            var separators = new[] { ',', ';', '|', ' ', '\t' };
+            var parts = pattern.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var p in parts)
+            {
+                if (uint.TryParse(p.Trim(), out var id))
+                    list.Add(id);
+            }
+            return list;
+        }
+
+
         /// <summary>
         ///
         /// </summary>
@@ -2666,38 +2682,44 @@ namespace TMPro.EditorUtilities
         void SearchLigatureTable(string searchPattern, ref List<int> searchResults)
         {
             if (searchResults == null) searchResults = new List<int>();
-
             searchResults.Clear();
 
-            // Lookup glyph index of potential characters contained in the search pattern.
-            uint firstGlyphIndex = 0;
-            TMP_Character firstCharacterSearch;
+            var requestedGlyphIndexes = ParseGlyphIndexList(searchPattern);
+            if (requestedGlyphIndexes.Count == 0)
+                return;
 
-            if (searchPattern.Length > 0 && m_fontAsset.characterLookupTable.TryGetValue(searchPattern[0], out firstCharacterSearch))
-                firstGlyphIndex = firstCharacterSearch.glyphIndex;
-
-            uint secondGlyphIndex = 0;
-            TMP_Character secondCharacterSearch;
-
-            if (searchPattern.Length > 1 && m_fontAsset.characterLookupTable.TryGetValue(searchPattern[1], out secondCharacterSearch))
-                secondGlyphIndex = secondCharacterSearch.glyphIndex;
-
-            int arraySize = m_MarkToBaseAdjustmentRecords_prop.arraySize;
+            int arraySize = m_LigatureSubstitutionRecords_prop.arraySize;
 
             for (int i = 0; i < arraySize; i++)
             {
-                SerializedProperty record = m_MarkToBaseAdjustmentRecords_prop.GetArrayElementAtIndex(i);
+                SerializedProperty record = m_LigatureSubstitutionRecords_prop.GetArrayElementAtIndex(i);
 
-                int baseGlyphIndex = record.FindPropertyRelative("m_BaseGlyphID").intValue;
-                int markGlyphIndex = record.FindPropertyRelative("m_MarkGlyphID").intValue;
+                // Build a set of all glyph IDs referenced by this ligature record.
+                var matches = new HashSet<uint>();
 
-                if (firstGlyphIndex == baseGlyphIndex && secondGlyphIndex == markGlyphIndex)
-                    searchResults.Add(i);
-                else if (searchPattern.Length == 1 && (firstGlyphIndex == baseGlyphIndex || firstGlyphIndex == markGlyphIndex))
-                    searchResults.Add(i);
-                else if (baseGlyphIndex.ToString().Contains(searchPattern))
-                    searchResults.Add(i);
-                else if (markGlyphIndex.ToString().Contains(searchPattern))
+                SerializedProperty componentGlyphIDsProp = record.FindPropertyRelative("m_ComponentGlyphIDs");
+                int componentCount = componentGlyphIDsProp.arraySize;
+                for (int j = 0; j < componentCount; j++)
+                {
+                    uint componentGlyphID = (uint)componentGlyphIDsProp.GetArrayElementAtIndex(j).intValue;
+                    matches.Add(componentGlyphID);
+                }
+
+                uint ligatureGlyphID = (uint)record.FindPropertyRelative("m_LigatureGlyphID").intValue;
+                matches.Add(ligatureGlyphID);
+
+                // Require that all requested IDs are present somewhere in this record.
+                bool hasAll = true;
+                for (int n = 0; n < requestedGlyphIndexes.Count; n++)
+                {
+                    if (!matches.Contains(requestedGlyphIndexes[n]))
+                    {
+                        hasAll = false;
+                        break;
+                    }
+                }
+
+                if (hasAll)
                     searchResults.Add(i);
             }
         }
