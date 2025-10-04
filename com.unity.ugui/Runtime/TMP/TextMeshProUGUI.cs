@@ -2053,46 +2053,59 @@ namespace TMPro
                         {
                             LigatureSubstitutionRecord record = records[j];
 
+                            uint[] componentGlyphIDs = record.componentGlyphIDs;
                             int componentCount = record.componentGlyphIDs.Length;
                             uint ligatureGlyphID = record.ligatureGlyphID;
 
-                            //
-                            for (int k = 1; k < componentCount; k++)
+                            int idx  = i + 1;  // current input index
+                            int componentIndex = 1; // next component index we still need to match in record.componentGlyphIDs
+
+                            // Try to match remaining components, skipping ignorable code points when they aren't the expected component.
+                            while (ligatureGlyphID != 0 && componentIndex < componentCount)
                             {
-                                uint componentUnicode = (uint)textProcessingArray[i + k].unicode;
+                                if (idx >= textProcessingArray.Length) { ligatureGlyphID = 0; break; }
 
-                                // Special Handling for Zero Width Joiner (ZWJ)
-                                //if (componentUnicode == 0x200D)
-                                //    continue;
+                                uint codepoint = textProcessingArray[idx].unicode;
+                                uint glyphIndex = m_currentFontAsset.GetGlyphIndex(codepoint);
+                                uint expect  = componentGlyphIDs[componentIndex];
 
-                                uint glyphIndex = m_currentFontAsset.GetGlyphIndex(componentUnicode);
-
-                                if (glyphIndex == record.componentGlyphIDs[k])
+                                // If codepoint is ignorable for ligature matching *and* it is not the expected component, skip it.
+                                if (glyphIndex != expect && TMP_TextParsingUtilities.IsIgnorableForLigature(codepoint))
+                                {
+                                    idx++;
                                     continue;
+                                }
 
+                                // Otherwise, we require an exact glyph match for this component.
+                                if (glyphIndex == expect)
+                                {
+                                    componentIndex++;
+                                    idx++;
+                                    continue;
+                                }
+
+                                // Mismatch.
                                 ligatureGlyphID = 0;
                                 break;
                             }
 
-                            if (ligatureGlyphID != 0)
+                            // If we matched all components, perform the substitution.
+                            if (ligatureGlyphID != 0 && componentIndex == componentCount)
                             {
+                                // idx now points one past the last code point we consume (including any skipped VS/ZWJ within the cluster).
+                                int spanLen = idx - i;
                                 if (m_currentFontAsset.TryAddGlyphInternal(ligatureGlyphID, out Glyph glyph))
                                 {
                                     m_textInfo.characterInfo[m_totalCharacterCount].alternativeGlyph = glyph;
+                                    textProcessingArray[i].length = spanLen;
 
-                                    // Update text processing array
-                                    for (int c = 0; c < componentCount; c++)
+                                    // Collapse the entire consumed span into the ligature.
+                                    for (int c = 1; c < spanLen; c++)
                                     {
-                                        if (c == 0)
-                                        {
-                                            textProcessingArray[i + c].length = componentCount;
-                                            continue;
-                                        }
-
-                                        textProcessingArray[i + c].unicode = 0x1A;
+                                        textProcessingArray[i + c].unicode = 0x1A; // mark as consumed
                                     }
 
-                                    i += componentCount - 1;
+                                    i += spanLen - 1; // advance past the cluster
                                     break;
                                 }
                             }

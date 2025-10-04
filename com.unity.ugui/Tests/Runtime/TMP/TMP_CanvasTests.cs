@@ -5,10 +5,9 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-
 namespace TMPro
 {
-    public class TMP_CanvasTests
+    internal class TMP_CanvasTests
     {
         [OneTimeSetUp]
         public void Setup()
