@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 namespace TMPro
 {
-    public class TMP_ControlTests
+    internal class TMP_ControlTests
     {
         Scene scene;
         [SetUp]

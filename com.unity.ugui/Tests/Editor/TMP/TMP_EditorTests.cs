@@ -3,11 +3,10 @@ using UnityEditor;
 using NUnit.Framework;
 using System.IO;
 
-
 namespace TMPro
 {
     [Category("Text Parsing & Layout")]
-    class TMP_EditorTests
+    internal class TMP_EditorTests
     {
         private TextMeshPro m_TextComponent;
 

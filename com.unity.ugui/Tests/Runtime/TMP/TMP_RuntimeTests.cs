@@ -8,7 +8,7 @@ using UnityEngine.EventSystems;
 namespace TMPro
 {
     [Category("Text Parsing & Layout")]
-    class TMP_RuntimeTests
+    internal class TMP_RuntimeTests
     {
         private TextMeshPro m_TextComponent;
 
