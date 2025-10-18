@@ -268,7 +268,7 @@ namespace TMPro.EditorUtilities
                 GUI.enabled = true;
                 EditorGUI.indentLevel--;
 
-                EditorGUILayout.PropertyField(m_RestoreOriginalTextOnEscape, new GUIContent("Restore On ESC Key", "Should the original text be restored when pressing ESC? (Property not applicable for HoloLens)"));
+                EditorGUILayout.PropertyField(m_RestoreOriginalTextOnEscape, new GUIContent("Restore On ESC Key", "Should the original text be restored when pressing ESC?"));
                 EditorGUILayout.PropertyField(m_ShouldActivateOnSelect, new GUIContent("Should Activate On Select", "Determines if the Input Field will be activated when selected."));
                 EditorGUILayout.PropertyField(m_HideMobileKeyboard, new GUIContent("Hide Soft Keyboard", "Controls the visibility of the mobile virtual keyboard."));
 
