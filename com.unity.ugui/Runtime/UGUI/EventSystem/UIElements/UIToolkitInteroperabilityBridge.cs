@@ -143,7 +143,7 @@ namespace UnityEngine.UIElements
                 var go = new GameObject(panel.name, typeof(PanelEventHandler), typeof(PanelRaycaster));
                 go.transform.SetParent(m_EventSystem.transform);
                 panel.selectableGameObject = go;
-                var destroyed = destroyedActions[panel] = () => UIRUtility.Destroy(go);
+                var destroyed = destroyedActions[panel] = () => DestroyPanelGameObject(panel);
                 panel.destroyed += destroyed;
             }
         }
@@ -339,17 +339,29 @@ namespace UnityEngine.UIElements
             }
         }
 
+        private List<BaseRuntimePanel> m_PanelsToRemove = new();
         private void UpdatePanelGameObjects()
         {
             if (!m_IsTrackingPanels) return;
 
             bool isWorldSpaceActive = false;
-
             foreach (var panel in trackedPanels)
             {
+                if (panel.disposed)
+                {
+                    m_PanelsToRemove.Add(panel);
+                    continue;
+                }
+
                 UpdatePanelGameObject(panel);
                 isWorldSpaceActive |= !panel.isFlat;
             }
+
+            foreach (var panel in m_PanelsToRemove)
+            {
+                trackedPanels.Remove(panel);
+            }
+            m_PanelsToRemove.Clear();
 
             if (isWorldSpaceActive && (m_HandlerTypes & EventHandlerTypes.WorldSpace) != 0)
             {
