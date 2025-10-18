@@ -4060,6 +4060,7 @@ namespace TMPro
 
                     bool shouldSaveHardLineBreak = false;
                     bool shouldSaveSoftLineBreak = false;
+                    uint nextChar = m_characterCount + 1 < totalCharacterCount ? m_textInfo.characterInfo[m_characterCount + 1].character : 0u;
 
                     if ((isWhiteSpace || charCode == 0x200B || charCode == 0x2D || charCode == 0xAD) && (!m_isNonBreakingSpace || ignoreNonBreakingSpace) && charCode != 0xA0 && charCode != 0x2007 && charCode != 0x2011 && charCode != 0x202F && charCode != 0x2060)
                     {
@@ -4077,7 +4078,7 @@ namespace TMPro
                     else if (m_isNonBreakingSpace == false && (TMP_TextParsingUtilities.IsHangul(charCode) && TMP_Settings.useModernHangulLineBreakingRules == false || TMP_TextParsingUtilities.IsCJK(charCode)))
                     {
                         bool isCurrentLeadingCharacter = TMP_Settings.linebreakingRules.leadingCharacters.Contains(charCode);
-                        bool isNextFollowingCharacter = m_characterCount < totalCharacterCount - 1 && TMP_Settings.linebreakingRules.followingCharacters.Contains(m_textInfo.characterInfo[m_characterCount + 1].character);
+                        bool isNextFollowingCharacter = m_characterCount < totalCharacterCount - 1 && TMP_Settings.linebreakingRules.followingCharacters.Contains(nextChar);
 
                         if (isCurrentLeadingCharacter == false)
                         {
@@ -4108,14 +4109,10 @@ namespace TMPro
                             }
                         }
                     }
-                    // Special handling for Latin characters followed by a CJK character.
-                    else if (!m_isNonBreakingSpace && (m_characterCount + 1) < totalCharacterCount && TMP_TextParsingUtilities.IsCJK(m_textInfo.characterInfo[m_characterCount + 1].character))
+                    // Handling for Latin characters followed by a CJK character that is not a following character.
+                    else if (m_isNonBreakingSpace == false && TMP_TextParsingUtilities.IsCJK(nextChar) && !TMP_Settings.linebreakingRules.followingCharacters.Contains(nextChar))
                     {
-                        uint nextChar = m_textInfo.characterInfo[m_characterCount + 1].character;
-                        bool prevIsLeading = TMP_Settings.linebreakingRules.leadingCharacters.Contains(charCode);
-                        bool nextIsFollowing = TMP_Settings.linebreakingRules.followingCharacters.Contains(nextChar);
-                        if (!prevIsLeading && !nextIsFollowing)
-                            shouldSaveHardLineBreak = true;
+                        shouldSaveHardLineBreak = true;
                     }
                     else if (isFirstWordOfLine)
                     {
