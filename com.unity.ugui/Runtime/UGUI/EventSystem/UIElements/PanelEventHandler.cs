@@ -147,6 +147,10 @@ namespace UnityEngine.UIElements
             if (m_Panel == null || !ReadPointerData(m_PointerEvent, eventData, PointerEventType.Down))
                 return;
 
+            // Allow KeyDown/KeyUp events to be processed before pointer events.
+            var target = currentFocusedElement ?? m_Panel.visualTree;
+            ProcessImguiEvents(target);
+
             if (eventSystem != null)
                 eventSystem.SetSelectedGameObject(selectableGameObject);
 

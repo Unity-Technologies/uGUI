@@ -1766,7 +1766,6 @@ namespace TMPro
                     }
                 }
 
-                OnDeselect(null);
                 return;
             }
 
