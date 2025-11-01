@@ -2804,39 +2804,26 @@ namespace TMPro
 
                 // Set Padding based on selected font style
                 #region Handle Style Padding
-                float boldSpacingAdjustment;
-                float style_padding;
-                if (m_textElementType == TMP_TextElementType.Character && !isUsingAltTypeface && ((m_FontStyleInternal & FontStyles.Bold) == FontStyles.Bold)) // Checks for any combination of Bold Style.
-                {
-                    if (m_currentMaterial != null && m_currentMaterial.HasProperty(ShaderUtilities.ID_GradientScale))
-                    {
-                        float gradientScale = m_currentMaterial.GetFloat(ShaderUtilities.ID_GradientScale);
-                        style_padding = m_currentFontAsset.boldStyle / 4.0f * gradientScale * m_currentMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A);
+                float boldSpacingAdjustment = 0;
+                float style_padding = 0;
 
-                        // Clamp overall padding to Gradient Scale size.
-                        if (style_padding + padding > gradientScale)
-                            padding = gradientScale - style_padding;
-                    }
-                    else
-                        style_padding = 0;
-
-                    boldSpacingAdjustment = m_currentFontAsset.boldSpacing;
-                }
-                else
+                if (m_textElementType == TMP_TextElementType.Character)
                 {
+                    bool isBold = !isUsingAltTypeface && (m_FontStyleInternal & FontStyles.Bold) == FontStyles.Bold;
+                    boldSpacingAdjustment = isBold ? m_currentFontAsset.boldSpacing : 0;
+
                     if (m_currentMaterial != null && m_currentMaterial.HasProperty(ShaderUtilities.ID_GradientScale) && m_currentMaterial.HasProperty(ShaderUtilities.ID_ScaleRatio_A))
                     {
                         float gradientScale = m_currentMaterial.GetFloat(ShaderUtilities.ID_GradientScale);
-                        style_padding = m_currentFontAsset.normalStyle / 4.0f * gradientScale * m_currentMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A);
+                        float scaleRatioA = m_currentMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A);
+                        float styleModifier = isBold ? m_currentFontAsset.boldStyle : m_currentFontAsset.normalStyle;
+
+                        style_padding = styleModifier * 0.25f * gradientScale * scaleRatioA;
 
                         // Clamp overall padding to Gradient Scale size.
                         if (style_padding + padding > gradientScale)
                             padding = gradientScale - style_padding;
                     }
-                    else
-                        style_padding = 0;
-
-                    boldSpacingAdjustment = 0;
                 }
                 #endregion Handle Style Padding
 

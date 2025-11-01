@@ -2445,7 +2445,7 @@ namespace TMPro.EditorUtilities
 
             // TODO : Need to revise how Everything is handled in the event more enum values are added.
             int flagValue = property.FindPropertyRelative("m_FeatureLookupFlags").intValue;
-            //pairAdjustmentRecord.featureLookupFlags = flagValue == -1 ? FontFeatureLookupFlags.IgnoreLigatures | FontFeatureLookupFlags.IgnoreSpacingAdjustments : (FontFeatureLookupFlags) flagValue;
+            pairAdjustmentRecord.featureLookupFlags = (UnityEngine.TextCore.LowLevel.FontFeatureLookupFlags)flagValue;
 
             return pairAdjustmentRecord;
         }
