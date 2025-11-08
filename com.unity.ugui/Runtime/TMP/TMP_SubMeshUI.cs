@@ -238,12 +238,17 @@ namespace TMPro
             subMesh.m_fontAsset = materialReference.fontAsset;
             subMesh.m_spriteAsset = materialReference.spriteAsset;
             subMesh.m_isDefaultMaterial = materialReference.isDefaultMaterial;
-            subMesh.maskable = textComponent.maskable;
             subMesh.SetSharedMaterial(materialReference.material);
+
+            // Only recalculate clipping if it is set to false on the parent text object
+            if (!textComponent.maskable)
+            {
+                subMesh.maskable = false;
+                subMesh.RecalculateClipping();
+            }
 
             return subMesh;
         }
-
 
 
         /// <summary>
