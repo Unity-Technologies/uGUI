@@ -51,7 +51,7 @@ namespace TMPro.EditorUtilities
                 DrawSpriteAsset();
 
                 DrawStyleSheet();
-                
+
                 DrawFontFeatures();
 
                 DrawPadding();
@@ -83,12 +83,19 @@ namespace TMPro.EditorUtilities
             EditorGUILayout.PropertyField(m_MaskableProp, k_MaskableLabel);
             if (EditorGUI.EndChangeCheck())
             {
-                m_TextComponent.maskable = m_MaskableProp.boolValue;
+                bool value = m_MaskableProp.boolValue;
 
                 // Change needs to propagate to the child sub objects.
                 MaskableGraphic[] maskableGraphics = m_TextComponent.GetComponentsInChildren<MaskableGraphic>();
-                for (int i = 1; i < maskableGraphics.Length; i++)
-                    maskableGraphics[i].maskable = m_MaskableProp.boolValue;
+
+                foreach (var graphicComponent in maskableGraphics)
+                {
+                    graphicComponent.maskable = value;
+
+                    // Force RectMask2D to re-evaluate clipping for this graphic
+                    graphicComponent.RecalculateClipping();
+                    EditorUtility.SetDirty(graphicComponent);
+                }
 
                 m_HavePropertiesChanged = true;
             }
