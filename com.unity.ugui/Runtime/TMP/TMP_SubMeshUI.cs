@@ -240,13 +240,6 @@ namespace TMPro
             subMesh.m_isDefaultMaterial = materialReference.isDefaultMaterial;
             subMesh.SetSharedMaterial(materialReference.material);
 
-            // Only recalculate clipping if it is set to false on the parent text object
-            if (!textComponent.maskable)
-            {
-                subMesh.maskable = false;
-                subMesh.RecalculateClipping();
-            }
-
             return subMesh;
         }
 
