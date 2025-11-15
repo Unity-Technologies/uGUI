@@ -2093,7 +2093,10 @@ namespace TMPro
                             // If we matched all components, perform the substitution.
                             if (ligatureGlyphID != 0 && componentIndex == componentCount)
                             {
-                                // idx now points one past the last code point we consume (including any skipped VS/ZWJ within the cluster).
+                                // Check for potential trailing variant selector that should also be consumed in the sequence.
+                                if (idx < textProcessingArray.Length && TMP_TextParsingUtilities.IsIgnorableForLigature(textProcessingArray[idx].unicode))
+                                    idx++;
+
                                 int spanLen = idx - i;
                                 if (m_currentFontAsset.TryAddGlyphInternal(ligatureGlyphID, out Glyph glyph))
                                 {
@@ -3130,7 +3133,7 @@ namespace TMPro
                 #region Handle Right-to-Left
                 if (m_isRightToLeft)
                 {
-                    m_xAdvance -= currentGlyphMetrics.horizontalAdvance * (1 - m_charWidthAdjDelta) * currentElementScale;
+                    m_xAdvance -= currentGlyphMetrics.horizontalAdvance * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale * currentElementScale;
 
                     if (isWhiteSpace || charCode == 0x200B)
                         m_xAdvance -= m_wordSpacing * currentEmScale;
@@ -3144,9 +3147,9 @@ namespace TMPro
                 if (m_monoSpacing != 0)
                 {
                     if (m_duoSpace && (charCode == '.' || charCode == ':' || charCode == ','))
-                        monoAdvance = (m_monoSpacing / 4 - (currentGlyphMetrics.width / 2 + currentGlyphMetrics.horizontalBearingX) * currentElementScale) * (1 - m_charWidthAdjDelta);
+                        monoAdvance = (m_monoSpacing / 4 - (currentGlyphMetrics.width / 2 + currentGlyphMetrics.horizontalBearingX) * currentElementScale) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
                     else
-                        monoAdvance = (m_monoSpacing / 2 - (currentGlyphMetrics.width / 2 + currentGlyphMetrics.horizontalBearingX) * currentElementScale) * (1 - m_charWidthAdjDelta);
+                        monoAdvance = (m_monoSpacing / 2 - (currentGlyphMetrics.width / 2 + currentGlyphMetrics.horizontalBearingX) * currentElementScale) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
 
                     m_xAdvance += monoAdvance;
                 }
@@ -3183,7 +3186,7 @@ namespace TMPro
                 #region Calculate Vertices Position
                 k_CalculateVerticesPositionMarker.Begin();
                 Vector3 top_left;
-                top_left.x = m_xAdvance + ((currentGlyphMetrics.horizontalBearingX * m_FXScale.x - padding - style_padding + glyphAdjustments.xPlacement) * currentElementScale * (1 - m_charWidthAdjDelta));
+                top_left.x = m_xAdvance + (currentGlyphMetrics.horizontalBearingX * m_FXScale.x - padding - style_padding + glyphAdjustments.xPlacement) * currentElementScale * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
                 top_left.y = baselineOffset + (currentGlyphMetrics.horizontalBearingY + padding + glyphAdjustments.yPlacement) * currentElementScale - m_lineOffset + m_baselineOffset;
                 top_left.z = 0;
 
@@ -3193,7 +3196,7 @@ namespace TMPro
                 bottom_left.z = 0;
 
                 Vector3 top_right;
-                top_right.x = bottom_left.x + ((currentGlyphMetrics.width * m_FXScale.x + padding * 2 + style_padding * 2) * currentElementScale * (1 - m_charWidthAdjDelta));
+                top_right.x = bottom_left.x + (currentGlyphMetrics.width * m_FXScale.x + padding * 2 + style_padding * 2) * currentElementScale * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
                 top_right.y = top_left.y;
                 top_right.z = 0;
 
@@ -3380,7 +3383,7 @@ namespace TMPro
                     widthOfTextArea = m_width != -1 ? Mathf.Min(marginWidth + 0.0001f - marginLeft - marginRight, m_width) : marginWidth + 0.0001f - marginLeft - marginRight;
 
                     // Calculate the line breaking width of the text.
-                    float textWidth = Mathf.Abs(m_xAdvance) + (!m_isRightToLeft ? currentGlyphMetrics.horizontalAdvance : 0) * (1 - m_charWidthAdjDelta) * (charCode == 0xAD ? currentElementUnmodifiedScale : currentElementScale);
+                    float textWidth = Mathf.Abs(m_xAdvance) + (!m_isRightToLeft ? currentGlyphMetrics.horizontalAdvance : 0) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale * (charCode == 0xAD ? currentElementUnmodifiedScale : currentElementScale);
                     float textHeight = m_maxTextAscender - (m_maxLineDescender - m_lineOffset) + (m_lineOffset > 0 && m_IsDrivenLineSpacing == false ? m_maxLineAscender - m_startOfLineAscender : 0);
 
                     int testedCharacterCount = m_characterCount;
@@ -4134,7 +4137,7 @@ namespace TMPro
                     }
 
                     float textHeight = m_maxTextAscender - (m_maxLineDescender - m_lineOffset) + (m_lineOffset > 0 && m_IsDrivenLineSpacing == false ? m_maxLineAscender - m_startOfLineAscender : 0);
-                    float textWidth = Mathf.Abs(m_xAdvance) + (!m_isRightToLeft ? m_Ellipsis.character.m_Glyph.metrics.horizontalAdvance : 0) * (1 - m_charWidthAdjDelta) * scale;
+                    float textWidth = Mathf.Abs(m_xAdvance) + (!m_isRightToLeft ? m_Ellipsis.character.m_Glyph.metrics.horizontalAdvance : 0) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale * scale;
                     float widthOfTextAreaForEllipsis = m_width != -1 ? Mathf.Min(marginWidth + 0.0001f - marginLeft - marginRight, m_width) : marginWidth + 0.0001f - marginLeft - marginRight;
 
                     if (textWidth < widthOfTextAreaForEllipsis * (isJustifiedOrFlush ? 1.05f : 1.0f) && textHeight < marginHeight + 0.0001f)
@@ -4182,21 +4185,21 @@ namespace TMPro
                     else
                         monoAdjustment = m_monoSpacing - monoAdvance;
 
-                    m_xAdvance += (monoAdjustment + ((m_currentFontAsset.normalSpacingOffset + characterSpacingAdjustment) * currentEmScale) + m_cSpacing) * (1 - m_charWidthAdjDelta);
+                    m_xAdvance += (monoAdjustment + ((m_currentFontAsset.normalSpacingOffset + characterSpacingAdjustment) * currentEmScale) + m_cSpacing) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
 
                     if (isWhiteSpace || charCode == 0x200B)
                         m_xAdvance += m_wordSpacing * currentEmScale;
                 }
                 else if (m_isRightToLeft)
                 {
-                    m_xAdvance -= ((glyphAdjustments.xAdvance * currentElementScale + (m_currentFontAsset.normalSpacingOffset + characterSpacingAdjustment + boldSpacingAdjustment) * currentEmScale + m_cSpacing) * (1 - m_charWidthAdjDelta));
+                    m_xAdvance -= (glyphAdjustments.xAdvance * currentElementScale + (m_currentFontAsset.normalSpacingOffset + characterSpacingAdjustment + boldSpacingAdjustment) * currentEmScale + m_cSpacing) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
 
                     if (isWhiteSpace || charCode == 0x200B)
                         m_xAdvance -= m_wordSpacing * currentEmScale;
                 }
                 else
                 {
-                    m_xAdvance += ((currentGlyphMetrics.horizontalAdvance * m_FXScale.x + glyphAdjustments.xAdvance) * currentElementScale + (m_currentFontAsset.normalSpacingOffset + characterSpacingAdjustment + boldSpacingAdjustment) * currentEmScale + m_cSpacing) * (1 - m_charWidthAdjDelta);
+                    m_xAdvance += ((currentGlyphMetrics.horizontalAdvance * m_FXScale.x + glyphAdjustments.xAdvance) * currentElementScale + (m_currentFontAsset.normalSpacingOffset + characterSpacingAdjustment + boldSpacingAdjustment) * currentEmScale + m_cSpacing) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
 
                     if (isWhiteSpace || charCode == 0x200B)
                         m_xAdvance += m_wordSpacing * currentEmScale;
@@ -4301,7 +4304,7 @@ namespace TMPro
                     if (m_textInfo.lineInfo[m_lineNumber].characterCount == 1)
                         m_textInfo.lineInfo[m_lineNumber].alignment = m_lineJustification;
 
-                    float maxAdvanceOffset = ((m_currentFontAsset.normalSpacingOffset + characterSpacingAdjustment + boldSpacingAdjustment) * currentEmScale + m_cSpacing) * (1 - m_charWidthAdjDelta);
+                    float maxAdvanceOffset = ((m_currentFontAsset.normalSpacingOffset + characterSpacingAdjustment + boldSpacingAdjustment) * currentEmScale + m_cSpacing) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
                     if (m_textInfo.characterInfo[m_lastVisibleCharacterOfLine].isVisible)
                         m_textInfo.lineInfo[m_lineNumber].maxAdvance = m_textInfo.characterInfo[m_lastVisibleCharacterOfLine].xAdvance + (m_isRightToLeft ? maxAdvanceOffset : - maxAdvanceOffset);
                     else
@@ -4848,7 +4851,7 @@ namespace TMPro
 
                             // Pack UV's so that we can pass Xscale needed for Shader to maintain 1:1 ratio.
                             #region Pack Scale into UV2
-                            xScale = characterInfos[i].scale * (1 - m_charWidthAdjDelta);
+                            xScale = characterInfos[i].scale * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
                             if (!characterInfos[i].isUsingAlternateTypeface && (characterInfos[i].style & FontStyles.Bold) == FontStyles.Bold) xScale *= -1;
 
                             switch (canvasRenderMode)
@@ -5411,31 +5414,38 @@ namespace TMPro
                     // Clear unused vertices
                     m_textInfo.meshInfo[i].ClearUnusedVertices();
 
-                    if (m_subTextObjects[i] == null) continue;
+                    TMP_SubMeshUI subTextObject = m_subTextObjects[i];
+
+                    if (subTextObject == null) continue;
 
                     // Sort the geometry of the sub-text objects if needed.
                     if (m_geometrySortingOrder != VertexSortingOrder.Normal)
                         m_textInfo.meshInfo[i].SortGeometry(VertexSortingOrder.Reverse);
 
-                    //m_subTextObjects[i].mesh.MarkDynamic();
-                    m_subTextObjects[i].mesh.vertices = m_textInfo.meshInfo[i].vertices;
-                    m_subTextObjects[i].mesh.SetUVs(0, m_textInfo.meshInfo[i].uvs0);
-                    m_subTextObjects[i].mesh.uv2 = m_textInfo.meshInfo[i].uvs2;
-                    //m_subTextObjects[i].mesh.uv4 = m_textInfo.meshInfo[i].uvs4;
-                    m_subTextObjects[i].mesh.colors32 = m_textInfo.meshInfo[i].colors32;
+                    subTextObject.mesh.vertices = m_textInfo.meshInfo[i].vertices;
+                    subTextObject.mesh.SetUVs(0, m_textInfo.meshInfo[i].uvs0);
+                    subTextObject.mesh.uv2 = m_textInfo.meshInfo[i].uvs2;
+                    subTextObject.mesh.colors32 = m_textInfo.meshInfo[i].colors32;
 
-                    m_subTextObjects[i].mesh.RecalculateBounds();
+                    subTextObject.mesh.RecalculateBounds();
 
-                    m_subTextObjects[i].canvasRenderer.SetMesh(m_subTextObjects[i].mesh);
+                    subTextObject.canvasRenderer.SetMesh(subTextObject.mesh);
 
                     // Set CanvasRenderer color to match the parent text object.
-                    m_subTextObjects[i].canvasRenderer.SetColor(parentBaseColor);
+                    subTextObject.canvasRenderer.SetColor(parentBaseColor);
 
                     // Make sure Cull Transparent Mesh of the sub objects matches the parent
-                    m_subTextObjects[i].canvasRenderer.cullTransparentMesh = isCullTransparentMeshEnabled;
+                    subTextObject.canvasRenderer.cullTransparentMesh = isCullTransparentMeshEnabled;
 
                     // Sync RaycastTarget property with parent text object
-                    m_subTextObjects[i].raycastTarget = this.raycastTarget;
+                    subTextObject.raycastTarget = this.raycastTarget;
+
+                    // Sync Maskable property with parent text object (if needed)
+                    if (subTextObject.maskable != this.maskable)
+                    {
+                        subTextObject.maskable = this.maskable;
+                        subTextObject.RecalculateClipping();
+                    }
                 }
             }
 
