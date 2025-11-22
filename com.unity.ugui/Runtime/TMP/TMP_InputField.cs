@@ -1938,9 +1938,9 @@ namespace TMPro
                 if (multiLine)
                 {
                     if (localMousePos.y > rect.yMax)
-                        MoveUp(true, true);
+                        MoveUp(true, false);
                     else if (localMousePos.y < rect.yMin)
-                        MoveDown(true, true);
+                        MoveDown(true, false);
                 }
                 else
                 {
