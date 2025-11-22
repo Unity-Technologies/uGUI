@@ -2,6 +2,7 @@
 using UnityEditor;
 using UnityEditor.Callbacks;
 using System.IO;
+using System;
 
 
 namespace TMPro
@@ -18,12 +19,28 @@ namespace TMPro
 
                 if (settings == null || TMP_Settings.enableEmojiSupport == false)
                     return;
-
-                string file = Path.Combine(pathToBuiltProject, "Trampoline", "Classes/UI/Keyboard.mm");
+                
+                string file = "";
+                
+                switch (PlayerSettings.xcodeProjectType)
+                {
+                    case XcodeProjectType.ObjectiveC:
+                        file = Path.Combine(pathToBuiltProject, "Trampoline", "Classes/UI/Keyboard.mm");
+                        if (!File.Exists(file))
+                        {
+                            file = Path.Combine(pathToBuiltProject, "Classes/UI/Keyboard.mm");
+                        }
+                        break;
+                    case XcodeProjectType.Swift:
+                        file = Path.Combine(pathToBuiltProject, "UnityFramework/Features/Keyboard/Keyboard.mm");
+                        break;
+                    default:
+                        throw new Exception("Unsupported iOS Xcode project type. Will not be able to modify Keyboard.mm to disable emoji filtering.");
+                }
 
                 if (!File.Exists(file))
                 {
-                    file = Path.Combine(pathToBuiltProject, "Classes/UI/Keyboard.mm");
+                    throw new Exception("Could not enable emojis support. Failed to locate Keyboard.mm file.");
                 }
                 
                 string content = File.ReadAllText(file);
