@@ -41,6 +41,7 @@ namespace TMPro.EditorUtilities
 
         static readonly GUIContent k_SpacingOptionsLabel = new GUIContent("Spacing Options (em)", "Spacing adjustments between different elements of the text. Values are in font units where a value of 1 equals 1/100em.");
         static readonly GUIContent k_CharacterSpacingLabel = new GUIContent("Character");
+        static readonly GUIContent k_CharacterHorizontalScaleLabel = new GUIContent("Character Horizontal Scale", "The horizontal scale of the characters. Value = 1.0 is normal. Values > 1.0 or < 1.0 respectively increases or decreases the horizontal scale or width of the characters.");
         static readonly GUIContent k_WordSpacingLabel = new GUIContent("Word");
         static readonly GUIContent k_LineSpacingLabel = new GUIContent("Line");
         static readonly GUIContent k_ParagraphSpacingLabel = new GUIContent("Paragraph");
@@ -129,6 +130,7 @@ namespace TMPro.EditorUtilities
         protected SerializedProperty m_CharWidthMaxAdjProp;
 
         protected SerializedProperty m_CharacterSpacingProp;
+        private protected SerializedProperty m_CharacterHorizontalScaleProp;
         protected SerializedProperty m_WordSpacingProp;
         protected SerializedProperty m_LineSpacingProp;
         protected SerializedProperty m_ParagraphSpacingProp;
@@ -213,6 +215,7 @@ namespace TMPro.EditorUtilities
             m_OverrideHtmlColorProp = serializedObject.FindProperty("m_overrideHtmlColors");
 
             m_CharacterSpacingProp = serializedObject.FindProperty("m_characterSpacing");
+            m_CharacterHorizontalScaleProp = serializedObject.FindProperty("m_characterHorizontalScale");
             m_WordSpacingProp = serializedObject.FindProperty("m_wordSpacing");
             m_LineSpacingProp = serializedObject.FindProperty("m_lineSpacing");
             m_ParagraphSpacingProp = serializedObject.FindProperty("m_paragraphSpacing");
@@ -275,7 +278,7 @@ namespace TMPro.EditorUtilities
             // Get Styles from Style Sheet
             if (TMP_Settings.instance != null)
                 m_StyleNames = GetStyleNames();
-            
+
             // Get list of font features for the primary font asset assigned to the text component
             // FontEngine.LoadFontFace(m_TextComponent.font.SourceFont_EditorRef);
             // OTL_Table gposTable = UnityEngine.TextCore.LowLevel.FontEngine.GetOpenTypeLayoutTable(OTL_TableType.GPOS);
@@ -995,6 +998,8 @@ namespace TMPro.EditorUtilities
             EditorGUIUtility.labelWidth = currentLabelWidth;
             EditorGUI.indentLevel = oldIndent;
 
+            EditorGUILayout.PropertyField(m_CharacterHorizontalScaleProp, k_CharacterHorizontalScaleLabel, GUILayout.MaxWidth(EditorGUIUtility.labelWidth + 50f));
+
             if (EditorGUI.EndChangeCheck())
             {
                 m_HavePropertiesChanged = true;
@@ -1266,7 +1271,7 @@ namespace TMPro.EditorUtilities
             for (int i = 0; i < featureCount; i++)
             {
                 SerializedProperty activeFeatureProperty = m_FontFeaturesActiveProp.GetArrayElementAtIndex(i);
-                
+
                 for (int j = 0; j < k_FontFeatures.Length; j++)
                 {
                     if (activeFeatureProperty.intValue == k_FontFeatures[j].TagToInt())
@@ -1278,15 +1283,15 @@ namespace TMPro.EditorUtilities
             }
 
             EditorGUI.BeginChangeCheck();
-            
+
             int mask = EditorGUILayout.MaskField(k_FontFeaturesLabel, srcMask, k_FontFeatures);
-            
+
             if (EditorGUI.EndChangeCheck())
             {
                 m_FontFeaturesActiveProp.ClearArray();
 
                 int writeIndex = 0;
-                
+
                 for (int i = 0; i < k_FontFeatures.Length; i++)
                 {
                     int bit = 0x1 << i;
@@ -1301,7 +1306,7 @@ namespace TMPro.EditorUtilities
                 }
 
                 m_HavePropertiesChanged = true;
-            }   
+            }
         }
 
         protected void DrawPadding()
