@@ -858,52 +858,81 @@ namespace UnityEngine.UI
 
             bool ignoreParentGroups = false;
             bool continueTraversal = true;
+            bool isParent = false;
 
             while (t != null)
             {
+                bool raycastValid = true;
+                bool hasMask = false;
+                bool maskableGraphicRaycastValid = true;
+
                 t.GetComponents(components);
                 for (var i = 0; i < components.Count; i++)
                 {
-                    var canvas = components[i] as Canvas;
+                    var component = components[i];
+                    var canvas = component as Canvas;
                     if (canvas != null && canvas.overrideSorting)
                         continueTraversal = false;
 
-                    var filter = components[i] as ICanvasRaycastFilter;
-
+                    var filter = component as ICanvasRaycastFilter;  // Image, Mask, RectMask2D, CanvasGroup
                     if (filter == null)
                         continue;
 
-                    if (ignoreMasks && components[i] is Mask or RectMask2D)
+                    if (ignoreMasks && component is Mask or RectMask2D)
                         continue;
 
-                    var raycastValid = true;
-
-                    var group = components[i] as CanvasGroup;
-                    if (group != null)
+                    if (component is CanvasGroup group)
                     {
                         if (!group.enabled)
                             continue;
 
-                        if (ignoreParentGroups == false && group.ignoreParentGroups)
+                        if (ignoreParentGroups == false)
                         {
-                            ignoreParentGroups = true;
+                            if (group.ignoreParentGroups)
+                                ignoreParentGroups = true;
+    
                             raycastValid = filter.IsRaycastLocationValid(sp, eventCamera);
+                            if (!raycastValid)
+                                break;
                         }
-                        else if (!ignoreParentGroups)
-                            raycastValid = filter.IsRaycastLocationValid(sp, eventCamera);
                     }
                     else
                     {
-                        raycastValid = filter.IsRaycastLocationValid(sp, eventCamera);
-                    }
+                        if (isParent && component is Graphic graphic && !graphic.raycastTarget)
+                            continue;
 
-                    if (!raycastValid)
-                    {
-                        ListPool<Component>.Release(components);
-                        return false;
+                        hasMask |= component is Mask;
+
+                        raycastValid = filter.IsRaycastLocationValid(sp, eventCamera);
+
+                        // Try to early-out if the raycast is not valid
+                        if (!raycastValid)
+                        {
+                            // Cache the raycast result for parent MaskableGraphics and continue processing components
+                            // unless we already found a Mask and are not ignoring masks
+                            if (isParent && component is MaskableGraphic)
+                            {
+                                maskableGraphicRaycastValid = raycastValid;
+                                if (ignoreMasks || !hasMask)
+                                {
+                                    raycastValid = true;
+                                    continue;
+                                }
+                            }
+
+                            break;
+                        }
                     }
                 }
+
+                if (!raycastValid || (hasMask && !maskableGraphicRaycastValid))
+                {
+                    ListPool<Component>.Release(components);
+                    return false;
+                }
+
                 t = continueTraversal ? t.parent : null;
+                isParent = true;
             }
             ListPool<Component>.Release(components);
             return true;
