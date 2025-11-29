@@ -1,7 +1,6 @@
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using NUnit.Framework;
-using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI.Tests
 {
@@ -9,28 +8,28 @@ namespace UnityEngine.UI.Tests
     internal class ImageTests
     {
         Image m_Image;
-        private Sprite m_Sprite;
-        private Sprite m_OverrideSprite;
-        Texture2D texture = new Texture2D(128, 128);
-        Texture2D overrideTexture = new Texture2D(512, 512);
+        Sprite m_Sprite;
+        Sprite m_OverrideSprite;
+        readonly Texture2D texture = new Texture2D(128, 128);
+        readonly Texture2D overrideTexture = new Texture2D(512, 512);
 
         bool m_dirtyVert;
         bool m_dirtyLayout;
         bool m_dirtyMaterial;
 
         Camera m_camera;
-        GameObject m_CanvasRoot;
+        Canvas m_CanvasRoot;
 
         [SetUp]
         public void TestSetup()
         {
-            m_CanvasRoot = new GameObject("Canvas", typeof(RectTransform), typeof(Canvas));
+            var canvasGO = new GameObject("Canvas", typeof(RectTransform), typeof(Canvas));
+            m_CanvasRoot = canvasGO.GetComponent<Canvas>();
             GameObject gameObject = new GameObject("Image", typeof(RectTransform), typeof(Image));
             gameObject.transform.SetParent(m_CanvasRoot.transform);
+            m_Image = gameObject.GetComponent<Image>();
 
             m_camera = new GameObject("Camera", typeof(Camera)).GetComponent<Camera>();
-
-            m_Image = gameObject.GetComponent<Image>();
 
             Color[] colors = new Color[128 * 128];
             for (int y = 0; y < 128; y++)
@@ -61,11 +60,13 @@ namespace UnityEngine.UI.Tests
         [TearDown]
         public void TearDown()
         {
+            Object.DestroyImmediate(m_CanvasRoot.gameObject);
+            Object.DestroyImmediate(m_camera.gameObject);
+
             m_Image = null;
             m_Sprite = null;
-
-            GameObject.DestroyImmediate(m_CanvasRoot);
-            GameObject.DestroyImmediate(m_camera.gameObject);
+            m_OverrideSprite = null;
+            m_CanvasRoot = null;
             m_camera = null;
         }
 
@@ -124,9 +125,8 @@ namespace UnityEngine.UI.Tests
         [Test]
         public void RaycastOverImageWithNonZeroSpritePosition_AlphaHitTestMinimumThreshold()
         {
-            var canvas = m_CanvasRoot.GetComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceCamera;
-            canvas.worldCamera = m_camera;
+            m_CanvasRoot.renderMode = RenderMode.ScreenSpaceCamera;
+            m_CanvasRoot.worldCamera = m_camera;
 
             // Create a square sprite (64x64) in the middle of a transparent area (128x128).
             Color[] colors = new Color[128 * 128];
@@ -151,9 +151,73 @@ namespace UnityEngine.UI.Tests
         }
 
         [Test]
+        public void RaycastOverImageWithTransparentPixels_AlphaHitTestMinimumThreshold()
+        {
+            m_CanvasRoot.renderMode = RenderMode.ScreenSpaceCamera;
+            m_CanvasRoot.worldCamera = m_camera;
+
+            // Create a 128x128 sprite that has a red dash "-" which is 32px tall. Remaining pixels are transparent.
+            Color[] colors = new Color[128 * 128];
+            for (int y = 48; y < 80; y++)
+                for (int x = 0; x < 128; x++)
+                    colors[x + 128 * y] = Color.red;
+            texture.SetPixels(colors);
+            texture.Apply();
+
+            var sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100);
+            var parentImage = m_Image;
+            parentImage.sprite = sprite;
+            parentImage.alphaHitTestMinimumThreshold = 0.5f;
+            parentImage.SetNativeSize();
+
+            // Duplicate Image as a child GO
+            var childImageGO = Object.Instantiate(parentImage.gameObject, parentImage.transform);
+            var childImage = childImageGO.GetComponent<Image>();
+            childImage.alphaHitTestMinimumThreshold = 0.5f; // Also set the threshold on the child, this property is not serialized.
+            childImage.rectTransform.anchoredPosition = new Vector2(0, 160);
+
+            // Parent Image Raycasts
+            var parentCenter = new Vector2(Screen.width / 2.0f, Screen.height / 2.0f);
+            Assert.True(parentImage.Raycast(parentCenter, m_camera), "Expected raycast to hit when clicking on a non-transparent pixel of the image.");
+            Assert.False(parentImage.Raycast(parentCenter + new Vector2(60, 60), m_camera), "Expected raycast to fail when clicking on a transparent pixel of the image.");
+            Assert.True(parentImage.Raycast(parentCenter + new Vector2(70, 0), m_camera), "Expected raycast to hit when clicking outside the image, next to a non-transparent area.");
+            Assert.False(parentImage.Raycast(parentCenter + new Vector2(70, 60), m_camera), "Expected raycast to fail when clicking outside the image, next to a transparent area.");
+
+            // Child Image Raycasts
+            var childCenter = parentCenter + childImage.rectTransform.anchoredPosition;
+            Assert.True(childImage.Raycast(childCenter, m_camera), "Expected raycast to hit when clicking on a non-transparent pixel of the child image.");
+            Assert.False(childImage.Raycast(childCenter + new Vector2(60, 60), m_camera), "Expected raycast to fail when clicking on a transparent pixel of the child image.");
+            Assert.True(childImage.Raycast(childCenter + new Vector2(70, 0), m_camera), "Expected raycast to hit when clicking outside the child image, next to a non-transparent area.");
+            Assert.False(childImage.Raycast(childCenter + new Vector2(70, 60), m_camera), "Expected raycast to fail when clicking outside the child image, next to a transparent area.");
+        }
+
+        [Test]
+        public void RaycastOverImageWithPreserveAspectRatio_AlphaHitTestMinimumThreshold()
+        {
+            m_CanvasRoot.renderMode = RenderMode.ScreenSpaceCamera;
+            m_CanvasRoot.worldCamera = m_camera;
+
+            texture.wrapMode = TextureWrapMode.Clamp;
+            m_Image.sprite = m_Sprite;
+            m_Image.alphaHitTestMinimumThreshold = 0.5f;
+            m_Image.preserveAspect = true;
+
+            // Make the image 100 units wider than the sprite's original size.
+            m_Image.SetNativeSize();
+            m_Image.rectTransform.sizeDelta += new Vector2(100, 0);
+            
+            // Parent Image Raycasts
+            var imageCenter = new Vector2(Screen.width / 2.0f, Screen.height / 2.0f);
+            Assert.True(m_Image.Raycast(imageCenter + new Vector2(-40, 0), m_camera), "Expected raycast to hit when clicking on a non-transparent pixel of the image.");
+            Assert.False(m_Image.Raycast(imageCenter + new Vector2(40, 0), m_camera), "Expected raycast to fail when clicking on a transparent pixel of the image.");
+            Assert.False(m_Image.Raycast(imageCenter + new Vector2(80, 0), m_camera), "Expected raycast to fail when clicking outside the sprite but still inside the image.");
+            Assert.False(m_Image.Raycast(imageCenter + new Vector2(120, 0), m_camera), "Expected raycast to fail when clicking outside the image, next to a transparent area.");
+        }
+
+        [Test]
         public void RaycastOverImage_IgnoresDisabledCanvasGroup()
         {
-            var canvasGroup = m_CanvasRoot.AddComponent<CanvasGroup>();
+            var canvasGroup = m_CanvasRoot.gameObject.AddComponent<CanvasGroup>();
             canvasGroup.blocksRaycasts = false;
             canvasGroup.enabled = false;
 
@@ -167,21 +231,38 @@ namespace UnityEngine.UI.Tests
         [TestCase(typeof(RectMask2D), false, true)]
         public void RaycastImageOutsideOfMaskWithMaskableSet_ReturnsExpected(Type maskType, bool maskable, bool expectedHit)
         {
-            var maskGameObject = new GameObject("Mask", typeof(RectTransform), maskType);
-            maskGameObject.transform.SetParent(m_CanvasRoot.transform);
-            var mask = maskGameObject.GetComponent(maskType);
-            m_Image.transform.SetParent(maskGameObject.transform);
+            m_CanvasRoot.renderMode = RenderMode.ScreenSpaceCamera;
+            m_CanvasRoot.worldCamera = m_camera;
 
-            var maskRect = mask.GetComponent<RectTransform>();
-            maskRect.position = new Vector3(0, 0, 0);
-            maskRect.sizeDelta = new Vector2(100, 100);
-            m_Image.rectTransform.position = new Vector3(500, 500, 0);
+            var maskRT = new GameObject("Mask", typeof(RectTransform), maskType).GetComponent<RectTransform>();
+            maskRT.SetParent(m_CanvasRoot.transform, false);
+            maskRT.anchoredPosition = Vector2.zero;
+            maskRT.sizeDelta = new Vector2(100, 100);
+
+            m_Image.transform.SetParent(maskRT);
+            m_Image.rectTransform.anchoredPosition = new Vector2(500, 500);
             m_Image.rectTransform.sizeDelta = new Vector2(10, 10);
-
             m_Image.maskable = maskable;
 
-            bool raycast = m_Image.Raycast(new Vector2(505, 505), m_camera);
-            Assert.AreEqual(expectedHit, raycast);
+            var imagePosition = RectTransformUtility.WorldToScreenPoint(m_camera, m_Image.rectTransform.position);
+
+            bool raycast = m_Image.Raycast(imagePosition, m_camera);
+            Assert.AreEqual(expectedHit, raycast, "Raycast is not working as expected when Image doesn't have a Sprite.");
+
+            m_Image.sprite = m_Sprite;
+
+            // Image raycast returns true when alphaHitTestMinimumThreshold = 0
+            m_Image.alphaHitTestMinimumThreshold = 0f;
+            raycast = m_Image.Raycast(imagePosition, m_camera);
+            Assert.AreEqual(expectedHit, raycast, "Raycast is not working as expected when Image has a Sprite.");
+
+            m_Image.alphaHitTestMinimumThreshold = 0.1f;
+            raycast = m_Image.Raycast(imagePosition, m_camera);
+            Assert.AreEqual(expectedHit, raycast, "Raycast is not working as expected when Image has a Sprite and clickin on a more transparent pixel than alphaHitTestMinimumThreshold.");
+
+            m_Image.alphaHitTestMinimumThreshold = 0.8f;
+            raycast = m_Image.Raycast(imagePosition, m_camera);
+            Assert.False(raycast, "Expected raycast to fail when clicking on a pixel that is more transparent than alphaHitTestMinimumThreshold.");
         }
 
         [Test]
