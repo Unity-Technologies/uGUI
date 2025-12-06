@@ -4476,6 +4476,12 @@ namespace TMPro
                 m_ShouldActivateNextUpdate = true;
 
             SendOnSubmit();
+#if PLATFORM_TVOS
+            // When a keyboard is open in tvOS, the submit button is used for typing.
+            // Only actually close the keyboard on tvOS if "Done" was pressed in the soft keyboard.
+            if (m_SoftKeyboard != null && m_SoftKeyboard.status == TouchScreenKeyboard.Status.Visible)
+                return;
+#endif
             DeactivateInputField();
             eventData?.Use();
         }
