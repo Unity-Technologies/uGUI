@@ -19,7 +19,7 @@ namespace TMPro
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
     [RequireComponent(typeof(CanvasRenderer))]
-    [AddComponentMenu("UI/TextMeshPro - Text (UI)", 11)]
+    [AddComponentMenu("UI (Canvas)/TextMeshPro - Text (UI)", 11)]
     [ExecuteAlways]
     #if UNITY_2023_2_OR_NEWER
     [HelpURL("https://docs.unity3d.com/Packages/com.unity.ugui@2.0/manual/TextMeshPro/index.html")]

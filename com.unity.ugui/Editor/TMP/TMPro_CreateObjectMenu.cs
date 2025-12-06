@@ -77,7 +77,7 @@ namespace TMPro.EditorUtilities
         /// Create a TextMeshPro object that works with the CanvasRenderer
         /// </summary>
         /// <param name="command"></param>
-        [MenuItem("GameObject/UI/Text - TextMeshPro", false, 2001)]
+        [MenuItem("GameObject/UI (Canvas)/Text - TextMeshPro", false, 2001)]
         static void CreateTextMeshProGuiObjectPerform(MenuCommand menuCommand)
         {
             GameObject go = TMP_DefaultControls.CreateText(GetStandardResources());
@@ -117,7 +117,7 @@ namespace TMPro.EditorUtilities
             PlaceUIElementRoot(go, menuCommand);
         }
 
-        [MenuItem("GameObject/UI/Button - TextMeshPro", false, 2031)]
+        [MenuItem("GameObject/UI (Canvas)/Button - TextMeshPro", false, 2031)]
         public static void AddButton(MenuCommand menuCommand)
         {
             GameObject go = TMP_DefaultControls.CreateButton(GetStandardResources());
@@ -130,7 +130,7 @@ namespace TMPro.EditorUtilities
         }
 
 
-        [MenuItem("GameObject/UI/Input Field - TextMeshPro", false, 2037)]
+        [MenuItem("GameObject/UI (Canvas)/Input Field - TextMeshPro", false, 2037)]
         static void AddTextMeshProInputField(MenuCommand menuCommand)
         {
             GameObject go = TMP_DefaultControls.CreateInputField(GetStandardResources());
@@ -138,7 +138,7 @@ namespace TMPro.EditorUtilities
         }
 
 
-        [MenuItem("GameObject/UI/Dropdown - TextMeshPro", false, 2036)]
+        [MenuItem("GameObject/UI (Canvas)/Dropdown - TextMeshPro", false, 2036)]
         public static void AddDropdown(MenuCommand menuCommand)
         {
             GameObject go = TMP_DefaultControls.CreateDropdown(GetStandardResources());

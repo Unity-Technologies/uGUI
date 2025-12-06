@@ -191,7 +191,7 @@ class RawImageTests
         Assert.AreEqual(4, uvs.Length, "Should have 4 UV coordinates");
 
         // Expected UVs based on the custom UV rect
-        // Unity UI typically generates quads with UV order: bottom-left, top-left, top-right, bottom-right
+        // uGUI (Unity UI) typically generates quads with UV order: bottom-left, top-left, top-right, bottom-right
         var expectedUVs = new[]
         {
             new Vector2(customUVRect.xMin, customUVRect.yMin), // Bottom-left

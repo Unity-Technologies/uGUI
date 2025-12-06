@@ -12,7 +12,7 @@ namespace UnityEngine.UI
     /// </summary>
 
     [RequireComponent(typeof(CanvasRenderer))]
-    [AddComponentMenu("UI/Image", 11)]
+    [AddComponentMenu("UI (Canvas)/Image", 11)]
     /// <summary>
     ///   Displays a Sprite inside the UI System.
     /// </summary>

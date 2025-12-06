@@ -2,7 +2,7 @@
 
 Shader Graph can help you create customized UI effects, including animated backgrounds and unique UI elements. With Shader Graph, you can transform Image elements from static to dynamic and easily define your own button state appearances. Shader Graph can also provide you with more control over the appearance of your UI and help you optimize performance and texture memory.
 
-Here are some examples of what you can achieve with Shader Graph in Unity UI:
+Here are some examples of what you can achieve with Shader Graph in uGUI (Unity UI):
 * Create custom backgrounds for your user interfaces that subtly swirl, flow, or drift.
 * Define visual button states, such as mouse hover and mouse press, or unfocused with just a single grayscale image.
 * Design animated HUD elements that indicate the passage of time.
@@ -56,7 +56,7 @@ Follow the steps below to apply the shader you created to a Canvas UI element.
 1. Right-click your Shader Graph asset in the Project window and select **Create** > **Material**. Give your material a name.
 ![Step 9](Images/CreateMaterial.png)<br/>
 
-2. Ensure that your scene has a Canvas element.  If it doesn't, right-click in the Hierarchy panel and select UI > Canvas.
+2. Ensure that your scene has a Canvas element.  If it doesn't, right-click in the Hierarchy panel and select UI (Canvas)> Canvas.
 ![Step 9](Images/CreateCanvas.png)<br/>
 
 3. Add a new Image element to your Canvas. Right-click the Canvas element and select **UI** > **Image**.
