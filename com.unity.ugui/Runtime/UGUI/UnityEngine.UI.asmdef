@@ -40,6 +40,11 @@
             "name": "com.unity.inputsystem",
             "expression": "1.7.0",
             "define": "PACKAGE_INPUTSYSTEM"
+        },
+        {
+            "name": "com.unity.polyspatial",
+            "expression": "2.0.0",
+            "define": "PACKAGE_POLYSPATIAL"
         }
     ],
     "noEngineReferences": false

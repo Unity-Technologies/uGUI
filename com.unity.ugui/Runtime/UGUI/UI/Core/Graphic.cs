@@ -298,6 +298,12 @@ namespace UnityEngine.UI
             m_VertsDirty = true;
             CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
 
+#if PACKAGE_POLYSPATIAL
+            // [AVPB-860] When vertices are dirtied, mark the component itself 
+            // dirty as well so that ObjectDispatcher picks it up
+            MarkDirty();
+#endif
+
             if (m_OnDirtyVertsCallback != null)
                 m_OnDirtyVertsCallback();
         }
