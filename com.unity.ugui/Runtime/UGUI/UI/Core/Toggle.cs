@@ -283,6 +283,11 @@ namespace UnityEngine.UI
                 UISystemProfilerApi.AddMarker("Toggle.value", this);
                 onValueChanged.Invoke(m_IsOn);
             }
+
+#if PACKAGE_POLYSPATIAL
+            // When the isOn value is changed, call MarkDirty() so that ObjectDispatcher picks it up.
+            MarkDirty();
+#endif
         }
 
         /// <summary>

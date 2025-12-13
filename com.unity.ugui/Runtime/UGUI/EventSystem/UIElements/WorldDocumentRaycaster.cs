@@ -60,16 +60,21 @@ namespace UnityEngine.UIElements
             }
 
             if (!worldPicker.TryPickWithCapture(pointerId, worldRay, maxDistance, layerMask, out _,
-                    out var document, out var elementUnderPointer, out var distance, out var captured))
+                    out var panelComponent, out var elementUnderPointer, out var distance, out var captured))
                 return;
+
+            var containerPanel = PanelComponentUtils.GetContainerPanel(panelComponent);
 
             resultAppendList.Add(new RaycastResult
             {
                 // Discard hits against non-UI objects. They should block UI but not hide the PhysicsRaycaster results.
-                gameObject = document == null ? gameObject : document.containerPanel.selectableGameObject,
+                gameObject = panelComponent == null ? gameObject : containerPanel.selectableGameObject,
                 origin = worldRay.origin,
                 worldPosition = worldRay.origin + distance * worldRay.direction,
-                document = document,
+                panelComponent = panelComponent,
+#pragma warning disable CS0618 // Type or member is obsolete
+                document = panelComponent as UIDocument,
+#pragma warning restore CS0618 // Type or member is obsolete
                 element = elementUnderPointer,
                 module = this,
                 distance = distance,

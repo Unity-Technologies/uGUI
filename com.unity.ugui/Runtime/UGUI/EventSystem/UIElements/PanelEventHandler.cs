@@ -486,7 +486,7 @@ namespace UnityEngine.UIElements
             public Vector3 screenPosition { get; private set; }
             public Vector3 screenDelta { get; private set; }
             public Ray worldRay { get; private set; }
-            public UIDocument document { get; private set; }
+            public IPanelComponent panelComponent { get; private set; }
             public VisualElement elementTarget { get; private set; }
             public VisualElement elementUnderPointer { get; private set; }
 
@@ -575,7 +575,7 @@ namespace UnityEngine.UIElements
 
                 var origin = eventData.pointerCurrentRaycast.origin;
                 worldRay = new Ray(origin, eventData.pointerCurrentRaycast.worldPosition - origin);
-                document = eventData.pointerCurrentRaycast.document;
+                panelComponent = eventData.pointerCurrentRaycast.panelComponent;
                 elementUnderPointer = eventData.pointerCurrentRaycast.element;
             }
 
@@ -591,15 +591,15 @@ namespace UnityEngine.UIElements
                 }
                 else
                 {
-                    if (document == null)
+                    if (panelComponent == null)
                         return false;
 
                     var capturingElement = RuntimePanel.s_EventDispatcher.pointerState.GetCapturingElement(pointerId) as VisualElement;
                     if (capturingElement != null && capturingElement.panel != panel)
                         return false;
 
-                    elementTarget = capturingElement ?? elementUnderPointer ?? document.rootVisualElement;
-                    panelPosition = GetPanelPosition(elementTarget, document, worldRay);
+                    elementTarget = capturingElement ?? elementUnderPointer ?? PanelComponentUtils.GetRootVisualElement(panelComponent);
+                    panelPosition = GetPanelPosition(elementTarget, panelComponent, worldRay);
                 }
 
                 localPosition = position = panelPosition;
@@ -607,9 +607,9 @@ namespace UnityEngine.UIElements
                 return true;
             }
 
-            Vector3 GetPanelPosition(VisualElement pickedElement, UIDocument document, Ray worldRay)
+            Vector3 GetPanelPosition(VisualElement pickedElement, IPanelComponent panelComponent, Ray worldRay)
             {
-                var documentRay = document.transform.worldToLocalMatrix.TransformRay(worldRay);
+                var documentRay = panelComponent.gameObject.transform.worldToLocalMatrix.TransformRay(worldRay);
                 pickedElement.IntersectWorldRay(documentRay, out var distanceWithinDocument, out _);
                 var documentPoint = documentRay.origin + documentRay.direction * distanceWithinDocument;
                 return documentPoint;

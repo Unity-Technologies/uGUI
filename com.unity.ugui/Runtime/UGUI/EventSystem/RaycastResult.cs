@@ -1,3 +1,4 @@
+using System;
 using UnityEngine.UIElements;
 
 namespace UnityEngine.EventSystems
@@ -115,10 +116,18 @@ namespace UnityEngine.EventSystems
         // The UIElements module is always present in the Editor but it can be stripped from a project build if unused.
 #if PACKAGE_UITOOLKIT
         /// <summary>
+        /// The UIToolkit component that was intersected by this raycast, if any.
+        /// </summary>
+        /// <remarks>This is only useful in the context of EventSystem UI Toolkit interoperability.</remarks>
+        /// <seealso cref="UnityEngine.UIElements.EventSystemUIToolkitInteroperabilityBridge"/>
+        public IPanelComponent panelComponent;
+
+        /// <summary>
         /// The UIToolkit Document that was intersected by this raycast, if any.
         /// </summary>
         /// <remarks>This is only useful in the context of EventSystem UI Toolkit interoperability.</remarks>
         /// <seealso cref="UnityEngine.UIElements.EventSystemUIToolkitInteroperabilityBridge"/>
+        [Obsolete("RaycastResult.document is obsolete. Use RaycastResult.panelComponent instead.")]
         public UIDocument document;
 
         /// <summary>
@@ -147,7 +156,10 @@ namespace UnityEngine.EventSystems
             screenPosition = Vector3.zero;
             displayIndex = 0;
 #if PACKAGE_UITOOLKIT
+            panelComponent = null;
+#pragma warning disable CS0618 // Type or member is obsolete
             document = null;
+#pragma warning restore CS0618 // Type or member is obsolete
             element = null;
 #endif
         }
