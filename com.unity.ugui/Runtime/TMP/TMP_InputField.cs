@@ -18,7 +18,7 @@ namespace TMPro
     /// <summary>
     /// Editable text input field.
     /// </summary>
-    [AddComponentMenu("UI/TextMeshPro - Input Field", 11)]
+    [AddComponentMenu("UI (Canvas)/TextMeshPro - Input Field", 11)]
         #if UNITY_2023_2_OR_NEWER
     [HelpURL("https://docs.unity3d.com/Packages/com.unity.ugui@2.0/manual/TextMeshPro/index.html")]
     #else

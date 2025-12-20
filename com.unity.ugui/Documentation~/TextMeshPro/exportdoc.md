@@ -70,7 +70,7 @@ TextMesh Pro UI text objects use [Unity's UI system](https://docs.unity3d.com/Ma
 
 **To create a new TextMesh Pro UI Text GameObject:**
 
-1. From the menu, choose **GameObject > UI > TextMesh Pro - Text**.
+1. From the menu, choose **GameObject > UI (Canvas) > TextMesh Pro - Text**.
 1. In the **TextMesh Pro (UGUI)** Inspector, enter your text.
 1. Adjust the [UI text properties](TMPObjectUIText.md) as needed.
 
@@ -78,7 +78,7 @@ TextMesh Pro UI text objects use [Unity's UI system](https://docs.unity3d.com/Ma
 
 In addition to the UI text GameObject, you can create TextMesh Pro **Dropdown** and **Input Field** components from the **GameObject > UI** menu.
 
-These components are nearly identical to regular Unity UI components, but have a few key differences:
+These components are nearly identical to regular uGUI (Unity UI) components, but have a few key differences:
 
 * The TextMesh Pro Dropdown GameObject uses [TextMesh Pro font assets](FontAssets.md) instead of regular Unity font assets. <br/><br/> For more information about Unity dropdowns, see the [Dropdown](https://docs.unity3d.com/Manual/script-Dropdown.html) documentation in the Unity manual. <br/><br/>
 * The TextMesh Pro Input Field GameObject uses uses [TextMesh Pro font assets](FontAssets.md) instead of regular Unity font assets, and has more options for defining the input field. <br/><br/> For more information about Unity input fields, see the [Input Field](https://docs.unity3d.com/Manual/script-InputField.html) documentation in the Unity manual.

@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
-    [AddComponentMenu("UI/Toggle Group", 31)]
+    [AddComponentMenu("UI (Canvas)/Toggle Group", 31)]
     [DisallowMultipleComponent]
     /// <summary>
     /// A component that represents a group of UI.Toggles.

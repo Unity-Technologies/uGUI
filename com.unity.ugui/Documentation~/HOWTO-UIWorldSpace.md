@@ -2,7 +2,7 @@
 
 The UI system makes it easy to create UI that is positioned in the world among other 2D or 3D objects in the Scene.
 
-Start by creating a UI element (such as an Image) if you don't already have one in your scene by using GameObject > UI > Image. This will also create a Canvas for you.
+Start by creating a UI element (such as an Image) if you don't already have one in your scene by using GameObject > UI (Canvas) > Image. This will also create a Canvas for you.
 
 
 ## Set the Canvas to World Space

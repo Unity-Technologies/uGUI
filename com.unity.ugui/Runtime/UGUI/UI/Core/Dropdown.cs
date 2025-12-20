@@ -8,7 +8,7 @@ using UnityEngine.UI.CoroutineTween;
 
 namespace UnityEngine.UI
 {
-    [AddComponentMenu("UI/Legacy/Dropdown", 102)]
+    [AddComponentMenu("UI (Canvas)/Legacy/Dropdown", 102)]
     [RequireComponent(typeof(RectTransform))]
     /// <summary>
     ///   A standard dropdown that presents a list of options when clicked, of which one can be chosen.

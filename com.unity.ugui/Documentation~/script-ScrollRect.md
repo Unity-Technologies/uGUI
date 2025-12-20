@@ -45,7 +45,7 @@ The important elements in a scroll view are the **viewport**, the scrolling **co
 * All the scrolling content must be children of a single content GameObject that is a child to the viewport. The content Rect Transform needs to be referenced in the **Content** property of the Scroll Rect.
 * The scrollbars - if used - are children to the root GameObject. See the [Scrollbar](script-Scrollbar.md) page for more details on the setup of a scrollbar and see the section **Scrollbar setup** below for information about setup of scrollbars with a scroll view.
 
-This image shows a setup where the viewport is a child to the scroll view root. This is the default used when using the GameObject > UI > Scroll View menu option.
+This image shows a setup where the viewport is a child to the scroll view root. This is the default used when using the GameObject > UI (Canvas) > Scroll View menu option.
 
 ![](images/UI_ScrollRectHierarchy.png)
 

@@ -266,7 +266,7 @@ namespace TMPro
         /// <returns></returns>
         public static int GetStencilID(GameObject obj)
         {
-            // Implementation is almost copied from Unity UI
+            // Implementation is almost copied from uGUI (Unity UI)
 
             var count = 0;
 
@@ -320,7 +320,7 @@ namespace TMPro
 
         private static Transform FindRootSortOverrideCanvas(Transform start)
         {
-            // Implementation is copied from Unity UI
+            // Implementation is copied from uGUI (Unity UI)
 
             var canvasList = TMP_ListPool<Canvas>.Get();
             start.GetComponentsInParent(false, canvasList);

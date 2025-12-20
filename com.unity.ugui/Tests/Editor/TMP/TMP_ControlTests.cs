@@ -15,10 +15,10 @@ namespace TMPro
             scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene);
         }
 
-        [TestCase("GameObject/UI/Dropdown - TextMeshPro")]
-        [TestCase("GameObject/UI/Button - TextMeshPro")]
-        [TestCase("GameObject/UI/Input Field - TextMeshPro")]
-        [TestCase("GameObject/UI/Text - TextMeshPro")]
+        [TestCase("GameObject/UI (Canvas)/Dropdown - TextMeshPro")]
+        [TestCase("GameObject/UI (Canvas)/Button - TextMeshPro")]
+        [TestCase("GameObject/UI (Canvas)/Input Field - TextMeshPro")]
+        [TestCase("GameObject/UI (Canvas)/Text - TextMeshPro")]
         public void TMPControlCreationAndUndoTest(string menuItem)
         {
             Assert.AreEqual(0, scene.rootCount);

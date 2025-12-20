@@ -198,17 +198,20 @@ namespace UnityEngine.UI
 #if UNITY_EDITOR
             //Child ILayoutGroup components from the root need to be marked for layout rebuild.
             //UUM-100091: Ideally, we'd want a broader fix. This change narrowly addresses the bug.
-            using (ListPool<ILayoutGroup>.Get(out var layoutComps))
+            if (!UnityEditor.EditorApplication.isPlaying)
             {
-                layoutRoot.GetComponentsInChildren<ILayoutGroup>(layoutComps);
-                foreach (var layout in layoutComps)
+                using (ListPool<ILayoutGroup>.Get(out var layoutComps))
                 {
-                    if (layout is Behaviour behaviour && behaviour.isActiveAndEnabled)
+                    layoutRoot.GetComponentsInChildren<ILayoutGroup>(layoutComps);
+                    foreach (var layout in layoutComps)
                     {
-                        if (ReferenceEquals(behaviour.gameObject, layoutRoot.gameObject))
-                            continue;
+                        if (layout is Behaviour behaviour && behaviour.isActiveAndEnabled)
+                        {
+                            if (ReferenceEquals(behaviour.gameObject, layoutRoot.gameObject))
+                                continue;
 
-                        MarkLayoutRootForRebuild(behaviour.transform as RectTransform);
+                            MarkLayoutRootForRebuild(behaviour.transform as RectTransform);
+                        }
                     }
                 }
             }

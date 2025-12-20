@@ -202,7 +202,7 @@ namespace UnityEditor.UI
 
         // Graphic elements
 
-        [MenuItem("GameObject/UI/Image", false, (int)MenuOptionsPriorityOrder.Image)]
+        [MenuItem("GameObject/UI (Canvas)/Image", false, (int)MenuOptionsPriorityOrder.Image)]
         static public void AddImage(MenuCommand menuCommand)
         {
             GameObject go;
@@ -211,7 +211,7 @@ namespace UnityEditor.UI
             PlaceUIElementRoot(go, menuCommand);
         }
 
-        [MenuItem("GameObject/UI/Raw Image", false, (int)MenuOptionsPriorityOrder.RawImage)]
+        [MenuItem("GameObject/UI (Canvas)/Raw Image", false, (int)MenuOptionsPriorityOrder.RawImage)]
         static public void AddRawImage(MenuCommand menuCommand)
         {
             GameObject go;
@@ -220,7 +220,7 @@ namespace UnityEditor.UI
             PlaceUIElementRoot(go, menuCommand);
         }
 
-        [MenuItem("GameObject/UI/Panel", false, (int)MenuOptionsPriorityOrder.Panel)]
+        [MenuItem("GameObject/UI (Canvas)/Panel", false, (int)MenuOptionsPriorityOrder.Panel)]
         static public void AddPanel(MenuCommand menuCommand)
         {
             GameObject go;
@@ -238,7 +238,7 @@ namespace UnityEditor.UI
 
         // Toggle is a control you just click on.
 
-        [MenuItem("GameObject/UI/Toggle", false, (int)MenuOptionsPriorityOrder.Toggle)]
+        [MenuItem("GameObject/UI (Canvas)/Toggle", false, (int)MenuOptionsPriorityOrder.Toggle)]
         static public void AddToggle(MenuCommand menuCommand)
         {
             GameObject go;
@@ -249,7 +249,7 @@ namespace UnityEditor.UI
 
         // Slider and Scrollbar modify a number
 
-        [MenuItem("GameObject/UI/Slider", false, (int)MenuOptionsPriorityOrder.Slider)]
+        [MenuItem("GameObject/UI (Canvas)/Slider", false, (int)MenuOptionsPriorityOrder.Slider)]
         static public void AddSlider(MenuCommand menuCommand)
         {
             GameObject go;
@@ -258,7 +258,7 @@ namespace UnityEditor.UI
             PlaceUIElementRoot(go, menuCommand);
         }
 
-        [MenuItem("GameObject/UI/Scrollbar", false, (int)MenuOptionsPriorityOrder.Scrollbar)]
+        [MenuItem("GameObject/UI (Canvas)/Scrollbar", false, (int)MenuOptionsPriorityOrder.Scrollbar)]
         static public void AddScrollbar(MenuCommand menuCommand)
         {
             GameObject go;
@@ -267,7 +267,7 @@ namespace UnityEditor.UI
             PlaceUIElementRoot(go, menuCommand);
         }
 
-        [MenuItem("GameObject/UI/Scroll View", false, (int)MenuOptionsPriorityOrder.ScrollView)]
+        [MenuItem("GameObject/UI (Canvas)/Scroll View", false, (int)MenuOptionsPriorityOrder.ScrollView)]
         static public void AddScrollView(MenuCommand menuCommand)
         {
             GameObject go;
@@ -278,7 +278,7 @@ namespace UnityEditor.UI
 
         // Containers
 
-        [MenuItem("GameObject/UI/Canvas", false, (int)MenuOptionsPriorityOrder.Canvas)]
+        [MenuItem("GameObject/UI (Canvas)/Canvas", false, (int)MenuOptionsPriorityOrder.Canvas)]
         static public void AddCanvas(MenuCommand menuCommand)
         {
             var go = CreateNewUI();
@@ -296,7 +296,7 @@ namespace UnityEditor.UI
 
         // Legacy Elements
 
-        [MenuItem("GameObject/UI/Legacy/Text", false, (int)MenuOptionsPriorityOrder.Text)]
+        [MenuItem("GameObject/UI (Canvas)/Legacy/Text", false, (int)MenuOptionsPriorityOrder.Text)]
         static public void AddText(MenuCommand menuCommand)
         {
             GameObject go;
@@ -305,7 +305,7 @@ namespace UnityEditor.UI
             PlaceUIElementRoot(go, menuCommand);
         }
 
-        [MenuItem("GameObject/UI/Legacy/Button", false, (int)MenuOptionsPriorityOrder.Button)]
+        [MenuItem("GameObject/UI (Canvas)/Legacy/Button", false, (int)MenuOptionsPriorityOrder.Button)]
         static public void AddButton(MenuCommand menuCommand)
         {
             GameObject go;
@@ -314,7 +314,7 @@ namespace UnityEditor.UI
             PlaceUIElementRoot(go, menuCommand);
         }
 
-        [MenuItem("GameObject/UI/Legacy/Dropdown", false, (int)MenuOptionsPriorityOrder.Dropdown)]
+        [MenuItem("GameObject/UI (Canvas)/Legacy/Dropdown", false, (int)MenuOptionsPriorityOrder.Dropdown)]
         static public void AddDropdown(MenuCommand menuCommand)
         {
             GameObject go;
@@ -323,7 +323,7 @@ namespace UnityEditor.UI
             PlaceUIElementRoot(go, menuCommand);
         }
 
-        [MenuItem("GameObject/UI/Legacy/Input Field", false, (int)MenuOptionsPriorityOrder.InputField)]
+        [MenuItem("GameObject/UI (Canvas)/Legacy/Input Field", false, (int)MenuOptionsPriorityOrder.InputField)]
         public static void AddInputField(MenuCommand menuCommand)
         {
             GameObject go;
@@ -363,7 +363,7 @@ namespace UnityEditor.UI
             return root;
         }
 
-        [MenuItem("GameObject/UI/Event System", false, (int)MenuOptionsPriorityOrder.EventSystem)]
+        [MenuItem("GameObject/UI (Canvas)/Event System", false, (int)MenuOptionsPriorityOrder.EventSystem)]
         public static void CreateEventSystem(MenuCommand menuCommand)
         {
             GameObject parent = menuCommand.context as GameObject;

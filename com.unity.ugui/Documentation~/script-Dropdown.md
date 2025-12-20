@@ -49,7 +49,7 @@ The template must have a single item in it with a Toggle component on. When the 
 
 ![A more advanced dropdown setup that includes a scrollview that enables scrolling when there are many options in the list.](images/UI_DropdownHierarchyScrolling.png)
 
-The template can be setup in many different ways. The setup used by the GameObject > UI > Dropdown menu item includes a scroll view, such that if there are too many options to show at once, a scrollbar will appear and the user can scroll through the options. This is however not a mandatory part of the template setup.
+The template can be setup in many different ways. The setup used by the GameObject > UI (Canvas) > Dropdown menu item includes a scroll view, such that if there are too many options to show at once, a scrollbar will appear and the user can scroll through the options. This is however not a mandatory part of the template setup.
 
 (See the ScrollRect page for more information about setup of Scroll Views.)
 
@@ -58,7 +58,7 @@ The template can be setup in many different ways. The setup used by the GameObje
 
 The dropdown supports one text content and one image content for each option. Both text and image is optional. They can only be used if the Dropdown is setup to support it.
 
-The dropdown supports text for each option when the Caption Text and Item Text properties are both setup. These are setup by default when using the GameObject > UI > Dropdown menu item.
+The dropdown supports text for each option when the Caption Text and Item Text properties are both setup. These are setup by default when using the GameObject > UI (Canvas) > Dropdown menu item.
 
 * The Caption Text is the Text component to hold the text for the currently selected option. It is typically a child to the Dropdown GameObject.
 * The Item Text is the Text component to hold the text for each option. It is typically a child to the Item GameObject.

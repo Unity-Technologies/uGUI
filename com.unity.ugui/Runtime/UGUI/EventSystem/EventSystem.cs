@@ -363,7 +363,7 @@ namespace UnityEngine.EventSystems
 
         /// <summary>
         /// Sets how UI Toolkit runtime panels receive events and handle selection
-        /// when interacting with other objects that use the EventSystem, such as components from the Unity UI package.
+        /// when interacting with other objects that use the EventSystem, such as components from the uGUI (Unity UI) package.
         /// </summary>
         /// <remarks>
         /// This method is obsolete. Use the PanelInputConfiguration component instead.

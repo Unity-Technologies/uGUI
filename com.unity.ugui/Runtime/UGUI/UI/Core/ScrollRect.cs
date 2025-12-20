@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
-    [AddComponentMenu("UI/Scroll Rect", 37)]
+    [AddComponentMenu("UI (Canvas)/Scroll Rect", 37)]
     [SelectionBase]
     [ExecuteAlways]
     [DisallowMultipleComponent]
