@@ -63,7 +63,7 @@ namespace TMPro
             // Assign new font material
             set
             {
-                if (m_sharedMaterial != null && m_sharedMaterial.GetInstanceID() == value.GetInstanceID())
+                if (m_sharedMaterial != null && m_sharedMaterial.GetEntityId() == value.GetEntityId())
                     return;
 
                 m_sharedMaterial = m_material = value;
@@ -347,10 +347,10 @@ namespace TMPro
             if (m_sharedMaterial == null)
                 return;
 
-            int targetMaterialID = mat.GetInstanceID();
-            int sharedMaterialID = m_sharedMaterial.GetInstanceID();
-            int maskingMaterialID = m_MaskMaterial == null ? 0 : m_MaskMaterial.GetInstanceID();
-            int fallbackSourceMaterialID = m_fallbackSourceMaterial == null ? 0 : m_fallbackSourceMaterial.GetInstanceID();
+            EntityId targetMaterialID = mat.GetEntityId();
+            EntityId sharedMaterialID = m_sharedMaterial.GetEntityId();
+            EntityId maskingMaterialID = m_MaskMaterial == null ? EntityId.None : m_MaskMaterial.GetEntityId();
+            EntityId fallbackSourceMaterialID = m_fallbackSourceMaterial == null ? EntityId.None : m_fallbackSourceMaterial.GetEntityId();
 
             // Sync culling with parent text object
             bool hasCullModeProperty = m_sharedMaterial.HasProperty(ShaderUtilities.ShaderTag_CullMode);
@@ -459,7 +459,7 @@ namespace TMPro
         // Event received when font asset properties are changed in Font Inspector
         void ON_FONT_PROPERTY_CHANGED(bool isChanged, Object fontAsset)
         {
-            if (m_fontAsset != null && fontAsset != null && fontAsset.GetInstanceID() == m_fontAsset.GetInstanceID())
+            if (m_fontAsset != null && fontAsset != null && fontAsset.GetEntityId() == m_fontAsset.GetEntityId())
             {
                 // Copy Normal and Bold Weight
                 if (m_fallbackMaterial != null)
@@ -755,7 +755,7 @@ namespace TMPro
             //    m_renderer = GetComponent<Renderer>();
 
             // Create Instance Material only if the new material is not the same instance previously used.
-            if (m_material == null || m_material.GetInstanceID() != mat.GetInstanceID())
+            if (m_material == null || m_material.GetEntityId() != mat.GetEntityId())
                 m_material = CreateMaterialInstance(mat);
 
             m_sharedMaterial = m_material;
@@ -811,7 +811,7 @@ namespace TMPro
             m_Material = m_sharedMaterial;
 
             //m_isDefaultMaterial = false;
-            //if (mat.GetInstanceID() == m_fontAsset.material.GetInstanceID())
+            //if (mat.GetEntityId() == m_fontAsset.material.GetEntityId())
             //    m_isDefaultMaterial = true;
 
             // Compute and Set new padding values for this new material.

@@ -94,7 +94,7 @@ namespace TMPro
         /// </summary>
         public void CalculateLayoutInputHorizontal()
         {
-            //Debug.Log("*** CalculateLayoutHorizontal() on Object ID: " + GetInstanceID() + " at frame: " + Time.frameCount + "***");
+            //Debug.Log("*** CalculateLayoutHorizontal() on Object ID: " + GetEntityId() + " at frame: " + Time.frameCount + "***");
         }
 
 
@@ -103,7 +103,7 @@ namespace TMPro
         /// </summary>
         public void CalculateLayoutInputVertical()
         {
-            //Debug.Log("*** CalculateLayoutInputVertical() on Object ID: " + GetInstanceID() + " at frame: " + Time.frameCount + "***");
+            //Debug.Log("*** CalculateLayoutInputVertical() on Object ID: " + GetEntityId() + " at frame: " + Time.frameCount + "***");
         }
 
 
@@ -782,7 +782,7 @@ namespace TMPro
 
         protected override void Awake()
         {
-            //Debug.Log("***** Awake() called on object ID " + GetInstanceID() + ". *****");
+            //Debug.Log("***** Awake() called on object ID " + GetEntityId() + ". *****");
 
             #if UNITY_EDITOR
             // Special handling for TMP Settings and importing Essential Resources
@@ -848,7 +848,7 @@ namespace TMPro
 
         protected override void OnEnable()
         {
-            //Debug.Log("***** OnEnable() called on object ID " + GetInstanceID() + ". *****");
+            //Debug.Log("***** OnEnable() called on object ID " + GetEntityId() + ". *****");
 
             // Return if Awake() has not been called on the text object.
             if (m_isAwake == false)
@@ -896,7 +896,7 @@ namespace TMPro
 
         protected override void OnDisable()
         {
-            //Debug.Log("***** OnDisable() called on object ID " + GetInstanceID() + ". *****");
+            //Debug.Log("***** OnDisable() called on object ID " + GetEntityId() + ". *****");
 
             // Return if Awake() has not been called on the text object.
             if (m_isAwake == false)
@@ -927,7 +927,7 @@ namespace TMPro
 
         protected override void OnDestroy()
         {
-            //Debug.Log("***** OnDestroy() called on object ID " + GetInstanceID() + ". *****");
+            //Debug.Log("***** OnDestroy() called on object ID " + GetEntityId() + ". *****");
 
             // UnRegister Graphic Component
             GraphicRegistry.UnregisterGraphicForCanvas(m_canvas, this);
@@ -980,7 +980,7 @@ namespace TMPro
 
         protected override void OnValidate()
         {
-            //Debug.Log("***** OnValidate() ***** Frame:" + Time.frameCount); // ID " + GetInstanceID()); // New Material [" + m_sharedMaterial.name + "] with ID " + m_sharedMaterial.GetInstanceID() + ". Base Material is [" + m_baseMaterial.name + "] with ID " + m_baseMaterial.GetInstanceID() + ". Previous Base Material is [" + (m_lastBaseMaterial == null ? "Null" : m_lastBaseMaterial.name) + "].");
+            //Debug.Log("***** OnValidate() ***** Frame:" + Time.frameCount); // ID " + GetEntityId()); // New Material [" + m_sharedMaterial.name + "] with ID " + m_sharedMaterial.GetEntityId() + ". Base Material is [" + m_baseMaterial.name + "] with ID " + m_baseMaterial.GetEntityId() + ". Previous Base Material is [" + (m_lastBaseMaterial == null ? "Null" : m_lastBaseMaterial.name) + "].");
 
             if (m_isAwake == false)
                 return;
@@ -992,7 +992,7 @@ namespace TMPro
                 m_hasFontAssetChanged = false;
             }
 
-            if (m_canvasRenderer == null || m_canvasRenderer.GetMaterial() == null || m_canvasRenderer.GetMaterial().GetTexture(ShaderUtilities.ID_MainTex) == null || m_fontAsset == null || m_fontAsset.atlasTexture.GetInstanceID() != m_canvasRenderer.GetMaterial().GetTexture(ShaderUtilities.ID_MainTex).GetInstanceID())
+            if (m_canvasRenderer == null || m_canvasRenderer.GetMaterial() == null || m_canvasRenderer.GetMaterial().GetTexture(ShaderUtilities.ID_MainTex) == null || m_fontAsset == null || m_fontAsset.atlasTexture.GetEntityId() != m_canvasRenderer.GetMaterial().GetTexture(ShaderUtilities.ID_MainTex).GetEntityId())
             {
                 LoadFontAsset();
                 m_hasFontAssetChanged = false;
@@ -1053,13 +1053,13 @@ namespace TMPro
         // Event received when custom material editor properties are changed.
         void ON_MATERIAL_PROPERTY_CHANGED(bool isChanged, Material mat)
         {
-            //Debug.Log("ON_MATERIAL_PROPERTY_CHANGED event received."); // Targeted Material is: " + mat.name + "  m_sharedMaterial: " + m_sharedMaterial.name + " with ID:" + m_sharedMaterial.GetInstanceID() + "  m_renderer.sharedMaterial: " + m_canvasRenderer.GetMaterial() + "  Masking Material:" + m_MaskMaterial.GetInstanceID());
+            //Debug.Log("ON_MATERIAL_PROPERTY_CHANGED event received."); // Targeted Material is: " + mat.name + "  m_sharedMaterial: " + m_sharedMaterial.name + " with ID:" + m_sharedMaterial.GetEntityId() + "  m_renderer.sharedMaterial: " + m_canvasRenderer.GetMaterial() + "  Masking Material:" + m_MaskMaterial.GetEntityId());
 
             ShaderUtilities.GetShaderPropertyIDs(); // Initialize ShaderUtilities and get shader property IDs.
 
-            int materialID = mat.GetInstanceID();
-            int sharedMaterialID = m_sharedMaterial.GetInstanceID();
-            int maskingMaterialID = m_MaskMaterial == null ? 0 : m_MaskMaterial.GetInstanceID();
+            EntityId materialID = mat.GetEntityId();
+            EntityId sharedMaterialID = m_sharedMaterial.GetEntityId();
+            EntityId maskingMaterialID = m_MaskMaterial == null ? EntityId.None : m_MaskMaterial.GetEntityId();
 
             if (m_canvasRenderer == null || m_canvasRenderer.GetMaterial() == null)
             {
@@ -1077,7 +1077,7 @@ namespace TMPro
 
             if (m_canvasRenderer.GetMaterial() != m_sharedMaterial && m_fontAsset == null) //    || m_renderer.sharedMaterials.Contains(mat))
             {
-                //Debug.Log("ON_MATERIAL_PROPERTY_CHANGED Called on Target ID: " + GetInstanceID() + ". Previous Material:" + m_sharedMaterial + "  New Material:" + m_uiRenderer.GetMaterial()); // on Object ID:" + GetInstanceID() + ". m_sharedMaterial: " + m_sharedMaterial.name + "  m_renderer.sharedMaterial: " + m_renderer.sharedMaterial.name);
+                //Debug.Log("ON_MATERIAL_PROPERTY_CHANGED Called on Target ID: " + GetEntityId() + ". Previous Material:" + m_sharedMaterial + "  New Material:" + m_uiRenderer.GetMaterial()); // on Object ID:" + GetEntityId() + ". m_sharedMaterial: " + m_sharedMaterial.name + "  m_renderer.sharedMaterial: " + m_renderer.sharedMaterial.name);
                 m_sharedMaterial = m_canvasRenderer.GetMaterial();
             }
 
@@ -1153,7 +1153,7 @@ namespace TMPro
 
             if (obj == this)
             {
-                //Debug.Log("Undo / Redo Event Received by Object ID:" + GetInstanceID());
+                //Debug.Log("Undo / Redo Event Received by Object ID:" + GetEntityId());
                 m_havePropertiesChanged = true;
 
                 ComputeMarginSize(); // Review this change
@@ -1165,7 +1165,7 @@ namespace TMPro
         // Event to Track Material Changed resulting from Drag-n-drop.
         void ON_DRAG_AND_DROP_MATERIAL(GameObject obj, Material currentMaterial, Material newMaterial)
         {
-            //Debug.Log("Drag-n-Drop Event - Receiving Object ID " + GetInstanceID() + ". Sender ID " + obj.GetInstanceID()); // +  ". Prefab Parent is " + UnityEditor.PrefabUtility.GetPrefabParent(gameObject).GetInstanceID()); // + ". New Material is " + newMaterial.name + " with ID " + newMaterial.GetInstanceID() + ". Base Material is " + m_baseMaterial.name + " with ID " + m_baseMaterial.GetInstanceID());
+            //Debug.Log("Drag-n-Drop Event - Receiving Object ID " + GetEntityId() + ". Sender ID " + obj.GetEntityId()); // +  ". Prefab Parent is " + UnityEditor.PrefabUtility.GetPrefabParent(gameObject).GetEntityId()); // + ". New Material is " + newMaterial.name + " with ID " + newMaterial.GetEntityId() + ". Base Material is " + m_baseMaterial.name + " with ID " + m_baseMaterial.GetEntityId());
 
             // Check if event applies to this current object
             if (obj == gameObject || UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(gameObject) == obj)
@@ -1254,7 +1254,7 @@ namespace TMPro
                 }
 
                 // If font atlas texture doesn't match the assigned material font atlas, switch back to default material specified in the Font Asset.
-                if (m_sharedMaterial == null || m_sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex) == null || m_fontAsset.atlasTexture.GetInstanceID() != m_sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetInstanceID())
+                if (m_sharedMaterial == null || m_sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex) == null || m_fontAsset.atlasTexture.GetEntityId() != m_sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetEntityId())
                 {
                     if (m_fontAsset.material == null)
                         Debug.LogWarning("The Font Atlas Texture of the Font Asset " + m_fontAsset.name + " assigned to " + gameObject.name + " is missing.", this);
@@ -1482,7 +1482,7 @@ namespace TMPro
             //    m_canvasRenderer = GetComponent<CanvasRenderer>();
 
             // Create Instance Material only if the new material is not the same instance previously used.
-            if (m_fontMaterial == null || m_fontMaterial.GetInstanceID() != mat.GetInstanceID())
+            if (m_fontMaterial == null || m_fontMaterial.GetEntityId() != mat.GetEntityId())
                 m_fontMaterial = CreateMaterialInstance(mat);
 
             m_sharedMaterial = m_fontMaterial;
@@ -1585,7 +1585,7 @@ namespace TMPro
                 if (i == 0)
                 {
                     // Only assign new material if the font atlas textures match.
-                    if (materials[i].GetTexture(ShaderUtilities.ID_MainTex) == null || materials[i].GetTexture(ShaderUtilities.ID_MainTex).GetInstanceID() != m_sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetInstanceID())
+                    if (materials[i].GetTexture(ShaderUtilities.ID_MainTex) == null || materials[i].GetTexture(ShaderUtilities.ID_MainTex).GetEntityId() != m_sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetEntityId())
                         continue;
 
                     m_sharedMaterial = m_fontSharedMaterials[i] = materials[i];
@@ -1594,7 +1594,7 @@ namespace TMPro
                 else
                 {
                     // Only assign new material if the font atlas textures match.
-                    if (materials[i].GetTexture(ShaderUtilities.ID_MainTex) == null || materials[i].GetTexture(ShaderUtilities.ID_MainTex).GetInstanceID() != m_subTextObjects[i].sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetInstanceID())
+                    if (materials[i].GetTexture(ShaderUtilities.ID_MainTex) == null || materials[i].GetTexture(ShaderUtilities.ID_MainTex).GetEntityId() != m_subTextObjects[i].sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetEntityId())
                         continue;
 
                     // Only assign a new material if none were specified in the text input.
@@ -1609,7 +1609,7 @@ namespace TMPro
         protected override void SetOutlineThickness(float thickness)
         {
             // Use material instance if one exists. Otherwise, create a new instance of the shared material.
-            if (m_fontMaterial != null && m_sharedMaterial.GetInstanceID() != m_fontMaterial.GetInstanceID())
+            if (m_fontMaterial != null && m_sharedMaterial.GetEntityId() != m_fontMaterial.GetEntityId())
             {
                 m_sharedMaterial = m_fontMaterial;
                 m_canvasRenderer.SetMaterial(m_sharedMaterial, m_sharedMaterial.GetTexture(ShaderUtilities.ID_MainTex));
@@ -1774,9 +1774,9 @@ namespace TMPro
             GetUnderlineSpecialCharacter(m_currentFontAsset);
             if (m_Underline.character != null)
             {
-                if (m_Underline.fontAsset.GetInstanceID() != m_currentFontAsset.GetInstanceID())
+                if (m_Underline.fontAsset.GetEntityId() != m_currentFontAsset.GetEntityId())
                 {
-                    if (TMP_Settings.matchMaterialPreset && m_currentMaterial.GetInstanceID() != m_Underline.fontAsset.material.GetInstanceID())
+                    if (TMP_Settings.matchMaterialPreset && m_currentMaterial.GetEntityId() != m_Underline.fontAsset.material.GetEntityId())
                         m_Underline.material = TMP_MaterialManager.GetFallbackMaterial(m_currentMaterial, m_Underline.fontAsset.material);
                     else
                         m_Underline.material = m_Underline.fontAsset.material;
@@ -1797,9 +1797,9 @@ namespace TMPro
 
                 if (m_Ellipsis.character != null)
                 {
-                    if (m_Ellipsis.fontAsset.GetInstanceID() != m_currentFontAsset.GetInstanceID())
+                    if (m_Ellipsis.fontAsset.GetEntityId() != m_currentFontAsset.GetEntityId())
                     {
-                        if (TMP_Settings.matchMaterialPreset && m_currentMaterial.GetInstanceID() != m_Ellipsis.fontAsset.material.GetInstanceID())
+                        if (TMP_Settings.matchMaterialPreset && m_currentMaterial.GetEntityId() != m_Ellipsis.fontAsset.material.GetEntityId())
                             m_Ellipsis.material = TMP_MaterialManager.GetFallbackMaterial(m_currentMaterial, m_Ellipsis.fontAsset.material);
                         else
                             m_Ellipsis.material = m_Ellipsis.fontAsset.material;
@@ -2018,7 +2018,7 @@ namespace TMPro
 
                 if (character.elementType == TextElementType.Character)
                 {
-                    if (character.textAsset.instanceID != m_currentFontAsset.instanceID)
+                    if (character.textAsset.entityId != m_currentFontAsset.entityId)
                     {
                         isUsingFallbackOrAlternativeTypeface = true;
                         m_currentFontAsset = character.textAsset as TMP_FontAsset;
@@ -2148,7 +2148,7 @@ namespace TMPro
                     continue;
                 }
 
-                if (isUsingFallbackOrAlternativeTypeface && m_currentFontAsset.instanceID != m_fontAsset.instanceID)
+                if (isUsingFallbackOrAlternativeTypeface && m_currentFontAsset.entityId != m_fontAsset.entityId)
                 {
                     // Create Fallback material instance matching current material preset if necessary
                     if (TMP_Settings.matchMaterialPreset)
@@ -2261,7 +2261,7 @@ namespace TMPro
                         m_subTextObjects[i].rectTransform.pivot = m_rectTransform.pivot;
 
                     // Check if the material has changed.
-                    if (m_subTextObjects[i].sharedMaterial == null || m_subTextObjects[i].sharedMaterial.GetInstanceID() != m_materialReferences[i].material.GetInstanceID())
+                    if (m_subTextObjects[i].sharedMaterial == null || m_subTextObjects[i].sharedMaterial.GetEntityId() != m_materialReferences[i].material.GetEntityId())
                     {
                         m_subTextObjects[i].sharedMaterial = m_materialReferences[i].material;
                         m_subTextObjects[i].fontAsset = m_materialReferences[i].fontAsset;
@@ -2536,7 +2536,7 @@ namespace TMPro
             // Early exit if no font asset was assigned. This should not be needed since LiberationSans SDF will be assigned by default.
             if (m_fontAsset == null || m_fontAsset.characterLookupTable == null)
             {
-                Debug.LogWarning("Can't Generate Mesh! No Font Asset has been assigned to Object ID: " + this.GetInstanceID());
+                Debug.LogWarning("Can't Generate Mesh! No Font Asset has been assigned to Object ID: " + this.GetEntityId());
                 m_IsAutoSizePointSizeSet = true;
                 k_GenerateTextMarker.End();
                 return;
@@ -5218,7 +5218,7 @@ namespace TMPro
                         DrawUnderlineMesh(strikethrough_start, strikethrough_end, ref last_vert_index, strikethroughScale, strikethroughScale, strikethroughScale, xScale, strikethroughColor);
                         //Debug.Log("Char [" + currentCharacter + "] at Index: " + i + "  End Strikethrough POS: " + strikethrough_end + "  Baseline: " + m_textInfo.characterInfo[i].baseLine.ToString("f3"));
                     }
-                    else if (beginStrikethrough && i < m_characterCount && currentFontAsset.GetInstanceID() != characterInfos[i + 1].fontAsset.GetInstanceID())
+                    else if (beginStrikethrough && i < m_characterCount && currentFontAsset.GetEntityId() != characterInfos[i + 1].fontAsset.GetEntityId())
                     {
                         // Terminate Strikethrough if font asset changes.
                         beginStrikethrough = false;
@@ -5456,7 +5456,7 @@ namespace TMPro
             // Event indicating the text has been regenerated.
             TMPro_EventManager.ON_TEXT_CHANGED(this);
 
-            //Debug.Log("***** Done rendering text object ID " + GetInstanceID() + ". *****");
+            //Debug.Log("***** Done rendering text object ID " + GetEntityId() + ". *****");
 
             // End Sampling
             k_GenerateTextPhaseIIIMarker.End();

@@ -15,10 +15,10 @@ namespace TMPro
         private static TMP_UpdateRegistry s_Instance;
 
         private readonly List<ICanvasElement> m_LayoutRebuildQueue = new List<ICanvasElement>();
-        private HashSet<int> m_LayoutQueueLookup = new HashSet<int>();
+        private HashSet<EntityId> m_LayoutQueueLookup = new HashSet<EntityId>();
 
         private readonly List<ICanvasElement> m_GraphicRebuildQueue = new List<ICanvasElement>();
-        private HashSet<int> m_GraphicQueueLookup = new HashSet<int>();
+        private HashSet<EntityId> m_GraphicQueueLookup = new HashSet<EntityId>();
 
         //private bool m_PerformingLayoutUpdate;
         //private bool m_PerformingGraphicUpdate;
@@ -58,7 +58,7 @@ namespace TMPro
 
         private bool InternalRegisterCanvasElementForLayoutRebuild(ICanvasElement element)
         {
-            int id = (element as Object).GetInstanceID();
+            EntityId id = (element as Object).GetEntityId();
 
             if (m_LayoutQueueLookup.Contains(id))
                 return false;
@@ -81,7 +81,7 @@ namespace TMPro
 
         private bool InternalRegisterCanvasElementForGraphicRebuild(ICanvasElement element)
         {
-            int id = (element as Object).GetInstanceID();
+            EntityId id = (element as Object).GetEntityId();
 
             if (m_GraphicQueueLookup.Contains(id))
                 return false;
@@ -157,7 +157,7 @@ namespace TMPro
 
         private void InternalUnRegisterCanvasElementForLayoutRebuild(ICanvasElement element)
         {
-            int id = (element as Object).GetInstanceID();
+             EntityId id = (element as Object).GetEntityId();
 
             //element.LayoutComplete();
             TMP_UpdateRegistry.instance.m_LayoutRebuildQueue.Remove(element);
@@ -167,7 +167,7 @@ namespace TMPro
 
         private void InternalUnRegisterCanvasElementForGraphicRebuild(ICanvasElement element)
         {
-            int id = (element as Object).GetInstanceID();
+            EntityId id = (element as Object).GetEntityId();
 
             //element.GraphicUpdateComplete();
             TMP_UpdateRegistry.instance.m_GraphicRebuildQueue.Remove(element);

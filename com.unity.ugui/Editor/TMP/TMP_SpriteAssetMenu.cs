@@ -400,7 +400,7 @@ namespace TMPro.EditorUtilities
                 // Check if the sprite is already contained in the SpriteInfoList
                 int index = -1;
                 if (spriteAsset.spriteInfoList.Count > i && spriteAsset.spriteInfoList[i].sprite != null)
-                    index = spriteAsset.spriteInfoList.FindIndex(item => item.sprite.GetInstanceID() == sprite.GetInstanceID());
+                    index = spriteAsset.spriteInfoList.FindIndex(item => item.sprite.GetEntityId() == sprite.GetEntityId());
 
                 // Use existing SpriteInfo if it already exists
                 TMP_Sprite spriteInfo = index == -1 ? new TMP_Sprite() : spriteAsset.spriteInfoList[index];

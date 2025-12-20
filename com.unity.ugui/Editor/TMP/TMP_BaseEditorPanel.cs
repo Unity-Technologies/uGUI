@@ -106,7 +106,7 @@ namespace TMPro.EditorUtilities
         protected SerializedProperty m_FontSharedMaterialProp;
         protected Material[] m_MaterialPresets;
         protected GUIContent[] m_MaterialPresetNames;
-        protected Dictionary<int, int> m_MaterialPresetIndexLookup = new Dictionary<int, int>();
+        protected Dictionary<EntityId, int> m_MaterialPresetIndexLookup = new Dictionary<EntityId, int>();
         protected int m_MaterialPresetSelectionIndex;
         protected bool m_IsPresetListDirty;
 
@@ -593,7 +593,7 @@ namespace TMPro.EditorUtilities
                 EditorStyles.popup.fontSize = 11;
 
                 if (m_FontSharedMaterialProp.objectReferenceValue != null)
-                    m_MaterialPresetIndexLookup.TryGetValue(m_FontSharedMaterialProp.objectReferenceValue.GetInstanceID(), out m_MaterialPresetSelectionIndex);
+                    m_MaterialPresetIndexLookup.TryGetValue(m_FontSharedMaterialProp.objectReferenceValue.GetEntityId(), out m_MaterialPresetSelectionIndex);
 
                 m_MaterialPresetSelectionIndex = EditorGUI.Popup(rect, k_MaterialPresetLabel, m_MaterialPresetSelectionIndex, m_MaterialPresetNames);
 
@@ -1323,9 +1323,9 @@ namespace TMPro.EditorUtilities
             {
                 m_MaterialPresetNames[i] = new GUIContent(m_MaterialPresets[i].name);
 
-                m_MaterialPresetIndexLookup.Add(m_MaterialPresets[i].GetInstanceID(), i);
+                m_MaterialPresetIndexLookup.Add(m_MaterialPresets[i].GetEntityId(), i);
 
-                //if (m_TargetMaterial.GetInstanceID() == m_MaterialPresets[i].GetInstanceID())
+                //if (m_TargetMaterial.GetEntityId() == m_MaterialPresets[i].GetEntityId())
                 //    m_MaterialPresetSelectionIndex = i;
             }
 

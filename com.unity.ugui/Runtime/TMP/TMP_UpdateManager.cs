@@ -11,16 +11,16 @@ namespace TMPro
     {
         private static TMP_UpdateManager s_Instance;
 
-        private readonly HashSet<int> m_LayoutQueueLookup = new HashSet<int>();
+        private readonly HashSet<EntityId> m_LayoutQueueLookup = new HashSet<EntityId>();
         private readonly List<TMP_Text> m_LayoutRebuildQueue = new List<TMP_Text>();
 
-        private readonly HashSet<int> m_GraphicQueueLookup = new HashSet<int>();
+        private readonly HashSet<EntityId> m_GraphicQueueLookup = new HashSet<EntityId>();
         private readonly List<TMP_Text> m_GraphicRebuildQueue = new List<TMP_Text>();
 
-        private readonly HashSet<int> m_InternalUpdateLookup = new HashSet<int>();
+        private readonly HashSet<EntityId> m_InternalUpdateLookup = new HashSet<EntityId>();
         private readonly List<TMP_Text> m_InternalUpdateQueue = new List<TMP_Text>();
 
-        private readonly HashSet<int> m_CullingUpdateLookup = new HashSet<int>();
+        private readonly HashSet<EntityId> m_CullingUpdateLookup = new HashSet<EntityId>();
         private readonly List<TMP_Text> m_CullingUpdateQueue = new List<TMP_Text>();
 
         // Profiler Marker declarations
@@ -67,7 +67,7 @@ namespace TMPro
 
         private void InternalRegisterTextObjectForUpdate(TMP_Text textObject)
         {
-            int id = textObject.GetInstanceID();
+            EntityId id = textObject.GetEntityId();
 
             if (m_InternalUpdateLookup.Contains(id))
                 return;
@@ -87,7 +87,7 @@ namespace TMPro
 
         private void InternalRegisterTextElementForLayoutRebuild(TMP_Text element)
         {
-            int id = element.GetInstanceID();
+            EntityId id = element.GetEntityId();
 
             if (m_LayoutQueueLookup.Contains(id))
                 return;
@@ -111,7 +111,7 @@ namespace TMPro
 
         private void InternalRegisterTextElementForGraphicRebuild(TMP_Text element)
         {
-            int id = element.GetInstanceID();
+            EntityId id = element.GetEntityId();
 
             if (m_GraphicQueueLookup.Contains(id))
                 return;
@@ -131,7 +131,7 @@ namespace TMPro
 
         private void InternalRegisterTextElementForCullingUpdate(TMP_Text element)
         {
-            int id = element.GetInstanceID();
+            EntityId id = element.GetEntityId();
 
             if (m_CullingUpdateLookup.Contains(id))
                 return;
@@ -222,7 +222,7 @@ namespace TMPro
         {
             k_UnregisterTextElementForGraphicRebuildMarker.Begin();
 
-            int id = element.GetInstanceID();
+            EntityId id = element.GetEntityId();
 
             m_GraphicRebuildQueue.Remove(element);
             m_GraphicQueueLookup.Remove(id);
@@ -232,7 +232,7 @@ namespace TMPro
 
         private void InternalUnRegisterTextElementForLayoutRebuild(TMP_Text element)
         {
-            int id = element.GetInstanceID();
+            EntityId id = element.GetEntityId();
 
             m_LayoutRebuildQueue.Remove(element);
             m_LayoutQueueLookup.Remove(id);
@@ -240,7 +240,7 @@ namespace TMPro
 
         private void InternalUnRegisterTextObjectForUpdate(TMP_Text textObject)
         {
-            int id = textObject.GetInstanceID();
+            EntityId id = textObject.GetEntityId();
 
             m_InternalUpdateQueue.Remove(textObject);
             m_InternalUpdateLookup.Remove(id);

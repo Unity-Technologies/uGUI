@@ -19,9 +19,11 @@ namespace TMPro
             internal set { m_Version = value; }
         }
 
+
         /// <summary>
         /// Instance ID of the TMP Asset
         /// </summary>
+        [Obsolete("instanceID is obsolete, use entityId instead. This will be removed in a future version.", true)]
         public int instanceID
         {
             get
@@ -30,6 +32,20 @@ namespace TMPro
                     m_InstanceID = GetInstanceID();
 
                 return m_InstanceID;
+            }
+        }
+
+        /// <summary>
+        /// EntityId of the TMP Asset
+        /// </summary>
+        public EntityId entityId
+        {
+            get
+            {
+                if (m_EntityId == EntityId.None)
+                    m_EntityId = GetEntityId();
+
+                return m_EntityId;
             }
         }
 
@@ -92,6 +108,8 @@ namespace TMPro
 
         [SerializeField]
         internal string m_Version;
+
+        internal EntityId m_EntityId;
 
         internal int m_InstanceID;
 

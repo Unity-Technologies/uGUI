@@ -18,7 +18,11 @@ namespace TMPro
         Material sharedMaterial { get; }
 
         void Rebuild(CanvasUpdate update);
+
+        [Obsolete("GetInstanceID() is obsolete, use GetEntityId() instead.", true)]
         int GetInstanceID();
+
+        EntityId GetEntityId();
     }
 
     public enum TextAlignmentOptions
@@ -193,7 +197,7 @@ namespace TMPro
         protected Material m_sharedMaterial;
         protected Material m_currentMaterial;
         protected static MaterialReference[] m_materialReferences = new MaterialReference[4];
-        protected static Dictionary<int, int> m_materialReferenceIndexLookup = new Dictionary<int, int>();
+        protected static Dictionary<EntityId, int> m_materialReferenceIndexLookup = new Dictionary<EntityId, int>();
 
         protected static TMP_TextProcessingStack<MaterialReference> m_materialReferenceStack = new TMP_TextProcessingStack<MaterialReference>(new MaterialReference[16]);
         protected int m_currentMaterialIndex;
@@ -222,7 +226,7 @@ namespace TMPro
             // Assign new font material
             set
             {
-                if (m_sharedMaterial != null && m_sharedMaterial.GetInstanceID() == value.GetInstanceID()) return;
+                if (m_sharedMaterial != null && m_sharedMaterial.GetEntityId() == value.GetEntityId()) return;
 
                 m_sharedMaterial = value;
 
@@ -3691,7 +3695,7 @@ namespace TMPro
 
             m_isPreferredWidthDirty = false;
 
-            //Debug.Log("GetPreferredWidth() called on Object ID: " + GetInstanceID() + " on frame: " + Time.frameCount + ". Returning width of " + preferredWidth);
+            //Debug.Log("GetPreferredWidth() called on Object ID: " + GetEntityId() + " on frame: " + Time.frameCount + ". Returning width of " + preferredWidth);
 
             return preferredWidth;
         }
@@ -3774,7 +3778,7 @@ namespace TMPro
 
             m_isPreferredHeightDirty = false;
 
-            //Debug.Log("GetPreferredHeight() called on Object ID: " + GetInstanceID() + " on frame: " + Time.frameCount +". Returning height of " + preferredHeight);
+            //Debug.Log("GetPreferredHeight() called on Object ID: " + GetEntityId() + " on frame: " + Time.frameCount +". Returning height of " + preferredHeight);
 
             return preferredHeight;
         }
@@ -3882,7 +3886,7 @@ namespace TMPro
             // Early exit if no font asset was assigned. This should not be needed since LiberationSans SDF will be assigned by default.
             if (m_fontAsset == null || m_fontAsset.characterLookupTable == null)
             {
-                Debug.LogWarning("Can't Generate Mesh! No Font Asset has been assigned to Object ID: " + this.GetInstanceID());
+                Debug.LogWarning("Can't Generate Mesh! No Font Asset has been assigned to Object ID: " + this.GetEntityId());
 
                 m_IsAutoSizePointSizeSet = true;
                 return Vector2.zero;
@@ -6153,7 +6157,7 @@ namespace TMPro
             }
 
             // Search for the character in the primary font asset if not the current font asset
-            if (fontAsset.instanceID != m_fontAsset.instanceID)
+            if (fontAsset.entityId != m_fontAsset.entityId)
             {
                 // Search primary font asset
                 character = TMP_FontAssetUtilities.GetCharacterFromFontAsset(unicode, m_fontAsset, false, fontStyle, fontWeight, out isUsingAlternativeTypeface);
@@ -6323,7 +6327,7 @@ namespace TMPro
                     return true;
             }
 
-            if (this.GetInstanceID() == targetTextComponent.GetInstanceID())
+            if (this.GetEntityId() == targetTextComponent.GetEntityId())
                 return true;
 
             return false;
@@ -7486,7 +7490,7 @@ namespace TMPro
                         if (materialHashCode == (int)MarkupTag.DEFAULT)
                         {
                             // Check if material font atlas texture matches that of the current font asset.
-                            //if (m_currentFontAsset.atlas.GetInstanceID() != m_currentMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetInstanceID()) return false;
+                            //if (m_currentFontAsset.atlas.GetEntityId() != m_currentMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetEntityId()) return false;
 
                             m_currentMaterial = m_materialReferences[0].material;
                             m_currentMaterialIndex = 0;
@@ -7501,7 +7505,7 @@ namespace TMPro
                         if (MaterialReferenceManager.TryGetMaterial(materialHashCode, out tempMaterial))
                         {
                             // Check if material font atlas texture matches that of the current font asset.
-                            //if (m_currentFontAsset.atlas.GetInstanceID() != tempMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetInstanceID()) return false;
+                            //if (m_currentFontAsset.atlas.GetEntityId() != tempMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetEntityId()) return false;
 
                             m_currentMaterial = tempMaterial;
 
@@ -7518,7 +7522,7 @@ namespace TMPro
                                 return false;
 
                             // Check if material font atlas texture matches that of the current font asset.
-                            //if (m_currentFontAsset.atlas.GetInstanceID() != tempMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetInstanceID()) return false;
+                            //if (m_currentFontAsset.atlas.GetEntityId() != tempMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetEntityId()) return false;
 
                             // Add new reference to this material in the MaterialReferenceManager
                             MaterialReferenceManager.AddFontMaterial(materialHashCode, tempMaterial);
@@ -7532,7 +7536,7 @@ namespace TMPro
                         return true;
                     case MarkupTag.SLASH_MATERIAL:
                         {
-                            //if (m_currentMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetInstanceID() != m_materialReferenceStack.PreviousItem().material.GetTexture(ShaderUtilities.ID_MainTex).GetInstanceID())
+                            //if (m_currentMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetEntityId() != m_materialReferenceStack.PreviousItem().material.GetTexture(ShaderUtilities.ID_MainTex).GetEntityId())
                             //    return false;
 
                             MaterialReference materialReference = m_materialReferenceStack.Remove();

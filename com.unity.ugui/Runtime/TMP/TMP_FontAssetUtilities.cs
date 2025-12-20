@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.TextCore;
 using UnityEngine.TextCore.LowLevel;
 
@@ -25,9 +26,9 @@ namespace TMPro
 
 
         /// <summary>
-        /// HashSet containing instance ID of font assets already searched.
+        /// HashSet containing entityId of font assets already searched.
         /// </summary>
-        private static HashSet<int> k_SearchedAssets;
+        private static HashSet<EntityId> k_SearchedAssets;
 
 
         /// <summary>
@@ -49,7 +50,7 @@ namespace TMPro
             if (includeFallbacks)
             {
                 if (k_SearchedAssets == null)
-                    k_SearchedAssets = new HashSet<int>();
+                    k_SearchedAssets = new HashSet<EntityId>();
                 else
                     k_SearchedAssets.Clear();
             }
@@ -198,7 +199,7 @@ namespace TMPro
                 if (temp == null)
                     continue;
 
-                int id = temp.instanceID;
+                EntityId id = temp.entityId;
 
                 // Try adding font asset to the search list. If already present, skip to the next one otherwise check if it contains the requested character.
                 if (k_SearchedAssets.Add(id) == false)
@@ -239,7 +240,7 @@ namespace TMPro
             if (includeFallbacks)
             {
                 if (k_SearchedAssets == null)
-                    k_SearchedAssets = new HashSet<int>();
+                    k_SearchedAssets = new HashSet<EntityId>();
                 else
                     k_SearchedAssets.Clear();
             }
@@ -253,7 +254,7 @@ namespace TMPro
                 if (fontAsset == null) continue;
 
                 // Add reference to this search query
-                //sourceFontAsset.FallbackSearchQueryLookup.Add(fontAsset.instanceID);
+                //sourceFontAsset.FallbackSearchQueryLookup.Add(fontAsset.entityId);
 
                 TMP_Character character = GetCharacterFromFontAsset_Internal(unicode, fontAsset, includeFallbacks, fontStyle, fontWeight, out isAlternativeTypeface);
 
@@ -275,7 +276,7 @@ namespace TMPro
             if (includeFallbacks)
             {
                 if (k_SearchedAssets == null)
-                    k_SearchedAssets = new HashSet<int>();
+                    k_SearchedAssets = new HashSet<EntityId>();
                 else
                     k_SearchedAssets.Clear();
             }
@@ -336,12 +337,12 @@ namespace TMPro
             {
                 // Clear searched assets
                 if (k_SearchedAssets == null)
-                    k_SearchedAssets = new HashSet<int>();
+                    k_SearchedAssets = new HashSet<EntityId>();
                 else
                     k_SearchedAssets.Clear();
 
                 // Add current sprite asset to already searched assets.
-                k_SearchedAssets.Add(spriteAsset.instanceID);
+                k_SearchedAssets.Add(spriteAsset.entityId);
 
                 List<TMP_SpriteAsset> fallbackSpriteAsset = spriteAsset.fallbackSpriteAssets;
 
@@ -356,7 +357,7 @@ namespace TMPro
                         if (temp == null)
                             continue;
 
-                        int id = temp.instanceID;
+                        EntityId id = temp.entityId;
 
                         // Try adding asset to search list. If already present skip to the next one otherwise check if it contains the requested character.
                         if (k_SearchedAssets.Add(id) == false)
@@ -403,7 +404,7 @@ namespace TMPro
                         if (temp == null)
                             continue;
 
-                        int id = temp.instanceID;
+                        EntityId id = temp.entityId;
 
                         // Try adding asset to search list. If already present skip to the next one otherwise check if it contains the requested character.
                         if (k_SearchedAssets.Add(id) == false)

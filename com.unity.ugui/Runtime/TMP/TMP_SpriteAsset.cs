@@ -246,7 +246,7 @@ namespace TMPro
         /// <summary>
         /// Used to keep track of which Sprite Assets have been searched.
         /// </summary>
-        private static HashSet<int> k_searchedSpriteAssets;
+        private static HashSet<EntityId> k_searchedSpriteAssets;
 
         /// <summary>
         /// Search through the given sprite asset and its fallbacks for the specified sprite matching the given unicode character.
@@ -267,12 +267,12 @@ namespace TMPro
 
             // Initialize list to track instance of Sprite Assets that have already been searched.
             if (k_searchedSpriteAssets == null)
-                k_searchedSpriteAssets = new HashSet<int>();
+                k_searchedSpriteAssets = new HashSet<EntityId>();
             else
                 k_searchedSpriteAssets.Clear();
 
             // Get instance ID of sprite asset and add to list.
-            int id = spriteAsset.GetInstanceID();
+            EntityId id = spriteAsset.GetEntityId();
             k_searchedSpriteAssets.Add(id);
 
             // Search potential fallback sprite assets if includeFallbacks is true.
@@ -303,7 +303,7 @@ namespace TMPro
                 TMP_SpriteAsset temp = spriteAssets[i];
                 if (temp == null) continue;
 
-                int id = temp.GetInstanceID();
+                EntityId id = temp.GetEntityId();
 
                 // Skip sprite asset if it has already been searched.
                 if (k_searchedSpriteAssets.Add(id) == false)
@@ -363,11 +363,11 @@ namespace TMPro
 
             // Initialize or clear list to Sprite Assets that have already been searched.
             if (k_searchedSpriteAssets == null)
-                k_searchedSpriteAssets = new HashSet<int>();
+                k_searchedSpriteAssets = new HashSet<EntityId>();
             else
                 k_searchedSpriteAssets.Clear();
 
-            int id = spriteAsset.instanceID;
+            EntityId id = spriteAsset.entityId;
 
             // Add to list of font assets already searched.
             k_searchedSpriteAssets.Add(id);
@@ -443,7 +443,7 @@ namespace TMPro
                 TMP_SpriteAsset temp = spriteAssets[i];
                 if (temp == null) continue;
 
-                int id = temp.instanceID;
+                EntityId id = temp.entityId;
 
                 // Skip sprite asset if it has already been searched.
                 if (k_searchedSpriteAssets.Add(id) == false)

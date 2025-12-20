@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 
 namespace TMPro
@@ -176,7 +177,7 @@ namespace TMPro
 
         //        materialReferences[index].fontAsset = fontAsset;
         //        materialReferences[index].material = material;
-        //        materialReferences[index].isDefaultMaterial = material.GetInstanceID() == fontAsset.material.GetInstanceID() ? true : false;
+        //        materialReferences[index].isDefaultMaterial = material.GetEntityId() == fontAsset.material.GetEntityId() ? true : false;
         //        materialReferences[index].index = index;
         //        materialReferences[index].referenceCount = 0;
 
@@ -428,7 +429,7 @@ namespace TMPro
         //        materialReferences[0].fontAsset = fontAsset;
         //        materialReferences[0].material = material;
         //        materialReferences[0].index = 0;
-        //        materialReferences[0].isDefaultMaterial = material.GetInstanceID() == fontAsset.material.GetInstanceID() ? true : false;
+        //        materialReferences[0].isDefaultMaterial = material.GetEntityId() == fontAsset.material.GetEntityId() ? true : false;
         //        materialReferences[0].referenceCount = 0;
         //        m_MaterialReferenceLookup[materialHashCode] = 0;
 
@@ -522,7 +523,7 @@ namespace TMPro
             this.fontAsset = fontAsset;
             this.spriteAsset = spriteAsset;
             this.material = material;
-            this.isDefaultMaterial = material.GetInstanceID() == fontAsset.material.GetInstanceID();
+            this.isDefaultMaterial = material.GetEntityId() == fontAsset.material.GetEntityId();
             this.isFallbackMaterial = false;
             this.fallbackMaterial = null;
             this.padding = padding;
@@ -538,11 +539,11 @@ namespace TMPro
         /// <returns></returns>
         public static bool Contains(MaterialReference[] materialReferences, TMP_FontAsset fontAsset)
         {
-            int id = fontAsset.GetInstanceID();
+            EntityId id = fontAsset.GetEntityId();
 
             for (int i = 0; i < materialReferences.Length && materialReferences[i].fontAsset != null; i++)
             {
-                if (materialReferences[i].fontAsset.GetInstanceID() == id)
+                if (materialReferences[i].fontAsset.GetEntityId() == id)
                     return true;
             }
 
@@ -558,9 +559,10 @@ namespace TMPro
         /// <param name="materialReferences"></param>
         /// <param name="materialReferenceIndexLookup"></param>
         /// <returns></returns>
+        [Obsolete("AddMaterialReference(Material material, TMP_FontAsset fontAsset, ref MaterialReference[] materialReferences, Dictionary<int, int> materialReferenceIndexLookup) is obsolete, use AddMaterialReference(Material material, TMP_FontAsset fontAsset, ref MaterialReference[] materialReferences, Dictionary<int, int> materialReferenceIndexLookup) instead.", true)]
         public static int AddMaterialReference(Material material, TMP_FontAsset fontAsset, ref MaterialReference[] materialReferences, Dictionary<int, int> materialReferenceIndexLookup)
         {
-            int materialID = material.GetInstanceID();
+            int materialID = material.GetEntityId();
             int index;
 
             if (materialReferenceIndexLookup.TryGetValue(materialID, out index))
@@ -578,7 +580,41 @@ namespace TMPro
             materialReferences[index].fontAsset = fontAsset;
             materialReferences[index].spriteAsset = null;
             materialReferences[index].material = material;
-            materialReferences[index].isDefaultMaterial = materialID == fontAsset.material.GetInstanceID();
+            materialReferences[index].isDefaultMaterial = materialID == fontAsset.material.GetEntityId();
+            materialReferences[index].referenceCount = 0;
+
+            return index;
+        }
+
+        /// <summary>
+        /// Function to add a new material reference and returning its index in the material reference array.
+        /// </summary>
+        /// <param name="material"></param>
+        /// <param name="fontAsset"></param>
+        /// <param name="materialReferences"></param>
+        /// <param name="materialReferenceIndexLookup"></param>
+        /// <returns></returns>
+        public static int AddMaterialReference(Material material, TMP_FontAsset fontAsset, ref MaterialReference[] materialReferences, Dictionary<EntityId, int> materialReferenceIndexLookup)
+        {
+            EntityId materialID = material.GetEntityId();
+            int index;
+
+            if (materialReferenceIndexLookup.TryGetValue(materialID, out index))
+                return index;
+
+            index = materialReferenceIndexLookup.Count;
+
+            // Add new reference index
+            materialReferenceIndexLookup[materialID] = index;
+
+            if (index >= materialReferences.Length)
+                System.Array.Resize(ref materialReferences, Mathf.NextPowerOfTwo(index + 1));
+
+            materialReferences[index].index = index;
+            materialReferences[index].fontAsset = fontAsset;
+            materialReferences[index].spriteAsset = null;
+            materialReferences[index].material = material;
+            materialReferences[index].isDefaultMaterial = materialID == fontAsset.material.GetEntityId();
             materialReferences[index].referenceCount = 0;
 
             return index;
@@ -593,9 +629,42 @@ namespace TMPro
         /// <param name="materialReferences"></param>
         /// <param name="materialReferenceIndexLookup"></param>
         /// <returns></returns>
+        [Obsolete("AddMaterialReference(Material material, TMP_SpriteAsset spriteAsset, ref MaterialReference[] materialReferences, Dictionary<int, int> materialReferenceIndexLookup) is obsolete, use AddMaterialReference(Material material, TMP_SpriteAsset spriteAsset, ref MaterialReference[] materialReferences, Dictionary<int, int> materialReferenceIndexLookup) instead.", true )]
         public static int AddMaterialReference(Material material, TMP_SpriteAsset spriteAsset, ref MaterialReference[] materialReferences, Dictionary<int, int> materialReferenceIndexLookup)
         {
-            int materialID = material.GetInstanceID();
+            int materialID = material.GetEntityId();
+            int index;
+
+            if (materialReferenceIndexLookup.TryGetValue(materialID, out index))
+                return index;
+            index = materialReferenceIndexLookup.Count;
+            // Add new reference index
+            materialReferenceIndexLookup[materialID] = index;
+            if (index >= materialReferences.Length)
+                System.Array.Resize(ref materialReferences, Mathf.NextPowerOfTwo(index + 1));
+            materialReferences[index].index = index;
+            materialReferences[index].fontAsset = materialReferences[0].fontAsset;
+            materialReferences[index].spriteAsset = spriteAsset;
+            materialReferences[index].material = material;
+            materialReferences[index].isDefaultMaterial = true;
+            materialReferences[index].referenceCount = 0;
+            return index;
+        }
+
+
+
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="material"></param>
+        /// <param name="spriteAsset"></param>
+        /// <param name="materialReferences"></param>
+        /// <param name="materialReferenceIndexLookup"></param>
+        /// <returns></returns>
+        public static int AddMaterialReference(Material material, TMP_SpriteAsset spriteAsset, ref MaterialReference[] materialReferences, Dictionary<EntityId, int> materialReferenceIndexLookup)
+        {
+            EntityId materialID = material.GetEntityId();
             int index;
 
             if (materialReferenceIndexLookup.TryGetValue(materialID, out index))

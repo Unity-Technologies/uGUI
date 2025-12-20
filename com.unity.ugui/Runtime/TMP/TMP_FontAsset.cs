@@ -1240,9 +1240,9 @@ namespace TMPro
         }
 
         /// <summary>
-        /// HashSet of font asset instance ID used in the process of searching for through fallback font assets for a given character or characters.
+        /// HashSet of font asset entityId used in the process of searching for through fallback font assets for a given character or characters.
         /// </summary>
-        private static HashSet<int> k_SearchedFontAssetLookup;
+        private static HashSet<EntityId> k_SearchedFontAssetLookup;
 
         /// <summary>
         /// Function to check if a certain character exists in the font asset.
@@ -1287,12 +1287,12 @@ namespace TMPro
             {
                 // Initialize or clear font asset lookup
                 if (k_SearchedFontAssetLookup == null)
-                    k_SearchedFontAssetLookup = new HashSet<int>();
+                    k_SearchedFontAssetLookup = new HashSet<EntityId>();
                 else
                     k_SearchedFontAssetLookup.Clear();
 
                 // Add current font asset to lookup
-                k_SearchedFontAssetLookup.Add(GetInstanceID());
+                k_SearchedFontAssetLookup.Add(GetEntityId());
 
                 // Check font asset fallbacks
                 if (fallbackFontAssetTable != null && fallbackFontAssetTable.Count > 0)
@@ -1300,7 +1300,7 @@ namespace TMPro
                     for (int i = 0; i < fallbackFontAssetTable.Count && fallbackFontAssetTable[i] != null; i++)
                     {
                         TMP_FontAsset fallback = fallbackFontAssetTable[i];
-                        int fallbackID = fallback.GetInstanceID();
+                        EntityId fallbackID = fallback.GetEntityId();
 
                         // Search fallback if not already contained in lookup
                         if (k_SearchedFontAssetLookup.Add(fallbackID))
@@ -1317,7 +1317,7 @@ namespace TMPro
                     for (int i = 0; i < TMP_Settings.fallbackFontAssets.Count && TMP_Settings.fallbackFontAssets[i] != null; i++)
                     {
                         TMP_FontAsset fallback = TMP_Settings.fallbackFontAssets[i];
-                        int fallbackID = fallback.GetInstanceID();
+                        EntityId fallbackID = fallback.GetEntityId();
 
                         // Search fallback if not already contained in lookup
                         if (k_SearchedFontAssetLookup.Add(fallbackID))
@@ -1332,7 +1332,7 @@ namespace TMPro
                 if (TMP_Settings.defaultFontAsset != null)
                 {
                     TMP_FontAsset fallback = TMP_Settings.defaultFontAsset;
-                    int fallbackID = fallback.GetInstanceID();
+                    EntityId fallbackID = fallback.GetEntityId();
 
                     // Search fallback if it has not already been searched
                     if (k_SearchedFontAssetLookup.Add(fallbackID))
@@ -1388,7 +1388,7 @@ namespace TMPro
                 for (int i = 0; i < fallbackFontAssetTable.Count && fallbackFontAssetTable[i] != null; i++)
                 {
                     TMP_FontAsset fallback = fallbackFontAssetTable[i];
-                    int fallbackID = fallback.GetInstanceID();
+                    EntityId fallbackID = fallback.GetEntityId();
 
                     // Search fallback if it has not already been searched
                     if (k_SearchedFontAssetLookup.Add(fallbackID))
@@ -1472,12 +1472,12 @@ namespace TMPro
                 {
                     // Initialize or clear font asset lookup
                     if (k_SearchedFontAssetLookup == null)
-                        k_SearchedFontAssetLookup = new HashSet<int>();
+                        k_SearchedFontAssetLookup = new HashSet<EntityId>();
                     else
                         k_SearchedFontAssetLookup.Clear();
 
                     // Add current font asset to lookup
-                    k_SearchedFontAssetLookup.Add(GetInstanceID());
+                    k_SearchedFontAssetLookup.Add(GetEntityId());
 
                     // Check font asset fallbacks
                     if (fallbackFontAssetTable != null && fallbackFontAssetTable.Count > 0)
@@ -1485,7 +1485,7 @@ namespace TMPro
                         for (int j = 0; j < fallbackFontAssetTable.Count && fallbackFontAssetTable[j] != null; j++)
                         {
                             TMP_FontAsset fallback = fallbackFontAssetTable[j];
-                            int fallbackID = fallback.GetInstanceID();
+                            EntityId fallbackID = fallback.GetEntityId();
 
                             // Search fallback if it has not already been searched
                             if (k_SearchedFontAssetLookup.Add(fallbackID))
@@ -1505,7 +1505,7 @@ namespace TMPro
                         for (int j = 0; j < TMP_Settings.fallbackFontAssets.Count && TMP_Settings.fallbackFontAssets[j] != null; j++)
                         {
                             TMP_FontAsset fallback = TMP_Settings.fallbackFontAssets[j];
-                            int fallbackID = fallback.GetInstanceID();
+                            EntityId fallbackID = fallback.GetEntityId();
 
                             // Search fallback if it has not already been searched
                             if (k_SearchedFontAssetLookup.Add(fallbackID))
@@ -1523,7 +1523,7 @@ namespace TMPro
                     if (isMissingCharacter && TMP_Settings.defaultFontAsset != null)
                     {
                         TMP_FontAsset fallback = TMP_Settings.defaultFontAsset;
-                        int fallbackID = fallback.GetInstanceID();
+                        EntityId fallbackID = fallback.GetEntityId();
 
                         // Search fallback if it has not already been searched
                         if (k_SearchedFontAssetLookup.Add(fallbackID))
@@ -1640,10 +1640,10 @@ namespace TMPro
 
         // List and HashSet used for tracking font assets whose font atlas texture and character data needs updating.
         private static List<TMP_FontAsset> k_FontAssets_FontFeaturesUpdateQueue = new List<TMP_FontAsset>();
-        private static HashSet<int> k_FontAssets_FontFeaturesUpdateQueueLookup = new HashSet<int>();
+        private static HashSet<EntityId> k_FontAssets_FontFeaturesUpdateQueueLookup = new HashSet<EntityId>();
 
         private static List<Texture2D> k_FontAssets_AtlasTexturesUpdateQueue = new List<Texture2D>();
-        private static HashSet<int> k_FontAssets_AtlasTexturesUpdateQueueLookup = new HashSet<int>();
+        private static HashSet<EntityId> k_FontAssets_AtlasTexturesUpdateQueueLookup = new HashSet<EntityId>();
 
         /// <summary>
         ///
@@ -1651,9 +1651,9 @@ namespace TMPro
         /// <param name="fontAsset"></param>
         internal static void RegisterFontAssetForFontFeatureUpdate(TMP_FontAsset fontAsset)
         {
-            int instanceID = fontAsset.instanceID;
+            EntityId entityId = fontAsset.entityId;
 
-            if (k_FontAssets_FontFeaturesUpdateQueueLookup.Add(instanceID))
+            if (k_FontAssets_FontFeaturesUpdateQueueLookup.Add(entityId))
                 k_FontAssets_FontFeaturesUpdateQueue.Add(fontAsset);
         }
 
@@ -1683,9 +1683,9 @@ namespace TMPro
         /// <param name="texture">The texture on which to call Apply().</param>
         internal static void RegisterAtlasTextureForApply(Texture2D texture)
         {
-            int instanceID = texture.GetInstanceID();
+            EntityId entityId = texture.GetEntityId();
 
-            if (k_FontAssets_AtlasTexturesUpdateQueueLookup.Add(instanceID))
+            if (k_FontAssets_AtlasTexturesUpdateQueueLookup.Add(entityId))
                 k_FontAssets_AtlasTexturesUpdateQueue.Add(texture);
         }
 
@@ -2590,7 +2590,7 @@ namespace TMPro
 
             //        if (TMP_Settings.getFontFeaturesAtRuntime)
             //        {
-            //            if (k_FontAssetsToUpdateLookup.Add(instanceID))
+            //            if (k_FontAssetsToUpdateLookup.Add(entityId))
             //                k_FontAssetsToUpdate.Add(this);
             //        }
 

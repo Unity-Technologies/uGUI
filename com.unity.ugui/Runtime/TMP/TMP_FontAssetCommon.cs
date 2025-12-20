@@ -370,7 +370,7 @@ namespace TMPro
 
     public static class TMP_FontUtilities
     {
-        private static List<int> k_searchedFontAssets;
+        private static List<EntityId> k_searchedFontAssets;
 
         /// <summary>
         /// Search through the given font and its fallbacks for the specified character.
@@ -382,7 +382,7 @@ namespace TMPro
         public static TMP_FontAsset SearchForCharacter(TMP_FontAsset font, uint unicode, out TMP_Character character)
         {
             if (k_searchedFontAssets == null)
-                k_searchedFontAssets = new List<int>();
+                k_searchedFontAssets = new List<EntityId>();
 
             k_searchedFontAssets.Clear();
 
@@ -425,7 +425,7 @@ namespace TMPro
                     TMP_FontAsset temp = font.fallbackFontAssetTable[i];
                     if (temp == null) continue;
 
-                    int id = temp.GetInstanceID();
+                    EntityId id = temp.GetEntityId();
 
                     // Skip over the fallback font asset in the event it is null or if already searched.
                     if (k_searchedFontAssets.Contains(id)) continue;

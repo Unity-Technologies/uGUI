@@ -1,9 +1,13 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEditor;
 using NUnit.Framework;
+#if UNITY_6000_5_OR_NEWER
+using UnityEngine.Assemblies;
+#endif
 
 internal class InterceptedEventsPreviewTests
 {
@@ -39,7 +43,11 @@ internal class InterceptedEventsPreviewTests
 
     private static IEnumerable<Type> GetAccessibleTypesInLoadedAssemblies()
     {
+#if UNITY_6000_5_OR_NEWER
+        var assemblies = CurrentAssemblies.GetLoadedAssemblies().ToArray();
+#else
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+#endif
         for (var i = 0; i < assemblies.Length; ++i)
         {
             Type[] types;

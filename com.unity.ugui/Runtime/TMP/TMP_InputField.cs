@@ -2440,7 +2440,7 @@ namespace TMPro
                 m_VerticalScrollbar.value = m_ScrollPosition;
             }
 
-            //Debug.Log(GetInstanceID() + "- Scroll Position:" + m_ScrollPosition);
+            //Debug.Log(GetEntityId() + "- Scroll Position:" + m_ScrollPosition);
         }
 
         float GetScrollPositionRelativeToViewport()
@@ -3542,7 +3542,7 @@ namespace TMPro
 
                 m_VerticalScrollbar.value = GetScrollPositionRelativeToViewport();
 
-                //Debug.Log(GetInstanceID() + "- UpdateScrollbar() - Updating Scrollbar... Value: " + m_VerticalScrollbar.value);
+                //Debug.Log(GetEntityId() + "- UpdateScrollbar() - Updating Scrollbar... Value: " + m_VerticalScrollbar.value);
             }
         }
 
@@ -3565,7 +3565,7 @@ namespace TMPro
 
             m_ScrollPosition = value;
 
-            //Debug.Log(GetInstanceID() + "- OnScrollbarValueChange() - Scrollbar value is: " + value + "  Transform POS: " + m_TextComponent.rectTransform.anchoredPosition);
+            //Debug.Log(GetEntityId() + "- OnScrollbarValueChange() - Scrollbar value is: " + value + "  Transform POS: " + m_TextComponent.rectTransform.anchoredPosition);
         }
 
         void UpdateMaskRegions()

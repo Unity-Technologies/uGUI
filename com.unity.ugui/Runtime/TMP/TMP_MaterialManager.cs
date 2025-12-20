@@ -13,8 +13,10 @@ namespace TMPro
     {
         private static List<MaskingMaterial> m_materialList = new List<MaskingMaterial>();
 
-        private static Dictionary<long, FallbackMaterial> m_fallbackMaterials = new Dictionary<long, FallbackMaterial>();
-        private static Dictionary<int, long> m_fallbackMaterialLookup = new Dictionary<int, long>();
+        private static Dictionary<(EntityId, EntityId), FallbackMaterial> m_fallbackMaterials =
+            new Dictionary<(EntityId, EntityId), FallbackMaterial>();
+        private static Dictionary<EntityId, (EntityId, EntityId)> m_fallbackMaterialLookup =
+            new Dictionary<EntityId, (EntityId, EntityId)>();
         private static List<FallbackMaterial> m_fallbackCleanupList = new List<FallbackMaterial>();
 
         private static bool isFallbackListDirty;
@@ -49,12 +51,12 @@ namespace TMPro
                 return baseMaterial;
             }
 
-            int baseMaterialID = baseMaterial.GetInstanceID();
+            var baseMaterialID = baseMaterial.GetEntityId();
 
             // If baseMaterial already has a corresponding masking material, return it.
             for (int i = 0; i < m_materialList.Count; i++)
             {
-                if (m_materialList[i].baseMaterial.GetInstanceID() == baseMaterialID && m_materialList[i].stencilID == stencilID)
+                if (m_materialList[i].baseMaterial.GetEntityId() == baseMaterialID && m_materialList[i].stencilID == stencilID)
                 {
                     m_materialList[i].count += 1;
 
@@ -110,11 +112,11 @@ namespace TMPro
         /// <param name="stencilMaterial"></param>
         public static void ReleaseStencilMaterial(Material stencilMaterial)
         {
-            int stencilMaterialID = stencilMaterial.GetInstanceID();
+            var stencilMaterialID = stencilMaterial.GetEntityId();
 
             for (int i = 0; i < m_materialList.Count; i++)
             {
-                if (m_materialList[i].stencilMaterial.GetInstanceID() == stencilMaterialID)
+                if (m_materialList[i].stencilMaterial.GetEntityId() == stencilMaterialID)
                 {
                     if (m_materialList[i].count > 1)
                         m_materialList[i].count -= 1;
@@ -228,7 +230,7 @@ namespace TMPro
                 }
                 else
                 {
-                    Debug.Log("Removed last reference to " + m_materialList[index].stencilMaterial.name + " with ID " + m_materialList[index].stencilMaterial.GetInstanceID());
+                    Debug.Log("Removed last reference to " + m_materialList[index].stencilMaterial.name + " with ID " + m_materialList[index].stencilMaterial.GetEntityId());
                     Object.DestroyImmediate(m_materialList[index].stencilMaterial);
                     m_materialList.RemoveAt(index);
                 }
@@ -342,10 +344,10 @@ namespace TMPro
 
         internal static Material GetFallbackMaterial(TMP_FontAsset fontAsset, Material sourceMaterial, int atlasIndex)
         {
-            int sourceMaterialID = sourceMaterial.GetInstanceID();
+            var sourceMaterialID = sourceMaterial.GetEntityId();
             Texture tex = fontAsset.atlasTextures[atlasIndex];
-            int texID = tex.GetInstanceID();
-            long key = (long)sourceMaterialID << 32 | (long)(uint)texID;
+            var texID = tex.GetEntityId();
+            var key = (sourceMaterialID, texID);
             FallbackMaterial fallback;
 
             if (m_fallbackMaterials.TryGetValue(key, out fallback))
@@ -378,7 +380,7 @@ namespace TMPro
             fallback.count = 0;
 
             m_fallbackMaterials.Add(key, fallback);
-            m_fallbackMaterialLookup.Add(fallbackMaterial.GetInstanceID(), key);
+            m_fallbackMaterialLookup.Add(fallbackMaterial.GetEntityId(), key);
 
             #if TMP_DEBUG_MODE
             ListFallbackMaterials();
@@ -396,10 +398,10 @@ namespace TMPro
         /// <returns></returns>
         public static Material GetFallbackMaterial (Material sourceMaterial, Material targetMaterial)
         {
-            int sourceID = sourceMaterial.GetInstanceID();
-            Texture tex = targetMaterial.GetTexture(ShaderUtilities.ID_MainTex);
-            int texID = tex.GetInstanceID();
-            long key = (long)sourceID << 32 | (long)(uint)texID;
+            var sourceID = sourceMaterial.GetEntityId();
+            var tex = targetMaterial.GetTexture(ShaderUtilities.ID_MainTex);
+            var texID = tex.GetEntityId();
+            var key = (sourceID, texID);
             FallbackMaterial fallback;
 
             if (m_fallbackMaterials.TryGetValue(key, out fallback))
@@ -453,7 +455,7 @@ namespace TMPro
             fallback.count = 0;
 
             m_fallbackMaterials.Add(key, fallback);
-            m_fallbackMaterialLookup.Add(fallbackMaterial.GetInstanceID(), key);
+            m_fallbackMaterialLookup.Add(fallbackMaterial.GetEntityId(), key);
 
             #if TMP_DEBUG_MODE
             ListFallbackMaterials();
@@ -471,11 +473,10 @@ namespace TMPro
         {
             if (targetMaterial == null) return;
 
-            int sourceID = targetMaterial.GetInstanceID();
-            long key;
+            var sourceID = targetMaterial.GetEntityId();
 
             // Lookup key to retrieve
-            if (m_fallbackMaterialLookup.TryGetValue(sourceID, out key))
+            if (m_fallbackMaterialLookup.TryGetValue(sourceID, out var key))
             {
                 FallbackMaterial fallback;
                 if (m_fallbackMaterials.TryGetValue(key, out fallback))
@@ -495,11 +496,10 @@ namespace TMPro
         {
             if (targetMaterial == null) return;
 
-            int sourceID = targetMaterial.GetInstanceID();
-            long key;
+            var sourceID = targetMaterial.GetEntityId();
 
             // Lookup key to retrieve
-            if (m_fallbackMaterialLookup.TryGetValue(sourceID, out key))
+            if (m_fallbackMaterialLookup.TryGetValue(sourceID, out var key))
             {
                 FallbackMaterial fallback;
                 if (m_fallbackMaterials.TryGetValue(key, out fallback))
@@ -531,9 +531,8 @@ namespace TMPro
 
                     Material mat = fallback.fallbackMaterial;
                     m_fallbackMaterials.Remove(fallback.fallbackID);
-                    m_fallbackMaterialLookup.Remove(mat.GetInstanceID());
+                    m_fallbackMaterialLookup.Remove(mat.GetEntityId());
                     Object.DestroyImmediate(mat);
-                    mat = null;
                 }
             }
 
@@ -549,10 +548,8 @@ namespace TMPro
         {
             if (fallbackMaterial == null) return;
 
-            int materialID = fallbackMaterial.GetInstanceID();
-            long key;
-
-            if (m_fallbackMaterialLookup.TryGetValue(materialID, out key))
+            var materialID = fallbackMaterial.GetEntityId();
+            if (m_fallbackMaterialLookup.TryGetValue(materialID, out var key))
             {
                 FallbackMaterial fallback;
                 if (m_fallbackMaterials.TryGetValue(key, out fallback))
@@ -576,7 +573,7 @@ namespace TMPro
 
         private class FallbackMaterial
         {
-            public long fallbackID;
+            public (EntityId, EntityId) fallbackID;
             public Material sourceMaterial;
             internal int sourceMaterialCRC;
             public Material fallbackMaterial;
@@ -650,7 +647,7 @@ namespace TMPro
                 Material baseMaterial = m_materialList[i].baseMaterial;
                 Material stencilMaterial = m_materialList[i].stencilMaterial;
 
-                Debug.Log("Item #" + (i + 1) + " - Base Material is [" + baseMaterial.name + "] with ID " + baseMaterial.GetInstanceID() + " is associated with [" + (stencilMaterial != null ? stencilMaterial.name : "Null") + "] Stencil ID " + m_materialList[i].stencilID + " with ID " + (stencilMaterial != null ? stencilMaterial.GetInstanceID() : 0) + " and is referenced " + m_materialList[i].count + " time(s).");
+                Debug.Log("Item #" + (i + 1) + " - Base Material is [" + baseMaterial.name + "] with ID " + baseMaterial.GetEntityId() + " is associated with [" + (stencilMaterial != null ? stencilMaterial.name : "Null") + "] Stencil ID " + m_materialList[i].stencilID + " with ID " + (stencilMaterial != null ? stencilMaterial.GetEntityId() : EntityId.None) + " and is referenced " + m_materialList[i].count + " time(s).");
             }
         }
 
@@ -677,9 +674,9 @@ namespace TMPro
 
                 string output = "Item #" + (count++);
                 if (baseMaterial != null)
-                    output += " - Base Material is [" + baseMaterial.name + "] with ID " + baseMaterial.GetInstanceID();
+                    output += " - Base Material is [" + baseMaterial.name + "] with ID " + baseMaterial.GetEntityId();
                 if (fallbackMaterial != null)
-                    output += " is associated with [" + fallbackMaterial.name + "] with ID " + fallbackMaterial.GetInstanceID() + " and is referenced " + fallback.Value.count + " time(s).";
+                    output += " is associated with [" + fallbackMaterial.name + "] with ID " + fallbackMaterial.GetEntityId() + " and is referenced " + fallback.Value.count + " time(s).";
 
                 Debug.Log(output);
             }
@@ -688,4 +685,3 @@ namespace TMPro
     }
 
 }
-
