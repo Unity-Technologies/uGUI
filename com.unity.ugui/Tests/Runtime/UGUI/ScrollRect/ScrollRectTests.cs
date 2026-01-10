@@ -85,6 +85,9 @@ internal class ScrollRectTests : IPrebuildSetup
 
     [TestCase(true, ExpectedResult = null)]
     [TestCase(false, ExpectedResult = null)]
+#if ENABLE_IL2CPP
+    [Ignore("This test depends on using reflection to access the Count property in UnityEngine.CoreModule.  When targeting the il2cpp backend the property is stripped which leads to the test failing")]
+#endif
     public IEnumerator OnEnableShouldAddListeners(bool isHorizontal)
     {
         ScrollRect scrollRect = m_PrefabRoot.GetComponentInChildren<ScrollRect>();
@@ -108,6 +111,9 @@ internal class ScrollRectTests : IPrebuildSetup
 
     [TestCase(true, ExpectedResult = null)]
     [TestCase(false, ExpectedResult = null)]
+#if ENABLE_IL2CPP
+    [Ignore("This test depends on using reflection to access the Count property in UnityEngine.CoreModule.  When targeting the il2cpp backend the property is stripped which leads to the test failing")]
+#endif
     public IEnumerator OnDisableShouldRemoveListeners(bool isHorizontal)
     {
         ScrollRect scrollRect = m_PrefabRoot.GetComponentInChildren<ScrollRect>();
@@ -129,6 +135,9 @@ internal class ScrollRectTests : IPrebuildSetup
 
     [TestCase(true)]
     [TestCase(false)]
+#if ENABLE_IL2CPP
+    [Ignore("This test depends on using reflection to access the Count property in UnityEngine.CoreModule.  When targeting the il2cpp backend the property is stripped which leads to the test failing")]
+#endif
     public void SettingScrollbarShouldRemoveThenAddListeners(bool testHorizontal)
     {
         ScrollRect scrollRect = m_PrefabRoot.GetComponentInChildren<ScrollRect>();

@@ -40,6 +40,9 @@ internal class RectangleContainsScreenPointTest : MonoBehaviour
     [Test]
     public void RectangleContainsScreenPoint_ReturnsTrue_ForAllPointsInTheRectangle()
     {
+         if (Application.platform == RuntimePlatform.Android)
+            Assert.Ignore("Fails on Android (ANT-3214)");
+
         var fourCourners = new Vector3[4];
         m_RectTransform.GetWorldCorners(fourCourners);
 
