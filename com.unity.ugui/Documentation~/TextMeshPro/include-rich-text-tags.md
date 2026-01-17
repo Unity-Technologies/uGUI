@@ -28,7 +28,7 @@
 |[`<size>`](RichTextSize.md)|Adjusts the font size for a specified portion of the text.||
 |[`<smallcaps>`](RichTextLetterCase.md)|Converts text to uppercase before rendering.||
 |[`<space>`](RichTextSpace.md)|Adds a horizontal offset between itself and the rest of the text.||
-|[`<sprite>`](RichTextSprite.md)|Adds a [sprite](Srites.md) to the text.|By default, TextMesh Pro looks in the default sprite assets, but you can use tag attributes to retrieve sprites from other assets.|
+|[`<sprite>`](RichTextSprite.md)|Adds a [sprite](Sprites.md) to the text.|By default, TextMesh Pro looks in the default sprite assets, but you can use tag attributes to retrieve sprites from other assets.|
 |[`<strikethrough>`](RichTextStrikethroughUnderline.md)  | Draws a line slightly above the baseline so it crosses out the text.  ||
 |[`<style>`](RichTextStyle.md)|Applies a custom style to the text.||
 |[`<sub>`](RichTextSubSuper.md)|Converts the text to subscript.||
