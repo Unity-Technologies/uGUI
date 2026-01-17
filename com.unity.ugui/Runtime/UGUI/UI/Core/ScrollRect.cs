@@ -1051,8 +1051,8 @@ namespace UnityEngine.UI
             }
         }
 
-        private void SetHorizontalNormalizedPosition(float value) { SetNormalizedPosition(value, 0); }
-        private void SetVerticalNormalizedPosition(float value) { SetNormalizedPosition(value, 1); }
+        private void SetHorizontalNormalizedPosition(float value) { if(horizontalNormalizedPosition != value) SetNormalizedPosition(value, 0); }
+        private void SetVerticalNormalizedPosition(float value) { if(verticalNormalizedPosition != value) SetNormalizedPosition(value, 1); }
 
         /// <summary>
         /// >Set the horizontal or vertical scroll position as a value between 0 and 1, with 0 being at the left or at the bottom.
