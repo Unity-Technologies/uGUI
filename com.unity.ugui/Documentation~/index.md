@@ -14,7 +14,7 @@ Unity UI (uGUI) is a GameObject-based UI system that you can use to develop user
 | [Events](EventSystem.md) | The Event System sends events to objects in the application based on input. |
 | [Reference](UIReference.md) | Comprehensive guide to understanding of uGUI features. |
 | [UI How Tos](UIHowTos.md) | Solutions to common UI tasks. |
-| [UI and UI Details Profiler](ProfilerUI.md) | Use the UI and UI Details Profiler modules to understand how Unity handles UI batching for your application. |
+| [UI (Canvas) and UI Details (Canvas) Profiler](ProfilerUI.md) | Use the UI (Canvas) and UI Details (Canvas) Profiler modules to understand how uGUI handles UI batching for your application. |
 
 > [!NOTE]
 > You can't use uGUI to create or change user interfaces of the Unity Editor.
