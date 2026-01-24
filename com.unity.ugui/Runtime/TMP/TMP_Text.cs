@@ -2201,6 +2201,7 @@ namespace TMPro
                 InsertOpeningStyleTag(m_TextStyle, ref m_TextProcessingArray, ref writeIndex);
 
             tag_NoParsing = false;
+            bool wasAnchorElementStyleApplied = false;
 
             int readIndex = 0;
             for (; readIndex < srcLength; readIndex++)
@@ -2341,8 +2342,12 @@ namespace TMPro
                             continue;
                         case MarkupTag.A:
                             // Additional check
-                            if (m_TextBackingArray.Count > readIndex + 4 && m_TextBackingArray[readIndex + 3] == 'h' && m_TextBackingArray[readIndex + 4] == 'r')
+                            if (m_TextBackingArray.Count > readIndex + 4 && m_TextBackingArray[readIndex + 3] == 'h' &&
+                                m_TextBackingArray[readIndex + 4] == 'r')
+                            {
                                 InsertOpeningTextStyle(GetStyle((int)MarkupTag.A), ref m_TextProcessingArray, ref writeIndex);
+                                wasAnchorElementStyleApplied = true;
+                            }
                             break;
                         case MarkupTag.STYLE:
                             if (tag_NoParsing) break;
@@ -2362,7 +2367,11 @@ namespace TMPro
                             }
                             break;
                         case MarkupTag.SLASH_A:
-                            InsertClosingTextStyle(GetStyle((int)MarkupTag.A), ref m_TextProcessingArray, ref writeIndex);
+                            if (wasAnchorElementStyleApplied)
+                            {
+                                InsertClosingTextStyle(GetStyle((int)MarkupTag.A), ref m_TextProcessingArray, ref writeIndex);
+                                wasAnchorElementStyleApplied = false;
+                            }
                             break;
                         case MarkupTag.SLASH_STYLE:
                             if (tag_NoParsing) break;
@@ -6797,13 +6806,6 @@ namespace TMPro
             return value;
         }
 
-        void ClearMarkupTagAttributes()
-        {
-            int length = m_xmlAttribute.Length;
-            for (int i = 0; i < length; i++)
-                m_xmlAttribute[i] = new RichTextTagAttribute();
-        }
-
         /// <summary>
         /// Function to identify and validate the rich tag. Returns the position of the > if the tag was valid.
         /// </summary>
@@ -6816,10 +6818,15 @@ namespace TMPro
             int tagCharCount = 0;
             byte attributeFlag = 0;
 
-            int attributeIndex = 0;
-            ClearMarkupTagAttributes();
+            // Reset the first element of the array
+            m_xmlAttribute[0] = RichTextTagAttribute.Default;
+
             TagValueType tagValueType = TagValueType.None;
             TagUnitType tagUnitType = TagUnitType.Pixels;
+
+            // Cache reference to markupAttribute
+            int attributeIndex = 0;
+            ref RichTextTagAttribute markupAttribute = ref m_xmlAttribute[attributeIndex];
 
             endIndex = startIndex;
             bool isTagSet = false;
@@ -6848,30 +6855,30 @@ namespace TMPro
                         if (unicode == '+' || unicode == '-' || unicode == '.' || (unicode >= '0' && unicode <= '9'))
                         {
                             tagUnitType = TagUnitType.Pixels;
-                            tagValueType = m_xmlAttribute[attributeIndex].valueType = TagValueType.NumericalValue;
-                            m_xmlAttribute[attributeIndex].valueStartIndex = tagCharCount - 1;
-                            m_xmlAttribute[attributeIndex].valueLength += 1;
+                            tagValueType = markupAttribute.valueType = TagValueType.NumericalValue;
+                            markupAttribute.valueStartIndex = tagCharCount - 1;
+                            markupAttribute.valueLength += 1;
                         }
                         else if (unicode == '#')
                         {
                             tagUnitType = TagUnitType.Pixels;
-                            tagValueType = m_xmlAttribute[attributeIndex].valueType = TagValueType.ColorValue;
-                            m_xmlAttribute[attributeIndex].valueStartIndex = tagCharCount - 1;
-                            m_xmlAttribute[attributeIndex].valueLength += 1;
+                            tagValueType = markupAttribute.valueType = TagValueType.ColorValue;
+                            markupAttribute.valueStartIndex = tagCharCount - 1;
+                            markupAttribute.valueLength += 1;
                         }
                         else if (unicode == '"')
                         {
                             tagUnitType = TagUnitType.Pixels;
-                            tagValueType = m_xmlAttribute[attributeIndex].valueType = TagValueType.StringValue;
-                            m_xmlAttribute[attributeIndex].valueStartIndex = tagCharCount;
+                            tagValueType = markupAttribute.valueType = TagValueType.StringValue;
+                            markupAttribute.valueStartIndex = tagCharCount;
                         }
                         else
                         {
                             tagUnitType = TagUnitType.Pixels;
-                            tagValueType = m_xmlAttribute[attributeIndex].valueType = TagValueType.StringValue;
-                            m_xmlAttribute[attributeIndex].valueStartIndex = tagCharCount - 1;
-                            m_xmlAttribute[attributeIndex].valueHashCode = (m_xmlAttribute[attributeIndex].valueHashCode << 5) + m_xmlAttribute[attributeIndex].valueHashCode ^ TMP_TextUtilities.ToUpperFast((char)unicode);
-                            m_xmlAttribute[attributeIndex].valueLength += 1;
+                            tagValueType = markupAttribute.valueType = TagValueType.StringValue;
+                            markupAttribute.valueStartIndex = tagCharCount - 1;
+                            markupAttribute.valueHashCode = (markupAttribute.valueHashCode << 5) + markupAttribute.valueHashCode ^ TMP_TextUtilities.ToUpperFast((char)unicode);
+                            markupAttribute.valueLength += 1;
                         }
                     }
                     else
@@ -6887,48 +6894,40 @@ namespace TMPro
                                 switch (unicode)
                                 {
                                     case 'e':
-                                        m_xmlAttribute[attributeIndex].unitType = tagUnitType = TagUnitType.FontUnits;
+                                        markupAttribute.unitType = tagUnitType = TagUnitType.FontUnits;
                                         break;
                                     case '%':
-                                        m_xmlAttribute[attributeIndex].unitType = tagUnitType = TagUnitType.Percentage;
+                                        markupAttribute.unitType = tagUnitType = TagUnitType.Percentage;
                                         break;
                                     default:
-                                        m_xmlAttribute[attributeIndex].unitType = tagUnitType = TagUnitType.Pixels;
+                                        markupAttribute.unitType = tagUnitType = TagUnitType.Pixels;
                                         break;
                                 }
 
                                 attributeIndex += 1;
-                                m_xmlAttribute[attributeIndex].nameHashCode = 0;
-                                m_xmlAttribute[attributeIndex].valueHashCode = 0;
-                                m_xmlAttribute[attributeIndex].valueType = TagValueType.None;
-                                m_xmlAttribute[attributeIndex].unitType = TagUnitType.Pixels;
-                                m_xmlAttribute[attributeIndex].valueStartIndex = 0;
-                                m_xmlAttribute[attributeIndex].valueLength = 0;
-
+                                markupAttribute = ref m_xmlAttribute[attributeIndex];
+                                markupAttribute = RichTextTagAttribute.Default;
                             }
                             else
                             {
-                                m_xmlAttribute[attributeIndex].valueLength += 1;
+                                markupAttribute.valueLength += 1;
                             }
                         }
                         else if (tagValueType == TagValueType.ColorValue)
                         {
                             if (unicode != ' ')
                             {
-                                m_xmlAttribute[attributeIndex].valueLength += 1;
+                                markupAttribute.valueLength += 1;
                             }
                             else
                             {
                                 attributeFlag = 2;
                                 tagValueType = TagValueType.None;
                                 tagUnitType = TagUnitType.Pixels;
+
                                 attributeIndex += 1;
-                                m_xmlAttribute[attributeIndex].nameHashCode = 0;
-                                m_xmlAttribute[attributeIndex].valueType = TagValueType.None;
-                                m_xmlAttribute[attributeIndex].unitType = TagUnitType.Pixels;
-                                m_xmlAttribute[attributeIndex].valueHashCode = 0;
-                                m_xmlAttribute[attributeIndex].valueStartIndex = 0;
-                                m_xmlAttribute[attributeIndex].valueLength = 0;
+                                markupAttribute = ref m_xmlAttribute[attributeIndex];
+                                markupAttribute = RichTextTagAttribute.Default;
                             }
                         }
                         else if (tagValueType == TagValueType.StringValue)
@@ -6936,28 +6935,24 @@ namespace TMPro
                             // Compute HashCode value for the named tag.
                             if (unicode != '"')
                             {
-                                m_xmlAttribute[attributeIndex].valueHashCode = (m_xmlAttribute[attributeIndex].valueHashCode << 5) + m_xmlAttribute[attributeIndex].valueHashCode ^ TMP_TextUtilities.ToUpperFast((char)unicode);
-                                m_xmlAttribute[attributeIndex].valueLength += 1;
+                                markupAttribute.valueHashCode = (markupAttribute.valueHashCode << 5) + markupAttribute.valueHashCode ^ TMP_TextUtilities.ToUpperFast((char)unicode);
+                                markupAttribute.valueLength += 1;
                             }
                             else
                             {
                                 attributeFlag = 2;
                                 tagValueType = TagValueType.None;
                                 tagUnitType = TagUnitType.Pixels;
+
                                 attributeIndex += 1;
-                                m_xmlAttribute[attributeIndex].nameHashCode = 0;
-                                m_xmlAttribute[attributeIndex].valueType = TagValueType.None;
-                                m_xmlAttribute[attributeIndex].unitType = TagUnitType.Pixels;
-                                m_xmlAttribute[attributeIndex].valueHashCode = 0;
-                                m_xmlAttribute[attributeIndex].valueStartIndex = 0;
-                                m_xmlAttribute[attributeIndex].valueLength = 0;
+                                markupAttribute = ref m_xmlAttribute[attributeIndex];
+                                markupAttribute = RichTextTagAttribute.Default;
                             }
                         }
                     }
                 }
 
-
-                if (unicode == '=') // '='
+                if (attributeFlag == 0 && unicode == '=') // '='
                     attributeFlag = 1;
 
                 // Compute HashCode for the name of the attribute
@@ -6970,22 +6965,24 @@ namespace TMPro
 
                     tagValueType = TagValueType.None;
                     tagUnitType = TagUnitType.Pixels;
+
                     attributeIndex += 1;
-                    m_xmlAttribute[attributeIndex].nameHashCode = 0;
-                    m_xmlAttribute[attributeIndex].valueType = TagValueType.None;
-                    m_xmlAttribute[attributeIndex].unitType = TagUnitType.Pixels;
-                    m_xmlAttribute[attributeIndex].valueHashCode = 0;
-                    m_xmlAttribute[attributeIndex].valueStartIndex = 0;
-                    m_xmlAttribute[attributeIndex].valueLength = 0;
+                    markupAttribute = ref m_xmlAttribute[attributeIndex];
+                    markupAttribute = RichTextTagAttribute.Default;
                 }
 
                 if (attributeFlag == 0)
-                    m_xmlAttribute[attributeIndex].nameHashCode = (m_xmlAttribute[attributeIndex].nameHashCode << 5) + m_xmlAttribute[attributeIndex].nameHashCode ^ TMP_TextUtilities.ToUpperFast((char)unicode);
+                    markupAttribute.nameHashCode = (markupAttribute.nameHashCode << 5) + markupAttribute.nameHashCode ^ TMP_TextUtilities.ToUpperFast((char)unicode);
 
                 if (attributeFlag == 2 && unicode == ' ')
                     attributeFlag = 0;
 
             }
+
+            // Terminate markupAttribute array
+            int terminalIndex = attributeIndex + 1;
+            if (terminalIndex < m_xmlAttribute.Length)
+                m_xmlAttribute[terminalIndex] = RichTextTagAttribute.Default;
 
             if (!isValidHtmlTag)
             {
@@ -7594,9 +7591,12 @@ namespace TMPro
                         {
                             int index = m_textInfo.linkCount;
 
-                            m_textInfo.linkInfo[index].linkTextLength = m_characterCount - m_textInfo.linkInfo[index].linkTextfirstCharacterIndex;
+                            if (index < m_textInfo.linkInfo.Length)
+                            {
+                                m_textInfo.linkInfo[index].linkTextLength = m_characterCount - m_textInfo.linkInfo[index].linkTextfirstCharacterIndex;
 
-                            m_textInfo.linkCount += 1;
+                                m_textInfo.linkCount += 1;
+                            }
                         }
                         return true;
                     case MarkupTag.LINK:

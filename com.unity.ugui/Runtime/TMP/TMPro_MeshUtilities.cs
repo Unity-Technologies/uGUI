@@ -449,7 +449,7 @@ namespace TMPro
         public int hashCode;
     }
 
-    internal struct RichTextTagAttribute
+    struct RichTextTagAttribute
     {
         public int nameHashCode;
         public int valueHashCode;
@@ -457,6 +457,14 @@ namespace TMPro
         public int valueStartIndex;
         public int valueLength;
         public TagUnitType unitType;
+
+        public static RichTextTagAttribute Default => k_Default;
+
+        static readonly RichTextTagAttribute k_Default = new ()
+        {
+            valueType = TagValueType.None,
+            unitType = TagUnitType.Pixels
+        };
     }
 
 }
