@@ -24,7 +24,7 @@ namespace UnityEngine.UIElements
         /// The camera used by this Raycaster to convert screen coordinates to Rays.
         /// If empty, Camera.main is going to be used.
         /// </summary>
-        public new Camera camera
+        public Camera camera
         {
             get => m_EventCamera;
             set => m_EventCamera = value;

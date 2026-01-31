@@ -598,7 +598,7 @@ namespace UnityEngine.UIElements
                     if (capturingElement != null && capturingElement.panel != panel)
                         return false;
 
-                    elementTarget = capturingElement ?? elementUnderPointer ?? PanelComponentUtils.GetRootVisualElement(panelComponent);
+                    elementTarget = capturingElement ?? elementUnderPointer ?? panelComponent.GetRootVisualElement();
                     panelPosition = GetPanelPosition(elementTarget, panelComponent, worldRay);
                 }
 

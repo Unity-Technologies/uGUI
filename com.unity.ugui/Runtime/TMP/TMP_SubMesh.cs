@@ -133,7 +133,7 @@ namespace TMPro
         /// <summary>
         /// The Mesh Renderer of this text sub object.
         /// </summary>
-        public new Renderer renderer
+        public Renderer renderer
         {
             get { if (m_renderer == null) m_renderer = GetComponent<Renderer>();
 

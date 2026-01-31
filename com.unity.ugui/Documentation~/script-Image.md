@@ -8,14 +8,19 @@ The **Image** control displays a non-interactive image to the user. You can use 
 
 ![](images/UI_ImageInspector.png)
 
-|**Property:** |**Function:** |
-|:---|:---|
-|**Source Image** | The Texture that represents the image to display (which must be imported as a [Sprite](https://docs.unity3d.com/Manual/class-TextureImporter.html)). |
-|**Color** | The color to apply to the image. |
-|**Material** | The [Material](https://docs.unity3d.com/Manual/class-Material.html) to use for rendering the image. |
-|**Raycast Target** | Enable **Raycast Target** if you want Unity to consider the image a target for raycasting. |
-|**Preserve Aspect** | Ensure the image retains its existing dimension.  |
-|**Set Native Size** |  Set the dimensions of the image box to the original pixel size of the Texture. |
+| **Property:**       | **Function:**                                                                                                                                        |
+|:--------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Source Image**    | The Texture that represents the image to display (which must be imported as a [Sprite](https://docs.unity3d.com/Manual/class-TextureImporter.html)). |
+| **Color**           | The color to apply to the image.                                                                                                                     |
+| **Material**        | The [Material](https://docs.unity3d.com/Manual/class-Material.html) to use for rendering the image.                                                  |
+| **Raycast Target**  | Enable **Raycast Target** if you want Unity to consider the image a target for raycasting.                                                           |
+| **Raycast Padding** | Space added to the [RectTransform](class-RectTransform.md) for raycasting.                                                                           |
+| **Maskable**        | Enable **Maskable** to allow [Masks](script-Mask.md) to hide this object.                                                                            |
+| **Image Type**      | Controls how to display the image. For detailed information on each Image Type, refer to [UIVisualComponents](UIVisualComponents.md).                |
 
+<!--
+| **Preserve Aspect** | Ensure the image retains its existing dimension.                                                                                                     |
+| **Set Native Size** | Set the dimensions of the image box to the original pixel size of the Texture.                                                                       |
+-->
 
 You must import the image to display as a [Sprite](https://docs.unity3d.com/Manual/class-TextureImporter.html) to work with the Image control.

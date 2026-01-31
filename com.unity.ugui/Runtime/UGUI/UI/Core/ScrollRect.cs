@@ -415,7 +415,7 @@ namespace UnityEngine.UI
         private ScrollRectEvent m_OnValueChanged = new ScrollRectEvent();
 
         /// <summary>
-        /// Callback executed when the position of the child changes.
+        /// Callback executed when the position of the child changes. Provides the normalized position as a Vector2.
         /// </summary>
         /// <remarks>
         /// onValueChanged is used to watch for changes in the ScrollRect object.
