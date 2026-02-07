@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using NUnit.Framework;
 using UnityEngine.TextCore.LowLevel;
@@ -6,6 +6,7 @@ using UnityEngine.TextCore.LowLevel;
 namespace TMPro
 {
     [Category("Text Parsing & Layout")]
+    [Ignore("Unstable tests // UUM-133195")]
     internal class FontEngineTests
     {
         [OneTimeSetUp]

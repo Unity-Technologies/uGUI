@@ -337,7 +337,7 @@ namespace TMPro.EditorUtilities
 
         private static void CreateEventSystem(bool select, GameObject parent)
         {
-            var esys = Object.FindFirstObjectByType<EventSystem>();
+            var esys = Object.FindAnyObjectByType<EventSystem>();
             if (esys == null)
             {
                 var eventSystem = ObjectFactory.CreateGameObject("EventSystem");
