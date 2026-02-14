@@ -327,7 +327,7 @@ namespace UnityEngine.EventSystems
         // This code is disabled unless the com.unity.modules.uielements module is present.
         // The UIElements module is always present in the Editor but it can be stripped from a project build if unused.
 #if PACKAGE_UITOOLKIT
-        [SerializeField, HideInInspector] private UIToolkitInteroperabilityBridge m_UIToolkitInterop = new ();
+        private UIToolkitInteroperabilityBridge m_UIToolkitInterop = new ();
 
         /// <summary>
         /// Use this property to initialize UI Toolkit interoperability with uGUI events.

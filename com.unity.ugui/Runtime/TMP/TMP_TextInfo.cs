@@ -27,11 +27,17 @@ namespace TMPro
 
         public int materialCount;
 
+        [NonSerialized]
         public TMP_CharacterInfo[] characterInfo;
+        [NonSerialized]
         public TMP_WordInfo[] wordInfo;
+        [NonSerialized]
         public TMP_LinkInfo[] linkInfo;
+        [NonSerialized]
         public TMP_LineInfo[] lineInfo;
+        [NonSerialized]
         public TMP_PageInfo[] pageInfo;
+        [NonSerialized]
         public TMP_MeshInfo[] meshInfo;
 
         private TMP_MeshInfo[] m_CachedMeshInfo;

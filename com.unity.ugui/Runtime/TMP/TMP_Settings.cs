@@ -413,7 +413,7 @@ namespace TMPro
                 return instance.m_linebreakingRules;
             }
         }
-        [SerializeField]
+
         private LineBreakingTable m_linebreakingRules;
 
         // TODO : Potential new feature to explore where multiple font assets share the same atlas texture.

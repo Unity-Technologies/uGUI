@@ -188,7 +188,7 @@ namespace UnityEngine.UI
 
                 if (currentEventCamera != null)
                 {
-                    float projectionDirection = ray.direction.z;
+                    float projectionDirection = Vector3.Dot(ray.direction, currentEventCamera.transform.forward);
                     distanceToClipPlane = Mathf.Approximately(0.0f, projectionDirection)
                         ? Mathf.Infinity
                         : Mathf.Abs((currentEventCamera.farClipPlane - currentEventCamera.nearClipPlane) / projectionDirection);
