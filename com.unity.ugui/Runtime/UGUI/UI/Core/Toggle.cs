@@ -199,7 +199,7 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Whether the toggle is currently active.
+        /// Whether the toggle is currently on.
         /// </summary>
         /// <example>
         /// <code>
