@@ -19,18 +19,19 @@ namespace UnityEditor.UI
             RawImage = 2002,
             Panel = 2003,
             // 2020 - Button (TMP)
-            Toggle = 2021,
+            Toggle = 2101,
             // 2022 - Dropdown (TMP)
             // 2023 - Input Field (TMP)
-            Slider = 2024,
-            Scrollbar = 2025,
-            ScrollView = 2026,
-            Canvas = 2060,
-            EventSystem = 2061,
-            Text = 2080,
-            Button = 2081,
-            Dropdown = 2082,
-            InputField = 2083,
+            Slider = 2104,
+            Scrollbar = 2105,
+            ScrollView = 2106,
+            RaycastReceiver = 2210,
+            Canvas = 2300,
+            EventSystem = 2301,
+            Text = 2400,
+            Button = 2401,
+            Dropdown = 2402,
+            InputField = 2403,
         };
 
         private const string kUILayerName = "UI";
@@ -329,6 +330,15 @@ namespace UnityEditor.UI
             GameObject go;
             using (new FactorySwapToEditor())
                 go = DefaultControls.CreateInputField(GetStandardResources());
+            PlaceUIElementRoot(go, menuCommand);
+        }
+
+        [MenuItem("GameObject/UI (Canvas)/Raycast Receiver", false, (int)MenuOptionsPriorityOrder.RaycastReceiver)]
+        public static void AddRaycastReceiver(MenuCommand menuCommand)
+        {
+            GameObject go;
+            using (new FactorySwapToEditor())
+                go = DefaultControls.CreateRaycastReceiver(GetStandardResources());
             PlaceUIElementRoot(go, menuCommand);
         }
 

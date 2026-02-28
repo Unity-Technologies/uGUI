@@ -800,5 +800,21 @@ namespace UnityEngine.UI
 
             return root;
         }
+
+        /// <summary>
+        /// Creates a Raycast Receiver that can block raycasts for detection.
+        /// </summary>
+        /// <remarks>
+        /// Hierarchy:
+        /// (root)
+        ///  |_ RaycastReceiver
+        /// </remarks>
+        /// <param name="resources">The resources to use for creation.</param>
+        /// <returns>The root GameObject of the created element.</returns>
+        public static GameObject CreateRaycastReceiver(Resources resources)
+        {
+            GameObject go = CreateUIElementRoot("Raycast Receiver", s_ImageElementSize, typeof(RaycastReceiver));
+            return go;
+        }
     }
 }

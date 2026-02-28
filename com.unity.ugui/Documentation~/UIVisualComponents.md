@@ -38,6 +38,12 @@ The Image component takes a sprite but **Raw Image** takes a texture (no borders
 
 A Mask is not a visible UI control but rather a way to modify the appearance of a control’s child elements. The mask restricts (ie, “masks”) the child elements to the shape of the parent. So, if the child is larger than the parent then only the part of the child that fits within the parent will be visible.
 
+## Raycast Receiver
+
+![](images/UI_RaycastReceiverEditor.png)
+
+The Raycast Receiver is a non-visual component that intercepts raycasts from the Graphic Raycaster to detect or block pointer events like clicks and touches. Use it to define interactive zones on the Canvas without rendering any visible geometry, offering better performance than with a transparent image. You can toggle the Raycast Target property to enable or disable input interception, and use Raycast Padding to adjust the hit-test area relative to the RectTransform bounds.
+
 ## Effects
 
 Visual components can also have various simple effects applied, such as a simple drop shadow or outline. See the [UI Effects](comp-UIEffects.md) reference page for more information.
