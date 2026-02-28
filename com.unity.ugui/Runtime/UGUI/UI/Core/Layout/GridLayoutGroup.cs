@@ -120,6 +120,26 @@ namespace UnityEngine.UI
         /// </summary>
         public int constraintCount { get { return m_ConstraintCount; } set { SetProperty(ref m_ConstraintCount, Mathf.Max(1, value)); } }
 
+        /// <summary>
+        /// The number of rows that the layout group generates after the layout process is complete.
+        /// </summary>
+        /// <remarks>
+        /// The layout system sets this value to `0` if there are no child GameObjects participating in layout.
+        /// When you set <see cref="constraint"/> to <see cref="Constraint.FixedRowCount"/>, this value is equal
+        /// to the minimum of <see cref="constraintCount"/> and the number of child GameObjects.
+        /// </remarks>
+        public int generatedRowCount { get; private set; }
+
+        /// <summary>
+        /// The number of columns that the layout group generates after the layout process is complete.
+        /// </summary>
+        /// <remarks>
+        /// The layout system sets this value to `0` if there are no child GameObjects participating in layout.
+        /// When you set <see cref="constraint"/> to <see cref="Constraint.FixedColumnCount"/>, this value is equal
+        /// to the minimum of <see cref="constraintCount"/> and the number of child GameObjects.
+        /// </remarks>
+        public int generatedColumnCount { get; private set; }
+
         protected GridLayoutGroup()
         {}
 
@@ -194,6 +214,7 @@ namespace UnityEngine.UI
         /// </summary>
         public override void SetLayoutHorizontal()
         {
+            ResetGeneratedCounts();
             SetCellsAlongAxis(0);
         }
 
@@ -349,6 +370,19 @@ namespace UnityEngine.UI
                 SetChildAlongAxis(rectChildren[i], 0, startOffset.x + (cellSize[0] + spacing[0]) * positionX, cellSize[0]);
                 SetChildAlongAxis(rectChildren[i], 1, startOffset.y + (cellSize[1] + spacing[1]) * positionY, cellSize[1]);
             }
+
+            generatedRowCount = actualCellCountY;
+            generatedColumnCount = actualCellCountX;
+        }
+
+        /// <summary>
+        /// Resets <see cref="generatedRowCount"/> and <see cref="generatedColumnCount"/> to default values.
+        /// </summary>
+        /// <exclude />
+        private void ResetGeneratedCounts()
+        {
+            generatedRowCount = 0;
+            generatedColumnCount = 0;
         }
     }
 }

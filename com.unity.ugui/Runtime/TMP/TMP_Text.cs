@@ -1368,14 +1368,29 @@ namespace TMPro
         // *** Unity Event Handling ***
 
         /// <summary>
-        /// Event delegate to allow custom loading of TMP_FontAsset when using the <font="Font Asset Name"> tag.
+        /// Event delegate to allow custom loading of font assets and resources required to display the requested character.
+        /// </summary>
+        public static event Func<uint, TMP_Text, TMP_FontAsset> OnCharacterRequest;
+
+        /// <summary>
+        /// Event delegate to allow custom loading of TMP_FontAsset when using the &lt;font="Font Asset Name"&gt; tag.
         /// </summary>
         public static event Func<int, string, TMP_FontAsset> OnFontAssetRequest;
 
         /// <summary>
-        /// Event delegate to allow custom loading of TMP_SpriteAsset when using the <sprite="Sprite Asset Name"> tag.
+        /// Event delegate to allow custom loading of Material when using the &lt;font="Font Asset Name" material="Material Name"&gt; tag.
+        /// </summary>
+        public static event Func<int, string, Material> OnFontMaterialRequest;
+
+        /// <summary>
+        /// Event delegate to allow custom loading of TMP_SpriteAsset when using the &lt;sprite="Sprite Asset Name"&gt; tag.
         /// </summary>
         public static event Func<int, string, TMP_SpriteAsset> OnSpriteAssetRequest;
+
+        /// <summary>
+        /// Event delegate to allow custom loading of TMP_ColorGradient when using the &lt;gradient="Gradient Name"&gt; tag.
+        /// </summary>
+        public static event Func<int, string, TMP_ColorGradient> OnColorGradientAssetRequest;
 
         /// <summary>
         /// Delegate for the OnMissingCharacter event called when the requested Unicode character is missing from the font asset.
@@ -6273,6 +6288,21 @@ namespace TMPro
                     return spriteCharacter;
             }
 
+            // Callback to allow loading font assets and resources based on requested character.
+            TMP_FontAsset tempFontAsset = OnCharacterRequest?.Invoke(unicode, this);
+            if (tempFontAsset != null)
+            {
+                character = TMP_FontAssetUtilities.GetCharacterFromFontAsset(unicode, tempFontAsset, true, fontStyle, fontWeight, out isUsingAlternativeTypeface);
+
+                if (character != null)
+                {
+                    // Add character to font asset lookup cache
+                    fontAsset.AddCharacterToLookupCache(unicode, character, fontStyle, fontWeight, isUsingAlternativeTypeface);
+
+                    return character;
+                }
+            }
+
             return null;
         }
 
@@ -6805,6 +6835,63 @@ namespace TMPro
 
             return value;
         }
+
+
+        private bool TryLoadAsset<TAsset>(int assetHashCode, string assetName, string defaultResourcePath, Func<int, string, TAsset> assetRequest, out TAsset asset)
+            where TAsset : UnityEngine.Object
+        {
+            // Check for anyone registered to this callback
+            asset = assetRequest?.Invoke(assetHashCode, assetName);
+
+            if (asset == null)
+            {
+                // Load resource
+                asset = Resources.Load<TAsset>(defaultResourcePath + assetName);
+                return asset != null;
+            }
+
+            return true;
+        }
+
+        void SetCurrentFontMaterialFromAttributes (RichTextTagAttribute[] attributes)
+        {
+            // Assign default material
+            m_currentMaterial = m_currentFontAsset.material;
+
+            for (int i = 1; i < attributes.Length; i++)
+            {
+                ref readonly RichTextTagAttribute attribute = ref attributes[i];
+
+                // Early-continue: skip everything except the material attribute
+                if (attribute.nameHashCode != (int)MarkupTag.MATERIAL)
+                    continue;
+
+                int materialHashCode = attribute.valueHashCode;
+
+                // Check for potential cached reference to this material
+                if (MaterialReferenceManager.TryGetMaterial(materialHashCode, out Material tempMaterial))
+                {
+                    m_currentMaterial = tempMaterial;
+                    break;
+                }
+
+                // Try loading requested material from potential delegate or resources.
+                string materialName = new string(m_htmlTag, attribute.valueStartIndex, attribute.valueLength);
+
+                // Try loading requested material from potential delegate or resources.
+                if (!TryLoadAsset(materialHashCode, materialName, TMP_Settings.defaultFontAssetPath, OnFontMaterialRequest, out tempMaterial))
+                    break;
+
+                // Add new reference to this material in the MaterialReferenceManager
+                MaterialReferenceManager.AddFontMaterial(materialHashCode, tempMaterial);
+                m_currentMaterial = tempMaterial;
+                break;
+            }
+
+            m_currentMaterialIndex = MaterialReference.AddMaterialReference(m_currentMaterial, m_currentFontAsset, ref m_materialReferences, m_materialReferenceIndexLookup);
+            m_materialReferenceStack.Add(m_materialReferences[m_currentMaterialIndex]);
+        }
+
 
         /// <summary>
         /// Function to identify and validate the rich tag. Returns the position of the > if the tag was valid.
@@ -7381,95 +7468,81 @@ namespace TMPro
                         m_currentFontSize = m_sizeStack.Remove();
                         return true;
                     case MarkupTag.FONT:
+
                         int fontHashCode = m_xmlAttribute[0].valueHashCode;
-                        int materialAttributeHashCode = m_xmlAttribute[1].nameHashCode;
-                        int materialHashCode = m_xmlAttribute[1].valueHashCode;
-
-                        // Special handling for <font=default> or <font=Default>
-                        if (fontHashCode == (int)MarkupTag.DEFAULT)
-                        {
-                            m_currentFontAsset = m_materialReferences[0].fontAsset;
-                            m_currentMaterial = m_materialReferences[0].material;
-                            m_currentMaterialIndex = 0;
-                            //Debug.Log("<font=Default> assigning Font Asset [" + m_currentFontAsset.name + "] with Material [" + m_currentMaterial.name + "].");
-
-                            m_materialReferenceStack.Add(m_materialReferences[0]);
-
-                            return true;
-                        }
-
                         TMP_FontAsset tempFont;
-                        Material tempMaterial;
 
-                        // HANDLE NEW FONT ASSET
-                        //TMP_ResourceManager.TryGetFontAsset(fontHashCode, out tempFont);
-
-                        // Check if we already have a reference to this font asset.
-                        MaterialReferenceManager.TryGetFontAsset(fontHashCode, out tempFont);
-
-                        // Try loading font asset from potential delegate or resources.
-                        if (tempFont == null)
+                        // Try loading the font asset
+                        switch (fontHashCode)
                         {
-                            // Check for anyone registered to this callback
-                            tempFont = OnFontAssetRequest?.Invoke(fontHashCode, new string(m_htmlTag, m_xmlAttribute[0].valueStartIndex, m_xmlAttribute[0].valueLength));
+                            // <font=default> or <font=Default>
+                            case (int)MarkupTag.DEFAULT:
+                                m_currentFontAsset = m_materialReferences[0].fontAsset;
+                                m_currentMaterial = m_materialReferences[0].material;
+                                m_currentMaterialIndex = 0;
+                                m_materialReferenceStack.Add(m_materialReferences[0]);
 
-                            if (tempFont == null)
-                            {
-                                // Load Font Asset
-                                tempFont = Resources.Load<TMP_FontAsset>(TMP_Settings.defaultFontAssetPath + new string(m_htmlTag, m_xmlAttribute[0].valueStartIndex, m_xmlAttribute[0].valueLength));
-                            }
+                                return true;
 
-                            if (tempFont == null)
-                                return false;
+                            // <font familyName="Liberation Sans"> or <font familyName="Liberation Sans" styleName="Regular"> or <font familyName="Liberation Sans" styleName="Regular" material="Liberation Sans SDF - Outline">
+                            case 0:
+                                //
+                                if (m_xmlAttribute.Length > 1 && m_xmlAttribute[1].nameHashCode == (int)MarkupTag.FAMILYNAME)
+                                {
+                                    int familyNameHashCode = m_xmlAttribute[1].valueHashCode;
+                                    int styleNameHashCode = (int)MarkupTag.REGULAR;
 
-                            // Add new reference to the font asset as well as default material to the MaterialReferenceManager
-                            MaterialReferenceManager.AddFontAsset(tempFont);
-                        }
+                                    // Check if a style name is referenced
+                                    if (m_xmlAttribute[2].nameHashCode == (int)MarkupTag.STYLENAME)
+                                    {
+                                        styleNameHashCode = m_xmlAttribute[2].valueHashCode;
+                                    }
 
-                        // HANDLE NEW MATERIAL
-                        if (materialAttributeHashCode == 0 && materialHashCode == 0)
-                        {
-                            // No material specified then use default font asset material.
-                            m_currentMaterial = tempFont.material;
+                                    if (TMP_ResourceManager.TryGetFontAssetByFamilyName(familyNameHashCode, styleNameHashCode, out tempFont))
+                                    {
+                                        // Add new reference to the font asset as well as default material to the MaterialReferenceManager
+                                        MaterialReferenceManager.AddFontAsset(tempFont);
+                                        m_currentFontAsset = tempFont;
 
-                            m_currentMaterialIndex = MaterialReference.AddMaterialReference(m_currentMaterial, tempFont, ref m_materialReferences, m_materialReferenceIndexLookup);
+                                        // Handle potential material attribute
+                                        SetCurrentFontMaterialFromAttributes(m_xmlAttribute);
 
-                            m_materialReferenceStack.Add(m_materialReferences[m_currentMaterialIndex]);
-                        }
-                        else if (materialAttributeHashCode == (int)MarkupTag.MATERIAL) // using material attribute
-                        {
-                            if (MaterialReferenceManager.TryGetMaterial(materialHashCode, out tempMaterial))
-                            {
-                                m_currentMaterial = tempMaterial;
+                                        return true;
+                                    }
+                                }
+                                break;
 
-                                m_currentMaterialIndex = MaterialReference.AddMaterialReference(m_currentMaterial, tempFont, ref m_materialReferences, m_materialReferenceIndexLookup);
+                            // <font="Liberation Sans SDF"> or <font="Liberation Sans SDF" material="Liberation Sans SDF - Outline">
+                            default:
+                                // Check if we already have a cached reference to this font asset.
+                                if (MaterialReferenceManager.TryGetFontAsset(fontHashCode, out tempFont))
+                                {
+                                    m_currentFontAsset = tempFont;
 
-                                m_materialReferenceStack.Add(m_materialReferences[m_currentMaterialIndex]);
-                            }
-                            else
-                            {
-                                // Load new material
-                                tempMaterial = Resources.Load<Material>(TMP_Settings.defaultFontAssetPath + new string(m_htmlTag, m_xmlAttribute[1].valueStartIndex, m_xmlAttribute[1].valueLength));
+                                    // Handle potential material attribute
+                                    SetCurrentFontMaterialFromAttributes(m_xmlAttribute);
 
-                                if (tempMaterial == null)
+                                    return true;
+                                }
+
+                                // Try loading the font asset by name from potential delegate or resources.
+                                string fontName = new string(m_htmlTag, m_xmlAttribute[0].valueStartIndex,
+                                    m_xmlAttribute[0].valueLength);
+
+                                if (!TryLoadAsset(fontHashCode, fontName, TMP_Settings.defaultFontAssetPath, OnFontAssetRequest, out tempFont))
                                     return false;
 
-                                // Add new reference to this material in the MaterialReferenceManager
-                                MaterialReferenceManager.AddFontMaterial(materialHashCode, tempMaterial);
+                                // Add new reference to the font asset as well as default material to the MaterialReferenceManager
+                                MaterialReferenceManager.AddFontAsset(tempFont);
+                                m_currentFontAsset = tempFont;
 
-                                m_currentMaterial = tempMaterial;
+                                // Handle potential material attribute
+                                SetCurrentFontMaterialFromAttributes(m_xmlAttribute);
 
-                                m_currentMaterialIndex = MaterialReference.AddMaterialReference(m_currentMaterial, tempFont, ref m_materialReferences, m_materialReferenceIndexLookup);
-
-                                m_materialReferenceStack.Add(m_materialReferences[m_currentMaterialIndex]);
-                            }
+                                return true;
                         }
-                        else
-                            return false;
+                        return false;
 
-                        m_currentFontAsset = tempFont;
-
-                        return true;
                     case MarkupTag.SLASH_FONT:
                         {
                             MaterialReference materialReference = m_materialReferenceStack.Remove();
@@ -7481,7 +7554,7 @@ namespace TMPro
                             return true;
                         }
                     case MarkupTag.MATERIAL:
-                        materialHashCode = m_xmlAttribute[0].valueHashCode;
+                        int materialHashCode = m_xmlAttribute[0].valueHashCode;
 
                         // Special handling for <material=default> or <material=Default>
                         if (materialHashCode == (int)MarkupTag.DEFAULT)
@@ -7497,9 +7570,8 @@ namespace TMPro
                             return true;
                         }
 
-
                         // Check if material
-                        if (MaterialReferenceManager.TryGetMaterial(materialHashCode, out tempMaterial))
+                        if (MaterialReferenceManager.TryGetMaterial(materialHashCode, out Material tempMaterial))
                         {
                             // Check if material font atlas texture matches that of the current font asset.
                             //if (m_currentFontAsset.atlas.GetEntityId() != tempMaterial.GetTexture(ShaderUtilities.ID_MainTex).GetEntityId()) return false;
@@ -7512,10 +7584,11 @@ namespace TMPro
                         }
                         else
                         {
-                            // Load new material
-                            tempMaterial = Resources.Load<Material>(TMP_Settings.defaultFontAssetPath + new string(m_htmlTag, m_xmlAttribute[0].valueStartIndex, m_xmlAttribute[0].valueLength));
+                            // Name of requested material
+                            string materialName = new string(m_htmlTag, m_xmlAttribute[1].valueStartIndex, m_xmlAttribute[1].valueLength);
 
-                            if (tempMaterial == null)
+                            // Try loading requested material from potential delegate or resources.
+                            if (!TryLoadAsset(materialHashCode, materialName, TMP_Settings.defaultFontAssetPath, OnFontMaterialRequest, out tempMaterial))
                                 return false;
 
                             // Check if material font atlas texture matches that of the current font asset.
@@ -7803,13 +7876,11 @@ namespace TMPro
                         }
                         else
                         {
-                            // Load Color Gradient Preset
-                            if (tempColorGradientPreset == null)
-                            {
-                                tempColorGradientPreset = Resources.Load<TMP_ColorGradient>(TMP_Settings.defaultColorGradientPresetsPath + new string(m_htmlTag, m_xmlAttribute[0].valueStartIndex, m_xmlAttribute[0].valueLength));
-                            }
+                            // Name of requested color gradient asset
+                            string gradientName = new string(m_htmlTag, m_xmlAttribute[0].valueStartIndex, m_xmlAttribute[0].valueLength);
 
-                            if (tempColorGradientPreset == null)
+                            // Try loading requested color gradient asset from potential delegate or resources.
+                            if (!TryLoadAsset(gradientPresetHashCode, gradientName, TMP_Settings.defaultColorGradientPresetsPath, OnColorGradientAssetRequest, out tempColorGradientPreset))
                                 return false;
 
                             MaterialReferenceManager.AddColorGradientPreset(gradientPresetHashCode, tempColorGradientPreset);
@@ -7993,17 +8064,11 @@ namespace TMPro
                             }
                             else
                             {
-                                // Load Sprite Asset
-                                if (tempSpriteAsset == null)
-                                {
-                                    //
-                                    tempSpriteAsset = OnSpriteAssetRequest?.Invoke(spriteAssetHashCode, new string(m_htmlTag, m_xmlAttribute[0].valueStartIndex, m_xmlAttribute[0].valueLength));
+                                // Name of request sprite asset
+                                string spriteName = new string(m_htmlTag, m_xmlAttribute[0].valueStartIndex, m_xmlAttribute[0].valueLength);
 
-                                    if (tempSpriteAsset == null)
-                                        tempSpriteAsset = Resources.Load<TMP_SpriteAsset>(TMP_Settings.defaultSpriteAssetPath + new string(m_htmlTag, m_xmlAttribute[0].valueStartIndex, m_xmlAttribute[0].valueLength));
-                                }
-
-                                if (tempSpriteAsset == null)
+                                // Try loading requested sprite asset from potential delegate or resources.
+                                if (!TryLoadAsset(spriteAssetHashCode, spriteName, TMP_Settings.defaultSpriteAssetPath, OnSpriteAssetRequest, out tempSpriteAsset))
                                     return false;
 
                                 //Debug.Log("Loading & assigning new Sprite Asset: " + tempSpriteAsset.name);
