@@ -11,7 +11,7 @@ namespace UnityEngine.UI
     /// A component that represents a group of UI.Toggles.
     /// </summary>
     /// <remarks>
-    /// When using a group reference the group from a UI.Toggle. Only one member of a group can be active at a time.
+    /// When using a group reference from a `UI.Toggle`. Only one member of a group can be on at a time.
     /// </remarks>
     public class ToggleGroup : UIBehaviour
     {
@@ -33,7 +33,7 @@ namespace UnityEngine.UI
 
         /// <summary>
         /// Because all the Toggles have registered themselves in the OnEnabled, Start should check to
-        /// make sure at least one Toggle is active in groups that do not AllowSwitchOff
+        /// make sure at least one Toggle is on in groups that do not AllowSwitchOff
         /// </summary>
         protected override void Start()
         {
@@ -54,7 +54,7 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Notify the group that the given toggle is enabled.
+        /// Notify the group that the given toggle is on.
         /// </summary>
         /// <param name="toggle">The toggle that got triggered on.</param>
         /// <param name="sendCallback">If other toggles should send onValueChanged.</param>
@@ -133,11 +133,11 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Returns the toggles in this group that are active.
+        /// Returns the toggles in this group that are on.
         /// </summary>
-        /// <returns>The active toggles in the group.</returns>
+        /// <returns>The toggles in the group that are on.</returns>
         /// <remarks>
-        /// Toggles belonging to this group but are not active either because their GameObject is inactive or because the Toggle component is disabled, are not returned as part of the list.
+        /// This only checks the on or off state, not the GameObject's active state.
         /// </remarks>
         public IEnumerable<Toggle> ActiveToggles()
         {
@@ -145,11 +145,11 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Returns the toggle that is the first in the list of active toggles.
+        /// Returns the first toggle that is on.
         /// </summary>
-        /// <returns>The first active toggle from m_Toggles</returns>
+        /// <returns>The first toggle that is on, or `null` if none are on.</returns>
         /// <remarks>
-        /// Get the active toggle for this group. As the group
+        /// This only checks the on or off state, not the GameObject's active state.
         /// </remarks>
         public Toggle GetFirstActiveToggle()
         {
