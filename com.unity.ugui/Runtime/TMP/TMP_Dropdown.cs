@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Pool;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -788,13 +787,10 @@ namespace TMPro
                 return;
 
             // Get root Canvas.
-            var list = ListPool<Canvas>.Get();
+            var list = TMP_ListPool<Canvas>.Get();
             gameObject.GetComponentsInParent(false, list);
             if (list.Count == 0)
-            {
-                ListPool<Canvas>.Release(list);
                 return;
-            }
 
             Canvas rootCanvas = list[list.Count - 1];
             for (int i = 0; i < list.Count; i++)
@@ -806,7 +802,7 @@ namespace TMPro
                 }
             }
 
-            ListPool<Canvas>.Release(list);
+            TMP_ListPool<Canvas>.Release(list);
 
             if (!validTemplate)
             {

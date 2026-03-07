@@ -16,7 +16,7 @@ namespace UnityEngine.UIElements
         ISubmitHandler, ICancelHandler, IMoveHandler, IScrollHandler, ISelectHandler, IDeselectHandler,
         IPointerExitHandler, IPointerEnterHandler, IRuntimePanelComponent, IPointerClickHandler
     {
-        private IRuntimePanel m_Panel;
+        private BaseRuntimePanel m_Panel;
 
         /// <summary>
         /// The panel that this component relates to. If panel is null, this component will have no effect.
@@ -27,7 +27,7 @@ namespace UnityEngine.UIElements
             get => m_Panel;
             set
             {
-                var newPanel = (IRuntimePanel)value;
+                var newPanel = (BaseRuntimePanel)value;
                 if (m_Panel != newPanel)
                 {
                     UnregisterCallbacks();
@@ -38,13 +38,12 @@ namespace UnityEngine.UIElements
         }
 
         private GameObject selectableGameObject => m_Panel?.selectableGameObject;
-        // Can be null if runtime panels have not been created (e.g., if UI Toolkit is stripped or not in use)
-        private EventSystem eventSystem => IRuntimePanel.uIElementsRuntimeUtility?.activeEventSystem as EventSystem;
+        private EventSystem eventSystem => UIElementsRuntimeUtility.activeEventSystem as EventSystem;
 
         private bool isCurrentFocusedPanel => m_Panel != null && eventSystem != null &&
                                               eventSystem.currentSelectedGameObject == selectableGameObject;
 
-        private IEventHandler currentFocusedElement => m_Panel?.GetLeafFocusedElement();
+        private Focusable currentFocusedElement => m_Panel?.focusController.GetLeafFocusedElement();
 
         private readonly PointerEvent m_PointerEvent = new PointerEvent();
         private readonly List<PointerEventData> m_ContainedPointers = new();
@@ -68,7 +67,8 @@ namespace UnityEngine.UIElements
             if (m_Panel != null)
             {
                 m_Panel.destroyed += OnPanelDestroyed;
-                m_Panel.RegisterRootFocusCallback(OnElementFocus);
+                m_Panel.visualTree.RegisterCallback<FocusEvent>(OnElementFocus, TrickleDown.TrickleDown);
+                m_Panel.visualTree.RegisterCallback<BlurEvent>(OnElementBlur, TrickleDown.TrickleDown);
             }
         }
 
@@ -77,7 +77,8 @@ namespace UnityEngine.UIElements
             if (m_Panel != null)
             {
                 m_Panel.destroyed -= OnPanelDestroyed;
-                m_Panel.UnregisterRootFocusCallback(OnElementFocus);
+                m_Panel.visualTree.UnregisterCallback<FocusEvent>(OnElementFocus, TrickleDown.TrickleDown);
+                m_Panel.visualTree.UnregisterCallback<BlurEvent>(OnElementBlur, TrickleDown.TrickleDown);
             }
         }
 
@@ -86,10 +87,17 @@ namespace UnityEngine.UIElements
             panel = null;
         }
 
-        void OnElementFocus()
+        void OnElementFocus(FocusEvent e)
         {
             if (!m_Selecting && eventSystem != null)
                 eventSystem.SetSelectedGameObject(selectableGameObject);
+        }
+
+        void OnElementBlur(BlurEvent e)
+        {
+            // Important: if panel discards focus entirely, it doesn't discard EventSystem selection necessarily.
+            // Also note that if we arrive here through eventSystem.SetSelectedGameObject -> OnDeselect,
+            // eventSystem.currentSelectedGameObject will still have its old value and we can't reaffect it immediately.
         }
 
         private bool m_Selecting;
@@ -117,13 +125,11 @@ namespace UnityEngine.UIElements
             if (!ReadPointerData(m_PointerEvent, eventData))
                 return;
 
-            var handled = m_Panel.SendPointerMoveEvent(
-                m_PointerEvent,
-                m_PointerEvent.m_elementTarget,
-                m_PointerEvent.m_elementUnderPointer);
-
-            if (handled)
-                eventData.Use();
+            using (var e = PointerMoveEvent.GetPooled(m_PointerEvent))
+            {
+                UpdatePointerEventTarget(e, m_PointerEvent);
+                SendEvent(e, eventData);
+            }
         }
 
         public void OnPointerUp(PointerEventData eventData)
@@ -131,13 +137,14 @@ namespace UnityEngine.UIElements
             if (!ReadPointerData(m_PointerEvent, eventData, PointerEventType.Up))
                 return;
 
-            var handled = m_Panel.SendPointerUpEvent(
-                m_PointerEvent,
-                m_PointerEvent.m_elementTarget,
-                m_PointerEvent.m_elementUnderPointer);
+            using (var e = PointerUpEvent.GetPooled(m_PointerEvent))
+            {
+                UpdatePointerEventTarget(e, m_PointerEvent);
+                SendEvent(e, eventData);
 
-            if (handled)
-                eventData.Use();
+                if (e.pressedButtons == 0)
+                    PointerDeviceState.SetElementWithSoftPointerCapture(e.pointerId, null, null);
+            }
         }
 
         public void OnPointerDown(PointerEventData eventData)
@@ -146,20 +153,19 @@ namespace UnityEngine.UIElements
                 return;
 
             // Allow KeyDown/KeyUp events to be processed before pointer events.
-            var target = currentFocusedElement ?? m_Panel.visualTree_as_IEventHandler;
+            var target = currentFocusedElement ?? m_Panel.visualTree;
             ProcessImguiEvents(target);
 
             if (eventSystem != null)
                 eventSystem.SetSelectedGameObject(selectableGameObject);
 
-            var handled = m_Panel.SendPointerDownEvent(
-                m_PointerEvent,
-                m_PointerEvent.m_elementTarget,
-                m_PointerEvent.m_elementUnderPointer,
-                eventData.pressEventCamera);
+            using (var e = PointerDownEvent.GetPooled(m_PointerEvent))
+            {
+                UpdatePointerEventTarget(e, m_PointerEvent);
+                SendEvent(e, eventData);
 
-            if (handled)
-                eventData.Use();
+                PointerDeviceState.SetElementWithSoftPointerCapture(e.pointerId, e.elementTarget, eventData.pressEventCamera);
+            }
         }
 
         public void OnPointerExit(PointerEventData eventData)
@@ -181,13 +187,14 @@ namespace UnityEngine.UIElements
                 eventData.pointerPressRaycast.gameObject != gameObject &&
                 m_PointerEvent.pointerId != PointerId.mousePointerId)
             {
-                var handled = m_Panel.SendPointerCancelEvent(
-                    m_PointerEvent,
-                    m_PointerEvent.m_elementTarget,
-                    m_PointerEvent.m_elementUnderPointer);
+                using (var e = PointerCancelEvent.GetPooled(m_PointerEvent))
+                {
+                    UpdatePointerEventTarget(e, m_PointerEvent);
+                    SendEvent(e, eventData);
 
-                if (handled)
-                    eventData.Use();
+                    if (e.pressedButtons == 0)
+                        PointerDeviceState.SetElementWithSoftPointerCapture(e.pointerId, null, null);
+                }
             }
 
             m_Panel.PointerLeavesPanel(m_PointerEvent.pointerId);
@@ -213,17 +220,14 @@ namespace UnityEngine.UIElements
                 return;
 
             // Allow KeyDown/KeyUp events to be processed before navigation events.
-            var target = currentFocusedElement ?? m_Panel.visualTree_as_IEventHandler;
+            var target = currentFocusedElement ?? m_Panel.visualTree;
             ProcessImguiEvents(target);
 
-            var handled = m_Panel.SendNavigationEvent(
-                NavigationEventType.Submit,
-                target,
-                GetDeviceType(eventData),
-                s_Modifiers);
-
-            if (handled)
-                eventData.Use();
+            using (var e = NavigationSubmitEvent.GetPooled(GetDeviceType(eventData), s_Modifiers))
+            {
+                e.target = target;
+                SendEvent(e, eventData);
+            }
         }
 
         public void OnCancel(BaseEventData eventData)
@@ -232,17 +236,14 @@ namespace UnityEngine.UIElements
                 return;
 
             // Allow KeyDown/KeyUp events to be processed before navigation events.
-            var target = currentFocusedElement ?? m_Panel.visualTree_as_IEventHandler;
+            var target = currentFocusedElement ?? m_Panel.visualTree;
             ProcessImguiEvents(target);
 
-            var handled = m_Panel.SendNavigationEvent(
-                NavigationEventType.Cancel,
-                target,
-                GetDeviceType(eventData),
-                s_Modifiers);
-
-            if (handled)
-                eventData.Use();
+            using (var e = NavigationCancelEvent.GetPooled(GetDeviceType(eventData), s_Modifiers))
+            {
+                e.target = target;
+                SendEvent(e, eventData);
+            }
         }
 
         public void OnMove(AxisEventData eventData)
@@ -251,18 +252,14 @@ namespace UnityEngine.UIElements
                 return;
 
             // Allow KeyDown/KeyUp events to be processed before navigation events.
-            var target = currentFocusedElement ?? m_Panel.visualTree_as_IEventHandler;
+            var target = currentFocusedElement ?? m_Panel.visualTree;
             ProcessImguiEvents(target);
 
-            var handled = m_Panel.SendNavigationEvent(
-                NavigationEventType.Move,
-                target,
-                GetDeviceType(eventData),
-                s_Modifiers,
-                eventData.moveVector);
-
-            if (handled)
-                eventData.Use();
+            using (var e = NavigationMoveEvent.GetPooled(eventData.moveVector, GetDeviceType(eventData), s_Modifiers))
+            {
+                e.target = target;
+                SendEvent(e, eventData);
+            }
 
             // TODO: if runtime panel has no internal navigation, switch to the next UGUI selectable element.
         }
@@ -279,14 +276,28 @@ namespace UnityEngine.UIElements
             var uitkScrollDelta = scrollTicks * WheelEvent.scrollDeltaPerTick;
             uitkScrollDelta.y = -uitkScrollDelta.y;
 
-            var handled = m_Panel.SendWheelEvent(
-                uitkScrollDelta,
-                m_PointerEvent);
-
-            if (handled)
-                eventData.Use();
+            using (var e = WheelEvent.GetPooled(uitkScrollDelta, m_PointerEvent))
+            {
+                SendEvent(e, eventData);
+            }
         }
 
+        private void SendEvent(EventBase e, BaseEventData sourceEventData)
+        {
+            //e.runtimeEventData = sourceEventData;
+            m_Panel.SendEvent(e);
+            if (e.isPropagationStopped)
+                sourceEventData.Use();
+        }
+
+        private void SendEvent(EventBase e, Event sourceEvent)
+        {
+            m_Panel.SendEvent(e);
+
+            // Don't call sourceEvent.Use() because DefaultEventSystem doesn't call it either
+            // and we want to have the same behavior as much as possible.
+            // See UGUIEventSystemTests.KeyDownStoppedDoesntPreventNavigationEvents for a test requires this.
+        }
 
         /// <summary>
         /// This method is automatically called on every frame.
@@ -295,7 +306,7 @@ namespace UnityEngine.UIElements
         public void Update()
         {
             if (isCurrentFocusedPanel)
-                ProcessImguiEvents(currentFocusedElement ?? m_Panel.visualTree_as_IEventHandler);
+                ProcessImguiEvents(currentFocusedElement ?? m_Panel.visualTree);
 
             UpdateWorldSpacePointers();
         }
@@ -312,7 +323,7 @@ namespace UnityEngine.UIElements
         // Send IMGUI events to given focus-based target, if any, or simply flush the event queue if not.
         // For uniformity of composite events (keyDown vs navigation), target should remain the same
         // throughout the entire processing cycle.
-        void ProcessImguiEvents(IEventHandler target)
+        void ProcessImguiEvents(Focusable target)
         {
             bool first = true;
 
@@ -334,7 +345,7 @@ namespace UnityEngine.UIElements
             }
         }
 
-        void ProcessKeyboardEvent(Event e, IEventHandler target)
+        void ProcessKeyboardEvent(Event e, Focusable target)
         {
             if (e.type == EventType.KeyUp)
             {
@@ -347,49 +358,43 @@ namespace UnityEngine.UIElements
         }
 
         // TODO: add an ITabHandler interface
-        void ProcessTabEvent(Event e, IEventHandler target)
+        void ProcessTabEvent(Event e, Focusable target)
         {
             if (e.ShouldSendNavigationMoveEventRuntime())
             {
-                SendTabEvent(e, e.shift ? NavigationMoveDirection.Previous : NavigationMoveDirection.Next, target);
+                SendTabEvent(e, e.shift ? NavigationMoveEvent.Direction.Previous : NavigationMoveEvent.Direction.Next, target);
             }
         }
 
-        private void SendTabEvent(Event e, NavigationMoveDirection direction, IEventHandler target)
+        private void SendTabEvent(Event e, NavigationMoveEvent.Direction direction, Focusable target)
         {
-            m_Panel.SendNavigationEvent(
-                NavigationEventType.Move,
-                target,
-                NavigationDeviceType.Keyboard,
-                s_Modifiers,
-                default,
-                direction);
-
-            // Note: we don't call e.Use() here because DefaultEventSystem doesn't either
+            using (var ev = NavigationMoveEvent.GetPooled(direction, s_Modifiers))
+            {
+                ev.target = target;
+                SendEvent(ev, e);
+            }
         }
 
-        private void SendKeyUpEvent(Event e, IEventHandler target)
+        private void SendKeyUpEvent(Event e, Focusable target)
         {
-            m_Panel.SendKeyboardEvent(
-                isKeyDown: false,
-                e.character,
-                e.keyCode,
-                s_Modifiers,
-                target);
-
-            // Don't call e.Use() because DefaultEventSystem doesn't either
+            // Use UIElementsRuntimeUtility.CreateEvent because DefaultEventSystem uses it too
+            // and we want to have the same behavior as much as possible.
+            using (var ev = (KeyUpEvent) UIElementsRuntimeUtility.CreateEvent(e))
+            {
+                ev.target = target;
+                SendEvent(ev, e);
+            }
         }
 
-        private void SendKeyDownEvent(Event e, IEventHandler target)
+        private void SendKeyDownEvent(Event e, Focusable target)
         {
-            m_Panel.SendKeyboardEvent(
-                isKeyDown: true,
-                e.character,
-                e.keyCode,
-                s_Modifiers,
-                target);
-
-            // Don't call e.Use() because DefaultEventSystem doesn't either
+            // Use UIElementsRuntimeUtility.CreateEvent because DefaultEventSystem uses it too
+            // and we want to have the same behavior as much as possible.
+            using (var ev = (KeyDownEvent) UIElementsRuntimeUtility.CreateEvent(e))
+            {
+                ev.target = target;
+                SendEvent(ev, e);
+            }
         }
 
         private bool ReadPointerData(PointerEvent pe, PointerEventData eventData, PointerEventType eventType = PointerEventType.Default)
@@ -405,6 +410,17 @@ namespace UnityEngine.UIElements
             return true;
         }
 
+        private void UpdatePointerEventTarget<TPointerEvent>(TPointerEvent e, PointerEvent eventData)
+            where TPointerEvent : PointerEventBase<TPointerEvent>, new()
+        {
+            e.target = eventData.elementTarget;
+
+            if (!m_Panel.isFlat)
+            {
+                // World-space panels set their top element manually instead of using RecomputeElementUnderPointer.
+                m_Panel.SetTopElementUnderPointer(eventData.pointerId, eventData.elementUnderPointer, e);
+            }
+        }
 
         private UIElements.NavigationDeviceType GetDeviceType(BaseEventData eventData)
         {
@@ -424,9 +440,7 @@ namespace UnityEngine.UIElements
                 if (!ReadPointerData(m_PointerEvent, eventData))
                     continue;
 
-                //Cannot use m_PointerEvent.elementUnderPointer as it would keep the VisualElement type alive for code stripping.
-                m_Panel.SetTopElementUnderPointer(m_PointerEvent.pointerId, m_PointerEvent.m_elementUnderPointer, m_PointerEvent.position);
-
+                m_Panel.SetTopElementUnderPointer(m_PointerEvent.pointerId, m_PointerEvent.elementUnderPointer, m_PointerEvent.position);
                 m_Panel.CommitElementUnderPointers();
             }
         }
@@ -474,13 +488,8 @@ namespace UnityEngine.UIElements
             public Vector3 screenDelta { get; private set; }
             public Ray worldRay { get; private set; }
             public IPanelComponent panelComponent { get; private set; }
-
-            //keep reference as object for code stripping the VisualElement type
-            internal IEventHandler m_elementTarget;
-            public VisualElement elementTarget { get => (VisualElement)m_elementTarget; }
-
-            internal IEventHandler m_elementUnderPointer;
-            public VisualElement elementUnderPointer { get => (VisualElement)m_elementUnderPointer; }
+            public VisualElement elementTarget { get; private set; }
+            public VisualElement elementUnderPointer { get; private set; }
 
             public void Read(PanelEventHandler self, PointerEventData eventData, PointerEventType eventType)
             {
@@ -547,35 +556,31 @@ namespace UnityEngine.UIElements
                     {
                         // UUM-57082: InputSystem doesn't reset clickCount on delay until after it sends PointerDown
                         // This is not perfect but it's the best we can do with incomplete information.
-                        // Can be null if runtime panels have not been created or UI Toolkit is stripped
-                        var doubleClickTime = IRuntimePanel.uIElementsRuntimeUtility?.s_DoubleClickTime ?? 300;
-                        if (Time.unscaledTime > self.m_LastClickTime + doubleClickTime * 0.001f)
+                        if (Time.unscaledTime > self.m_LastClickTime + ClickDetector.s_DoubleClickTime * 0.001f)
                             clickCount = 0;
 
                         // Case 1379054: UIToolkit assumes clickCount is increased before PointerDown, but UGUI does it after.
                         clickCount++;
-                        // Can be null if runtime panels have not been created or UI Toolkit is stripped
-                        IRuntimePanel.pointerDeviceState?.PressButton(pointerId, button);
+
+                        PointerDeviceState.PressButton(pointerId, button);
                     }
                     else if (eventType == PointerEventType.Up)
                     {
-                        // Can be null if runtime panels have not been created or UI Toolkit is stripped
-                        IRuntimePanel.pointerDeviceState?.ReleaseButton(pointerId, button);
+                        PointerDeviceState.ReleaseButton(pointerId, button);
                     }
 
                     clickCount = Mathf.Max(1, clickCount);
                 }
 
-                // Can be null if runtime panels have not been created or UI Toolkit is stripped; default to 0 (no buttons pressed)
-                pressedButtons = IRuntimePanel.pointerDeviceState?.GetPressedButtons(pointerId) ?? 0;
+                pressedButtons = PointerDeviceState.GetPressedButtons(pointerId);
 
                 var origin = eventData.pointerCurrentRaycast.origin;
                 worldRay = new Ray(origin, eventData.pointerCurrentRaycast.worldPosition - origin);
                 panelComponent = eventData.pointerCurrentRaycast.panelComponent;
-                m_elementUnderPointer = eventData.pointerCurrentRaycast.m_element;
+                elementUnderPointer = eventData.pointerCurrentRaycast.element;
             }
 
-            public bool ComputeTarget(IRuntimePanel panel)
+            public bool ComputeTarget(BaseRuntimePanel panel)
             {
                 Vector3 panelPosition;
                 if (panel.isFlat)
@@ -583,30 +588,33 @@ namespace UnityEngine.UIElements
                     // PointerEvents making it this far have been validated by PanelRaycaster already
                     panel.ScreenToPanel(screenPosition, screenDelta,
                         out panelPosition, allowOutside:true);
-                    m_elementTarget = null;
+                    elementTarget = null;
                 }
                 else
                 {
                     if (panelComponent == null)
                         return false;
 
-                    // Can be null if runtime panels have not been created or UI Toolkit is stripped; default to no capturing element
-                    IRuntimePanel capturingPanel = null;
-                    IEventHandler capturingElement = null;
-                    IRuntimePanel.uIElementsRuntimeUtility?.GetCapturingElement(pointerId, out capturingPanel, out capturingElement);
-                    if (capturingElement != null && capturingPanel != panel)
+                    var capturingElement = RuntimePanel.s_EventDispatcher.pointerState.GetCapturingElement(pointerId) as VisualElement;
+                    if (capturingElement != null && capturingElement.panel != panel)
                         return false;
 
-                    m_elementTarget = capturingElement ?? m_elementUnderPointer ?? panelComponent.GetRoot();
-                    panelPosition = panelComponent.GetPanelPosition(m_elementTarget , worldRay);
+                    elementTarget = capturingElement ?? elementUnderPointer ?? panelComponent.GetRootVisualElement();
+                    panelPosition = GetPanelPosition(elementTarget, panelComponent, worldRay);
                 }
 
                 localPosition = position = panelPosition;
-                // Can be null if runtime panels have not been created or UI Toolkit is stripped; default to Vector3.zero
-                deltaPosition = IRuntimePanel.pointerDeviceState?.GetPointerDeltaPosition(pointerId, ContextType.Player, position) ?? Vector3.zero;
+                deltaPosition = PointerDeviceState.GetPointerDeltaPosition(pointerId, ContextType.Player, position);
                 return true;
             }
 
+            Vector3 GetPanelPosition(VisualElement pickedElement, IPanelComponent panelComponent, Ray worldRay)
+            {
+                var documentRay = panelComponent.gameObject.transform.worldToLocalMatrix.TransformRay(worldRay);
+                pickedElement.IntersectWorldRay(documentRay, out var distanceWithinDocument, out _);
+                var documentPoint = documentRay.origin + documentRay.direction * distanceWithinDocument;
+                return documentPoint;
+            }
         }
     }
 #endif

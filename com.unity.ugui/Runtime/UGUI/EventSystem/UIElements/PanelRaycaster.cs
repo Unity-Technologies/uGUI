@@ -6,7 +6,8 @@ using UnityEngine.UI;
 
 namespace UnityEngine.UIElements
 {
-    // This code is disabled unless the com.unity.modules.uielements module is activated in the package manager.
+    // This code is disabled unless the com.unity.modules.uielements module is present.
+    // The UIElements module is always present in the Editor but it can be stripped from a project build if unused.
 #if PACKAGE_UITOOLKIT
     /// <summary>
     /// A derived BaseRaycaster to raycast against UI Toolkit panel instances at runtime.
@@ -15,7 +16,7 @@ namespace UnityEngine.UIElements
     [UGUIHelpURL("PanelRaycaster")]
     public class PanelRaycaster : BaseRaycaster, IRuntimePanelComponent
     {
-        private IRuntimePanel m_Panel;
+        private BaseRuntimePanel m_Panel;
 
         /// <summary>
         /// The panel that this component relates to. If panel is null, this component will have no effect.
@@ -26,7 +27,7 @@ namespace UnityEngine.UIElements
             get => m_Panel;
             set
             {
-                var newPanel = (IRuntimePanel)value;
+                var newPanel = (BaseRuntimePanel)value;
                 if (m_Panel != newPanel)
                 {
                     UnregisterCallbacks();
@@ -60,9 +61,9 @@ namespace UnityEngine.UIElements
         private GameObject selectableGameObject => m_Panel?.selectableGameObject;
 
         public override int sortOrderPriority => Mathf.FloorToInt(m_Panel?.sortingPriority ?? 0f);
-        // Can be null if runtime panels have not been created or UI Toolkit is stripped; default to 0
-        public override int renderOrderPriority => int.MaxValue - ((IRuntimePanel.uIElementsRuntimeUtility?.s_ResolvedSortingIndexMax ?? 0) - (m_Panel?.resolvedSortingIndex ?? 0));
+        public override int renderOrderPriority => int.MaxValue - (UIElementsRuntimeUtility.s_ResolvedSortingIndexMax - (m_Panel?.resolvedSortingIndex ?? 0));
 
+        private static ScreenOverlayPanelPicker panelPicker = new ScreenOverlayPanelPicker();
 
         public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
         {
@@ -79,10 +80,10 @@ namespace UnityEngine.UIElements
             if (UnityEngineInternal.DisplayInternal.IsASecondaryDisplayIndex(displayIndex))
             {
 #if UNITY_ANDROID
-                // Changed for UITK to be coherent for Android which passes display-relative rendering coordinates
-                h = Display.displays[displayIndex].renderingHeight;
+                    // Changed for UITK to be coherent for Android which passes display-relative rendering coordinates
+                    h = Display.displays[displayIndex].renderingHeight;
 #else
-                h = Display.displays[displayIndex].systemHeight;
+                    h = Display.displays[displayIndex].systemHeight;
 #endif
             }
 
@@ -94,7 +95,7 @@ namespace UnityEngine.UIElements
                 return;
             var pointerId = currentInputModule.ConvertUIToolkitPointerId(eventData);
 
-            if (!ScreenOverlayPanelPicker.TryPick(m_Panel, pointerId, position, delta, (int)eventPosition.z, out _))
+            if (!panelPicker.TryPick((RuntimePanel)m_Panel, pointerId, position, delta, (int)eventPosition.z, out _))
                 return;
 
             resultAppendList.Add(new RaycastResult

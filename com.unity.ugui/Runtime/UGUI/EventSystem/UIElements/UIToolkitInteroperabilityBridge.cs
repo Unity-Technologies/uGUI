@@ -4,14 +4,14 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UIElements
 {
-    // This code is disabled unless the com.unity.modules.uielements module is activated in the package manager.
+    // This code is disabled unless the com.unity.modules.uielements module is present.
+    // The UIElements module is always present in the Editor but it can be stripped from a project build if unused.
 #if PACKAGE_UITOOLKIT
     /// <summary>
     /// Enables UI Toolkit interoperability with uGUI events.
     /// </summary>
     internal class UIToolkitInteroperabilityBridge
     {
-
         [Flags]
         public enum EventHandlerTypes
         {
@@ -41,7 +41,6 @@ namespace UnityEngine.UIElements
         private bool m_Enabled;
         private bool m_IsTrackingPanels;
         private GameObject m_WorldSpaceGo;
-        private bool m_PendingRegistration; // True if we need to retry registration when utility becomes available
 
         public bool overrideUIToolkitEvents
         {
@@ -92,25 +91,17 @@ namespace UnityEngine.UIElements
         {
             if (m_IsTrackingPanels || !shouldTrackPanels) return;
 
-            // Can be null if runtime panels have not been created yet; mark for retry in Update()
-            if (IRuntimePanel.uIElementsRuntimeUtility == null)
-            {
-                m_PendingRegistration = true;
-                return;
-            }
-
-            foreach (var panel in IRuntimePanel.uIElementsRuntimeUtility.GetSortedPlayerPanelsInternal())
+            foreach (var panel in UIElementsRuntimeUtility.GetSortedPlayerPanels())
             {
                 StartTrackingPanel(panel);
             }
 
-            IRuntimePanel.uIElementsRuntimeUtility.AddOnCreatePanelAction( StartTrackingPanel);
+            UIElementsRuntimeUtility.onCreatePanel += StartTrackingPanel;
             m_IsTrackingPanels = true;
         }
 
-        // Use object storage to prevent generic type parameter from preserving BaseRuntimePanel during code stripping
-        private readonly HashSet<IRuntimePanel> trackedPanels = new();
-        private void StartTrackingPanel(IRuntimePanel panel)
+        private readonly HashSet<BaseRuntimePanel> trackedPanels = new();
+        private void StartTrackingPanel(BaseRuntimePanel panel)
         {
             trackedPanels.Add(panel);
         }
@@ -119,20 +110,19 @@ namespace UnityEngine.UIElements
         {
             if (!m_IsTrackingPanels) return;
 
-            // Can be null if runtime panels have not been created or UI Toolkit is stripped
-            IRuntimePanel.uIElementsRuntimeUtility?.RemoveOnCreatePanelAction( StartTrackingPanel);
+            UIElementsRuntimeUtility.onCreatePanel -= StartTrackingPanel;
             m_IsTrackingPanels = false;
 
-            foreach (var panelObj in trackedPanels)
+            foreach (var panel in trackedPanels)
             {
-                DestroyPanelGameObject(panelObj);
+                DestroyPanelGameObject(panel);
             }
             trackedPanels.Clear();
 
             DestroyWorldSpacePanelGameObject();
         }
 
-        private void UpdatePanelGameObject(IRuntimePanel panel)
+        private void UpdatePanelGameObject(BaseRuntimePanel panel)
         {
             var handlerType = panel.isFlat ? EventHandlerTypes.ScreenOverlay : EventHandlerTypes.WorldSpace;
             if ((m_HandlerTypes & handlerType) != 0)
@@ -145,17 +135,12 @@ namespace UnityEngine.UIElements
             }
         }
 
-        // Use interface storage to prevent generic type parameter from preserving BaseRuntimePanel during code stripping
-        private readonly Dictionary<object, Action> destroyedActions = new();
-        private void CreatePanelGameObject(IRuntimePanel panel)
+        private readonly Dictionary<BaseRuntimePanel, Action> destroyedActions = new();
+        private void CreatePanelGameObject(BaseRuntimePanel panel)
         {
             if (panel.selectableGameObject == null)
             {
-                var go = new GameObject(panel.name);
-
-                go.AddComponent<PanelEventHandler>();
-                go.AddComponent<PanelRaycaster>();
-
+                var go = new GameObject(panel.name, typeof(PanelEventHandler), typeof(PanelRaycaster));
                 go.transform.SetParent(m_EventSystem.transform);
                 panel.selectableGameObject = go;
                 var destroyed = destroyedActions[panel] = () => DestroyPanelGameObject(panel);
@@ -163,7 +148,7 @@ namespace UnityEngine.UIElements
             }
         }
 
-        private void DestroyPanelGameObject(IRuntimePanel panel)
+        private void DestroyPanelGameObject(BaseRuntimePanel panel)
         {
             var go = panel.selectableGameObject;
             if (go != null)
@@ -194,11 +179,7 @@ namespace UnityEngine.UIElements
                 {
                     foreach (var cam in m_InputSettings.eventCameras)
                     {
-                        var raycaster = go.AddComponent<WorldDocumentRaycaster>();
-                        if (raycaster != null)
-                        {
-                            raycaster.camera = cam;
-                        }
+                        go.AddComponent<WorldDocumentRaycaster>().camera = cam;
                     }
                 }
 
@@ -231,14 +212,8 @@ namespace UnityEngine.UIElements
             if (m_Started)
                 StartTrackingUIToolkitPanels();
 
-            // Can be null if runtime panels have not been created yet; mark for retry in Update()
             if (m_OverrideUIToolkitEvents)
-            {
-                if (IRuntimePanel.uIElementsRuntimeUtility != null)
-                    IRuntimePanel.uIElementsRuntimeUtility.RegisterEventSystem(m_EventSystem);
-                else
-                    m_PendingRegistration = true;
-            }
+                UIElementsRuntimeUtility.RegisterEventSystem(m_EventSystem);
         }
 
         public void OnDisable()
@@ -249,27 +224,11 @@ namespace UnityEngine.UIElements
             PanelInputConfiguration.onApply -= Apply;
 
             StopTrackingUIToolkitPanels();
-            // Can be null if runtime panels have not been created or UI Toolkit is stripped
-            IRuntimePanel.uIElementsRuntimeUtility?.UnregisterEventSystem(m_EventSystem);
-            m_PendingRegistration = false;
+            UIElementsRuntimeUtility.UnregisterEventSystem(m_EventSystem);
         }
 
         public void Update()
         {
-            // Retry registration if it was pending and utility is now available
-            if (m_PendingRegistration && IRuntimePanel.uIElementsRuntimeUtility != null)
-            {
-                m_PendingRegistration = false;
-
-                // Retry event system registration
-                if (m_OverrideUIToolkitEvents && m_Enabled)
-                    IRuntimePanel.uIElementsRuntimeUtility.RegisterEventSystem(m_EventSystem);
-
-                // Retry panel tracking
-                if (shouldTrackPanels)
-                    StartTrackingUIToolkitPanels();
-            }
-
             UpdatePanelGameObjects();
         }
 
@@ -303,18 +262,13 @@ namespace UnityEngine.UIElements
 
             if (!m_Enabled) return;
 
-            // Can be null if runtime panels have not been created yet; mark for retry in Update()
             if (m_OverrideUIToolkitEvents)
             {
-                if (IRuntimePanel.uIElementsRuntimeUtility != null)
-                    IRuntimePanel.uIElementsRuntimeUtility.RegisterEventSystem(m_EventSystem);
-                else
-                    m_PendingRegistration = true;
+                UIElementsRuntimeUtility.RegisterEventSystem(m_EventSystem);
             }
             else
             {
-                IRuntimePanel.uIElementsRuntimeUtility?.UnregisterEventSystem(m_EventSystem);
-                m_PendingRegistration = false;
+                UIElementsRuntimeUtility.UnregisterEventSystem(m_EventSystem);
             }
 
             UpdatePanelTracking();
@@ -385,8 +339,7 @@ namespace UnityEngine.UIElements
             }
         }
 
-        // Use object storage to prevent generic type parameter from preserving BaseRuntimePanel during code stripping
-        private List<IRuntimePanel> m_PanelsToRemove = new();
+        private List<BaseRuntimePanel> m_PanelsToRemove = new();
         private void UpdatePanelGameObjects()
         {
             if (!m_IsTrackingPanels) return;
@@ -404,9 +357,9 @@ namespace UnityEngine.UIElements
                 isWorldSpaceActive |= !panel.isFlat;
             }
 
-            foreach (var panelObj in m_PanelsToRemove)
+            foreach (var panel in m_PanelsToRemove)
             {
-                trackedPanels.Remove(panelObj);
+                trackedPanels.Remove(panel);
             }
             m_PanelsToRemove.Clear();
 

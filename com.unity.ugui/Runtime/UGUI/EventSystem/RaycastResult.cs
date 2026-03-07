@@ -128,24 +128,14 @@ namespace UnityEngine.EventSystems
         /// <remarks>This is only useful in the context of EventSystem UI Toolkit interoperability.</remarks>
         /// <seealso cref="UnityEngine.UIElements.EventSystemUIToolkitInteroperabilityBridge"/>
         [Obsolete("RaycastResult.document is obsolete. Use RaycastResult.panelComponent instead.")]
-        public UIDocument document
-        {
-            get => panelComponent as UIDocument;
-            set => panelComponent = value;
-        }
+        public UIDocument document;
 
-        //This is a visualElement but we rely on the getter being stripped to not pulling the type.
-        internal IEventHandler m_element;
         /// <summary>
         /// The UIToolkit Visual Element that was intersected by this raycast, if any.
         /// </summary>
         /// <remarks>This is only useful in the context of EventSystem UI Toolkit interoperability.</remarks>
         /// <seealso cref="UnityEngine.UIElements.EventSystemUIToolkitInteroperabilityBridge"/>
-        public VisualElement element
-        {
-            get => (VisualElement)m_element;
-            set => m_element = value;
-        }
+        public VisualElement element;
 #endif
 
         /// <summary>
@@ -167,7 +157,10 @@ namespace UnityEngine.EventSystems
             displayIndex = 0;
 #if PACKAGE_UITOOLKIT
             panelComponent = null;
-            m_element = null;
+#pragma warning disable CS0618 // Type or member is obsolete
+            document = null;
+#pragma warning restore CS0618 // Type or member is obsolete
+            element = null;
 #endif
         }
 

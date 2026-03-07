@@ -345,7 +345,7 @@ namespace UnityEngine.EventSystems
             get
             {
 #if PACKAGE_UITOOLKIT
-                return uiToolkitInterop.overrideUIToolkitEvents && IRuntimePanel.uIElementsRuntimeUtility != null && IRuntimePanel.uIElementsRuntimeUtility.HasActiveDocuments();
+                return uiToolkitInterop.overrideUIToolkitEvents && UIDocument.EnabledDocumentCount > 0;
 #else
                 return false;
 #endif
@@ -394,10 +394,9 @@ namespace UnityEngine.EventSystems
             };
 
             var eventSystem = activeEventSystem != null ? activeEventSystem : EventSystem.current;
-            // Can be null if runtime panels have not been created (e.g., if UI Toolkit is stripped or not in use)
-            if (IRuntimePanel.uIElementsRuntimeUtility?.activeEventSystem != null && IRuntimePanel.uIElementsRuntimeUtility.activeEventSystem != eventSystem)
+            if (UIElementsRuntimeUtility.activeEventSystem != null && UIElementsRuntimeUtility.activeEventSystem != eventSystem)
             {
-                ((EventSystem)IRuntimePanel.uIElementsRuntimeUtility.activeEventSystem).uiToolkitInterop.overrideUIToolkitEvents = false;
+                ((EventSystem)UIElementsRuntimeUtility.activeEventSystem).uiToolkitInterop.overrideUIToolkitEvents = false;
             }
             if (eventSystem != null && eventSystem.isActiveAndEnabled)
             {
