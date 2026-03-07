@@ -1483,6 +1483,10 @@ namespace UnityEngine.UI
                         m_WasCanceled = true;
                     else if (m_Keyboard.status == TouchScreenKeyboard.Status.Done)
                         SendOnSubmit();
+
+#if UNITY_ANDROID || UNITY_IOS
+                    DeactivateInputField();
+#endif
                 }
 
                 return;

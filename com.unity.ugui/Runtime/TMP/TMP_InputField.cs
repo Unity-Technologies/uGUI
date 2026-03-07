@@ -1764,6 +1764,10 @@ namespace TMPro
                             OnSubmit(null);
                             break;
                     }
+
+#if UNITY_ANDROID || UNITY_IOS
+                    DeactivateInputField();
+#endif
                 }
 
                 return;
