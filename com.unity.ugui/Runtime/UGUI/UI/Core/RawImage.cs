@@ -13,6 +13,7 @@ namespace UnityEngine.UI
 
     [RequireComponent(typeof(CanvasRenderer))]
     [AddComponentMenu("UI (Canvas)/Raw Image", 12)]
+    [UGUIHelpURL("RawImage")]
     public class RawImage : MaskableGraphic
     {
         [FormerlySerializedAs("m_Tex")]

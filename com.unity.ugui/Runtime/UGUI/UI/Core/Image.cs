@@ -13,6 +13,7 @@ namespace UnityEngine.UI
 
     [RequireComponent(typeof(CanvasRenderer))]
     [AddComponentMenu("UI (Canvas)/Image", 11)]
+    [UGUIHelpURL("Image")]
     /// <summary>
     ///   Displays a Sprite inside the UI System.
     /// </summary>

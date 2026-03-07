@@ -1,6 +1,7 @@
 namespace UnityEngine.UI
 {
     [AddComponentMenu("Layout/Vertical Layout Group", 151)]
+    [UGUIHelpURL("VerticalLayoutGroup")]
     /// <summary>
     /// Layout child layout elements below each other.
     /// </summary>

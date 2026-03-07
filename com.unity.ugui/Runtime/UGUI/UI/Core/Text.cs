@@ -5,6 +5,7 @@ namespace UnityEngine.UI
 {
     [RequireComponent(typeof(CanvasRenderer))]
     [AddComponentMenu("UI (Canvas)/Legacy/Text", 100)]
+    [UGUIHelpURL("Text")]
     /// <summary>
     /// The default Graphic to draw font data to screen.
     /// </summary>

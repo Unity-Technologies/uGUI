@@ -5,6 +5,7 @@ namespace UnityEngine.UI
     [AddComponentMenu("Layout/Content Size Fitter", 141)]
     [ExecuteAlways]
     [RequireComponent(typeof(RectTransform))]
+    [UGUIHelpURL("ContentSizeFitter")]
     /// <summary>
     /// Resizes a RectTransform to fit the size of its content.
     /// </summary>

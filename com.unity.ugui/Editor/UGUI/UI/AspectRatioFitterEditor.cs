@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor.AnimatedValues;
+using UnityEditor.SceneManagement;
 using UnityEngine.UI;
 
 namespace UnityEditor.UI
@@ -44,7 +45,7 @@ namespace UnityEditor.UI
 
             if (aspectRatioFitter)
             {
-                if (!aspectRatioFitter.IsAspectModeValid())
+                if (!aspectRatioFitter.IsAspectModeValid() && !IsEditingPrefabAssetOrInPrefabMode())
                     ShowNoParentWarning();
                 if (!aspectRatioFitter.IsComponentValidOnObject())
                     ShowCanvasRenderModeInvalidWarning();
@@ -69,6 +70,28 @@ namespace UnityEditor.UI
         {
             var text = L10n.Tr("You cannot use this Aspect Mode because this Component is attached to a Canvas with a fixed width and height.");
             EditorGUILayout.HelpBox(text, MessageType.Warning, true);
+        }
+
+        // Returns true if any of this editor's targets is being edited in a Prefab Stage
+        // (Prefab Mode) or is a prefab asset from the Project window.
+        private bool IsEditingPrefabAssetOrInPrefabMode()
+        {
+            foreach (var t in targets)
+            {
+                var go = (t as GameObject) ?? (t as Component)?.gameObject;
+                if (go == null)
+                    continue;
+
+                // In Prefab Mode (either Isolation or In Context)?
+                if (PrefabStageUtility.GetPrefabStage(go) != null)
+                    return true;
+
+                // Prefab asset in Project window?
+                if (PrefabUtility.IsPartOfPrefabAsset(go))
+                    return true;
+            }
+
+            return false;
         }
     }
 }

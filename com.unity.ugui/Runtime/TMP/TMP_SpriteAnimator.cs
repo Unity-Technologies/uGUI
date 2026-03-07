@@ -6,6 +6,7 @@ using System.Collections.Generic;
 namespace TMPro
 {
     [DisallowMultipleComponent]
+    [TMPHelpURL("index")]
     public class TMP_SpriteAnimator : MonoBehaviour
     {
         private Dictionary<int, bool> m_animations = new Dictionary<int, bool>(16);

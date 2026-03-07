@@ -6,7 +6,7 @@ using System;
 
 namespace TMPro
 {
-
+    [TMPHelpURL("index")]
     public class TMP_ScrollbarEventHandler : MonoBehaviour, IPointerClickHandler, ISelectHandler, IDeselectHandler
     {
         public bool isSelected;

@@ -10,6 +10,7 @@ namespace UnityEngine.UI
     [ExecuteAlways]
     [RequireComponent(typeof(RectTransform))]
     [DisallowMultipleComponent]
+    [UGUIHelpURL("Mask")]
     /// <summary>
     /// A component for masking children elements.
     /// </summary>

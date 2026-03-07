@@ -7,6 +7,7 @@ namespace UnityEngine.UI
 {
     [AddComponentMenu("UI (Canvas)/Toggle Group", 31)]
     [DisallowMultipleComponent]
+    [UGUIHelpURL("ToggleGroup")]
     /// <summary>
     /// A component that represents a group of UI.Toggles.
     /// </summary>

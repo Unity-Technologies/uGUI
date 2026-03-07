@@ -1,6 +1,7 @@
 namespace UnityEngine.UI
 {
     [AddComponentMenu("Layout/Horizontal Layout Group", 150)]
+    [UGUIHelpURL("HorizontalLayoutGroup")]
     /// <summary>
     /// Layout class for arranging child elements side by side.
     /// </summary>

@@ -12,6 +12,7 @@ namespace TMPro
 {
     [AddComponentMenu("UI (Canvas)/Dropdown - TextMeshPro", 35)]
     [RequireComponent(typeof(RectTransform))]
+    [TMPHelpURL("index")]
     /// <summary>
     ///   A standard dropdown that presents a list of options when clicked, of which one can be chosen.
     /// </summary>

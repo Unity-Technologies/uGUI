@@ -11,6 +11,7 @@ namespace TMPro
 {
     [ExecuteAlways]
     [RequireComponent(typeof(CanvasRenderer))]
+    [TMPHelpURL("index")]
     public class TMP_SubMeshUI : MaskableGraphic
     {
         /// <summary>

@@ -9,6 +9,7 @@ namespace TMPro
 {
     [RequireComponent(typeof(MeshRenderer))]
     [ExecuteAlways]
+    [TMPHelpURL("index")]
     public class TMP_SubMesh : MonoBehaviour
     {
         /// <summary>

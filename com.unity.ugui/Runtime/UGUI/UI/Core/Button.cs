@@ -10,6 +10,7 @@ namespace UnityEngine.UI
     /// A standard button that sends an event when clicked.
     /// </summary>
     [AddComponentMenu("UI (Canvas)/Button", 30)]
+    [UGUIHelpURL("Button")]
     public class Button : Selectable, IPointerClickHandler, ISubmitHandler
     {
         [Serializable]

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 namespace UnityEngine.UI
 {
     [AddComponentMenu("Layout/Grid Layout Group", 152)]
+    [UGUIHelpURL("GridLayoutGroup")]
     /// <summary>
     /// Layout class to arrange child elements in a grid format.
     /// </summary>
