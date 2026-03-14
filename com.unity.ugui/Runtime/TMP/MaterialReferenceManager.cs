@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System;
 
@@ -61,6 +61,7 @@ namespace TMPro
         /// <summary>
         /// Add new Sprite Asset to dictionary.
         /// </summary>
+        /// <param name="hashCode"></param>
         /// <param name="spriteAsset"></param>
         public static void AddSpriteAsset(TMP_SpriteAsset spriteAsset)
         {
@@ -253,7 +254,7 @@ namespace TMPro
         /// <summary>
         /// Function to check if the sprite asset is already referenced.
         /// </summary>
-        /// <param name="sprite"></param>
+        /// <param name="font"></param>
         /// <returns></returns>
         public bool Contains(TMP_SpriteAsset sprite)
         {

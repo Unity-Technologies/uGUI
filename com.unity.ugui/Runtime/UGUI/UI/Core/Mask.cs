@@ -142,9 +142,7 @@ namespace UnityEngine.UI
             return RectTransformUtility.RectangleContainsScreenPoint(rectTransform, sp, eventCamera);
         }
 
-        /// <summary>
         /// Stencil calculation time!
-        /// </summary>
         public virtual Material GetModifiedMaterial(Material baseMaterial)
         {
             if (!MaskEnabled())

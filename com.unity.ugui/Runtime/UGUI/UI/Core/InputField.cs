@@ -1255,7 +1255,7 @@ namespace UnityEngine.UI
         /// A common use of this is allowing the user to type once focussed. Another way is outputting a message when the user clicks on a field(often seen when creating passwords).
         /// </remarks>
         /// <example>
-        /// <para>Create an Input Field by going to __Create__&gt;__UI__&gt;__Input Field__. Attach this script to the Input Field GameObject.</para>
+        /// //Create an Input Field by going to __Create__>__UI__>__Input Field__. Attach this script to the Input Field GameObject
         /// <code>
         /// <![CDATA[
         /// using UnityEngine;

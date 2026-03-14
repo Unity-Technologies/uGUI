@@ -310,7 +310,7 @@ namespace UnityEngine.EventSystems
         /// </summary>
         /// <param name="x">X movement.</param>
         /// <param name="y">Y movement.</param>
-        /// <param name="moveDeadZone">Move dead zone.</param>
+        /// <param name="deadZone">Dead zone.</param>
         protected virtual AxisEventData GetAxisEventData(float x, float y, float moveDeadZone)
         {
             if (m_AxisEventData == null)
