@@ -189,6 +189,16 @@ namespace UnityEditor.UI
             // This way if we are on a derived class we dont draw anything else, otherwise draw the remaining properties.
             ChildClassPropertiesGUI();
 
+            //if the TargetGraphic is changed, reset the outgoing Graphic
+			if (graphic != m_TargetGraphicProperty.objectReferenceValue)
+			{
+				CanvasRenderer renderer = graphic.GetComponent<CanvasRenderer>();
+				if (renderer != null)
+				{
+					renderer.SetColor(Color.white);
+				}
+			}
+
             serializedObject.ApplyModifiedProperties();
         }
 

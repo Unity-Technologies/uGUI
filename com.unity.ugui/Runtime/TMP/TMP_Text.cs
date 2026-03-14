@@ -1,4 +1,4 @@
-﻿#define TMP_PRESENT
+#define TMP_PRESENT
 
 using System;
 using System.Text;
@@ -995,7 +995,7 @@ namespace TMPro
 
 
         /// <summary>
-        /// Sets Perspective Correction to Zero for Orthographic Camera mode & 0.875f for Perspective Camera mode.
+        /// Sets Perspective Correction to Zero for Orthographic Camera mode and 0.875f for Perspective Camera mode.
         /// </summary>
         public bool isOrthographic
         {
@@ -1960,7 +1960,6 @@ namespace TMPro
         /// <param name="duration"></param>
         /// <param name="ignoreTimeScale"></param>
         /// <param name="useAlpha"></param>
-        /// <param name="useRGB"></param>
         protected virtual void InternalCrossFadeColor(Color targetColor, float duration, bool ignoreTimeScale, bool useAlpha) { }
 
 
@@ -2768,9 +2767,9 @@ namespace TMPro
         /// <summary>
         /// Set the text using a StringBuilder object as the source.
         /// </summary>
-        /// <description>
+        /// <remarks>
         /// Using a StringBuilder instead of concatenating strings prevents memory allocations with temporary objects.
-        /// </description>
+        /// </remarks>
         /// <param name="sourceText">The StringBuilder object containing the source text.</param>
         public void SetText(StringBuilder sourceText)
         {
@@ -5442,8 +5441,6 @@ namespace TMPro
         /// <summary>
         /// Store vertex information for each sprite.
         /// </summary>
-        /// <param name="padding"></param>
-        /// <param name="style_padding"></param>
         /// <param name="vertexColor"></param>
         protected virtual void SaveSpriteVertexInfo(Color32 vertexColor)
         {
@@ -5539,7 +5536,6 @@ namespace TMPro
         /// Store vertex attributes into the appropriate TMP_MeshInfo.
         /// </summary>
         /// <param name="i"></param>
-        /// <param name="index_X4"></param>
         protected virtual void FillCharacterVertexBuffers(int i)
         {
             int materialIndex = m_textInfo.characterInfo[i].materialReferenceIndex;
@@ -5678,7 +5674,6 @@ namespace TMPro
         /// Fill Vertex Buffers for Sprites
         /// </summary>
         /// <param name="i"></param>
-        /// <param name="spriteIndex_X4"></param>
         protected virtual void FillSpriteVertexBuffers(int i)
         {
             int materialIndex = m_textInfo.characterInfo[i].materialReferenceIndex;
@@ -6050,7 +6045,7 @@ namespace TMPro
         /// <summary>
         /// Method used to find and cache references to the Underline and Ellipsis characters.
         /// </summary>
-        /// <param name=""></param>
+        /// <param name="fontAsset"></param>
         protected void GetSpecialCharacters(TMP_FontAsset fontAsset)
         {
             GetEllipsisSpecialCharacter(fontAsset);
@@ -6755,10 +6750,10 @@ namespace TMPro
         /// <summary>
         /// Extracts a float value from char[] given a start index and length.
         /// </summary>
-        /// <param name="chars"></param> The Char[] containing the numerical sequence.
-        /// <param name="startIndex"></param> The index of the start of the numerical sequence.
-        /// <param name="length"></param> The length of the numerical sequence.
-        /// <param name="lastIndex"></param> Index of the last character in the validated sequence.
+        /// <param name="chars">The Char[] containing the numerical sequence.</param>
+        /// <param name="startIndex">The index of the start of the numerical sequence.</param>
+        /// <param name="length">The length of the numerical sequence.</param>
+        /// <param name="lastIndex">Index of the last character in the validated sequence.</param>
         /// <returns></returns>
         protected float ConvertToFloat(char[] chars, int startIndex, int length, out int lastIndex)
         {

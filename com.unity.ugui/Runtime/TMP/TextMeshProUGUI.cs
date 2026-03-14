@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Pool;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using Unity.Profiling;
@@ -1281,7 +1282,7 @@ namespace TMPro
         private Canvas GetCanvas()
         {
             Canvas canvas = null;
-            var list = TMP_ListPool<Canvas>.Get();
+            var list = ListPool<Canvas>.Get();
 
             gameObject.GetComponentsInParent(false, list);
             if (list.Count > 0)
@@ -1297,7 +1298,7 @@ namespace TMPro
                 }
             }
 
-            TMP_ListPool<Canvas>.Release(list);
+            ListPool<Canvas>.Release(list);
 
             return canvas;
         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -29,7 +29,7 @@ namespace TMPro.EditorUtilities
         /// <summary>
         /// Starts a new EditorCoroutine.
         /// </summary>
-        /// <param name="newCoroutine">Coroutine</param>
+        /// <param name="routine">The coroutine to run.</param>
         /// <returns>new EditorCoroutine</returns>
         public static TMP_EditorCoroutine StartCoroutine(IEnumerator routine)
         {

@@ -31,7 +31,7 @@ To change the default style sheet, set the **Default Style Sheet > Default Style
 
 ## Per-object style sheets
 
-
+To override the default style sheet, assign the style sheet asset under **Extra settings** in the [UI text component](TMPObjectUIText.md#extra-settings) or [3D text component](TMPObject3DText.md#extra-settings).
 
 ## Creating custom style sheets
 

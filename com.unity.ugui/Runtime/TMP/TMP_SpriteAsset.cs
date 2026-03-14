@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.TextCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -253,7 +253,8 @@ namespace TMPro
         /// </summary>
         /// <param name="spriteAsset">The font asset to search for the given character.</param>
         /// <param name="unicode">The character to find.</param>
-        /// <param name="glyph">out parameter containing the glyph for the specified character (if found).</param>
+        /// <param name="includeFallbacks">Whether to search fallback sprite assets.</param>
+        /// <param name="spriteIndex">out parameter containing the sprite index for the specified character (if found).</param>
         /// <returns></returns>
         public static TMP_SpriteAsset SearchForSpriteByUnicode(TMP_SpriteAsset spriteAsset, uint unicode, bool includeFallbacks, out int spriteIndex)
         {

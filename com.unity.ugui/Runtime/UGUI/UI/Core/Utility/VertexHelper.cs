@@ -49,6 +49,7 @@ namespace UnityEngine.UI
         private List<Vector4> m_Uv3S;
         private List<Vector3> m_Normals;
         private List<Vector4> m_Tangents;
+        private List<Vector4> m_PrevPositions;
         private List<int> m_Indices;
 
         private static readonly Vector4 s_DefaultTangent = new Vector4(1.0f, 0.0f, 0.0f, -1.0f);
@@ -77,6 +78,8 @@ namespace UnityEngine.UI
             m_Normals.AddRange(m.normals);
             m_Tangents.AddRange(m.tangents);
             m_Indices.AddRange(m.GetIndices(0));
+            m.GetUVs(4, tempUVList);
+            m_PrevPositions.AddRange(tempUVList);
         }
 
         private void InitializeListIfRequired()
@@ -91,6 +94,7 @@ namespace UnityEngine.UI
                 m_Uv3S = ListPool<Vector4>.Get();
                 m_Normals = ListPool<Vector3>.Get();
                 m_Tangents = ListPool<Vector4>.Get();
+                m_PrevPositions = ListPool<Vector4>.Get();
                 m_Indices = ListPool<int>.Get();
                 m_ListsInitalized = true;
             }
@@ -111,6 +115,7 @@ namespace UnityEngine.UI
                 ListPool<Vector4>.Release(m_Uv3S);
                 ListPool<Vector3>.Release(m_Normals);
                 ListPool<Vector4>.Release(m_Tangents);
+                ListPool<Vector4>.Release(m_PrevPositions);
                 ListPool<int>.Release(m_Indices);
 
                 m_Positions = null;
@@ -121,6 +126,7 @@ namespace UnityEngine.UI
                 m_Uv3S = null;
                 m_Normals = null;
                 m_Tangents = null;
+                m_PrevPositions = null;
                 m_Indices = null;
 
                 m_ListsInitalized = false;
@@ -143,6 +149,7 @@ namespace UnityEngine.UI
                 m_Uv3S.Clear();
                 m_Normals.Clear();
                 m_Tangents.Clear();
+                m_PrevPositions.Clear();
                 m_Indices.Clear();
             }
         }
@@ -180,6 +187,7 @@ namespace UnityEngine.UI
             vertex.uv3 = m_Uv3S[i];
             vertex.normal = m_Normals[i];
             vertex.tangent = m_Tangents[i];
+            vertex.prevPosition = m_PrevPositions[i];
         }
 
         /// <summary>
@@ -199,6 +207,7 @@ namespace UnityEngine.UI
             m_Uv3S[i] = vertex.uv3;
             m_Normals[i] = vertex.normal;
             m_Tangents[i] = vertex.tangent;
+            m_PrevPositions[i] = vertex.prevPosition;
         }
 
         /// <summary>
@@ -221,6 +230,7 @@ namespace UnityEngine.UI
             mesh.SetUVs(3, m_Uv3S);
             mesh.SetNormals(m_Normals);
             mesh.SetTangents(m_Tangents);
+            mesh.SetUVs(4, m_PrevPositions);
             mesh.SetTriangles(m_Indices, 0);
             mesh.RecalculateBounds();
         }
@@ -236,7 +246,8 @@ namespace UnityEngine.UI
         /// <param name="uv3">UV3 of the vert</param>
         /// <param name="normal">Normal of the vert.</param>
         /// <param name="tangent">Tangent of the vert</param>
-        public void AddVert(Vector3 position, Color32 color, Vector4 uv0, Vector4 uv1, Vector4 uv2, Vector4 uv3, Vector3 normal, Vector4 tangent)
+        /// <param name="prevPosition">Previous position of the vert (in the UV4 slot)</param>
+        public void AddVert(Vector3 position, Color32 color, Vector4 uv0, Vector4 uv1, Vector4 uv2, Vector4 uv3, Vector3 normal, Vector4 tangent, Vector4 prevPosition)
         {
             InitializeListIfRequired();
 
@@ -248,6 +259,23 @@ namespace UnityEngine.UI
             m_Uv3S.Add(uv3);
             m_Normals.Add(normal);
             m_Tangents.Add(tangent);
+            m_PrevPositions.Add(prevPosition);
+        }
+
+        /// <summary>
+        /// Add a single vertex to the stream.
+        /// </summary>
+        /// <param name="position">Position of the vert</param>
+        /// <param name="color">Color of the vert</param>
+        /// <param name="uv0">UV of the vert</param>
+        /// <param name="uv1">UV1 of the vert</param>
+        /// <param name="uv2">UV2 of the vert</param>
+        /// <param name="uv3">UV3 of the vert</param>
+        /// <param name="normal">Normal of the vert.</param>
+        /// <param name="tangent">Tangent of the vert</param>
+        public void AddVert(Vector3 position, Color32 color, Vector4 uv0, Vector4 uv1, Vector4 uv2, Vector4 uv3, Vector3 normal, Vector4 tangent)
+        {
+            AddVert(position, color, uv0, uv1, uv2, uv3, normal, tangent, Vector4.zero);
         }
 
         /// <summary>
@@ -261,7 +289,7 @@ namespace UnityEngine.UI
         /// <param name="tangent">Tangent of the vert</param>
         public void AddVert(Vector3 position, Color32 color, Vector4 uv0, Vector4 uv1, Vector3 normal, Vector4 tangent)
         {
-            AddVert(position, color, uv0, uv1, Vector4.zero, Vector4.zero, normal, tangent);
+            AddVert(position, color, uv0, uv1, Vector4.zero, Vector4.zero, normal, tangent, Vector4.zero);
         }
 
         /// <summary>
@@ -281,7 +309,7 @@ namespace UnityEngine.UI
         /// <param name="v">The vertex to add</param>
         public void AddVert(UIVertex v)
         {
-            AddVert(v.position, v.color, v.uv0, v.uv1, v.uv2, v.uv3, v.normal, v.tangent);
+            AddVert(v.position, v.color, v.uv0, v.uv1, v.uv2, v.uv3, v.normal, v.tangent, v.prevPosition);
         }
 
         /// <summary>
@@ -325,7 +353,7 @@ namespace UnityEngine.UI
 
             if (verts != null)
             {
-                CanvasRenderer.AddUIVertexStream(verts, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Uv2S, m_Uv3S, m_Normals, m_Tangents);
+                CanvasRenderer.AddUIVertexStream(verts, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Uv2S, m_Uv3S, m_Normals, m_Tangents, m_PrevPositions);
             }
 
             if (indices != null)
@@ -345,7 +373,7 @@ namespace UnityEngine.UI
 
             InitializeListIfRequired();
 
-            CanvasRenderer.SplitUIVertexStreams(verts, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Uv2S, m_Uv3S, m_Normals, m_Tangents, m_Indices);
+            CanvasRenderer.SplitUIVertexStreams(verts, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Uv2S, m_Uv3S, m_Normals, m_Tangents, m_PrevPositions, m_Indices);
         }
 
         /// <summary>
@@ -358,7 +386,7 @@ namespace UnityEngine.UI
 
             InitializeListIfRequired();
 
-            CanvasRenderer.CreateUIVertexStream(stream, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Uv2S, m_Uv3S, m_Normals, m_Tangents, m_Indices);
+            CanvasRenderer.CreateUIVertexStream(stream, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Uv2S, m_Uv3S, m_Normals, m_Tangents, m_PrevPositions, m_Indices);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using System.Collections;
 using Object = UnityEngine.Object;
@@ -547,7 +547,7 @@ namespace TMPro
         /// Function to update the padding values of the object.
         /// </summary>
         /// <param name="isExtraPadding"></param>
-        /// <param name="isBold"></param>
+        /// <param name="isUsingBold"></param>
         public void UpdateMeshPadding(bool isExtraPadding, bool isUsingBold)
         {
             m_padding = ShaderUtilities.GetPadding(m_sharedMaterial, isExtraPadding, isUsingBold);

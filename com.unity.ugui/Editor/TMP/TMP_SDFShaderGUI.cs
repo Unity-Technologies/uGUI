@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 
 namespace TMPro.EditorUtilities
@@ -650,6 +650,21 @@ namespace TMPro.EditorUtilities
             DoFloat("_ScaleRatioB", "Scale Ratio B");
             DoFloat("_ScaleRatioC", "Scale Ratio C");
             EditorGUI.EndDisabledGroup();
+
+            if (m_Material.HasProperty(ShaderUtilities.ShaderTag_Spacewarp))
+            {
+                EditorGUILayout.Space();
+                DoToggle(ShaderUtilities.ShaderTag_Spacewarp, "Use SpaceWarp");
+                bool xrMotionVectorPassEnabled = m_Material.GetFloat(ShaderUtilities.ShaderTag_Spacewarp) != 0.0f;
+                EditorGUILayout.Space();
+
+                string motionVectorPass = "XRMotionVectors";
+                if (m_Material.GetShaderPassEnabled(motionVectorPass) != xrMotionVectorPassEnabled)
+                {
+                    m_Material.SetShaderPassEnabled(motionVectorPass, xrMotionVectorPassEnabled);
+                }
+            }
+
             EditorGUI.indentLevel -= 1;
             EditorGUILayout.Space();
         }

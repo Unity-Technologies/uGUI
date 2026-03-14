@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.TextCore;
 using UnityEngine.TextCore.LowLevel;
@@ -43,7 +43,6 @@ namespace TMPro
         /// <param name="fontStyle">The font style</param>
         /// <param name="fontWeight">The font weight</param>
         /// <param name="isAlternativeTypeface">Indicates if the OUT font asset is an alternative typeface or fallback font asset</param>
-        /// <param name="fontAsset">The font asset that contains the requested character</param>
         /// <returns></returns>
         public static TMP_Character GetCharacterFromFontAsset(uint unicode, TMP_FontAsset sourceFontAsset, bool includeFallbacks, FontStyles fontStyle, FontWeight fontWeight, out bool isAlternativeTypeface)
         {

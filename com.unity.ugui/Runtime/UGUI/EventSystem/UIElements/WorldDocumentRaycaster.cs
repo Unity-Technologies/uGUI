@@ -4,8 +4,7 @@ using UnityEngine.UI;
 
 namespace UnityEngine.UIElements
 {
-    // This code is disabled unless the com.unity.modules.uielements module is present.
-    // The UIElements module is always present in the Editor but it can be stripped from a project build if unused.
+    // This code is disabled unless the com.unity.modules.uielements module is activated in the package manager.
 #if PACKAGE_UITOOLKIT
     /// <summary>
     /// A derived BaseRaycaster to raycast against UI Toolkit world-space document instances at runtime.
@@ -30,7 +29,6 @@ namespace UnityEngine.UIElements
             set => m_EventCamera = value;
         }
 
-        private static PhysicsDocumentPicker worldPicker = new();
 
         /// <summary>
         /// Raycast against the scene.
@@ -51,7 +49,8 @@ namespace UnityEngine.UIElements
 
             var pointerId = currentInputModule.ConvertUIToolkitPointerId(eventData);
 
-            var capturingCamera = PointerDeviceState.GetCameraWithSoftPointerCapture(pointerId);
+            // Can be null if runtime panels have not been created or UI Toolkit is stripped; default to null (no capture)
+            var capturingCamera = IRuntimePanel.pointerDeviceState?.GetCameraWithSoftPointerCapture(pointerId);
             if (capturingCamera != null)
             {
                 var cam = m_EventCamera != null ? m_EventCamera : Camera.main;
@@ -59,11 +58,11 @@ namespace UnityEngine.UIElements
                     return;
             }
 
-            if (!worldPicker.TryPickWithCapture(pointerId, worldRay, maxDistance, layerMask, out _,
+            if (!PhysicsDocumentPicker.TryPickWithCapture(pointerId, worldRay, maxDistance, layerMask, out _,
                     out var panelComponent, out var elementUnderPointer, out var distance, out var captured))
                 return;
 
-            var containerPanel = PanelComponentUtils.GetContainerPanel(panelComponent);
+            var containerPanel = panelComponent?.GetContainerPanel();
 
             resultAppendList.Add(new RaycastResult
             {
@@ -72,10 +71,7 @@ namespace UnityEngine.UIElements
                 origin = worldRay.origin,
                 worldPosition = worldRay.origin + distance * worldRay.direction,
                 panelComponent = panelComponent,
-#pragma warning disable CS0618 // Type or member is obsolete
-                document = panelComponent as UIDocument,
-#pragma warning restore CS0618 // Type or member is obsolete
-                element = elementUnderPointer,
+                m_element = elementUnderPointer,
                 module = this,
                 distance = distance,
                 sortingOrder = captured ? int.MaxValue : 0,

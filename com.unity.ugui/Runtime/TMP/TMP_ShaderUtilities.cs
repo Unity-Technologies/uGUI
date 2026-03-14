@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Linq;
 using System.Collections;
 
@@ -128,6 +128,11 @@ namespace TMPro
 
         public static string ShaderTag_ZTestMode = "unity_GUIZTestMode";
         public static string ShaderTag_CullMode = "_CullMode";
+
+        /// <summary>
+        /// The shader tag used to designate the XR motion vectors pass.
+        /// </summary>
+        public static string ShaderTag_Spacewarp = "_XRMotionVectorsPass";
 
         private static float m_clamp = 1.0f;
         public static bool isInitialized = false;

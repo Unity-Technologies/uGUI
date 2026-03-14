@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 #pragma warning disable 0649 // Disabled warnings.
@@ -92,7 +92,7 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function to update the content of the int[] resulting from changes to OpeningDefinition & ClosingDefinition.
+        /// Function to update the content of the int[] resulting from changes to OpeningDefinition and ClosingDefinition.
         /// </summary>
         public void RefreshStyle()
         {
