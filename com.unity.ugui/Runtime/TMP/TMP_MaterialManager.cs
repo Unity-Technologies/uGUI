@@ -1,7 +1,6 @@
 ﻿//#define TMP_DEBUG_MODE
 
 using UnityEngine;
-using UnityEngine.Pool;
 using System.Collections.Generic;
 
 using UnityEngine.UI;
@@ -279,7 +278,7 @@ namespace TMPro
                 return count;
 
             var t = transform.parent;
-            var components = ListPool<Mask>.Get();
+            var components = TMP_ListPool<Mask>.Get();
             while (t != null)
             {
                 t.GetComponents<Mask>(components);
@@ -298,7 +297,7 @@ namespace TMPro
 
                 t = t.parent;
             }
-            ListPool<Mask>.Release(components);
+            TMP_ListPool<Mask>.Release(components);
 
             return Mathf.Min((1 << count) - 1, 255);
         }
@@ -309,14 +308,14 @@ namespace TMPro
             if (baseMaterial == null)
                 return null;
 
-            var modifiers = ListPool<IMaterialModifier>.Get();
+            var modifiers = TMP_ListPool<IMaterialModifier>.Get();
             graphic.GetComponents(modifiers);
 
             var result = baseMaterial;
             for (int i = 0; i < modifiers.Count; i++)
                 result = modifiers[i].GetModifiedMaterial(result);
 
-            ListPool<IMaterialModifier>.Release(modifiers);
+            TMP_ListPool<IMaterialModifier>.Release(modifiers);
 
             return result;
         }
@@ -325,7 +324,7 @@ namespace TMPro
         {
             // Implementation is copied from uGUI (Unity UI)
 
-            var canvasList = ListPool<Canvas>.Get();
+            var canvasList = TMP_ListPool<Canvas>.Get();
             start.GetComponentsInParent(false, canvasList);
             Canvas canvas = null;
 
@@ -337,7 +336,7 @@ namespace TMPro
                 if (canvas.overrideSorting)
                     break;
             }
-            ListPool<Canvas>.Release(canvasList);
+            TMP_ListPool<Canvas>.Release(canvasList);
 
             return canvas != null ? canvas.transform : null;
         }
