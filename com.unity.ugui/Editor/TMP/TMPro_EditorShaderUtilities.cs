@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using System.Linq;
 using System.Collections;
@@ -14,7 +14,6 @@ namespace TMPro.EditorUtilities
         /// Copy Shader properties from source to destination material.
         /// </summary>
         /// <param name="source"></param>
-        /// <returns></returns>
         public static void CopyMaterialProperties(Material source, Material destination)
         {
             MaterialProperty[] source_prop = MaterialEditor.GetMaterialProperties(new Material[] { source });

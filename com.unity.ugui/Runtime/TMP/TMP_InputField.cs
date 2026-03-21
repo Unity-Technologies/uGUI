@@ -4462,6 +4462,16 @@ namespace TMPro
 
         public override void OnDeselect(BaseEventData eventData)
         {
+            // Commit any pending IME composition string before deactivating.
+            // When focus is changed programmatically, OnUpdateSelected is not called,
+            // so the composition is never processed. DeactivateInputField resets the
+            // IME mode and discards the composition, causing the last composed character
+            // (e.g., the final Hangul syllable) to be lost.
+            if (compositionLength > 0)
+            {
+                Append(compositionString);
+            }
+
             DeactivateInputField();
 
             base.OnDeselect(eventData);

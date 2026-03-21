@@ -401,6 +401,7 @@ namespace TMPro
         [SerializeField]
         private TMP_FontWeightPair[] m_FontWeightTable = new TMP_FontWeightPair[10];
 
+#pragma warning disable 0414
         // FONT WEIGHTS
         /// <summary>
         /// Font weights used by font asset prior to version 1.1.0.
@@ -408,9 +409,9 @@ namespace TMPro
         /// </summary>
         [SerializeField]
         private TMP_FontWeightPair[] fontWeights = null;
+#pragma warning restore 0414
 
         //private int[] m_characterSet; // Array containing all the characters in this font asset.
-
         /// <summary>
         /// Defines the dilation of the text when using regular style.
         /// </summary>

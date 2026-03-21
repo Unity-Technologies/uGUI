@@ -10,7 +10,7 @@ A **Mask** is not a visible UI control but rather a way to modify the appearance
 
 |**Property:** |**Function:** |
 |:---|:---|
-|**Show Graphic** |Should the graphic of the masking (parent) object be drawn with alpha over the child object? |
+|**Show Mask Graphic** |Should the graphic of the masking (parent) object be drawn with alpha over the child object? |
 
 
 ## Description
