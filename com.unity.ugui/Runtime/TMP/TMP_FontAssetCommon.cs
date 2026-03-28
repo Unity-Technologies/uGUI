@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.TextCore;
 using UnityEngine.TextCore.LowLevel;
@@ -325,10 +325,10 @@ namespace TMPro
         /// <summary>
         /// Add Glyph pair adjustment record
         /// </summary>
-        /// <param name="firstGlyph">The first glyph</param>
-        /// <param name="firstGlyphAdjustments">Adjustment record for the first glyph</param>
-        /// <param name="secondGlyph">The second glyph</param>
-        /// <param name="secondGlyphAdjustments">Adjustment record for the second glyph</param>
+        /// <param name="first">The first glyph</param>
+        /// <param name="firstAdjustments">Adjustment record for the first glyph</param>
+        /// <param name="second">The second glyph</param>
+        /// <param name="secondAdjustments">Adjustment record for the second glyph</param>
         /// <returns></returns>
         public int AddGlyphPairAdjustmentRecord(uint first, GlyphValueRecord_Legacy firstAdjustments, uint second, GlyphValueRecord_Legacy secondAdjustments)
         {

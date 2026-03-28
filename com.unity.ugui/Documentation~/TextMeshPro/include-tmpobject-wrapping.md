@@ -7,7 +7,11 @@ Some overflow options supersede wrapping. For example, if Overflow is set to tru
 
 |Property:||Function:|
 |---------|-|---------|
-|**Wrapping**||**Enable** or **Disable** word wrapping. |
+|**Text Wrapping Mode**||Control the text wrapping mode.|
+||No Wrap|Disable word wrapping.|
+||Normal|Enable word wrapping.|
+||Preserve Whitespace|Enable word wrapping while preserving whitespace.|
+||Preserve Whitespace No Wrap|Disable word wrapping while preserving whitespace.|
 |**Overflow**||Specify what happens when the text doesn't fit inside the display area.|
 ||Overflow|Extends the text beyond the bounds of the display area, but still wraps it if **Wrapping** is enabled.|
 ||Ellipsis|Cuts off the text and inserts an ellipsis (…) to indicate that some of the text is omitted.|
