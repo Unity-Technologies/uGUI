@@ -1810,9 +1810,6 @@ namespace TMPro
                             return;
                         }
 
-                        if (!m_AllowInput)
-                            return;
-
                         // In the case of a Custom Validator, the user is expected to modify the m_Text where as such we do not append c.
                         // However we will append c if the user did not modify the m_Text (UUM-42147)
                         if (c != 0 && (characterValidation != CharacterValidation.CustomValidator || !hasValidateUpdatedText))
@@ -4465,16 +4462,6 @@ namespace TMPro
 
         public override void OnDeselect(BaseEventData eventData)
         {
-            // Commit any pending IME composition string before deactivating.
-            // When focus is changed programmatically, OnUpdateSelected is not called,
-            // so the composition is never processed. DeactivateInputField resets the
-            // IME mode and discards the composition, causing the last composed character
-            // (e.g., the final Hangul syllable) to be lost.
-            if (compositionLength > 0)
-            {
-                Append(compositionString);
-            }
-
             DeactivateInputField();
 
             base.OnDeselect(eventData);

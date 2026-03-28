@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using System.Linq;
 using System.Collections;
@@ -244,6 +244,7 @@ namespace TMPro
         /// <summary>
         /// Function to resized the content of MeshData and re-assign normals, tangents and triangles.
         /// </summary>
+        /// <param name="meshData"></param>
         /// <param name="size"></param>
         public void ResizeMeshInfo(int size)
         {
