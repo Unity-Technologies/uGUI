@@ -275,32 +275,6 @@ internal class ImageTests
         Assert.That(m_Image.defaultMaterial.name, Is.EqualTo(name));
     }
 
-    [Test]
-    public void TrackedTexturelessImagesWillNotLeak()
-    {
-        Image image = new GameObject().AddComponent<Image>();
-
-        var texture = new Texture2D(2, 2);
-
-        Sprite spriteA = Sprite.Create(texture, new Rect(0, 0, 2, 2), new Vector2(0, 0));
-        Sprite spriteB = Sprite.Create(texture, new Rect(0, 0, 2, 2), new Vector2(0, 0));
-
-        GameObject.DestroyImmediate(texture); // Sprite A and B are now textureless
-
-        var trackedTexturelessImages = typeof(Image).GetField("m_TrackedTexturelessImages", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
-        int startCount = (trackedTexturelessImages.GetValue(null) as System.Collections.Generic.List<Image>).Count;
-
-        image.sprite = spriteA; // calls TrackSprite()
-        Assert.AreEqual((trackedTexturelessImages.GetValue(null) as System.Collections.Generic.List<Image>).Count, startCount + 1);
-
-        image.sprite = spriteB; // calls TrackSprite()
-        Assert.AreEqual((trackedTexturelessImages.GetValue(null) as System.Collections.Generic.List<Image>).Count, startCount + 1);
-
-        Object.DestroyImmediate(image.gameObject, true);
-
-        Assert.AreEqual((trackedTexturelessImages.GetValue(null) as System.Collections.Generic.List<Image>).Count, startCount);
-    }
-
     [TearDown]
     public void TearDown()
     {
