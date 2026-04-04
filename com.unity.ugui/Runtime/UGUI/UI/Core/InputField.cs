@@ -1255,7 +1255,7 @@ namespace UnityEngine.UI
         /// A common use of this is allowing the user to type once focussed. Another way is outputting a message when the user clicks on a field(often seen when creating passwords).
         /// </remarks>
         /// <example>
-        /// //Create an Input Field by going to __Create__>__UI__>__Input Field__. Attach this script to the Input Field GameObject
+        /// <para>Create an Input Field by going to __Create__&gt;__UI__&gt;__Input Field__. Attach this script to the Input Field GameObject.</para>
         /// <code>
         /// <![CDATA[
         /// using UnityEngine;
@@ -1691,9 +1691,30 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// If we are able to drag, try and select the character range underneath the bounding rect.
+        /// Selects the character range under the bounding rectangle during a drag operation.
         /// </summary>
-        /// <param name="eventData"></param>
+        /// <remarks>
+        /// The event system calls this method when the user drags over the
+        /// <see cref="InputField"/>. It updates the caret and selection range based on
+        /// the drag position so that the selected text expands or shrinks as the user
+        /// drags. Requires <see cref="MayDrag"/> to return true.
+        /// </remarks>
+        /// <param name="eventData">The pointer event data for the drag.</param>
+        /// <example>
+        /// <para>Override this method to customize drag selection behavior. Call
+        /// base.OnDrag first so the caret and selection range update correctly;
+        /// then add custom logic (e.g. limit selection length or update a custom
+        /// selection indicator).</para>
+        /// <code><![CDATA[
+        /// public override void OnDrag(PointerEventData eventData)
+        /// {
+        ///     base.OnDrag(eventData);
+        ///     // Clamp selection to a max length.
+        ///     if (caretSelectPositionInternal - caretPositionInternal > maxSelectionLength)
+        ///         caretSelectPositionInternal = caretPositionInternal + maxSelectionLength;
+        /// }
+        /// ]]></code>
+        /// </example>
         public virtual void OnDrag(PointerEventData eventData)
         {
             if (!MayDrag(eventData))
@@ -3137,7 +3158,13 @@ namespace UnityEngine.UI
 
             if (isFocused)
             {
+                #if UNITY_ANDROID_RENDERSERVICE
+                // in the case of the render service, m_Keyboard.active might not be updated yet at this stage, since
+                // the actual keyboard implementation is handled in a client application.
+                if (m_Keyboard != null)
+                #else
                 if (m_Keyboard != null && !m_Keyboard.active)
+                #endif
                 {
                     m_Keyboard.active = true;
                     m_Keyboard.text = m_Text;
@@ -3278,6 +3305,11 @@ namespace UnityEngine.UI
         /// <param name="eventData">The data sent by the EventSystem</param>
         public override void OnDeselect(BaseEventData eventData)
         {
+            if (compositionString.Length > 0)
+            {
+                Append(compositionString);
+            }
+
             DeactivateInputField();
             base.OnDeselect(eventData);
         }

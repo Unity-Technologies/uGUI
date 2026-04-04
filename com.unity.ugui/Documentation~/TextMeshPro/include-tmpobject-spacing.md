@@ -11,3 +11,4 @@ To control spacing within a single TextMesh Pro GameObject, use [rich text tags]
 |Word||Set the spacing between words for this TextMesh Pro GameObject.|
 |Line||Set the spacing between lines for this TextMesh Pro GameObject.|
 |Paragraph||Set the spacing between paragraphs for this TextMesh Pro GameObject. <br/><br/> Paragraphs are defined by explicit line breaks.|
+|Character Horizontal Scale||Scale the horizontal size of characters for this TextMesh Pro GameObject.|
