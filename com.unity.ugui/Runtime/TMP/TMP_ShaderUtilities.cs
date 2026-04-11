@@ -178,7 +178,7 @@ namespace TMPro
         }
 
         /// <summary>
-        ///
+        /// Populates the shader property IDs used by TextMesh Pro materials.
         /// </summary>
         public static void GetShaderPropertyIDs()
         {

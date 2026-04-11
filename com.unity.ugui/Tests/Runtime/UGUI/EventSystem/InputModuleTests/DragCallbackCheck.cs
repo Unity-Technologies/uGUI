@@ -1,14 +1,15 @@
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 internal class DragCallbackCheck : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler, IPointerDownHandler
 {
     private bool loggedOnDrag = false;
-    public bool onBeginDragCalled = false;
-    public bool onDragCalled = false;
-    public bool onEndDragCalled = false;
-    public bool onDropCalled = false;
-    public int? pointerId = null;
+    [NonSerialized] public bool onBeginDragCalled = false;
+    [NonSerialized] public bool onDragCalled = false;
+    [NonSerialized] public bool onEndDragCalled = false;
+    [NonSerialized] public bool onDropCalled = false;
+    [NonSerialized] public int? pointerId = null;
 
     public void OnBeginDrag(PointerEventData eventData)
     {

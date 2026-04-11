@@ -291,6 +291,8 @@ namespace UnityEngine.UI
 
                         ResetAlphaHitThresholdIfNeeded();
                         SetAllDirty();
+                        if (m_Tracked)
+                            UnTrackImage(this);
                         TrackSprite();
                     }
                 }
@@ -349,10 +351,10 @@ namespace UnityEngine.UI
         /// is set to /null/.
         /// </remarks>
         /// <example>
-        /// Note: The script example below has two buttons.  The button textures are loaded from the
+        /// <para>Note: The script example below has two buttons.  The button textures are loaded from the
         /// /Resources/ folder.  (They are not used in the shown example).  Two sprites are added to
         /// the example code.  /Example1/ and /Example2/ are functions called by the button OnClick
-        /// functions.  Example1 calls overrideSprite and Example2 sets overrideSprite to null.
+        /// functions.  Example1 calls overrideSprite and Example2 sets overrideSprite to null.</para>
         /// <code>
         /// <![CDATA[
         /// using System.Collections;
@@ -400,6 +402,8 @@ namespace UnityEngine.UI
                 if (SetPropertyUtility.SetClass(ref m_OverrideSprite, value))
                 {
                     SetAllDirty();
+                    if (m_Tracked)
+                        UnTrackImage(this);
                     TrackSprite();
                 }
             }
@@ -1013,7 +1017,6 @@ namespace UnityEngine.UI
                 for (var i = 0; i < m_SecondaryTextures.Length; ++i)
                 {
                     var secondaryTex = m_SecondaryTextures[i];
-                
                     renderer.SetSecondaryTexture(i, secondaryTex.name, secondaryTex.texture);
                 }
             }

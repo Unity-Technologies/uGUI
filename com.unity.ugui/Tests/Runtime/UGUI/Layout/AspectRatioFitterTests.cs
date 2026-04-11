@@ -22,8 +22,6 @@ namespace LayoutTests
         public void Setup()
         {
 #if UNITY_EDITOR
-            var cameraGo = new GameObject("Cam").AddComponent<Camera>();
-
             var panelGO = new GameObject("PanelObject", typeof(RectTransform));
             var panelRT = panelGO.GetComponent<RectTransform>();
             panelRT.sizeDelta = new Vector2(200, 200);
