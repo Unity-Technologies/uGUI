@@ -94,8 +94,7 @@ namespace UnityEngine.UIElements
                 return;
             var pointerId = currentInputModule.ConvertUIToolkitPointerId(eventData);
 
-            var uiElementsUtil = IRuntimePanel.uIElementsRuntimeUtility;
-            if (uiElementsUtil == null || !uiElementsUtil.TryPick(m_Panel, pointerId, position, delta, (int)eventPosition.z, out _))
+            if (!ScreenOverlayPanelPicker.TryPick(m_Panel, pointerId, position, delta, (int)eventPosition.z, out _))
                 return;
 
             resultAppendList.Add(new RaycastResult
