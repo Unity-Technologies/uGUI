@@ -17,6 +17,10 @@ TextMesh Pro UI text objects use [Unity's UI system](https://docs.unity3d.com/Ma
 1. In the **TextMesh Pro (UGUI)** Inspector, enter your text.
 1. Adjust the [UI text properties](TMPObjectUIText.md) as needed.
 
+**Additional Shader Channels**
+
+**TextMesh Pro (UGUI)** automatically enables **TexCoord1**, **Normal**, and **Tangent** in the **[Additional Shader Channels](../UICanvas.md#additional-shader-channels)** of its parent [Canvas](../UICanvas.md). This is required by TMP’s shaders and occurs during text mesh generation. If you inspect the Canvas and notice these channels are set, this is expected behavior. Be aware that any custom UI shaders on the same Canvas will also receive these additional vertex attributes.
+
 ### Other TextMesh Pro UI GameObjects
 
 In addition to the UI text GameObject, you can create TextMesh Pro **Dropdown** and **Input Field** components from the **GameObject > UI** menu.

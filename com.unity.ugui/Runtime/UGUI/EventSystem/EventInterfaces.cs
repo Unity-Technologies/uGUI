@@ -83,8 +83,6 @@ namespace UnityEngine.EventSystems
     /// </summary>
     /// <remarks>
     /// Criteria for this event is implementation dependent. For example see StandAloneInputModule.
-    /// </remarks>
-    /// <remarks>
     /// Use the IPointerClickHandler Interface to handle click input using OnPointerClick callbacks. Ensure an Event System exists in the Scene to allow click detection. For click detection on non-UI GameObjects, ensure a EventSystems.PhysicsRaycaster is attached to the Camera.
     /// </remarks>
     /// <example>

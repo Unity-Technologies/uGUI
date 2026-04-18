@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -304,7 +304,7 @@ namespace TMPro
         /// <typeparam name="T"></typeparam>
         /// <param name="array"></param>
         /// <param name="size"></param>
-        /// <param name="isFixedSize"></param>
+        /// <param name="isBlockAllocated"></param>
         public static void Resize<T>(ref T[] array, int size, bool isBlockAllocated)
         {
             if (isBlockAllocated) size = size > 1024 ? size + 256 : Mathf.NextPowerOfTwo(size);

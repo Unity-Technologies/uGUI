@@ -162,7 +162,7 @@ namespace TMPro
         public TMP_GlyphAdjustmentRecord secondAdjustmentRecord { get { return m_SecondAdjustmentRecord; } set { m_SecondAdjustmentRecord = value; } }
 
         /// <summary>
-        ///
+        /// Flags that control how this glyph pair adjustment is applied (e.g. ignore spacing adjustments).
         /// </summary>
         public FontFeatureLookupFlags featureLookupFlags { get { return m_FeatureLookupFlags; } set { m_FeatureLookupFlags = value; } }
 

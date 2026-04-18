@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.TextCore;
 using UnityEngine.TextCore.LowLevel;
@@ -43,8 +43,7 @@ namespace TMPro
         /// <param name="fontStyle">The font style</param>
         /// <param name="fontWeight">The font weight</param>
         /// <param name="isAlternativeTypeface">Indicates if the OUT font asset is an alternative typeface or fallback font asset</param>
-        /// <param name="fontAsset">The font asset that contains the requested character</param>
-        /// <returns></returns>
+        /// <returns>The character for the given unicode, or null if not found.</returns>
         public static TMP_Character GetCharacterFromFontAsset(uint unicode, TMP_FontAsset sourceFontAsset, bool includeFallbacks, FontStyles fontStyle, FontWeight fontWeight, out bool isAlternativeTypeface)
         {
             if (includeFallbacks)
@@ -227,8 +226,8 @@ namespace TMPro
         /// <param name="includeFallbacks">Determines if the fallback of each font assets on the list will be searched</param>
         /// <param name="fontStyle">The font style</param>
         /// <param name="fontWeight">The font weight</param>
-        /// <param name="isAlternativeTypeface">Determines if the OUT font asset is an alternative typeface or fallback font asset</param>
-        /// <returns></returns>
+        /// <param name="isAlternativeTypeface">Determines if the returned character is from an alternative typeface or fallback font asset</param>
+        /// <returns>The character for the given unicode, or null if not found.</returns>
         public static TMP_Character GetCharacterFromFontAssets(uint unicode, TMP_FontAsset sourceFontAsset, List<TMP_FontAsset> fontAssets, bool includeFallbacks, FontStyles fontStyle, FontWeight fontWeight, out bool isAlternativeTypeface)
         {
             isAlternativeTypeface = false;
@@ -315,12 +314,12 @@ namespace TMPro
         // =====================================================================
 
         /// <summary>
-        ///
+        /// Returns the sprite character for the given Unicode value from the sprite asset and optionally its fallbacks.
         /// </summary>
-        /// <param name="unicode"></param>
-        /// <param name="spriteAsset"></param>
-        /// <param name="includeFallbacks"></param>
-        /// <returns></returns>
+        /// <param name="unicode">The Unicode value of the requested sprite character.</param>
+        /// <param name="spriteAsset">The sprite asset to search.</param>
+        /// <param name="includeFallbacks">Whether to search fallback sprite assets.</param>
+        /// <returns>The sprite character if found; otherwise null.</returns>
         public static TMP_SpriteCharacter GetSpriteCharacterFromSpriteAsset(uint unicode, TMP_SpriteAsset spriteAsset, bool includeFallbacks)
         {
             // Make sure we have a valid sprite asset to search

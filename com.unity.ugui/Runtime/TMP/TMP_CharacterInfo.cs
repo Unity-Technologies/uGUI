@@ -22,8 +22,20 @@ namespace TMPro
     }
 
     /// <summary>
-    ///
+    /// Represents padding or offset values (left, right, top, bottom) for text layout.
     /// </summary>
+    /// <remarks>
+    /// Used by TextMesh Pro for margin, padding, and underline/overhang offsets. Set
+    /// horizontal or vertical to apply the same value to both sides (e.g. left and right).
+    /// </remarks>
+    /// <example>
+    /// <para>Use for text margins or custom layout. Create with horizontal and vertical
+    /// or with separate left, right, top, and bottom values.</para>
+    /// <code><![CDATA[
+    /// TMP_Offset margin = new TMP_Offset(10f, 5f); // left/right 10, top/bottom 5
+    /// TMP_Offset padding = new TMP_Offset(2f, 2f, 2f, 2f);
+    /// ]]></code>
+    /// </example>
     public struct TMP_Offset
     {
         public float left { get { return m_Left; } set { m_Left = value; } }
@@ -39,7 +51,7 @@ namespace TMPro
         public float vertical { get { return m_Top; } set { m_Top = value; m_Bottom = value; } }
 
         /// <summary>
-        ///
+        /// A TMP_Offset with all values set to zero.
         /// </summary>
         public static TMP_Offset zero { get { return k_ZeroOffset; } }
 
@@ -55,12 +67,12 @@ namespace TMPro
         static readonly TMP_Offset k_ZeroOffset = new TMP_Offset(0F, 0F, 0F, 0F);
 
         /// <summary>
-        ///
+        /// Creates a TMP_Offset with the given left, right, top, and bottom values.
         /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <param name="top"></param>
-        /// <param name="bottom"></param>
+        /// <param name="left">The left edge offset value for the layout.</param>
+        /// <param name="right">The right edge offset value for the layout.</param>
+        /// <param name="top">The top edge offset value for the layout.</param>
+        /// <param name="bottom">The bottom edge offset value for the layout.</param>
         public TMP_Offset(float left, float right, float top, float bottom)
         {
             m_Left = left;
@@ -70,10 +82,10 @@ namespace TMPro
         }
 
         /// <summary>
-        ///
+        /// Creates a TMP_Offset with the same horizontal value for left/right and same vertical value for top/bottom.
         /// </summary>
-        /// <param name="horizontal"></param>
-        /// <param name="vertical"></param>
+        /// <param name="horizontal">The horizontal offset applied to both left and right edges.</param>
+        /// <param name="vertical">The vertical offset applied to both top and bottom edges.</param>
         public TMP_Offset(float horizontal, float vertical)
         {
             m_Left = horizontal;
@@ -118,7 +130,7 @@ namespace TMPro
 
 
     /// <summary>
-    ///
+    /// Represents the highlight state (color and padding) for a run of text.
     /// </summary>
     public struct HighlightState
     {

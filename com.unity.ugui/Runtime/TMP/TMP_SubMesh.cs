@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using System.Collections;
 using Object = UnityEngine.Object;
@@ -534,7 +534,7 @@ namespace TMPro
         /// <summary>
         /// Function called when the padding value for the material needs to be re-calculated.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Uniform padding in mesh units required to avoid clipping expanded SDF effects for the active material.</returns>
         public float GetPaddingForMaterial()
         {
             float padding = ShaderUtilities.GetPadding(m_sharedMaterial, m_TextComponent.extraPadding, m_TextComponent.isUsingBold);
@@ -546,8 +546,8 @@ namespace TMPro
         /// <summary>
         /// Function to update the padding values of the object.
         /// </summary>
-        /// <param name="isExtraPadding"></param>
-        /// <param name="isBold"></param>
+        /// <param name="isExtraPadding">True to add TMP's additional safety padding (shader-dependent, usually a few pixels worth in SDF space) for effects.</param>
+        /// <param name="isUsingBold">True when bold weight is active so padding accounts for thicker glyph outlines in the material.</param>
         public void UpdateMeshPadding(bool isExtraPadding, bool isUsingBold)
         {
             m_padding = ShaderUtilities.GetPadding(m_sharedMaterial, isExtraPadding, isUsingBold);
@@ -555,7 +555,8 @@ namespace TMPro
 
 
         /// <summary>
-        ///
+        /// Suppresses the base rebuild; updates are driven by the parent text component.
+        /// Use <see cref="TextMeshPro.SetVerticesDirty"/> on the parent to mark it dirty.
         /// </summary>
         public void SetVerticesDirty()
         {
@@ -564,7 +565,7 @@ namespace TMPro
 
 
         /// <summary>
-        ///
+        /// Applies the shared material to the renderer and syncs culling with the parent text component.
         /// </summary>
         public void SetMaterialDirty()
         {
@@ -579,7 +580,7 @@ namespace TMPro
 
 
         /// <summary>
-        ///
+        /// Applies the shared material to the renderer and syncs culling with the parent text component.
         /// </summary>
         protected void UpdateMaterial()
         {
