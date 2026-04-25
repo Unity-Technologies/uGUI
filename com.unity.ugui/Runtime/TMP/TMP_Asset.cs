@@ -109,6 +109,7 @@ namespace TMPro
         [SerializeField]
         internal string m_Version;
 
+        [NonSerialized]
         internal EntityId m_EntityId;
 
         internal int m_InstanceID;
