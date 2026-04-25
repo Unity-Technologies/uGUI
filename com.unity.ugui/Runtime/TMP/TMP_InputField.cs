@@ -1811,6 +1811,9 @@ namespace TMPro
                             return;
                         }
 
+                        if (!m_AllowInput)
+                            return;
+
                         // In the case of a Custom Validator, the user is expected to modify the m_Text where as such we do not append c.
                         // However we will append c if the user did not modify the m_Text (UUM-42147)
                         if (c != 0 && (characterValidation != CharacterValidation.CustomValidator || !hasValidateUpdatedText))
