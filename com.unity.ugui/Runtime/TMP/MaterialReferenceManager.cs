@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System;
 
@@ -35,20 +35,7 @@ namespace TMPro
         /// <summary>
         /// Add new font asset reference to dictionary.
         /// </summary>
-        /// <remarks>
-        /// Registers the font asset and its material with the singleton so TextMesh Pro
-        /// can reuse them across text objects. Duplicate hash codes are ignored. Call
-        /// when loading or creating font assets at runtime.
-        /// </remarks>
-        /// <param name="fontAsset">The font asset to register with the manager.</param>
-        /// <example>
-        /// <para>Register a font asset after loading it so it is tracked for material
-        /// and mesh updates. Typically called from font asset initialization.</para>
-        /// <code><![CDATA[
-        /// TMP_FontAsset myFont = Resources.Load<TMP_FontAsset>("MyFont");
-        /// MaterialReferenceManager.AddFontAsset(myFont);
-        /// ]]></code>
-        /// </example>
+        /// <param name="fontAsset"></param>
         public static void AddFontAsset(TMP_FontAsset fontAsset)
         {
             MaterialReferenceManager.instance.AddFontAssetInternal(fontAsset);
@@ -74,20 +61,8 @@ namespace TMPro
         /// <summary>
         /// Add new Sprite Asset to dictionary.
         /// </summary>
-        /// <remarks>
-        /// Registers the sprite asset and its material with the singleton so inline
-        /// sprites in text can resolve references. Duplicate hash codes are ignored.
-        /// Call when loading or creating sprite assets at runtime.
-        /// </remarks>
-        /// <param name="spriteAsset">The sprite asset to register with the manager.</param>
-        /// <example>
-        /// <para>Register a sprite asset so it can be used in rich text (e.g. sprite
-        /// tags). Typically called when the asset is loaded or created.</para>
-        /// <code><![CDATA[
-        /// TMP_SpriteAsset emojiAsset = Resources.Load<TMP_SpriteAsset>("EmojiSprites");
-        /// MaterialReferenceManager.AddSpriteAsset(emojiAsset);
-        /// ]]></code>
-        /// </example>
+        /// <param name="hashCode"></param>
+        /// <param name="spriteAsset"></param>
         public static void AddSpriteAsset(TMP_SpriteAsset spriteAsset)
         {
             MaterialReferenceManager.instance.AddSpriteAssetInternal(spriteAsset);
@@ -112,21 +87,8 @@ namespace TMPro
         /// <summary>
         /// Add new Sprite Asset to dictionary.
         /// </summary>
-        /// <remarks>
-        /// Registers the sprite asset under the given hash code so it can be looked up
-        /// by that code. Use when the asset's default hashCode is not suitable (e.g.
-        /// custom atlases). Duplicate hash codes overwrite the previous entry.
-        /// </remarks>
-        /// <param name="hashCode">The hash code to use when looking up the sprite asset.</param>
-        /// <param name="spriteAsset">The sprite asset to register with the manager.</param>
-        /// <example>
-        /// <para>Register a sprite asset with a specific hash for custom lookup. Use
-        /// the same hashCode when resolving sprites in rich text.</para>
-        /// <code><![CDATA[
-        /// int customHash = GetCustomSpriteHash(mySpriteAsset);
-        /// MaterialReferenceManager.AddSpriteAsset(customHash, mySpriteAsset);
-        /// ]]></code>
-        /// </example>
+        /// <param name="hashCode"></param>
+        /// <param name="spriteAsset"></param>
         public static void AddSpriteAsset(int hashCode, TMP_SpriteAsset spriteAsset)
         {
             MaterialReferenceManager.instance.AddSpriteAssetInternal(hashCode, spriteAsset);
@@ -156,21 +118,8 @@ namespace TMPro
         /// <summary>
         /// Add new Material reference to dictionary.
         /// </summary>
-        /// <remarks>
-        /// Registers a font material by hash code so TextMesh Pro can look it up when
-        /// building meshes. Use the same hashCode as the font asset's material for
-        /// correct reference counting. Duplicate hash codes overwrite the previous entry.
-        /// </remarks>
-        /// <param name="hashCode">The hash code used to look up the material.</param>
-        /// <param name="material">The material instance to register with the manager.</param>
-        /// <example>
-        /// <para>Register a material by hash when you need to track it separately from
-        /// a font asset. Ensure the hashCode matches the material instance.</para>
-        /// <code><![CDATA[
-        /// int matHash = myMaterial.GetHashCode();
-        /// MaterialReferenceManager.AddFontMaterial(matHash, myMaterial);
-        /// ]]></code>
-        /// </example>
+        /// <param name="hashCode"></param>
+        /// <param name="material"></param>
         public static void AddFontMaterial(int hashCode, Material material)
         {
             MaterialReferenceManager.instance.AddFontMaterialInternal(hashCode, material);
@@ -192,37 +141,24 @@ namespace TMPro
         /// <summary>
         /// Add new Color Gradient Preset to dictionary.
         /// </summary>
-        /// <remarks>
-        /// Registers a color gradient preset by hash code so it can be referenced in
-        /// rich text (e.g. &lt;gradient&gt; tags). Duplicate hash codes are ignored.
-        /// Call when loading or creating gradient presets at runtime.
-        /// </remarks>
-        /// <param name="hashCode">The hash code used to look up the gradient preset.</param>
-        /// <param name="colorGradient">The color gradient preset to register with the manager.</param>
-        /// <example>
-        /// <para>Register a gradient preset so it can be used in text. Use a stable
-        /// hashCode (e.g. from the preset name or asset) for lookups.</para>
-        /// <code><![CDATA[
-        /// int gradientHash = myGradientAsset.GetHashCode();
-        /// MaterialReferenceManager.AddColorGradientPreset(gradientHash, myGradientAsset);
-        /// ]]></code>
-        /// </example>
-        public static void AddColorGradientPreset(int hashCode, TMP_ColorGradient colorGradient)
+        /// <param name="hashCode"></param>
+        /// <param name="spriteAsset"></param>
+        public static void AddColorGradientPreset(int hashCode, TMP_ColorGradient spriteAsset)
         {
-            MaterialReferenceManager.instance.AddColorGradientPreset_Internal(hashCode, colorGradient);
+            MaterialReferenceManager.instance.AddColorGradientPreset_Internal(hashCode, spriteAsset);
         }
 
         /// <summary>
         /// Internal method to add a new Color Gradient Preset to the dictionary.
         /// </summary>
         /// <param name="hashCode"></param>
-        /// <param name="colorGradient"></param>
-        private void AddColorGradientPreset_Internal(int hashCode, TMP_ColorGradient colorGradient)
+        /// <param name="spriteAsset"></param>
+        private void AddColorGradientPreset_Internal(int hashCode, TMP_ColorGradient spriteAsset)
         {
             if (m_ColorGradientReferenceLookup.ContainsKey(hashCode)) return;
 
             // Add reference to Color Gradient Preset Asset.
-            m_ColorGradientReferenceLookup.Add(hashCode, colorGradient);
+            m_ColorGradientReferenceLookup.Add(hashCode, spriteAsset);
         }
 
 
@@ -305,10 +241,10 @@ namespace TMPro
 
 
         /// <summary>
-        /// Checks whether the font asset is referenced.
+        /// Function to check if the font asset is already referenced.
         /// </summary>
-        /// <param name="font">The font asset to check for in the manager.</param>
-        /// <returns>True if the font asset is already registered in the manager.</returns>
+        /// <param name="font"></param>
+        /// <returns></returns>
         public bool Contains(TMP_FontAsset font)
         {
             return m_FontAssetReferenceLookup.ContainsKey(font.hashCode);
@@ -316,10 +252,10 @@ namespace TMPro
 
 
         /// <summary>
-        /// Checks whether the sprite asset is referenced.
+        /// Function to check if the sprite asset is already referenced.
         /// </summary>
-        /// <param name="sprite">The sprite asset to check for in the manager.</param>
-        /// <returns>True if the sprite asset is already registered in the manager.</returns>
+        /// <param name="font"></param>
+        /// <returns></returns>
         public bool Contains(TMP_SpriteAsset sprite)
         {
             return m_FontAssetReferenceLookup.ContainsKey(sprite.hashCode);
@@ -328,18 +264,18 @@ namespace TMPro
 
 
         /// <summary>
-        /// Gets the font asset for the given hash code, if registered.
+        /// Function returning the Font Asset corresponding to the provided hash code.
         /// </summary>
-        /// <param name="hashCode">The hash code of the font asset to look up.</param>
-        /// <param name="fontAsset">The font asset if found, or null otherwise.</param>
-        /// <returns>True if the font asset was found; otherwise, false.</returns>
+        /// <param name="hashCode"></param>
+        /// <param name="fontAsset"></param>
+        /// <returns></returns>
         public static bool TryGetFontAsset(int hashCode, out TMP_FontAsset fontAsset)
         {
             return MaterialReferenceManager.instance.TryGetFontAssetInternal(hashCode, out fontAsset);
         }
 
         /// <summary>
-        /// Returns the font asset for the given hash code from the internal lookup.
+        /// Internal Function returning the Font Asset corresponding to the provided hash code.
         /// </summary>
         /// <param name="hashCode"></param>
         /// <param name="fontAsset"></param>
@@ -354,18 +290,18 @@ namespace TMPro
 
 
         /// <summary>
-        /// Gets the sprite asset for the given hash code, if registered.
+        /// Function returning the Sprite Asset corresponding to the provided hash code.
         /// </summary>
-        /// <param name="hashCode">The hash code of the sprite asset to look up.</param>
-        /// <param name="spriteAsset">The sprite asset if found, or null otherwise.</param>
-        /// <returns>True if the sprite asset was found; otherwise, false.</returns>
+        /// <param name="hashCode"></param>
+        /// <param name="spriteAsset"></param>
+        /// <returns></returns>
         public static bool TryGetSpriteAsset(int hashCode, out TMP_SpriteAsset spriteAsset)
         {
             return MaterialReferenceManager.instance.TryGetSpriteAssetInternal(hashCode, out spriteAsset);
         }
 
         /// <summary>
-        /// Returns the sprite asset for the given hash code from the internal lookup.
+        /// Internal function returning the Sprite Asset corresponding to the provided hash code.
         /// </summary>
         /// <param name="hashCode"></param>
         /// <param name="fontAsset"></param>
@@ -379,18 +315,18 @@ namespace TMPro
 
 
         /// <summary>
-        /// Gets the color gradient preset for the given hash code, if registered.
+        /// Function returning the Color Gradient Preset corresponding to the provided hash code.
         /// </summary>
-        /// <param name="hashCode">The hash code of the gradient preset to look up.</param>
-        /// <param name="gradientPreset">The gradient preset if found, or null otherwise.</param>
-        /// <returns>True if the gradient preset was found; otherwise, false.</returns>
+        /// <param name="hashCode"></param>
+        /// <param name="gradientPreset"></param>
+        /// <returns></returns>
         public static bool TryGetColorGradientPreset(int hashCode, out TMP_ColorGradient gradientPreset)
         {
             return MaterialReferenceManager.instance.TryGetColorGradientPresetInternal(hashCode, out gradientPreset);
         }
 
         /// <summary>
-        /// Returns the color gradient preset for the given hash code from the internal lookup.
+        /// Internal function returning the Color Gradient Preset corresponding to the provided hash code.
         /// </summary>
         /// <param name="hashCode"></param>
         /// <param name="fontAsset"></param>
@@ -404,18 +340,18 @@ namespace TMPro
 
 
         /// <summary>
-        /// Gets the font material for the given hash code, if registered.
+        /// Function returning the Font Material corresponding to the provided hash code.
         /// </summary>
-        /// <param name="hashCode">The hash code of the material to look up.</param>
-        /// <param name="material">The material if found, or null otherwise.</param>
-        /// <returns>True if the material was found; otherwise, false.</returns>
+        /// <param name="hashCode"></param>
+        /// <param name="material"></param>
+        /// <returns></returns>
         public static bool TryGetMaterial(int hashCode, out Material material)
         {
             return MaterialReferenceManager.instance.TryGetMaterialInternal(hashCode, out material);
         }
 
         /// <summary>
-        /// Returns the font material for the given hash code from the internal lookup.
+        /// Internal function returning the Font Material corresponding to the provided hash code.
         /// </summary>
         /// <param name="hashCode"></param>
         /// <param name="material"></param>
@@ -576,11 +512,11 @@ namespace TMPro
         /// <summary>
         /// Constructor for new Material Reference.
         /// </summary>
-        /// <param name="index">The index in the material reference array.</param>
-        /// <param name="fontAsset">The font asset for this material reference.</param>
-        /// <param name="spriteAsset">The sprite asset for this material reference.</param>
-        /// <param name="material">The material instance for this reference entry.</param>
-        /// <param name="padding">The padding value applied to the material reference.</param>
+        /// <param name="index"></param>
+        /// <param name="fontAsset"></param>
+        /// <param name="spriteAsset"></param>
+        /// <param name="material"></param>
+        /// <param name="padding"></param>
         public MaterialReference(int index, TMP_FontAsset fontAsset, TMP_SpriteAsset spriteAsset, Material material, float padding)
         {
             this.index = index;
@@ -596,11 +532,11 @@ namespace TMPro
 
 
         /// <summary>
-        /// Checks whether the font asset is contained in the material reference array.
+        /// Function to check if a certain font asset is contained in the material reference array.
         /// </summary>
-        /// <param name="materialReferences">The material reference array to search.</param>
-        /// <param name="fontAsset">The font asset to look for.</param>
-        /// <returns>True if the font asset is in the array.</returns>
+        /// <param name="materialReferences"></param>
+        /// <param name="fontAsset"></param>
+        /// <returns></returns>
         public static bool Contains(MaterialReference[] materialReferences, TMP_FontAsset fontAsset)
         {
             EntityId id = fontAsset.GetEntityId();
@@ -616,13 +552,13 @@ namespace TMPro
 
 
         /// <summary>
-        /// Adds a new material reference and returns its index in the material reference array.
+        /// Function to add a new material reference and returning its index in the material reference array.
         /// </summary>
-        /// <param name="material">The material to add.</param>
-        /// <param name="fontAsset">The font asset.</param>
-        /// <param name="materialReferences">The material reference array.</param>
-        /// <param name="materialReferenceIndexLookup">The lookup dictionary.</param>
-        /// <returns>The index of the added or existing material reference.</returns>
+        /// <param name="material"></param>
+        /// <param name="fontAsset"></param>
+        /// <param name="materialReferences"></param>
+        /// <param name="materialReferenceIndexLookup"></param>
+        /// <returns></returns>
         [Obsolete("AddMaterialReference(Material material, TMP_FontAsset fontAsset, ref MaterialReference[] materialReferences, Dictionary<int, int> materialReferenceIndexLookup) is obsolete, use AddMaterialReference(Material material, TMP_FontAsset fontAsset, ref MaterialReference[] materialReferences, Dictionary<int, int> materialReferenceIndexLookup) instead.", true)]
         public static int AddMaterialReference(Material material, TMP_FontAsset fontAsset, ref MaterialReference[] materialReferences, Dictionary<int, int> materialReferenceIndexLookup)
         {
@@ -651,13 +587,13 @@ namespace TMPro
         }
 
         /// <summary>
-        /// Adds a new material reference and returns its index in the material reference array.
+        /// Function to add a new material reference and returning its index in the material reference array.
         /// </summary>
-        /// <param name="material">The material to add.</param>
-        /// <param name="fontAsset">The font asset.</param>
-        /// <param name="materialReferences">The material reference array.</param>
-        /// <param name="materialReferenceIndexLookup">The lookup dictionary.</param>
-        /// <returns>The index of the added or existing material reference.</returns>
+        /// <param name="material"></param>
+        /// <param name="fontAsset"></param>
+        /// <param name="materialReferences"></param>
+        /// <param name="materialReferenceIndexLookup"></param>
+        /// <returns></returns>
         public static int AddMaterialReference(Material material, TMP_FontAsset fontAsset, ref MaterialReference[] materialReferences, Dictionary<EntityId, int> materialReferenceIndexLookup)
         {
             EntityId materialID = material.GetEntityId();
@@ -686,13 +622,13 @@ namespace TMPro
 
 
         /// <summary>
-        /// Adds a new material reference for a sprite asset and returns its index in the array.
+        ///
         /// </summary>
-        /// <param name="material">The material to add.</param>
-        /// <param name="spriteAsset">The sprite asset.</param>
-        /// <param name="materialReferences">The material reference array.</param>
-        /// <param name="materialReferenceIndexLookup">The lookup dictionary.</param>
-        /// <returns>The index of the added or existing material reference.</returns>
+        /// <param name="material"></param>
+        /// <param name="spriteAsset"></param>
+        /// <param name="materialReferences"></param>
+        /// <param name="materialReferenceIndexLookup"></param>
+        /// <returns></returns>
         [Obsolete("AddMaterialReference(Material material, TMP_SpriteAsset spriteAsset, ref MaterialReference[] materialReferences, Dictionary<int, int> materialReferenceIndexLookup) is obsolete, use AddMaterialReference(Material material, TMP_SpriteAsset spriteAsset, ref MaterialReference[] materialReferences, Dictionary<int, int> materialReferenceIndexLookup) instead.", true )]
         public static int AddMaterialReference(Material material, TMP_SpriteAsset spriteAsset, ref MaterialReference[] materialReferences, Dictionary<int, int> materialReferenceIndexLookup)
         {
@@ -719,13 +655,13 @@ namespace TMPro
 
 
         /// <summary>
-        /// Adds a new material reference for a sprite asset and returns its index in the array.
+        ///
         /// </summary>
-        /// <param name="material">The material to add.</param>
-        /// <param name="spriteAsset">The sprite asset.</param>
-        /// <param name="materialReferences">The material reference array.</param>
-        /// <param name="materialReferenceIndexLookup">The lookup dictionary.</param>
-        /// <returns>The index of the added or existing material reference.</returns>
+        /// <param name="material"></param>
+        /// <param name="spriteAsset"></param>
+        /// <param name="materialReferences"></param>
+        /// <param name="materialReferenceIndexLookup"></param>
+        /// <returns></returns>
         public static int AddMaterialReference(Material material, TMP_SpriteAsset spriteAsset, ref MaterialReference[] materialReferences, Dictionary<EntityId, int> materialReferenceIndexLookup)
         {
             EntityId materialID = material.GetEntityId();

@@ -401,7 +401,7 @@ namespace TMPro
         private TextAsset m_followingCharacters;
 
         /// <summary>
-        /// Table of leading and following characters used for line-breaking rules (e.g. for CJK).
+        ///
         /// </summary>
         public static LineBreakingTable linebreakingRules
         {
@@ -494,7 +494,7 @@ namespace TMPro
         /// <summary>
         /// Static Function to load the TMP Settings file.
         /// </summary>
-        /// <returns>The loaded <see cref="TMP_Settings"/> instance, or null if the asset is not present in a Resources folder.</returns>
+        /// <returns></returns>
         public static TMP_Settings LoadDefaultSettings()
         {
             if (s_Instance == null)
@@ -510,9 +510,9 @@ namespace TMPro
 
 
         /// <summary>
-        /// Returns the singleton TMP Settings instance.
+        /// Returns the Sprite Asset defined in the TMP Settings file.
         /// </summary>
-        /// <returns>The active <see cref="TMP_Settings"/> asset, or null if it could not be loaded from Resources.</returns>
+        /// <returns></returns>
         public static TMP_Settings GetSettings()
         {
             if (TMP_Settings.instance == null) return null;
@@ -524,7 +524,7 @@ namespace TMPro
         /// <summary>
         /// Returns the Font Asset defined in the TMP Settings file.
         /// </summary>
-        /// <returns>The configured <see cref="TMP_FontAsset"/>, or null if TMP Settings failed to load.</returns>
+        /// <returns></returns>
         public static TMP_FontAsset GetFontAsset()
         {
             if (TMP_Settings.instance == null) return null;
@@ -536,7 +536,7 @@ namespace TMPro
         /// <summary>
         /// Returns the Sprite Asset defined in the TMP Settings file.
         /// </summary>
-        /// <returns>The configured <see cref="TMP_SpriteAsset"/>, or null if TMP Settings failed to load.</returns>
+        /// <returns></returns>
         public static TMP_SpriteAsset GetSpriteAsset()
         {
             if (TMP_Settings.instance == null) return null;
@@ -548,7 +548,7 @@ namespace TMPro
         /// <summary>
         /// Returns the Style Sheet defined in the TMP Settings file.
         /// </summary>
-        /// <returns>The configured <see cref="TMP_StyleSheet"/>, or null if TMP Settings failed to load.</returns>
+        /// <returns></returns>
         public static TMP_StyleSheet GetStyleSheet()
         {
             if (TMP_Settings.instance == null) return null;

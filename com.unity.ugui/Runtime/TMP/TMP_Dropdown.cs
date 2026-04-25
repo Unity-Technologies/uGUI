@@ -1,8 +1,7 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Pool;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -97,7 +96,7 @@ namespace TMPro
             /// </summary>
             /// <param name="text">Optional text for the option.</param>
             /// <param name="image">Optional image for the option.</param>
-            /// <param name="color">Optional color for the option.</param>
+            /// <param name="image">Optional color for the option.</param>
             public OptionData(string text, Sprite image, Color color)
             {
                 this.text = text;
@@ -214,8 +213,8 @@ namespace TMPro
         /// This is the list of options within the Dropdown. Each option contains Text and/or image data that you can specify using UI.Dropdown.OptionData before adding to the Dropdown list.
         /// This also unlocks the ability to edit the Dropdown, including the insertion, removal, and finding of options, as well as other useful tools
         /// </remarks>
-        /// <example>
-        /// <code><![CDATA[
+        /// /// <example>
+        /// <code>
         /// //Create a new Dropdown GameObject by going to the Hierarchy and clicking Create>UI>Dropdown - TextMeshPro. Attach this script to the Dropdown GameObject.
         ///
         /// using UnityEngine;
@@ -296,7 +295,7 @@ namespace TMPro
         ///         }
         ///     }
         /// }
-        /// ]]></code>
+        /// </code>
         /// </example>
         public List<OptionData> options
         {
@@ -317,7 +316,7 @@ namespace TMPro
         /// Use this to detect when a user selects one or more options in the Dropdown. Add a listener to perform an action when this UnityEvent detects a selection by the user. See https://unity3d.com/learn/tutorials/topics/scripting/delegates for more information on delegates.
         /// </remarks>
         /// <example>
-        /// <code><![CDATA[
+        ///  <code>
         /// //Create a new Dropdown GameObject by going to the Hierarchy and clicking Create>UI>Dropdown - TextMeshPro. Attach this script to the Dropdown GameObject.
         /// //Set your own Text in the Inspector window
         ///
@@ -349,7 +348,7 @@ namespace TMPro
         ///         m_Text.text =  "New Value : " + change.value;
         ///     }
         /// }
-        /// ]]></code>
+        /// </code>
         /// </example>
         public DropdownEvent onValueChanged { get { return m_OnValueChanged; } set { m_OnValueChanged = value; } }
 
@@ -374,7 +373,7 @@ namespace TMPro
         /// The Value is the index number of the current selection in the Dropdown. 0 is the first option in the Dropdown, 1 is the second, and so on.
         /// </summary>
         /// <example>
-        /// <code><![CDATA[
+        /// <code>
         /// //Create a new Dropdown GameObject by going to the Hierarchy and clicking Create>UI>Dropdown - TextMeshPro. Attach this script to the Dropdown GameObject.
         /// //Set your own Text in the Inspector window
         ///
@@ -411,7 +410,7 @@ namespace TMPro
         ///         m_Text.text = m_Message;
         ///     }
         /// }
-        /// ]]></code>
+        /// </code>
         /// </example>
         public int value
         {
@@ -563,10 +562,8 @@ namespace TMPro
         /// Add multiple options to the options of the Dropdown based on a list of OptionData objects.
         /// </summary>
         /// <param name="options">The list of OptionData to add.</param>
-        /// <remarks>
-        /// Adds option entries that can include both text and an optional sprite image. Use this overload
-        /// when you have pre-built OptionData (e.g. from a data source). See AddOptions(List&lt;string&gt;
-        /// options) for a code example of adding options from a list.
+        /// /// <remarks>
+        /// See AddOptions(List<string> options) for code example of usages.
         /// </remarks>
         public void AddOptions(List<OptionData> options)
         {
@@ -582,7 +579,7 @@ namespace TMPro
         /// </remarks>
         /// <param name="options">The list of text strings to add.</param>
         /// <example>
-        /// <code><![CDATA[
+        /// <code>
         /// //Create a new Dropdown GameObject by going to the Hierarchy and clicking Create>UI>Dropdown - TextMeshPro. Attach this script to the Dropdown GameObject.
         ///
         /// using System.Collections.Generic;
@@ -607,7 +604,7 @@ namespace TMPro
         ///         m_Dropdown.AddOptions(m_DropOptions);
         ///     }
         /// }
-        /// ]]></code>
+        /// </code>
         /// </example>
         public void AddOptions(List<string> options)
         {
@@ -622,9 +619,7 @@ namespace TMPro
         /// </summary>
         /// <param name="options">The list of Sprites to add.</param>
         /// <remarks>
-        /// Adds option entries that display only sprite images (no text). Each sprite in the list becomes
-        /// one dropdown option. Use for icon-only menus. See AddOptions(List&lt;string&gt; options) for a
-        /// code example of adding options from a list.
+        /// See AddOptions(List<string> options) for code example of usages.
         /// </remarks>
         public void AddOptions(List<Sprite> options)
         {
@@ -792,13 +787,10 @@ namespace TMPro
                 return;
 
             // Get root Canvas.
-            var list = ListPool<Canvas>.Get();
+            var list = TMP_ListPool<Canvas>.Get();
             gameObject.GetComponentsInParent(false, list);
             if (list.Count == 0)
-            {
-                ListPool<Canvas>.Release(list);
                 return;
-            }
 
             Canvas rootCanvas = list[list.Count - 1];
             for (int i = 0; i < list.Count; i++)
@@ -810,7 +802,7 @@ namespace TMPro
                 }
             }
 
-            ListPool<Canvas>.Release(list);
+            TMP_ListPool<Canvas>.Release(list);
 
             if (!validTemplate)
             {

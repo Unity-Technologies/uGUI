@@ -1,9 +1,5 @@
 # Changelog
 
-## [2.6.0] - 2026-03-30
-
-The changelog for version 2.6.0 will remain under active development throughout the alpha phase of 6000.6.
-
 ## [2.5.0] - 2026-02-27
 
 ### Added

@@ -257,15 +257,9 @@ namespace TMPro
             Assert.AreEqual(m_TextComponent.textInfo.lineCount, extraKeyDownEventCount + 1);
         }
 
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
-        {
-            if (m_TextComponent != null)
-            {
-                Object.DestroyImmediate(m_TextComponent.gameObject);
-                m_TextComponent = null;
-            }
-
+        //[OneTimeTearDown]
+        //public void Cleanup()
+        //{
         //    // Remove TMP Essential Resources if they were imported in the project as a result of running tests.
         //    if (TMPro_EventManager.temporaryResourcesImported == true)
         //    {
@@ -279,7 +273,7 @@ namespace TMPro
 
         //        TMPro_EventManager.temporaryResourcesImported = false;
         //    }
-        }
+        //}
 
         [Test]
         public void SettingIsTextObjectScaleStatic_OnDisabledObject_DoesntProduceErrors()

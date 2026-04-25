@@ -10,10 +10,10 @@ namespace TMPro
         public enum AnchorPositions { TopLeft, Top, TopRight, Left, Center, Right, BottomLeft, Bottom, BottomRight, BaseLine, None };
 
         /// <summary>
-        /// Converts a legacy text alignment enumeration value to TextAlignmentOptions.
+        /// Function used to convert text alignment option enumeration format.
         /// </summary>
-        /// <param name="oldValue">The legacy text alignment enumeration value to convert.</param>
-        /// <returns>The converted TextAlignmentOptions value for the given legacy alignment.</returns>
+        /// <param name="oldValue"></param>
+        /// <returns></returns>
         public static TextAlignmentOptions ConvertTextAlignmentEnumValues(TextAlignmentOptions oldValue)
         {
             switch ((int)oldValue)

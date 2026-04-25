@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using System.Linq;
 using System.Collections;
@@ -36,7 +36,7 @@ namespace TMPro
         public Vector4[] uvs0;
 
         /// <summary>
-        /// Secondary UV channel used to pass scale and character-specific data to the SDF shader for consistent rendering of outlines and effects.
+        ///
         /// </summary>
         public Vector2[] uvs2;
 
@@ -48,10 +48,10 @@ namespace TMPro
 
 
         /// <summary>
-        /// Pre-allocates vertex attributes for a mesh.
+        /// Function to pre-allocate vertex attributes for a mesh of size X.
         /// </summary>
-        /// <param name="mesh">The mesh to initialize; will be cleared if not null.</param>
-        /// <param name="size">The number of quads (4 vertices each) to allocate.</param>
+        /// <param name="mesh"></param>
+        /// <param name="size"></param>
         public TMP_MeshInfo(Mesh mesh, int size)
         {
             // Reference to the TMP Text Component.
@@ -121,11 +121,11 @@ namespace TMPro
 
 
         /// <summary>
-        /// Pre-allocates vertex attributes for a mesh.
+        /// Function to pre-allocate vertex attributes for a mesh of size X.
         /// </summary>
-        /// <param name="mesh">The mesh to initialize; will be cleared if not null.</param>
-        /// <param name="size">The number of quads (or cubes if volumetric) to allocate.</param>
-        /// <param name="isVolumetric">If true, allocates 8 vertices per element for 3D text; otherwise 4 per quad.</param>
+        /// <param name="mesh"></param>
+        /// <param name="size"></param>
+        /// <param name="isVolumetric"></param>
         public TMP_MeshInfo(Mesh mesh, int size, bool isVolumetric)
         {
             // Reference to the TMP Text Component.
@@ -242,9 +242,10 @@ namespace TMPro
 
 
         /// <summary>
-        /// Resizes the content of the mesh data and re-assigns normals, tangents and triangles.
+        /// Function to resized the content of MeshData and re-assign normals, tangents and triangles.
         /// </summary>
-        /// <param name="size">The new number of quads (4 vertices each) to allocate.</param>
+        /// <param name="meshData"></param>
+        /// <param name="size"></param>
         public void ResizeMeshInfo(int size)
         {
             // If the requested size will exceed the 16 bit mesh limit, switch mesh to use 32 bit.
@@ -313,10 +314,10 @@ namespace TMPro
 
 
         /// <summary>
-        /// Resizes the content of the mesh data and re-assigns normals, tangents and triangles.
+        /// Function to resized the content of MeshData and re-assign normals, tangents and triangles.
         /// </summary>
-        /// <param name="size">The new number of elements (quads or cubes) to allocate.</param>
-        /// <param name="isVolumetric">If true, each element uses 8 vertices; otherwise 4 per quad.</param>
+        /// <param name="size"></param>
+        /// <param name="isVolumetric"></param>
         public void ResizeMeshInfo(int size, bool isVolumetric)
         {
             int s0 = !isVolumetric ? 4 : 8;
@@ -487,9 +488,9 @@ namespace TMPro
 
 
         /// <summary>
-        /// Marks unused vertices as degenerate (cleared from the given index to the end).
+        /// Function used to mark unused vertices as degenerate.
         /// </summary>
-        /// <param name="startIndex">The first vertex index to treat as unused; vertices from this index to the end are cleared.</param>
+        /// <param name="startIndex"></param>
         public void ClearUnusedVertices(int startIndex)
         {
             int length = this.vertices.Length - startIndex;
@@ -500,10 +501,9 @@ namespace TMPro
 
 
         /// <summary>
-        /// Marks unused vertices as degenerate and optionally uploads the resulting data to the mesh.
+        /// Function used to mark unused vertices as degenerate an upload resulting data to the mesh.
         /// </summary>
-        /// <param name="startIndex">The first vertex index to treat as unused; vertices from this index to the end are cleared.</param>
-        /// <param name="updateMesh">If true, uploads the modified vertices to the mesh after clearing.</param>
+        /// <param name="startIndex"></param>
         public void ClearUnusedVertices(int startIndex, bool updateMesh)
         {
             int length = this.vertices.Length - startIndex;
@@ -543,9 +543,9 @@ namespace TMPro
 
 
         /// <summary>
-        /// Rearranges the quads of the text object to change their rendering order.
+        /// Function to rearrange the quads of the text object to change their rendering order.
         /// </summary>
-        /// <param name="sortingOrder">List of quad indices defining the new rendering order.</param>
+        /// <param name="sortingOrder"></param>
         public void SortGeometry(IList<int> sortingOrder)
         {
             // Make sure the sorting order array is not larger than the vertices array.
