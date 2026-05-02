@@ -23,10 +23,6 @@ internal class InputModuleTests
     [Test]
     public void InputModuleComponentFactory_AddComponent_CanBeOverriden()
     {
-        // Reset the current override
-        var current = InputModuleComponentFactory.InputModuleComponentOverride;
-        InputModuleComponentFactory.SetInputModuleComponentOverride(null);
-
         // First call creates a StandaloneInputModule
         var inputModule = InputModuleComponentFactory.AddInputModule(m_EventSystem.gameObject);
         Assert.IsInstanceOf<StandaloneInputModule>(inputModule);
@@ -42,10 +38,6 @@ internal class InputModuleTests
         InputModuleComponentFactory.SetInputModuleComponentOverride(null);
         inputModule = InputModuleComponentFactory.AddInputModule(m_EventSystem.gameObject);
         Assert.IsInstanceOf<StandaloneInputModule>(inputModule);
-        Object.DestroyImmediate(inputModule);
-
-        // Set it back to it's original value
-        InputModuleComponentFactory.SetInputModuleComponentOverride(current);
     }
 
     internal class TestInputModule : BaseInputModule

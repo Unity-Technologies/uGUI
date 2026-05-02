@@ -50,7 +50,7 @@ namespace TMPro
                     }
                     GUILayout.Space(5f);
 
-                    GUI.enabled = (!m_EssentialResourcesImported || m_EssentialResourcesNeedUpdate) && !EditorApplication.isPlaying;
+                    GUI.enabled = !m_EssentialResourcesImported || m_EssentialResourcesNeedUpdate;
                     if (GUILayout.Button("Import TMP Essentials"))
                     {
                         m_EssentialResourcesNeedUpdate = false;
@@ -78,7 +78,7 @@ namespace TMPro
                         GUILayout.Label("The Examples & Extras package contains addition resources and examples that will make discovering and learning about TextMesh Pro's powerful features easier. These additional resources will be placed in the same folder as the TMP essential resources.", new GUIStyle(EditorStyles.label) { wordWrap = true });
                     GUILayout.Space(5f);
 
-                    GUI.enabled = ((m_EssentialResourcesImported && !m_ExamplesAndExtrasResourcesImported) || m_ExamplesAndExtrasNeedUpdate) && !EditorApplication.isPlaying;
+                    GUI.enabled = (m_EssentialResourcesImported && !m_ExamplesAndExtrasResourcesImported) || m_ExamplesAndExtrasNeedUpdate;
                     if (GUILayout.Button("Import TMP Examples & Extras"))
                     {
                         // Set flag to get around importing scripts as per of this package which results in an assembly reload which in turn prevents / clears any callbacks.

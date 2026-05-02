@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using NUnit.Framework;
 using System.IO;
@@ -55,7 +55,7 @@ namespace TMPro
 
 
         [OneTimeSetUp]
-        public void OneTimeSetup()
+        public void Setup()
         {
             if (Directory.Exists(Path.GetFullPath("Assets/TextMesh Pro")) || Directory.Exists(Path.GetFullPath("Packages/com.unity.textmeshpro.tests/TextMesh Pro")))
             {
@@ -388,15 +388,9 @@ namespace TMPro
         // These test also use the data contained inside the TMP_TextInfo class.
 
 
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
-        {
-            if (m_TextComponent != null)
-            {
-                Object.DestroyImmediate(m_TextComponent.gameObject);
-                m_TextComponent = null;
-            }
-
+        //[OneTimeTearDown]
+        //public void Cleanup()
+        //{
         //    // Remove TMP Essential Resources if they were imported in the project as a result of running tests.
         //    if (TMPro_EventManager.temporaryResourcesImported == true)
         //    {
@@ -406,6 +400,7 @@ namespace TMPro
         //            TMPro_EventManager.temporaryResourcesImported = false;
         //        }
         //    }
-        }
+        //}
+
     }
 }

@@ -119,7 +119,7 @@ namespace TMPro
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsHighSurrogate(uint c)
         {
-            return c >= CodePoint.HIGH_SURROGATE_START && c <= CodePoint.HIGH_SURROGATE_END;
+            return c > 0xD800 && c < 0xDBFF;
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace TMPro
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsLowSurrogate(uint c)
         {
-            return c >= CodePoint.LOW_SURROGATE_START && c <= CodePoint.LOW_SURROGATE_END;
+            return c > 0xDC00 && c < 0xDFFF;
         }
 
         /// <summary>

@@ -438,7 +438,7 @@ namespace TMPro
         public byte italicStyle = 35;
 
         /// <summary>
-        /// The character width used for tab spacing.
+        ///
         /// </summary>
         public byte tabSize = 10;
 
@@ -473,7 +473,7 @@ namespace TMPro
         private List<TMP_FontAsset> fallbackFontAssets;
 
         /// <summary>
-        /// The primary atlas texture containing the glyphs for this font asset.
+        ///
         /// </summary>
         [SerializeField]
         public Texture2D atlas; // Should add a property to make this read-only.
@@ -1247,10 +1247,10 @@ namespace TMPro
         private static HashSet<EntityId> k_SearchedFontAssetLookup;
 
         /// <summary>
-        /// Checks whether a specific character exists in the font asset.
+        /// Function to check if a certain character exists in the font asset.
         /// </summary>
-        /// <param name="character">Unicode value of the character to check.</param>
-        /// <returns>True if the character exists in the font asset.</returns>
+        /// <param name="character"></param>
+        /// <returns></returns>
         public bool HasCharacter(int character)
         {
             if (characterLookupTable == null)
@@ -1260,12 +1260,12 @@ namespace TMPro
         }
 
         /// <summary>
-        /// Checks whether a character is contained in the font asset, with the option to also check potential local fallbacks.
+        /// Function to check if a character is contained in the font asset with the option to also check potential local fallbacks.
         /// </summary>
-        /// <param name="character">The character to check.</param>
-        /// <param name="searchFallbacks">Whether to search fallback font assets.</param>
-        /// <param name="tryAddCharacter">If true and the font is dynamic, attempt to add the character to the font asset.</param>
-        /// <returns>True if the character exists in the font asset or fallbacks.</returns>
+        /// <param name="character"></param>
+        /// <param name="searchFallbacks"></param>
+        /// <param name="tryAddCharacter"></param>
+        /// <returns></returns>
         public bool HasCharacter(char character, bool searchFallbacks = false, bool tryAddCharacter = false)
         {
             // Read font asset definition if it hasn't already been done.
@@ -1405,11 +1405,11 @@ namespace TMPro
         }
 
         /// <summary>
-        /// Checks whether the given characters exist in the font asset and returns a list of any missing characters.
+        /// Function to check if certain characters exists in the font asset. Function returns a list of missing characters.
         /// </summary>
         /// <param name="text">String containing the characters to check.</param>
         /// <param name="missingCharacters">List of missing characters.</param>
-        /// <returns>True if all characters exist in the font asset; otherwise false.</returns>
+        /// <returns></returns>
         public bool HasCharacters(string text, out List<char> missingCharacters)
         {
             if (characterLookupTable == null)
@@ -1435,12 +1435,12 @@ namespace TMPro
         }
 
         /// <summary>
-        /// Checks whether the characters in the given string are contained in the font asset, with the option to also check local fallbacks.
+        /// Function to check if the characters in the given string are contained in the font asset with the option to also check its potential local fallbacks.
         /// </summary>
         /// <param name="text">String containing the characters to check.</param>
         /// <param name="missingCharacters">Array containing the unicode values of the missing characters.</param>
         /// <param name="searchFallbacks">Determines if fallback font assets assigned to this font asset should be searched.</param>
-        /// <param name="tryAddCharacter">If true and the font is dynamic, attempt to add missing characters to the font asset.</param>
+        /// <param name="tryAddCharacter"></param>
         /// <returns>Returns true if all requested characters are available in the font asset and potential fallbacks.</returns>
         public bool HasCharacters(string text, out uint[] missingCharacters, bool searchFallbacks = false, bool tryAddCharacter = false)
         {
@@ -1550,10 +1550,10 @@ namespace TMPro
         }
 
         /// <summary>
-        /// Checks whether specific characters exist in the font asset.
+        /// Function to check if certain characters exists in the font asset. Function returns false if any characters are missing.
         /// </summary>
-        /// <param name="text">String containing the characters to check.</param>
-        /// <returns>True if all characters exist in the font asset; otherwise false.</returns>
+        /// <param name="text">String containing the characters to check</param>
+        /// <returns></returns>
         public bool HasCharacters(string text)
         {
             if (characterLookupTable == null)
@@ -1571,10 +1571,10 @@ namespace TMPro
         }
 
         /// <summary>
-        /// Extracts all characters from the font asset as a string.
+        /// Function to extract all the characters from a font asset.
         /// </summary>
-        /// <param name="fontAsset">The font asset to extract characters from.</param>
-        /// <returns>A string containing all characters defined in the font asset.</returns>
+        /// <param name="fontAsset"></param>
+        /// <returns></returns>
         public static string GetCharacters(TMP_FontAsset fontAsset)
         {
             string characters = string.Empty;
@@ -1588,10 +1588,10 @@ namespace TMPro
         }
 
         /// <summary>
-        /// Returns an array of all character Unicode values from the font asset.
+        /// Function which returns an array that contains all the characters from a font asset.
         /// </summary>
-        /// <param name="fontAsset">The font asset to extract character Unicode values from.</param>
-        /// <returns>An array of Unicode values for all characters defined in the font asset.</returns>
+        /// <param name="fontAsset"></param>
+        /// <returns></returns>
         public static int[] GetCharactersArray(TMP_FontAsset fontAsset)
         {
             int[] characters = new int[fontAsset.characterTable.Count];
@@ -1771,8 +1771,8 @@ namespace TMPro
         /// <summary>
         /// Try adding the characters from the provided string to the font asset.
         /// </summary>
-        /// <param name="unicodes">Array that contains the Unicode values of the characters to add to the font asset.</param>
-        /// <param name="includeFontFeatures">Whether to include font features when adding characters.</param>
+        /// <param name="unicodes">Array that contains the characters to add to the font asset.</param>
+        /// <param name="includeFontFeatures"></param>
         /// <returns>Returns true if all the characters were successfully added to the font asset. Return false otherwise.</returns>
         public bool TryAddCharacters(uint[] unicodes, bool includeFontFeatures = false)
         {
@@ -1784,9 +1784,9 @@ namespace TMPro
         /// <summary>
         /// Try adding the characters from the provided string to the font asset.
         /// </summary>
-        /// <param name="unicodes">Array that contains the Unicode values of the characters to add to the font asset.</param>
-        /// <param name="missingUnicodes">Array containing the Unicode values of characters that could not be added to the font asset.</param>
-        /// <param name="includeFontFeatures">Whether to include font features when adding characters.</param>
+        /// <param name="unicodes">Array that contains the characters to add to the font asset.</param>
+        /// <param name="missingUnicodes">Array containing the characters that could not be added to the font asset.</param>
+        /// <param name="includeFontFeatures"></param>
         /// <returns>Returns true if all the characters were successfully added to the font asset. Return false otherwise.</returns>
         public bool TryAddCharacters(uint[] unicodes, out uint[] missingUnicodes, bool includeFontFeatures = false)
         {
@@ -1994,7 +1994,7 @@ namespace TMPro
         /// Try adding the characters from the provided string to the font asset.
         /// </summary>
         /// <param name="characters">String containing the characters to add to the font asset.</param>
-        /// <param name="includeFontFeatures">Whether to include font features when adding characters.</param>
+        /// <param name="includeFontFeatures"></param>
         /// <returns>Returns true if all the characters were successfully added to the font asset. Return false otherwise.</returns>
         public bool TryAddCharacters(string characters, bool includeFontFeatures = false)
         {
@@ -2008,7 +2008,7 @@ namespace TMPro
         /// </summary>
         /// <param name="characters">String containing the characters to add to the font asset.</param>
         /// <param name="missingCharacters">String containing the characters that could not be added to the font asset.</param>
-        /// <param name="includeFontFeatures">Whether to include font features when adding characters.</param>
+        /// <param name="includeFontFeatures"></param>
         /// <returns>Returns true if all the characters were successfully added to the font asset. Return false otherwise.</returns>
         public bool TryAddCharacters(string characters, out string missingCharacters, bool includeFontFeatures = false)
         {

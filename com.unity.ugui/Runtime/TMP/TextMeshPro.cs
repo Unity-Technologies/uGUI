@@ -583,7 +583,9 @@ namespace TMPro
             {
                 m_mesh = new Mesh();
                 m_mesh.hideFlags = HideFlags.HideAndDontSave;
+                #if DEVELOPMENT_BUILD || UNITY_EDITOR
                 m_mesh.name = "TextMeshPro Mesh";
+                #endif
                 m_meshFilter.sharedMesh = m_mesh;
 
                 // Create new TextInfo for the text object.
