@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Pool;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using Unity.Profiling;
@@ -815,9 +816,7 @@ namespace TMPro
             {
                 m_mesh = new Mesh();
                 m_mesh.hideFlags = HideFlags.HideAndDontSave;
-                #if DEVELOPMENT_BUILD || UNITY_EDITOR
                 m_mesh.name = "TextMeshPro UI Mesh";
-                #endif
                 // Create new TextInfo for the text object.
                 m_textInfo = new TMP_TextInfo(this);
             }
@@ -1281,7 +1280,7 @@ namespace TMPro
         private Canvas GetCanvas()
         {
             Canvas canvas = null;
-            var list = TMP_ListPool<Canvas>.Get();
+            var list = ListPool<Canvas>.Get();
 
             gameObject.GetComponentsInParent(false, list);
             if (list.Count > 0)
@@ -1297,7 +1296,7 @@ namespace TMPro
                 }
             }
 
-            TMP_ListPool<Canvas>.Release(list);
+            ListPool<Canvas>.Release(list);
 
             return canvas;
         }

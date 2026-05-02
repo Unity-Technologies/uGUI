@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.TextCore;
 using UnityEngine.TextCore.LowLevel;
@@ -52,10 +52,10 @@ namespace TMPro
     public class TMP_Glyph : TMP_TextElement_Legacy
     {
         /// <summary>
-        /// Function to create a deep copy of a GlyphInfo.
+        /// Clones a glyph info object.
         /// </summary>
-        /// <param name="source"></param>
-        /// <returns></returns>
+        /// <param name="source">The source glyph object to copy from.</param>
+        /// <returns>A new TMP_Glyph instance with the same values as the source.</returns>
         public static TMP_Glyph Clone(TMP_Glyph source)
         {
             TMP_Glyph copy = new TMP_Glyph();
@@ -307,7 +307,7 @@ namespace TMPro
         /// <param name="first">First glyph</param>
         /// <param name="second">Second glyph</param>
         /// <param name="offset">xAdvance value</param>
-        /// <returns></returns>
+        /// <returns>The index of the added or existing kerning pair.</returns>
         public int AddKerningPair(uint first, uint second, float offset)
         {
             int index = kerningPairs.FindIndex(item => item.firstGlyph == first && item.secondGlyph == second);
@@ -325,11 +325,11 @@ namespace TMPro
         /// <summary>
         /// Add Glyph pair adjustment record
         /// </summary>
-        /// <param name="firstGlyph">The first glyph</param>
-        /// <param name="firstGlyphAdjustments">Adjustment record for the first glyph</param>
-        /// <param name="secondGlyph">The second glyph</param>
-        /// <param name="secondGlyphAdjustments">Adjustment record for the second glyph</param>
-        /// <returns></returns>
+        /// <param name="first">The first glyph index.</param>
+        /// <param name="firstAdjustments">Adjustment record for the first glyph.</param>
+        /// <param name="second">The second glyph index.</param>
+        /// <param name="secondAdjustments">Adjustment record for the second glyph.</param>
+        /// <returns>The index of the added or existing glyph pair adjustment record.</returns>
         public int AddGlyphPairAdjustmentRecord(uint first, GlyphValueRecord_Legacy firstAdjustments, uint second, GlyphValueRecord_Legacy secondAdjustments)
         {
             int index = kerningPairs.FindIndex(item => item.firstGlyph == first && item.secondGlyph == second);
@@ -378,7 +378,7 @@ namespace TMPro
         /// <param name="font">The font asset to search for the given character.</param>
         /// <param name="unicode">The character to find.</param>
         /// <param name="character">out parameter containing the glyph for the specified character (if found).</param>
-        /// <returns></returns>
+        /// <returns>The font asset that contains the character, or null if not found.</returns>
         public static TMP_FontAsset SearchForCharacter(TMP_FontAsset font, uint unicode, out TMP_Character character)
         {
             if (k_searchedFontAssets == null)
@@ -393,10 +393,10 @@ namespace TMPro
         /// <summary>
         /// Search through the given list of fonts and their possible fallbacks for the specified character.
         /// </summary>
-        /// <param name="fonts"></param>
-        /// <param name="unicode"></param>
-        /// <param name="character"></param>
-        /// <returns></returns>
+        /// <param name="fonts">The list of font assets to search.</param>
+        /// <param name="unicode">The Unicode value of the character to find.</param>
+        /// <param name="character">out parameter containing the character data (if found).</param>
+        /// <returns>The font asset that contains the character, or null if not found.</returns>
         public static TMP_FontAsset SearchForCharacter(List<TMP_FontAsset> fonts, uint unicode, out TMP_Character character)
         {
             return SearchForCharacterInternal(fonts, unicode, out character);

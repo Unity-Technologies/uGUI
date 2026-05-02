@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using UnityEngine;
 
@@ -378,7 +378,7 @@ namespace TMPro
         /// <summary>
         /// Function to retrieve the current item from the stack.
         /// </summary>
-        /// <returns>itemStack <T></returns>
+        /// <returns>The current item T from the stack.</returns>
         public T CurrentItem()
         {
             if (index > 0)

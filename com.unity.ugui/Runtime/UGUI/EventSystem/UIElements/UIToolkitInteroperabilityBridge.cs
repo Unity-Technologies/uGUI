@@ -224,9 +224,9 @@ namespace UnityEngine.UIElements
             if (m_Enabled) return;
             m_Enabled = true;
 
-            if (PanelInputConfiguration.current != null)
-                Apply(PanelInputConfiguration.current);
-            PanelInputConfiguration.onApply += Apply;
+            if (PanelInputState.current != null)
+                Apply(PanelInputState.current);
+            PanelInputState.onApply += Apply;
 
             if (m_Started)
                 StartTrackingUIToolkitPanels();
@@ -246,7 +246,7 @@ namespace UnityEngine.UIElements
             if (!m_Enabled) return;
             m_Enabled = false;
 
-            PanelInputConfiguration.onApply -= Apply;
+            PanelInputState.onApply -= Apply;
 
             StopTrackingUIToolkitPanels();
             // Can be null if runtime panels have not been created or UI Toolkit is stripped
@@ -273,12 +273,11 @@ namespace UnityEngine.UIElements
             UpdatePanelGameObjects();
         }
 
-        private PanelInputConfiguration.Settings m_InputSettings = PanelInputConfiguration.Settings.Default;
-        void Apply(PanelInputConfiguration input)
+        private PanelInputSettings m_InputSettings = PanelInputSettings.Default;
+        void Apply(IPanelInputProvider input)
         {
-            m_InputSettings = input != null ? input.settings : PanelInputConfiguration.Settings.Default;
-            m_OverrideUIToolkitEvents =
-                m_InputSettings.panelInputRedirection != PanelInputConfiguration.PanelInputRedirection.Never;
+            m_InputSettings = input != null ? input.settings : PanelInputSettings.Default;
+            m_OverrideUIToolkitEvents = m_InputSettings.shouldRedirectInput;
             m_HandlerTypes = EventHandlerTypes.ScreenOverlay |
                 (m_InputSettings.processWorldSpaceInput ? EventHandlerTypes.WorldSpace : 0);
             m_WorldPickingLayers = m_InputSettings.interactionLayers;

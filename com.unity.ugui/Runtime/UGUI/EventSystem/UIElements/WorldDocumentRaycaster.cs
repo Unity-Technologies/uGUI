@@ -58,7 +58,9 @@ namespace UnityEngine.UIElements
                     return;
             }
 
-            if (!PhysicsDocumentPicker.TryPickWithCapture(pointerId, worldRay, maxDistance, layerMask, out _,
+
+            var uiElementsUtil = IRuntimePanel.uIElementsRuntimeUtility;
+            if (uiElementsUtil == null || !uiElementsUtil.TryPickWithCapture(pointerId, worldRay, maxDistance, layerMask, out _,
                     out var panelComponent, out var elementUnderPointer, out var distance, out var captured))
                 return;
 

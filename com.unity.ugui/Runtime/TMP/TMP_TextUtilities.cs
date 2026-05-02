@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 
@@ -188,7 +188,7 @@ namespace TMPro
         /// <summary>
         /// Function returning the line nearest to the position.
         /// </summary>
-        /// <param name="textComponent"></param>
+        /// <param name="text"></param>
         /// <param name="position"></param>
         /// <param name="camera"></param>
         /// <returns></returns>
@@ -1316,7 +1316,7 @@ namespace TMPro
         /// <summary>
         /// Function returning the line intersecting the position.
         /// </summary>
-        /// <param name="textComponent"></param>
+        /// <param name="text"></param>
         /// <param name="position"></param>
         /// <param name="camera"></param>
         /// <returns></returns>

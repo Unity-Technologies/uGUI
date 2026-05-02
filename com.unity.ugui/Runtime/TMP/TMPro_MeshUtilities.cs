@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.TextCore;
 using System;
 
@@ -142,7 +142,6 @@ namespace TMPro
         /// <summary>
         /// Function which returns the text contained in a link.
         /// </summary>
-        /// <param name="textInfo"></param>
         /// <returns></returns>
         public string GetLinkText()
         {
@@ -167,7 +166,6 @@ namespace TMPro
         /// <summary>
         /// Function which returns the link ID as a string.
         /// </summary>
-        /// <param name="text">The source input text.</param>
         /// <returns></returns>
         public string GetLinkID()
         {

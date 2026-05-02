@@ -1,16 +1,13 @@
 using UnityEngine;
 using NUnit.Framework;
 using System.IO;
-using System.Collections.Generic;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
 
 namespace TMPro
 {
     internal class TMP_CanvasTests
     {
         [OneTimeSetUp]
-        public void Setup()
+        public void OneTimeSetUp()
         {
             if (!Directory.Exists(Path.GetFullPath("Assets/TextMesh Pro")))
             {
@@ -41,6 +38,9 @@ namespace TMPro
             canvas.enabled = true;
 
             Assert.IsFalse(text.havePropertiesChanged, "Text should not have changed after enabling / disabling canvas");
+
+            // Cleanup
+            Object.DestroyImmediate(go);
         }
 
     }
