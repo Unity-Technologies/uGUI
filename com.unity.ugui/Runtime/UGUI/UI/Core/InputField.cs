@@ -3277,6 +3277,11 @@ namespace UnityEngine.UI
         /// <param name="eventData">The data sent by the EventSystem</param>
         public override void OnDeselect(BaseEventData eventData)
         {
+            if (compositionString.Length > 0)
+            {
+                Append(compositionString);
+            }
+
             DeactivateInputField();
             base.OnDeselect(eventData);
         }
