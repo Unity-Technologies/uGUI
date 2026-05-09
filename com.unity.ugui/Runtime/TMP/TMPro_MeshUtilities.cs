@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.TextCore;
 using System;
 
@@ -140,12 +140,10 @@ namespace TMPro
         }
 
         /// <summary>
-        /// Returns the text contained in a link.
+        /// Function which returns the text contained in a link.
         /// </summary>
-        /// <returns>Concatenated characters for the link body between <see cref="linkTextfirstCharacterIndex"/> and <see cref="linkTextLength"/>.</returns>
-        /// <remarks>
-        /// Walks <see cref="TMP_Text.textInfo"/> character entries so callers can display or hit-test the human-readable portion of a link tag.
-        /// </remarks>
+        /// <param name="textInfo"></param>
+        /// <returns></returns>
         public string GetLinkText()
         {
             string text = string.Empty;
@@ -158,24 +156,19 @@ namespace TMPro
         }
 
         /// <summary>
-        /// Returns the link as a string.
+        /// Function which returns the link as a string.
         /// </summary>
-        /// <returns>The same identifier string as <see cref="GetLinkID"/> for convenience when passing link metadata to UI handlers.</returns>
-        /// <remarks>
-        /// Delegates to <see cref="GetLinkID"/> so API consumers can treat the link token uniformly across scripting and inspector workflows.
-        /// </remarks>
+        /// <returns></returns>
         public string GetLink()
         {
             return GetLinkID();
         }
 
         /// <summary>
-        /// Returns the link ID as a string.
+        /// Function which returns the link ID as a string.
         /// </summary>
-        /// <returns>Parsed id characters from the opening link tag, or an empty string when no text component is bound.</returns>
-        /// <remarks>
-        /// Materializes the temporary <see cref="linkID"/> buffer into a managed string for comparisons against your application-specific link table.
-        /// </remarks>
+        /// <param name="text">The source input text.</param>
+        /// <returns></returns>
         public string GetLinkID()
         {
             if (textComponent == null)
@@ -203,10 +196,7 @@ namespace TMPro
         /// <summary>
         /// Returns the word as a string.
         /// </summary>
-        /// <returns>Characters from <see cref="firstCharacterIndex"/> through <see cref="lastCharacterIndex"/> inclusive.</returns>
-        /// <remarks>
-        /// Concatenates code units from <see cref="TMP_Text.textInfo"/> so word boundaries respect TMP layout even when ligatures span characters.
-        /// </remarks>
+        /// <returns></returns>
         public string GetWord()
         {
             string word = string.Empty;

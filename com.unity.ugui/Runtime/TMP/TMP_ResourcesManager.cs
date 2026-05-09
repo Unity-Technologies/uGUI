@@ -5,7 +5,7 @@ using UnityEngine;
 namespace TMPro
 {
     /// <summary>
-    /// Central registry for TextMesh Pro font assets and access to the loaded <see cref="TMP_Settings"/> asset.
+    ///
     /// </summary>
     public class TMP_ResourceManager
     {

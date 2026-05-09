@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 
 #pragma warning disable 0649 // Disabled warnings.
@@ -23,7 +23,7 @@ namespace TMPro
         // PUBLIC PROPERTIES
 
         /// <summary>
-        /// The name identifying this style, for example &lt;style=&quot;name&quot;&gt;.
+        /// The name identifying this style. ex. <style="name">.
         /// </summary>
         public string name
         { get { return m_Name; } set { if (value != m_Name) m_Name = value; } }
@@ -35,13 +35,13 @@ namespace TMPro
         { get { return m_HashCode; } set { if (value != m_HashCode) m_HashCode = value; } }
 
         /// <summary>
-        /// The initial definition of the style, for example &lt;b&gt; &lt;u&gt;.
+        /// The initial definition of the style. ex. <b> <u>.
         /// </summary>
         public string styleOpeningDefinition
         { get { return m_OpeningDefinition; } }
 
         /// <summary>
-        /// The closing definition of the style, for example &lt;/b&gt; &lt;/u&gt;.
+        /// The closing definition of the style. ex. </b> </u>.
         /// </summary>
         public string styleClosingDefinition
         { get { return m_ClosingDefinition; } }
@@ -92,7 +92,7 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function to update the content of the int[] resulting from changes to OpeningDefinition and ClosingDefinition.
+        /// Function to update the content of the int[] resulting from changes to OpeningDefinition & ClosingDefinition.
         /// </summary>
         public void RefreshStyle()
         {

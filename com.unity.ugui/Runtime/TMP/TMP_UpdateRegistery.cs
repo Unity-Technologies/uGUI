@@ -48,12 +48,9 @@ namespace TMPro
 
 
         /// <summary>
-        /// Registers elements which require a layout rebuild.
+        /// Function to register elements which require a layout rebuild.
         /// </summary>
-        /// <param name="element">Canvas element (typically <see cref="TMP_Text"/>) to enqueue; duplicates are skipped using the object entity id.</param>
-        /// <remarks>
-        /// Queues the element for <see cref="CanvasUpdate.Prelayout"/> during <c>Canvas.willRenderCanvases</c> so TMP can refresh preferred size before mesh generation.
-        /// </remarks>
+        /// <param name="element"></param>
         public static void RegisterCanvasElementForLayoutRebuild(ICanvasElement element)
         {
             TMP_UpdateRegistry.instance.InternalRegisterCanvasElementForLayoutRebuild(element);
@@ -74,12 +71,9 @@ namespace TMPro
 
 
         /// <summary>
-        /// Registers elements which require a graphic rebuild.
+        /// Function to register elements which require a graphic rebuild.
         /// </summary>
-        /// <param name="element">Canvas element to enqueue for vertex or material updates before the next canvas prerender pass.</param>
-        /// <remarks>
-        /// Processes after layout rebuilds so font atlases and mesh buffers apply once RectTransform dimensions are finalized for the frame.
-        /// </remarks>
+        /// <param name="element"></param>
         public static void RegisterCanvasElementForGraphicRebuild(ICanvasElement element)
         {
             TMP_UpdateRegistry.instance.InternalRegisterCanvasElementForGraphicRebuild(element);
@@ -151,12 +145,9 @@ namespace TMPro
 
 
         /// <summary>
-        /// Unregisters elements which no longer require a rebuild.
+        /// Function to unregister elements which no longer require a rebuild.
         /// </summary>
-        /// <param name="element">Canvas element to remove from both internal layout and graphic rebuild queues when disabling or destroying the object.</param>
-        /// <remarks>
-        /// Clears pending work so stale <see cref="ICanvasElement"/> references are not processed after the component becomes inactive or is pooled.
-        /// </remarks>
+        /// <param name="element"></param>
         public static void UnRegisterCanvasElementForRebuild(ICanvasElement element)
         {
             TMP_UpdateRegistry.instance.InternalUnRegisterCanvasElementForLayoutRebuild(element);
