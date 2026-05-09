@@ -1,4 +1,4 @@
-﻿#if HDRP_10_7_OR_NEWER
+#if HDRP_10_7_OR_NEWER
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.Rendering.HighDefinition;
@@ -14,7 +14,7 @@ namespace TMPro.EditorUtilities
     #endif
     {
         /// <summary>Representation of a #pragma shader_feature.</summary>
-        /// <description>It is assumed that the first feature option is for no keyword (underscores).</description>
+        /// <remarks>It is assumed that the first feature option is for no keyword (underscores).</remarks>
         protected class ShaderFeature
         {
             public string undoLabel;

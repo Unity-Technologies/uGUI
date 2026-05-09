@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Pool;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using Unity.Profiling;
@@ -124,9 +125,7 @@ namespace TMPro
         }
 
 
-        /// <summary>
-        ///
-        /// </summary>
+        /// <inheritdoc/>
         public override void SetLayoutDirty()
         {
             m_isPreferredWidthDirty = true;
@@ -144,9 +143,7 @@ namespace TMPro
         }
 
 
-        /// <summary>
-        ///
-        /// </summary>
+        /// <inheritdoc/>
         public override void SetMaterialDirty()
         {
             if (this == null || !this.IsActive())
@@ -163,8 +160,9 @@ namespace TMPro
         }
 
 
+        /// <inheritdoc/>
         /// <summary>
-        ///
+        /// Marks layout, vertices and material as dirty.
         /// </summary>
         public override void SetAllDirty()
         {
@@ -208,11 +206,10 @@ namespace TMPro
             m_DelayedMaterialRebuild = null;
         }
 
-
+        /// <inheritdoc/>
         /// <summary>
-        ///
+        /// Rebuilds the text geometry for the given canvas update phase.
         /// </summary>
-        /// <param name="update"></param>
         public override void Rebuild(CanvasUpdate update)
         {
             if (this == null) return;
@@ -250,12 +247,10 @@ namespace TMPro
             //m_isPivotDirty = false;
         }
 
-
+        /// <inheritdoc/>
         /// <summary>
-        ///
+        /// Returns the material with masking and stencil applied for rendering.
         /// </summary>
-        /// <param name="baseMaterial"></param>
-        /// <returns></returns>
         public override Material GetModifiedMaterial(Material baseMaterial)
         {
             Material mat = baseMaterial;
@@ -278,9 +273,9 @@ namespace TMPro
             return mat;
         }
 
-
+        /// <inheritdoc/>
         /// <summary>
-        ///
+        /// Updates the material used for rendering the text.
         /// </summary>
         protected override void UpdateMaterial()
         {
@@ -369,12 +364,10 @@ namespace TMPro
         //    base.SetClipRect(clipRect, validRect);
         //}
 
-
+        /// <inheritdoc/>
         /// <summary>
         /// Override of the Cull function to provide for the ability to override the culling of the text object.
         /// </summary>
-        /// <param name="clipRect"></param>
-        /// <param name="validRect"></param>
         public override void Cull(Rect clipRect, bool validRect)
         {
             m_ShouldUpdateCulling = false;
@@ -565,12 +558,7 @@ namespace TMPro
             OnPreRenderCanvas();
         }
 
-
-        /// <summary>
-        /// Function used to evaluate the length of a text string.
-        /// </summary>
-        /// <param name="text"></param>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public override TMP_TextInfo GetTextInfo(string text)
         {
             SetText(text);
@@ -609,11 +597,7 @@ namespace TMPro
         public override event Action<TMP_TextInfo> OnPreRenderText;
 
 
-        /// <summary>
-        /// Function to update the geometry of the main and sub text objects.
-        /// </summary>
-        /// <param name="mesh"></param>
-        /// <param name="index"></param>
+        /// <inheritdoc/>
         public override void UpdateGeometry(Mesh mesh, int index)
         {
             mesh.RecalculateBounds();
@@ -815,9 +799,7 @@ namespace TMPro
             {
                 m_mesh = new Mesh();
                 m_mesh.hideFlags = HideFlags.HideAndDontSave;
-                #if DEVELOPMENT_BUILD || UNITY_EDITOR
                 m_mesh.name = "TextMeshPro UI Mesh";
-                #endif
                 // Create new TextInfo for the text object.
                 m_textInfo = new TMP_TextInfo(this);
             }
@@ -1281,7 +1263,7 @@ namespace TMPro
         private Canvas GetCanvas()
         {
             Canvas canvas = null;
-            var list = TMP_ListPool<Canvas>.Get();
+            var list = ListPool<Canvas>.Get();
 
             gameObject.GetComponentsInParent(false, list);
             if (list.Count > 0)
@@ -1297,7 +1279,7 @@ namespace TMPro
                 }
             }
 
-            TMP_ListPool<Canvas>.Release(list);
+            ListPool<Canvas>.Release(list);
 
             return canvas;
         }
@@ -1497,10 +1479,7 @@ namespace TMPro
         }
 
 
-        /// <summary>
-        /// Method returning instances of the materials used by the text object.
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc/>
         protected override Material[] GetMaterials(Material[] mats)
         {
             int materialCount = m_textInfo.materialCount;
@@ -1541,10 +1520,7 @@ namespace TMPro
         }
 
 
-        /// <summary>
-        /// Method returning an array containing the materials used by the text object.
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc/>
         protected override Material[] GetSharedMaterials()
         {
             int materialCount = m_textInfo.materialCount;
@@ -2352,8 +2328,9 @@ namespace TMPro
         }
 
 
+        /// <inheritdoc/>
         /// <summary>
-        ///
+        /// Called when animation properties have been applied; marks the text as changed.
         /// </summary>
         protected override void OnDidApplyAnimationProperties()
         {
@@ -5464,10 +5441,7 @@ namespace TMPro
         }
 
 
-        /// <summary>
-        /// Method to return the local corners of the Text Container or RectTransform.
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc/>
         protected override Vector3[] GetTextContainerLocalCorners()
         {
             if (m_rectTransform == null) m_rectTransform = this.rectTransform;
@@ -5478,10 +5452,7 @@ namespace TMPro
         }
 
 
-        /// <summary>
-        /// Method to Enable or Disable child SubMesh objects.
-        /// </summary>
-        /// <param name="state"></param>
+        /// <inheritdoc/>
         protected override void SetActiveSubMeshes(bool state)
         {
             for (int i = 1; i < m_subTextObjects.Length && m_subTextObjects[i] != null; i++)
@@ -5502,10 +5473,7 @@ namespace TMPro
         }
 
 
-        /// <summary>
-        ///  Method returning the compound bounds of the text object and child sub objects.
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc/>
         protected override Bounds GetCompoundBounds()
         {
             Bounds mainBounds = m_mesh.bounds;
