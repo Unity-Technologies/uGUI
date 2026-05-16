@@ -722,6 +722,9 @@ namespace UnityEngine.UI
             get { return 0; }
         }
 
+        /// <inheritdoc/>
+        public virtual float maxWidth { get { return LayoutUtility.DefaultMaxSize; } }
+
         public virtual float preferredWidth
         {
             get
@@ -737,6 +740,9 @@ namespace UnityEngine.UI
         {
             get { return 0; }
         }
+
+        /// <inheritdoc/>
+        public virtual float maxHeight { get { return LayoutUtility.DefaultMaxSize; } }
 
         public virtual float preferredHeight
         {

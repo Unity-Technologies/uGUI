@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -149,8 +149,13 @@ namespace TMPro
 
 
         /// <summary>
-        ///
+        /// Clears all mesh data and reconfigures the vertex structures to support either standard quads or volumetric (3D) character geometry.
         /// </summary>
+        /// <param name="isVolumetric">When true, subsequent mesh growth uses eight vertices per glyph; otherwise four vertices per glyph.</param>
+        /// <remarks>
+        /// Resizes each entry in <see cref="meshInfo"/> to zero vertices using <see cref="TMP_MeshInfo.ResizeMeshInfo(int, bool)"/>,
+        /// so subsequent text generation allocates buffers for either billboard quads or extruded volumetric glyphs as required.
+        /// </remarks>
         public void ResetVertexLayout(bool isVolumetric)
         {
             for (int i = 0; i < this.meshInfo.Length; i++)
@@ -159,9 +164,13 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function used to mark unused vertices as degenerate.
+        /// Marks unused vertices as degenerate.
         /// </summary>
-        /// <param name="materials"></param>
+        /// <param name="materials">Parallel material references for each sub-mesh entry; reserved for per-material vertex ranges when clearing unused vertices.</param>
+        /// <remarks>
+        /// Iterates <see cref="meshInfo"/> and calls <see cref="TMP_MeshInfo.ClearUnusedVertices(int)"/> from the computed start index so trailing vertices
+        /// in each buffer can be cleared without reallocating the mesh.
+        /// </remarks>
         public void ClearUnusedVertices(MaterialReference[] materials)
         {
             for (int i = 0; i < meshInfo.Length; i++)
@@ -284,11 +293,14 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function to resize any of the structure contained in the TMP_TextInfo class.
+        /// Resizes any of the structure contained in the TMP_TextInfo class.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="array"></param>
-        /// <param name="size"></param>
+        /// <typeparam name="T">Element type of the array.</typeparam>
+        /// <param name="array">The array to resize (passed by reference).</param>
+        /// <param name="size">The required number of elements; actual size may be rounded up to next power of two.</param>
+        /// <remarks>
+        /// Uses the next power of two (or size plus 256 when above 1024) to reduce frequent reallocations while TMP grows character, word, or line tables during layout.
+        /// </remarks>
         public static void Resize<T> (ref T[] array, int size)
         {
             // Allocated to the next power of two
@@ -299,12 +311,16 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function to resize any of the structure contained in the TMP_TextInfo class.
+        /// Resizes any of the structure contained in the TMP_TextInfo class.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="array"></param>
-        /// <param name="size"></param>
-        /// <param name="isFixedSize"></param>
+        /// <typeparam name="T">Element type of the array.</typeparam>
+        /// <param name="array">The array to resize (passed by reference).</param>
+        /// <param name="size">The required number of elements; when isBlockAllocated is true, rounded up to next power of two.</param>
+        /// <param name="isBlockAllocated">When true, size is rounded up to the next power of two for block allocation.</param>
+        /// <remarks>
+        /// When <paramref name="isBlockAllocated"/> is false, the array is resized to exactly <paramref name="size"/> if different from the current length,
+        /// which is used for structures that already use explicit sizing instead of power-of-two blocks.
+        /// </remarks>
         public static void Resize<T>(ref T[] array, int size, bool isBlockAllocated)
         {
             if (isBlockAllocated) size = size > 1024 ? size + 256 : Mathf.NextPowerOfTwo(size);

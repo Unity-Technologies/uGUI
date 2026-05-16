@@ -2,7 +2,7 @@
 
 Use the `<width>` tag adjust the horizontal size of text area. The change takes effect on the current line, after the tag. Typically, you place the tag at the start of a paragraph.
 
-If you add more than one `,width>` tag to a line, the last one takes precedence over the others.
+If you add more than one `<width>` tag to a line, the last one takes precedence over the others.
 
 You can specify the width in either pixels, font units, or percentages. The adjusted width cannot exceed the TextMesh Pro object's original width.
 

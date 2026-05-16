@@ -1,6 +1,7 @@
 ﻿//#define TMP_DEBUG_MODE
 
 using UnityEngine;
+using UnityEngine.Pool;
 using System.Collections.Generic;
 
 using UnityEngine.UI;
@@ -37,11 +38,11 @@ namespace TMPro
         }
 
         /// <summary>
-        /// Create a Masking Material Instance for the given ID
+        /// Creates a masking material instance for the given ID.
         /// </summary>
-        /// <param name="baseMaterial"></param>
-        /// <param name="stencilID"></param>
-        /// <returns></returns>
+        /// <param name="baseMaterial">The base material to create a stencil masking instance from.</param>
+        /// <param name="stencilID">The stencil ID to assign to the masking material.</param>
+        /// <returns>A material instance configured for stencil masking with the given ID.</returns>
         public static Material GetStencilMaterial(Material baseMaterial, int stencilID)
         {
             // Check if Material supports masking
@@ -107,9 +108,9 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function to release the stencil material.
+        /// Releases the stencil material (decrements reference count or destroys if last).
         /// </summary>
-        /// <param name="stencilMaterial"></param>
+        /// <param name="stencilMaterial">The stencil material to release (decrements reference count or destroys if last).</param>
         public static void ReleaseStencilMaterial(Material stencilMaterial)
         {
             var stencilMaterialID = stencilMaterial.GetEntityId();
@@ -153,11 +154,11 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function to set the Material Stencil ID
+        /// Sets the stencil ID on the material.
         /// </summary>
-        /// <param name="material"></param>
-        /// <param name="stencilID"></param>
-        /// <returns></returns>
+        /// <param name="material">The material to set the stencil ID on.</param>
+        /// <param name="stencilID">The stencil ID value to assign to the material for masking.</param>
+        /// <returns>The same material with stencil ID applied.</returns>
         public static Material SetStencil(Material material, int stencilID)
         {
             material.SetFloat(ShaderUtilities.ID_StencilID, stencilID);
@@ -262,10 +263,10 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function to get the Stencil ID
+        /// Gets the combined stencil ID from mask components above the object.
         /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
+        /// <param name="obj">The GameObject to get the stencil ID for (from Mask components in the hierarchy).</param>
+        /// <returns>The combined stencil ID from all masks above the object.</returns>
         public static int GetStencilID(GameObject obj)
         {
             // Implementation is almost copied from uGUI (Unity UI)
@@ -278,7 +279,7 @@ namespace TMPro
                 return count;
 
             var t = transform.parent;
-            var components = TMP_ListPool<Mask>.Get();
+            var components = ListPool<Mask>.Get();
             while (t != null)
             {
                 t.GetComponents<Mask>(components);
@@ -297,7 +298,7 @@ namespace TMPro
 
                 t = t.parent;
             }
-            TMP_ListPool<Mask>.Release(components);
+            ListPool<Mask>.Release(components);
 
             return Mathf.Min((1 << count) - 1, 255);
         }
@@ -308,14 +309,14 @@ namespace TMPro
             if (baseMaterial == null)
                 return null;
 
-            var modifiers = TMP_ListPool<IMaterialModifier>.Get();
+            var modifiers = ListPool<IMaterialModifier>.Get();
             graphic.GetComponents(modifiers);
 
             var result = baseMaterial;
             for (int i = 0; i < modifiers.Count; i++)
                 result = modifiers[i].GetModifiedMaterial(result);
 
-            TMP_ListPool<IMaterialModifier>.Release(modifiers);
+            ListPool<IMaterialModifier>.Release(modifiers);
 
             return result;
         }
@@ -324,7 +325,7 @@ namespace TMPro
         {
             // Implementation is copied from uGUI (Unity UI)
 
-            var canvasList = TMP_ListPool<Canvas>.Get();
+            var canvasList = ListPool<Canvas>.Get();
             start.GetComponentsInParent(false, canvasList);
             Canvas canvas = null;
 
@@ -336,7 +337,7 @@ namespace TMPro
                 if (canvas.overrideSorting)
                     break;
             }
-            TMP_ListPool<Canvas>.Release(canvasList);
+            ListPool<Canvas>.Release(canvasList);
 
             return canvas != null ? canvas.transform : null;
         }
@@ -395,7 +396,7 @@ namespace TMPro
         /// </summary>
         /// <param name="sourceMaterial">The material containing the source material properties to be copied to the new material.</param>
         /// <param name="targetMaterial">The font atlas texture that should be assigned to the new material.</param>
-        /// <returns></returns>
+        /// <returns>A material instance with source properties and target material's main texture.</returns>
         public static Material GetFallbackMaterial (Material sourceMaterial, Material targetMaterial)
         {
             var sourceID = sourceMaterial.GetEntityId();
@@ -466,9 +467,9 @@ namespace TMPro
 
 
         /// <summary>
-        ///
+        /// Registers a fallback material reference for tracking and cleanup.
         /// </summary>
-        /// <param name="targetMaterial"></param>
+        /// <param name="targetMaterial">The fallback material to add a reference for.</param>
         public static void AddFallbackMaterialReference(Material targetMaterial)
         {
             if (targetMaterial == null) return;
@@ -489,9 +490,9 @@ namespace TMPro
 
 
         /// <summary>
-        ///
+        /// Decrements the reference count for a fallback material; when the count reaches zero it is queued for cleanup.
         /// </summary>
-        /// <param name="targetMaterial"></param>
+        /// <param name="targetMaterial">The fallback material whose reference count should be decremented.</param>
         public static void RemoveFallbackMaterialReference(Material targetMaterial)
         {
             if (targetMaterial == null) return;
@@ -514,7 +515,7 @@ namespace TMPro
 
 
         /// <summary>
-        ///
+        /// Destroys fallback materials that have no remaining references and clears the cleanup list.
         /// </summary>
         public static void CleanupFallbackMaterials()
         {
@@ -591,10 +592,10 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function to copy the properties of a source material preset to another while preserving the unique font asset properties of the destination material.
+        /// Copies the properties of a source material preset to a destination while preserving the destination's unique font asset properties.
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="destination"></param>
+        /// <param name="source">The source material to copy properties from.</param>
+        /// <param name="destination">The destination material to copy properties to.</param>
         public static void CopyMaterialPresetProperties(Material source, Material destination)
         {
             if (!source.HasProperty(ShaderUtilities.ID_GradientScale) || !destination.HasProperty(ShaderUtilities.ID_GradientScale))

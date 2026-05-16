@@ -267,27 +267,6 @@ namespace UnityEngine.UI.Tests
             Assert.AreEqual(selectable.colors.normalColor, canvasRenderer.GetColor());
         }
 
-        [UnityTest][Ignore("Fails")] // regression test 742140
-        public IEnumerator SettingNotInteractableThenInteractableShouldNotTweenToDisabledColor()
-        {
-            var canvasRenderer = selectable.gameObject.GetComponent<CanvasRenderer>();
-            selectable.enabled = false;
-            selectable.enabled = true;
-            canvasRenderer.SetColor(selectable.colors.normalColor);
-
-            selectable.interactable = false;
-            selectable.interactable = true;
-            Color c = canvasRenderer.GetColor();
-
-            for (int i = 0; i < 30; i++)
-            {
-                yield return null;
-                Color c2 = canvasRenderer.GetColor();
-                Assert.AreNotEqual(c2, c);
-            }
-            Assert.AreEqual(selectable.colors.normalColor, canvasRenderer.GetColor());
-        }
-
         [UnityTest]
         public IEnumerator SettingInteractableToFalseTrueFalseShouldTweenToDisabledColor()
         {
@@ -457,15 +436,6 @@ namespace UnityEngine.UI.Tests
             selectable.InvokeOnPointerDown(new PointerEventData(EventSystem.current) { button = PointerEventData.InputButton.Right });
             selectable.InvokeOnPointerUp(new PointerEventData(EventSystem.current) { button = PointerEventData.InputButton.Right });
             Assert.True(selectable.isStatePressed);
-        }
-
-        [Test, Ignore("No disabled state assigned ? Investigate")]
-        public void SettingNotInteractableShouldDisable()
-        {
-            Assert.True(selectable.isStateNormal);
-            selectable.interactable = false;
-            selectable.InvokeOnCanvasGroupChanged();
-            Assert.True(selectable.isStateDisabled);
         }
 
         #endregion

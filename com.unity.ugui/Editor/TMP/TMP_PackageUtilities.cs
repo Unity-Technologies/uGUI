@@ -1022,7 +1022,7 @@ namespace TMPro
     public class TMP_PackageUtilities : Editor
     {
         /// <summary>
-        ///
+        /// Imports the TextMesh Pro essential resources into the project.
         /// </summary>
         [MenuItem("Window/TextMeshPro/Import TMP Essential Resources", false, 2050)]
         public static void ImportProjectResourcesMenu()
@@ -1032,7 +1032,7 @@ namespace TMPro
 
 
         /// <summary>
-        ///
+        /// Imports the TextMesh Pro examples and extras content into the project.
         /// </summary>
         [MenuItem("Window/TextMeshPro/Import TMP Examples and Extras", false, 2051)]
         public static void ImportExamplesContentMenu()

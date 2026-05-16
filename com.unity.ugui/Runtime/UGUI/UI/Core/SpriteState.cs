@@ -1,5 +1,4 @@
 using System;
-using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
@@ -15,7 +14,6 @@ namespace UnityEngine.UI
         [SerializeField]
         private Sprite m_PressedSprite;
 
-        [FormerlySerializedAs("m_HighlightedSprite")]
         [SerializeField]
         private Sprite m_SelectedSprite;
 

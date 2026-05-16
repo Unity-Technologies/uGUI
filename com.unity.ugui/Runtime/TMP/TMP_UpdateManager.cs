@@ -77,9 +77,12 @@ namespace TMPro
         }
 
         /// <summary>
-        /// Function to register elements which require a layout rebuild.
+        /// Registers elements which require a layout rebuild.
         /// </summary>
-        /// <param name="element"></param>
+        /// <param name="element">Text component to enqueue; duplicates are ignored using the instance entity id.</param>
+        /// <remarks>
+        /// Queues the element for <see cref="CanvasUpdate.Prelayout"/> processing during <c>willRenderCanvases</c> so preferred sizes and line breaks refresh before mesh generation.
+        /// </remarks>
         public static void RegisterTextElementForLayoutRebuild(TMP_Text element)
         {
             instance.InternalRegisterTextElementForLayoutRebuild(element);
@@ -97,9 +100,12 @@ namespace TMPro
         }
 
         /// <summary>
-        /// Function to register elements which require a layout rebuild.
+        /// Registers elements which require a graphic rebuild.
         /// </summary>
-        /// <param name="element"></param>
+        /// <param name="element">Text component to enqueue for vertex or material updates before the next render.</param>
+        /// <remarks>
+        /// Runs during the graphic rebuild phase so SDF scale tweaks and material swaps apply after layout has settled for the frame.
+        /// </remarks>
         public static void RegisterTextElementForGraphicRebuild(TMP_Text element)
         {
             k_RegisterTextElementForGraphicRebuildMarker.Begin();
@@ -208,9 +214,12 @@ namespace TMPro
         }
 
         /// <summary>
-        /// Function to unregister elements which no longer require a rebuild.
+        /// Unregisters elements which no longer require a rebuild.
         /// </summary>
-        /// <param name="element"></param>
+        /// <param name="element">Text component to remove from internal layout, graphic, and per-frame update queues.</param>
+        /// <remarks>
+        /// Clears pending work when the object is disabled or destroyed so stale references are not processed on subsequent canvas render callbacks.
+        /// </remarks>
         public static void UnRegisterTextElementForRebuild(TMP_Text element)
         {
             instance.InternalUnRegisterTextElementForGraphicRebuild(element);

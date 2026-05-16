@@ -14,6 +14,8 @@ A layout element has properties that defines its own:
 
 * Minimum width
 * Minimum height
+* Maximum width
+* Maximum height
 * Preferred width
 * Preferred height
 * Flexible width

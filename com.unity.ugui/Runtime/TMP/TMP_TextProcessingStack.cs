@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using UnityEngine;
 
@@ -141,7 +141,7 @@ namespace TMPro
     /// <summary>
     /// Structure used to track XML tags of various types.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T">The element type of the stack.</typeparam>
     [DebuggerDisplay("Item count = {m_Count}")]
     public struct TMP_TextProcessingStack<T>
     {
@@ -159,7 +159,10 @@ namespace TMPro
         /// <summary>
         /// Constructor to create a new item stack.
         /// </summary>
-        /// <param name="stack"></param>
+        /// <param name="stack">Backing array that stores stack entries; capacity equals this array length.</param>
+        /// <remarks>
+        /// Initializes internal counters so the stack starts empty while reusing the provided buffer to avoid an extra allocation when the caller already sized the array.
+        /// </remarks>
         public TMP_TextProcessingStack(T[] stack)
         {
             itemStack = stack;
@@ -175,7 +178,10 @@ namespace TMPro
         /// <summary>
         /// Constructor for a new item stack with the given capacity.
         /// </summary>
-        /// <param name="capacity"></param>
+        /// <param name="capacity">Number of slots to allocate in the internal item array before any push operations.</param>
+        /// <remarks>
+        /// Allocates <paramref name="capacity"/> entries up front so nested rich-text tags can push state without resizing during typical markup depth.
+        /// </remarks>
         public TMP_TextProcessingStack(int capacity)
         {
             itemStack = new T[capacity];
@@ -201,8 +207,11 @@ namespace TMPro
 
 
         /// <summary>
-        ///
+        /// Gets the number of items currently stored on the stack.
         /// </summary>
+        /// <remarks>
+        /// Backed by <c>m_Count</c>, which push, pop, and remove operations keep aligned with the logical depth of active rich-text scopes.
+        /// </remarks>
         public int Count
         {
             get { return m_Count; }
@@ -225,8 +234,11 @@ namespace TMPro
 
 
         /// <summary>
-        ///
+        /// Gets or sets the rollover size used when the stack wraps in circular-buffer mode.
         /// </summary>
+        /// <remarks>
+        /// When set to zero, pushes grow the backing array; when positive, the stack index wraps modulo the rollover size to cap memory for unbounded tag nesting.
+        /// </remarks>
         public int rolloverSize
         {
             get { return m_RolloverSize; }
@@ -253,8 +265,11 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function to clear and reset stack to first item.
+        /// Clears and resets stack to first item.
         /// </summary>
+        /// <remarks>
+        /// Resets the logical count and index so the next push or set default rebuilds state from scratch without reallocating the backing array reference.
+        /// </remarks>
         public void Clear()
         {
             index = 0;
@@ -263,9 +278,12 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function to set the first item on the stack and reset index.
+        /// Sets the first item on the stack and reset index.
         /// </summary>
-        /// <param name="item"></param>
+        /// <param name="item">Baseline value written to index zero and returned when the stack would otherwise be empty.</param>
+        /// <remarks>
+        /// Lazily allocates the backing array when null, then sets index to one so subsequent adds append rich-text overrides above the default style.
+        /// </remarks>
         public void SetDefault(T item)
         {
             if (itemStack == null)
@@ -282,9 +300,12 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function to add a new item to the stack.
+        /// Adds a new item to the stack.
         /// </summary>
-        /// <param name="item"></param>
+        /// <param name="item">Value to store at the current write index when capacity allows further growth.</param>
+        /// <remarks>
+        /// Writes only when index is below the backing array length; this legacy path does not expand storage, unlike <see cref="Push"/>.
+        /// </remarks>
         public void Add(T item)
         {
             if (index < itemStack.Length)
@@ -296,9 +317,12 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function to retrieve an item from the stack.
+        /// Retrieves an item from the stack.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The value exposed after decrementing the stack pointer, or the default slot when collapsing to one entry.</returns>
+        /// <remarks>
+        /// Decrements both index and count, clamping to one level so <see cref="current"/> always has a defined fallback entry at index zero.
+        /// </remarks>
         public T Remove()
         {
             index -= 1;
@@ -363,9 +387,12 @@ namespace TMPro
         }
 
         /// <summary>
-        ///
+        /// Returns the top item on the stack without removing it.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The most recently pushed value, or the baseline entry at index zero when nothing has been pushed yet.</returns>
+        /// <remarks>
+        /// Non-destructive read used when parsers need the active style without mutating the stack during lookahead.
+        /// </remarks>
         public T Peek()
         {
             if (index == 0)
@@ -378,7 +405,7 @@ namespace TMPro
         /// <summary>
         /// Function to retrieve the current item from the stack.
         /// </summary>
-        /// <returns>itemStack <T></returns>
+        /// <returns>The current item T from the stack.</returns>
         public T CurrentItem()
         {
             if (index > 0)
@@ -389,9 +416,12 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function to retrieve the previous item without affecting the stack.
+        /// Retrieves the previous item without affecting the stack.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The value one level below the top when at least two entries exist; otherwise the first slot.</returns>
+        /// <remarks>
+        /// Useful when comparing the prior style to the active style while leaving the stack unchanged for subsequent characters.
+        /// </remarks>
         public T PreviousItem()
         {
             if (index > 1)

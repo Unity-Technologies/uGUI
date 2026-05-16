@@ -190,8 +190,8 @@ namespace TMPro
         /// <summary>
         /// Function used to set the mask type and coordinates in World Space
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="maskCoords"></param>
+        /// <param name="type">The masking type to apply.</param>
+        /// <param name="maskCoords">Mask coordinates in world space.</param>
         public void SetMask(MaskingTypes type, Vector4 maskCoords)
         {
             SetMask(type);
@@ -202,10 +202,10 @@ namespace TMPro
         /// <summary>
         /// Function used to set the mask type, coordinates and softness
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="maskCoords"></param>
-        /// <param name="softnessX"></param>
-        /// <param name="softnessY"></param>
+        /// <param name="type">The masking type to apply.</param>
+        /// <param name="maskCoords">Mask coordinates in world space.</param>
+        /// <param name="softnessX">Horizontal softness of the mask edge.</param>
+        /// <param name="softnessY">Vertical softness of the mask edge.</param>
         public void SetMask(MaskingTypes type, Vector4 maskCoords, float softnessX, float softnessY)
         {
             SetMask(type);
@@ -229,10 +229,7 @@ namespace TMPro
             ObjectUtilsBridge.MarkDirty(this);
         }
 
-
-        /// <summary>
-        ///
-        /// </summary>
+        /// <inheritdoc/>
         public override void SetLayoutDirty()
         {
             m_isPreferredWidthDirty = true;
@@ -262,9 +259,9 @@ namespace TMPro
             //TMP_UpdateManager.RegisterTextElementForGraphicRebuild(this);
         }
 
-
+        /// <inheritdoc/>
         /// <summary>
-        ///
+        /// Marks layout, vertices and material as dirty.
         /// </summary>
         public override void SetAllDirty()
         {
@@ -273,11 +270,10 @@ namespace TMPro
             SetMaterialDirty();
         }
 
-
+        /// <inheritdoc/>
         /// <summary>
-        ///
+        /// Rebuilds the text geometry for the given canvas update phase.
         /// </summary>
-        /// <param name="update"></param>
         public override void Rebuild(CanvasUpdate update)
         {
             if (this == null) return;
@@ -300,9 +296,9 @@ namespace TMPro
             }
         }
 
-
+        /// <inheritdoc/>
         /// <summary>
-        ///
+        /// Updates the mesh and material used for rendering the text.
         /// </summary>
         protected override void UpdateMaterial()
         {
@@ -351,12 +347,7 @@ namespace TMPro
             OnPreRenderObject();
         }
 
-
-        /// <summary>
-        /// Function used to evaluate the length of a text string.
-        /// </summary>
-        /// <param name="text"></param>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public override TMP_TextInfo GetTextInfo(string text)
         {
             SetText(text);
@@ -391,11 +382,7 @@ namespace TMPro
         public override event Action<TMP_TextInfo> OnPreRenderText;
 
 
-        /// <summary>
-        /// Function to update the geometry of the main and sub text objects.
-        /// </summary>
-        /// <param name="mesh"></param>
-        /// <param name="index"></param>
+        /// <inheritdoc/>
         public override void UpdateGeometry(Mesh mesh, int index)
         {
             mesh.RecalculateBounds();
@@ -583,9 +570,7 @@ namespace TMPro
             {
                 m_mesh = new Mesh();
                 m_mesh.hideFlags = HideFlags.HideAndDontSave;
-                #if DEVELOPMENT_BUILD || UNITY_EDITOR
                 m_mesh.name = "TextMeshPro Mesh";
-                #endif
                 m_meshFilter.sharedMesh = m_mesh;
 
                 // Create new TextInfo for the text object.
@@ -1201,10 +1186,7 @@ namespace TMPro
         }
 
 
-        /// <summary>
-        /// Method returning instances of the materials used by the text object.
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc/>
         protected override Material[] GetMaterials(Material[] mats)
         {
             int materialCount = m_textInfo.materialCount;
@@ -1245,10 +1227,7 @@ namespace TMPro
         }
 
 
-        /// <summary>
-        /// Method returning an array containing the materials used by the text object.
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc/>
         protected override Material[] GetSharedMaterials()
         {
             int materialCount = m_textInfo.materialCount;
@@ -2031,9 +2010,9 @@ namespace TMPro
             }
         }
 
-
+        /// <inheritdoc/>
         /// <summary>
-        ///
+        /// Called when animation properties have been applied; marks the text as changed.
         /// </summary>
         protected override void OnDidApplyAnimationProperties()
         {
@@ -5076,11 +5055,7 @@ namespace TMPro
             k_GenerateTextMarker.End();
         }
 
-
-        /// <summary>
-        /// Method to return the local corners of the Text Container or RectTransform.
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc/>
         protected override Vector3[] GetTextContainerLocalCorners()
         {
             if (m_rectTransform == null) m_rectTransform = this.rectTransform;
@@ -5117,11 +5092,7 @@ namespace TMPro
             }
         }
 
-
-        /// <summary>
-        /// Method to Enable or Disable child SubMesh objects.
-        /// </summary>
-        /// <param name="state"></param>
+        /// <inheritdoc/>
         protected override void SetActiveSubMeshes(bool state)
         {
             for (int i = 1; i < m_subTextObjects.Length && m_subTextObjects[i] != null; i++)
@@ -5184,10 +5155,7 @@ namespace TMPro
             }
         }
 
-        /// <summary>
-        ///  Method returning the compound bounds of the text object and child sub objects.
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc/>
         protected override Bounds GetCompoundBounds()
         {
             Bounds mainBounds = m_mesh.bounds;
