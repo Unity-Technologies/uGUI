@@ -44,8 +44,8 @@ namespace InputfieldTests
         [TearDown]
         public void TearDown()
         {
+            InputField inputField = m_PrefabRoot.GetComponentInChildren<InputField>();
             TouchScreenKeyboard.hideInput = false;
-            TouchScreenKeyboard.inPlaceEditingBehavior = TouchScreenKeyboard.InPlaceEditingBehavior.Auto;
             FontUpdateTracker.UntrackText(m_PrefabRoot.GetComponentInChildren<Text>());
             GameObject.DestroyImmediate(m_PrefabRoot);
         }
@@ -210,9 +210,6 @@ namespace InputfieldTests
         [UnityPlatform(exclude = new[] { RuntimePlatform.tvOS })] // UUM-71764 (tvOS)
         public IEnumerator SendsEndEditEventOnDeselect()
         {
-            if (!TouchScreenKeyboard.isSupported)
-                Assert.Ignore("Test ignored, because TouchScreenKeyboard is not supported");
-
             InputField inputField = m_PrefabRoot.GetComponentInChildren<InputField>();
             BaseEventData eventData = new BaseEventData(m_PrefabRoot.GetComponentInChildren<EventSystem>());
 
@@ -260,12 +257,12 @@ namespace InputfieldTests
         [UnityPlatform(exclude = new[] { RuntimePlatform.tvOS})] // UUM-71764 (tvOS)
         public IEnumerator FocusOpensTouchScreenKeyboard()
         {
-            if (!TouchScreenKeyboard.isSupported)
-                Assert.Ignore("Test ignored, because TouchScreenKeyboard is not supported");
+            var isInPlaceEditingDisabled = typeof(TouchScreenKeyboard).GetProperty("disableInPlaceEditing",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+            isInPlaceEditingDisabled.SetValue(null, true);
 
-            // inPlaceEditingBehavior is specifically for Android to handle cases where a physical keyboard
-            // (e.g., a game controller detected as keyboard) can suppress the touch screen keyboard.
-            TouchScreenKeyboard.inPlaceEditingBehavior = TouchScreenKeyboard.InPlaceEditingBehavior.AlwaysDisallowed;
+            if (!TouchScreenKeyboard.isSupported)
+                yield break;
             InputField inputField = m_PrefabRoot.GetComponentInChildren<InputField>();
             BaseEventData eventData = new BaseEventData(m_PrefabRoot.GetComponentInChildren<EventSystem>());
 
@@ -311,6 +308,7 @@ namespace InputfieldTests
             }
         }
 
+        [UnityTest, Ignore("Disabled for Instability https://jira.unity3d.com/browse/UUM-69542")]
         [UnityPlatform(exclude = new[] { RuntimePlatform.IPhonePlayer, RuntimePlatform.PS4, RuntimePlatform.PS5, RuntimePlatform.VisionOS })] // disabled on visionOS due to UUM-61018
         public IEnumerator IsTouchScreenKeyboardVisible()
         {

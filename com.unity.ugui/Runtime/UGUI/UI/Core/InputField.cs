@@ -310,7 +310,6 @@ namespace UnityEngine.UI
         private bool m_DragPositionOutOfBounds = false;
         private const float kHScrollSpeed = 0.05f;
         private const float kVScrollSpeed = 0.10f;
-        static readonly RangeInt k_KeyboardSelectionResetValue = new RangeInt(-1, -1);
         protected bool m_CaretVisible;
         private Coroutine m_BlinkCoroutine = null;
         private float m_BlinkStartTime = 0.0f;
@@ -323,8 +322,6 @@ namespace UnityEngine.UI
         private WaitForSecondsRealtime m_WaitForSecondsRealtime;
         private bool m_TouchKeyboardAllowsInPlaceEditing = false;
         private bool m_IsCompositionActive = false;
-        private bool m_UpdateCaretToKeyboardPending = false;
-        private RangeInt m_LastSyncedToKeyboard = k_KeyboardSelectionResetValue;
 
         private BaseInput input
         {
@@ -1033,28 +1030,9 @@ namespace UnityEngine.UI
         /// Getters are public Setters are protected
         /// </summary>
 
-        protected int caretPositionInternal
-        {
-            get { return m_CaretPosition + compositionString.Length; }
-            set
-            {
-                m_CaretPosition = value;
-                ClampPos(ref m_CaretPosition);
-                MarkCaretToKeyboardDirty();
-            }
-        }
-
-        protected int caretSelectPositionInternal
-        {
-            get { return m_CaretSelectPosition + compositionString.Length; }
-            set
-            {
-                m_CaretSelectPosition = value;
-                ClampPos(ref m_CaretSelectPosition);
-                MarkCaretToKeyboardDirty();
-            }
-        }
-        private bool hasSelection { get { return m_CaretPosition != m_CaretSelectPosition; } }
+        protected int caretPositionInternal { get { return m_CaretPosition + compositionString.Length; } set { m_CaretPosition = value; ClampPos(ref m_CaretPosition); } }
+        protected int caretSelectPositionInternal { get { return m_CaretSelectPosition + compositionString.Length; } set { m_CaretSelectPosition = value; ClampPos(ref m_CaretSelectPosition); } }
+        private bool hasSelection { get { return caretPositionInternal != caretSelectPositionInternal; } }
 
 #if UNITY_EDITOR
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
@@ -1091,8 +1069,6 @@ namespace UnityEngine.UI
 
                 m_CaretPosition = value;
                 ClampPos(ref m_CaretPosition);
-
-                MarkCaretToKeyboardDirty();
             }
         }
 
@@ -1114,8 +1090,6 @@ namespace UnityEngine.UI
 
                 m_CaretSelectPosition = value;
                 ClampPos(ref m_CaretSelectPosition);
-
-                MarkCaretToKeyboardDirty();
             }
         }
 
@@ -1281,7 +1255,7 @@ namespace UnityEngine.UI
         /// A common use of this is allowing the user to type once focussed. Another way is outputting a message when the user clicks on a field(often seen when creating passwords).
         /// </remarks>
         /// <example>
-        /// <para>Create an Input Field by going to __Create__&gt;__UI__&gt;__Input Field__. Attach this script to the Input Field GameObject.</para>
+        /// //Create an Input Field by going to __Create__>__UI__>__Input Field__. Attach this script to the Input Field GameObject
         /// <code>
         /// <![CDATA[
         /// using UnityEngine;
@@ -1417,122 +1391,37 @@ namespace UnityEngine.UI
             return new RangeInt(selectionStart, selectionLength);
         }
 
-        /// <summary>
-        /// Converts a visual text position (which includes the IME composition string) to a raw position
-        /// (relative to m_Text only). The composition string is visually inserted at compositionRawStart
-        /// but is not part of m_Text, so visual positions after it must be offset backward.
-        /// Positions inside the composition region map to the composition start (the caret anchor).
-        /// </summary>
-        static int VisualToRawPosition(int visualPos, int compositionRawStart, int compositionLength)
-        {
-            if (compositionLength == 0 || visualPos <= compositionRawStart)
-                return visualPos;
-            if (visualPos <= compositionRawStart + compositionLength)
-                return compositionRawStart;
-            return visualPos - compositionLength;
-        }
-
-        /// <summary>
-        /// Converts a raw text position to a visual position by accounting for the IME composition string.
-        /// Raw positions before the composition are unchanged; positions at or after it shift forward
-        /// by compositionLength to account for the visually inserted composition text.
-        /// </summary>
-        static int RawToVisualPosition(int rawPos, int compositionRawStart, int compositionLength)
-        {
-            if (compositionLength == 0 || rawPos < compositionRawStart)
-                return rawPos;
-            return rawPos + compositionLength;
-        }
-
-        void UpdateCaretToKeyboard()
-        {
-            if (m_Keyboard == null || !m_Keyboard.canSetSelection)
-                return;
-
-            // Cache compositionString.Length (native property) and convert raw positions to visual space
-            // accounting for where the IME composition string is inserted
-            var compositionLength = compositionString.Length;
-            var caretPos = RawToVisualPosition(m_CaretPosition, m_CaretPosition, compositionLength);
-            var caretSelect = RawToVisualPosition(m_CaretSelectPosition, m_CaretPosition, compositionLength);
-            var selectionStart = Mathf.Min(caretSelect, caretPos);
-            var selectionLength = Mathf.Abs(caretSelect - caretPos);
-            var selection = new RangeInt(selectionStart, selectionLength);
-
-            // Validate selection is within InputField text bounds
-            // Using m_Text.Length as it is kept in sync with the keyboard text each frame
-            // Include compositionLength since selection positions include it
-            var textLength = m_Text.Length + compositionLength;
-            if (selection.start < 0 || selection.start > textLength ||
-                selection.start + selection.length > textLength)
-            {
-                return;
-            }
-
-            m_Keyboard.selection = selection;
-            // Remember what we set, so we can skip syncing this same value back
-            m_LastSyncedToKeyboard = selection;
-        }
-
-        void MarkCaretToKeyboardDirty()
-        {
-            // Mark that the caret position needs to be pushed to the keyboard in LateUpdate.
-            // This batches multiple selection changes in a single frame into one native bridge call,
-            // reducing JNI/Objective-C overhead when programmatically updating selection or navigating with keyboard.
-            m_UpdateCaretToKeyboardPending = true;
-        }
-
         void UpdateKeyboardCaret()
         {
-            // Push caret to keyboard when user interacts with InputField UI (touch/drag).
-            // Done here instead of LateUpdate so that we wouldn't override TouchScreenKeyboard selection
-            // when it's changed directly by the user (e.g., arrow keys or shortcuts on an external keyboard).
-            // Uses UpdateCaretToKeyboard for consistent bounds validation and tracking across all platforms.
-            if (shouldHideMobileInput && m_Keyboard != null && m_Keyboard.canSetSelection)
+            // On iOS/tvOS we only update SoftKeyboard selection when we know that it might have changed by touch/pointer interactions with InputField
+            // Setting the TouchScreenKeyboard selection here instead of LateUpdate so that we wouldn't override
+            // TouchScreenKeyboard selection when it's changed with cmd+a/ctrl+a/arrow/etc. in the TouchScreenKeyboard
+            // This is only applicable for iOS/tvOS as we have instance of TouchScreenKeyboard even when external keyboard is connected
+            if (m_HideMobileInput && m_Keyboard != null && m_Keyboard.canSetSelection &&
+                (Application.platform == RuntimePlatform.IPhonePlayer || Application.platform == RuntimePlatform.tvOS))
             {
-                UpdateCaretToKeyboard();
-                // Clear pending flag since we just pushed the caret - avoids redundant update in LateUpdate
-                m_UpdateCaretToKeyboardPending = false;
+                m_Keyboard.selection = GetInternalSelection();
             }
         }
 
         void UpdateCaretFromKeyboard()
         {
-            // Skip during drag (user is dragging to select in InputField, not using keyboard)
-            if (m_UpdateDrag)
-                return;
-
             var selectionRange = m_Keyboard.selection;
+
             var selectionStart = selectionRange.start;
             var selectionEnd = selectionRange.end;
-            var selectionLength = selectionRange.length;
 
-            // Skip when the keyboard selection has not changed since last time we synced it
-            if (m_LastSyncedToKeyboard.start == selectionStart && m_LastSyncedToKeyboard.length == selectionLength)
-                return;
-
-            // Keyboard selection is different from what we set - accept the change (user interaction or external change)
-            // IMPORTANT: keyboard.selection contains VISUAL positions that include the IME composition string.
-            // The caretPositionInternal setter expects RAW positions (relative to m_Text only).
-            // Cache the composition anchor (m_CaretPosition before update) and compositionString.Length (native property)
-            // to ensure consistent conversion even after the setter updates m_CaretPosition.
-            var compositionRawStart = m_CaretPosition;
-            var compositionLength = compositionString.Length;
             var caretChanged = false;
 
-            // Compare current raw positions converted to visual space against keyboard selection.
-            // Use RawToVisualPosition instead of unconditionally adding compositionLength, because
-            // compositionLength should only be added when the raw position is at or after the composition anchor.
-            // Unconditional addition would produce wrong visual positions for backwards selections
-            // where m_CaretSelectPosition < compositionRawStart.
-            if (RawToVisualPosition(m_CaretPosition, compositionRawStart, compositionLength) != selectionStart)
+            if (caretPositionInternal != selectionStart)
             {
                 caretChanged = true;
-                caretPositionInternal = VisualToRawPosition(selectionStart, compositionRawStart, compositionLength);
+                caretPositionInternal = selectionStart;
             }
 
-            if (RawToVisualPosition(m_CaretSelectPosition, compositionRawStart, compositionLength) != selectionEnd)
+            if (caretSelectPositionInternal != selectionEnd)
             {
-                caretSelectPositionInternal = VisualToRawPosition(selectionEnd, compositionRawStart, compositionLength);
+                caretSelectPositionInternal = selectionEnd;
                 caretChanged = true;
             }
 
@@ -1541,25 +1430,6 @@ namespace UnityEngine.UI
                 m_BlinkStartTime = Time.unscaledTime;
 
                 UpdateLabel();
-
-                // Clear the pending flag if final positions match keyboard exactly,
-                // or if the keyboard cursor is inside the active composition string.
-                // VisualToRawPosition maps any position inside the composition to compositionRawStart,
-                // so the round-trip through RawToVisualPosition would snap it to the end of the composition.
-                // When the native keyboard places the cursor inside the composition (e.g., user tapping to
-                // adjust conversion boundaries in CJK input), we must accept that placement and not override it.
-                // If positions don't match for other reasons (clamping), leave pending so UpdateCaretToKeyboard
-                // pushes the corrected values.
-                var isInsideComposition = compositionLength > 0
-                    && selectionStart >= compositionRawStart
-                    && selectionStart <= compositionRawStart + compositionLength;
-                if (isInsideComposition ||
-                    (RawToVisualPosition(m_CaretPosition, compositionRawStart, compositionLength) == selectionStart &&
-                     RawToVisualPosition(m_CaretSelectPosition, compositionRawStart, compositionLength) == selectionEnd))
-                {
-                    m_LastSyncedToKeyboard = selectionRange;
-                    m_UpdateCaretToKeyboardPending = false;
-                }
             }
         }
 
@@ -1603,41 +1473,25 @@ namespace UnityEngine.UI
             if (!isFocused || InPlaceEditing())
                 return;
 
-            // Early return if no keyboard - all code below is keyboard-specific
-            if (m_Keyboard == null)
-                return;
-
-            // ============================================================================
-            // KEYBOARD UPDATE LOGIC
-            // All code below this point requires an active TouchScreenKeyboard.
-            // If adding non-keyboard-related logic to LateUpdate, place it ABOVE the
-            // null check to ensure it executes even when keyboard is not active.
-            // ============================================================================
-
-            // Cache keyboard status to avoid multiple native bridge calls
-            var keyboardStatus = m_Keyboard.status;
-
-            if (keyboardStatus != TouchScreenKeyboard.Status.Visible)
+            if (m_Keyboard == null || m_Keyboard.status != TouchScreenKeyboard.Status.Visible)
             {
-                if (!m_ReadOnly)
-                    text = m_Keyboard.text;
+                if (m_Keyboard != null)
+                {
+                    if (!m_ReadOnly)
+                        text = m_Keyboard.text;
 
-                if (keyboardStatus == TouchScreenKeyboard.Status.Canceled)
-                    m_WasCanceled = true;
-                else if (keyboardStatus == TouchScreenKeyboard.Status.Done)
-                    SendOnSubmit();
+                    if (m_Keyboard.status == TouchScreenKeyboard.Status.Canceled)
+                        m_WasCanceled = true;
+                    else if (m_Keyboard.status == TouchScreenKeyboard.Status.Done)
+                        SendOnSubmit();
 
 #if UNITY_ANDROID || UNITY_IOS
-                DeactivateInputField();
+                    DeactivateInputField();
 #endif
+                }
 
                 return;
             }
-
-            // Cache keyboard capabilities to avoid repeated native bridge calls in this high-frequency update loop
-            // These remain constant for the lifetime of a TouchScreenKeyboard instance
-            var canGetSelection = m_Keyboard.canGetSelection;
-            var canSetSelection = m_Keyboard.canSetSelection;
 
             string val = m_Keyboard.text;
 
@@ -1679,7 +1533,7 @@ namespace UnityEngine.UI
                     if (characterLimit > 0 && m_Text.Length > characterLimit)
                         m_Text = m_Text.Substring(0, characterLimit);
 
-                    if (canGetSelection)
+                    if (m_Keyboard.canGetSelection)
                     {
                         UpdateCaretFromKeyboard();
                     }
@@ -1693,51 +1547,26 @@ namespace UnityEngine.UI
                     if (m_Text != val)
                         m_Keyboard.text = m_Text;
 
-                    var textBeforeListeners = m_Text;
-
                     SendOnValueChangedAndUpdateLabel();
-
-                    // If a listener modified m_Text (e.g., a custom formatter using SetTextWithoutNotify),
-                    // push the updated text to the keyboard to keep it in sync. Without this, the keyboard
-                    // retains the pre-listener text on every subsequent frame, re-triggering the text-change
-                    // branch and the onValueChanged listener in an infinite loop that can cause caret drift.
-                    if (m_Text != textBeforeListeners && m_Keyboard != null)
-                        m_Keyboard.text = m_Text;
-
-                    // Push caret to keyboard if it was changed programmatically (e.g., by a script in onValueChanged).
-                    if (m_UpdateCaretToKeyboardPending && canSetSelection)
-                    {
-                        UpdateCaretToKeyboard();
-                        m_UpdateCaretToKeyboardPending = false;
-                    }
                 }
             }
-            // Push caret to keyboard if it was changed programmatically (e.g., by a script in onValueChanged).
-            // Use else-if to avoid reading from the keyboard in the same frame we just wrote to it,
-            // which would return a stale value before the native side processes the update.
-            else if (m_UpdateCaretToKeyboardPending && m_Keyboard != null && canSetSelection)
+            // On iOS/tvOS we always have TouchScreenKeyboard instance even when using external keyboard
+            // so we keep track of the caret position there
+            else if (m_HideMobileInput && m_Keyboard != null && m_Keyboard.canSetSelection &&
+                     Application.platform != RuntimePlatform.IPhonePlayer && Application.platform != RuntimePlatform.tvOS)
             {
-                UpdateCaretToKeyboard();
-                m_UpdateCaretToKeyboardPending = false;
+                m_Keyboard.selection = GetInternalSelection();
             }
-            else if (m_Keyboard != null && canGetSelection)
+            else if (m_Keyboard != null && m_Keyboard.canGetSelection)
             {
-                // Read selection from keyboard even when text doesn't change.
-                // UpdateCaretFromKeyboard skips if the value hasn't changed (m_LastSyncedToKeyboard check).
                 UpdateCaretFromKeyboard();
             }
 
-            // Check status again - may have changed during text/selection processing (e.g., user pressed Enter)
-            // m_Keyboard could have been nulled by a listener in SendOnValueChangedAndUpdateLabel
-            // Cache status to avoid multiple native bridge calls
-            if (m_Keyboard == null)
-                return;
-            keyboardStatus = m_Keyboard.status;
-            if (keyboardStatus != TouchScreenKeyboard.Status.Visible)
+            if (m_Keyboard.status != TouchScreenKeyboard.Status.Visible)
             {
-                if (keyboardStatus == TouchScreenKeyboard.Status.Canceled)
+                if (m_Keyboard.status == TouchScreenKeyboard.Status.Canceled)
                     m_WasCanceled = true;
-                else if (keyboardStatus == TouchScreenKeyboard.Status.Done)
+                else if (m_Keyboard.status == TouchScreenKeyboard.Status.Done)
                     SendOnSubmit();
 
                 OnDeselect(null);
@@ -1862,30 +1691,9 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Selects the character range under the bounding rectangle during a drag operation.
+        /// If we are able to drag, try and select the character range underneath the bounding rect.
         /// </summary>
-        /// <remarks>
-        /// The event system calls this method when the user drags over the
-        /// <see cref="InputField"/>. It updates the caret and selection range based on
-        /// the drag position so that the selected text expands or shrinks as the user
-        /// drags. Requires <see cref="MayDrag"/> to return true.
-        /// </remarks>
-        /// <param name="eventData">The pointer event data for the drag.</param>
-        /// <example>
-        /// <para>Override this method to customize drag selection behavior. Call
-        /// base.OnDrag first so the caret and selection range update correctly;
-        /// then add custom logic (e.g. limit selection length or update a custom
-        /// selection indicator).</para>
-        /// <code><![CDATA[
-        /// public override void OnDrag(PointerEventData eventData)
-        /// {
-        ///     base.OnDrag(eventData);
-        ///     // Clamp selection to a max length.
-        ///     if (caretSelectPositionInternal - caretPositionInternal > maxSelectionLength)
-        ///         caretSelectPositionInternal = caretPositionInternal + maxSelectionLength;
-        /// }
-        /// ]]></code>
-        /// </example>
+        /// <param name="eventData"></param>
         public virtual void OnDrag(PointerEventData eventData)
         {
             if (!MayDrag(eventData))
@@ -3360,11 +3168,10 @@ namespace UnityEngine.UI
 
             if (TouchScreenKeyboardShouldBeUsed())
             {
-
-                // Set hideInput based on InputField's shouldHideMobileInput setting
-                // This should be set unconditionally when opening a TouchScreenKeyboard
-                TouchScreenKeyboard.hideInput = shouldHideMobileInput;
-
+                if (input != null && input.touchSupported)
+                {
+                    TouchScreenKeyboard.hideInput = shouldHideMobileInput;
+                }
                 m_Keyboard = (inputType == InputType.Password) ?
                     TouchScreenKeyboard.Open(m_Text, keyboardType, false, multiLine, true, false, "", characterLimit) :
                     TouchScreenKeyboard.Open(m_Text, keyboardType, inputType == InputType.AutoCorrect, multiLine, false, false, "", characterLimit);
@@ -3375,16 +3182,6 @@ namespace UnityEngine.UI
                 {
                     MoveTextEnd(false);
                 }
-
-                // Reset last synced selection state when opening a new keyboard
-                // This ensures UpdateCaretFromKeyboard() doesn't incorrectly treat the keyboard's initial selection as an echo
-                m_LastSyncedToKeyboard = k_KeyboardSelectionResetValue;
-
-                // Push the InputField's current caret position to the keyboard's initial selection.
-                // This must be done after MoveTextEnd to ensure the selection reflects the final caret position.
-                // Use MarkCaretToKeyboardDirty() to handle async keyboard initialization — if canSetSelection is not yet ready,
-                // m_UpdateCaretToKeyboardPending will be set and LateUpdate will retry when the keyboard finishes initializing.
-                MarkCaretToKeyboardDirty();
             }
 
             // Perform normal OnFocus routine if platform supports it
@@ -3645,9 +3442,6 @@ namespace UnityEngine.UI
         /// </summary>
         public virtual float minWidth { get { return 5; } }
 
-        /// <inheritdoc/>
-        public virtual float maxWidth { get { return LayoutUtility.DefaultMaxSize; } }
-
         /// <summary>
         /// Get the displayed with of all input characters.
         /// </summary>
@@ -3671,9 +3465,6 @@ namespace UnityEngine.UI
         /// See ILayoutElement.minHeight.
         /// </summary>
         public virtual float minHeight { get { return 0; } }
-
-        /// <inheritdoc/>
-        public virtual float maxHeight { get { return LayoutUtility.DefaultMaxSize; } }
 
         /// <summary>
         /// Get the height of all the text if constrained to the height of the RectTransform.

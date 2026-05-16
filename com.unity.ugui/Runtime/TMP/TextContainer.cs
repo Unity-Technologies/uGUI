@@ -152,11 +152,8 @@ namespace TMPro
 
 
         /// <summary>
-        /// Gets the <see cref="TextMeshPro"/> component on the same GameObject, caching the reference after first access.
+        /// 
         /// </summary>
-        /// <remarks>
-        /// Text Container is obsolete; new projects should rely on RectTransform sizing on <see cref="TextMeshPro"/> directly instead of this helper.
-        /// </remarks>
         public TextMeshPro textMeshPro
         {
             get
@@ -175,9 +172,9 @@ namespace TMPro
             return;
         }
 
-        /// <inheritdoc/>
+
         /// <summary>
-        /// Updates container dimensions and notifies the text component when enabled.
+        /// 
         /// </summary>
         protected override void OnEnable()
         {
@@ -187,7 +184,9 @@ namespace TMPro
         }
 
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void OnDisable()
         {
             //Debug.Log("OnDisable() called.");

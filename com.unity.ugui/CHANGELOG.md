@@ -1,15 +1,5 @@
 # Changelog
 
-## [2.6.0] - 2026-03-30
-
-### Added
-- New Maximum Width and Height properties added to ILayoutElement.
-- New Clamped FitMode added to ContentSizeFitter.
-
-### Changed
-- ContentSizeFitter's PreferredSize FitMode now respects Maximum Width and Height of ILayoutElement.
-- GridLayoutGroup, VerticalLayoutGroup and HorizontalLayoutGroup calculate their maximum width and height based on their children's layout element properties.
-
 ## [2.5.0] - 2026-02-27
 
 ### Added

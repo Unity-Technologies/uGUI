@@ -112,31 +112,25 @@ namespace TMPro
 
 
         /// <summary>
-        /// Whether the scalar value is a Unicode high surrogate code unit.
+        /// Check if Unicode is High Surrogate
         /// </summary>
-        /// <param name="c">Unicode scalar value to test; expected in UTF-32 form for surrogate-related APIs.</param>
-        /// <returns>Whether the value lies in the high surrogate range from U+D800 through U+DBFF.</returns>
-        /// <remarks>
-        /// High surrogates pair with low surrogates to represent supplementary plane characters; this helper matches the range used before <see cref="ConvertToUTF32"/>.
-        /// </remarks>
+        /// <param name="c"></param>
+        /// <returns></returns>
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsHighSurrogate(uint c)
         {
-            return c >= CodePoint.HIGH_SURROGATE_START && c <= CodePoint.HIGH_SURROGATE_END;
+            return c > 0xD800 && c < 0xDBFF;
         }
 
         /// <summary>
-        /// Whether the scalar value is a Unicode low surrogate code unit.
+        /// Check if Unicode is Low Surrogate
         /// </summary>
-        /// <param name="c">Unicode scalar value to test; expected in UTF-32 form for surrogate-related APIs.</param>
-        /// <returns>Whether the value lies in the low surrogate range from U+DC00 through U+DFFF.</returns>
-        /// <remarks>
-        /// Low surrogates follow a high surrogate in UTF-16; validating both halves prevents corrupt supplementary character reconstruction during parsing.
-        /// </remarks>
+        /// <param name="c"></param>
+        /// <returns></returns>
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsLowSurrogate(uint c)
         {
-            return c >= CodePoint.LOW_SURROGATE_START && c <= CodePoint.LOW_SURROGATE_END;
+            return c > 0xDC00 && c < 0xDFFF;
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.TextCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +18,7 @@ namespace TMPro
         public Texture spriteSheet;
 
         /// <summary>
-        /// List of sprite characters in this asset. Used to populate lookup dictionaries.
+        ///
         /// </summary>
         public List<TMP_SpriteCharacter> spriteCharacterTable
         {
@@ -192,8 +192,8 @@ namespace TMPro
         /// <summary>
         /// Function which returns the sprite index using the hashcode of the name
         /// </summary>
-        /// <param name="hashCode">Case-insensitive hash of the sprite name, typically from <c>TMP_TextUtilities.GetHashCode(spriteName)</c>.</param>
-        /// <returns>The sprite index in this asset's tables, or -1 when no sprite name produces the given hash.</returns>
+        /// <param name="hashCode"></param>
+        /// <returns></returns>
         public int GetSpriteIndexFromHashcode(int hashCode)
         {
             if (m_NameLookup == null)
@@ -211,8 +211,8 @@ namespace TMPro
         /// <summary>
         /// Returns the index of the sprite for the given unicode value.
         /// </summary>
-        /// <param name="unicode">Unicode scalar value (for example 0x263A) assigned to a <see cref="TMP_SpriteCharacter"/> in this asset.</param>
-        /// <returns>The sprite glyph index, or -1 if the code point is not mapped in this asset.</returns>
+        /// <param name="unicode"></param>
+        /// <returns></returns>
         public int GetSpriteIndexFromUnicode (uint unicode)
         {
             if (m_SpriteCharacterLookup == null)
@@ -230,8 +230,8 @@ namespace TMPro
         /// <summary>
         /// Returns the index of the sprite for the given name.
         /// </summary>
-        /// <param name="name">Sprite name as authored in the sprite asset (case-insensitive hash; null or empty yields no match).</param>
-        /// <returns>The sprite index in this asset, or -1 when the name is not found.</returns>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public int GetSpriteIndexFromName (string name)
         {
             if (m_NameLookup == null)
@@ -251,11 +251,10 @@ namespace TMPro
         /// <summary>
         /// Search through the given sprite asset and its fallbacks for the specified sprite matching the given unicode character.
         /// </summary>
-        /// <param name="spriteAsset">The sprite asset to search for the given character.</param>
+        /// <param name="spriteAsset">The font asset to search for the given character.</param>
         /// <param name="unicode">The character to find.</param>
-        /// <param name="includeFallbacks">Whether to search fallback sprite assets.</param>
-        /// <param name="spriteIndex">out parameter containing the sprite index for the specified character (if found).</param>
-        /// <returns>The asset instance that contains the sprite, or null if no match exists.</returns>
+        /// <param name="glyph">out parameter containing the glyph for the specified character (if found).</param>
+        /// <returns></returns>
         public static TMP_SpriteAsset SearchForSpriteByUnicode(TMP_SpriteAsset spriteAsset, uint unicode, bool includeFallbacks, out int spriteIndex)
         {
             // Check to make sure sprite asset is not null

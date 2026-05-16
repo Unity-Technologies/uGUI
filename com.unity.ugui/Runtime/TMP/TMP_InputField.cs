@@ -147,7 +147,7 @@ namespace TMPro
         private float m_ScrollPosition;
 
         /// <summary>
-        /// Scroll sensitivity multiplier for mouse wheel or touch scroll input.
+        ///
         /// </summary>
         [SerializeField]
         protected float m_ScrollSensitivity = 1.0f;
@@ -1056,7 +1056,7 @@ namespace TMPro
 
 
         /// <summary>
-        /// The current cursor position in the raw text string (excluding rich text tags).
+        ///
         /// </summary>
         public int stringPosition
         {
@@ -1358,7 +1358,7 @@ namespace TMPro
         /// <summary>
         /// Move to the end of the text.
         /// </summary>
-        /// <param name="shift">If true, extend the selection to the end; otherwise move the caret only.</param>
+        /// <param name="shift"></param>
         public void MoveTextEnd(bool shift)
         {
             if (m_isRichTextEditingAllowed)
@@ -1397,7 +1397,7 @@ namespace TMPro
         /// <summary>
         /// Move to the start of the text.
         /// </summary>
-        /// <param name="shift">If true, extend the selection to the start; otherwise move the caret only.</param>
+        /// <param name="shift"></param>
         public void MoveTextStart(bool shift)
         {
             if (m_isRichTextEditingAllowed)
@@ -1437,8 +1437,7 @@ namespace TMPro
         /// <summary>
         /// Move to the end of the current line of text.
         /// </summary>
-        /// <param name="shift">If true, extend the selection; otherwise move the caret only.</param>
-        /// <param name="ctrl">If true, move to the end of the entire text; otherwise the current line only.</param>
+        /// <param name="shift"></param>
         public void MoveToEndOfLine(bool shift, bool ctrl)
         {
             // Get the line the caret is currently located on.
@@ -1469,8 +1468,7 @@ namespace TMPro
         /// <summary>
         /// Move to the start of the current line of text.
         /// </summary>
-        /// <param name="shift">If true, extend the selection; otherwise move the caret only.</param>
-        /// <param name="ctrl">If true, move to the start of the entire text; otherwise the current line only.</param>
+        /// <param name="shift"></param>
         public void MoveToStartOfLine(bool shift, bool ctrl)
         {
             // Get the line the caret is currently located on.
@@ -2344,9 +2342,9 @@ namespace TMPro
 
 
         /// <summary>
-        /// Called by the EventSystem when the input field is selected; processes keyboard and navigation input.
+        ///
         /// </summary>
-        /// <param name="eventData">The event data from the EventSystem.</param>
+        /// <param name="eventData"></param>
         public virtual void OnUpdateSelected(BaseEventData eventData)
         {
             if (!isFocused)
@@ -2416,9 +2414,9 @@ namespace TMPro
         }
 
         /// <summary>
-        /// Handles scroll wheel or touch scroll input to scroll the text when the input field is multiline.
+        ///
         /// </summary>
-        /// <param name="eventData">The pointer event data containing scroll delta.</param>
+        /// <param name="eventData"></param>
         public virtual void OnScroll(PointerEventData eventData)
         {
             // Return if Single Line
@@ -4703,9 +4701,6 @@ namespace TMPro
         /// </summary>
         public virtual float minWidth { get { return 0; } }
 
-        /// <inheritdoc/>
-        public virtual float maxWidth { get { return LayoutUtility.DefaultMaxSize; } }
-
         /// <summary>
         /// Get the displayed with of all input characters.
         /// </summary>
@@ -4737,9 +4732,6 @@ namespace TMPro
         /// See ILayoutElement.minHeight.
         /// </summary>
         public virtual float minHeight { get { return 0; } }
-
-        /// <inheritdoc/>
-        public virtual float maxHeight { get { return LayoutUtility.DefaultMaxSize; } }
 
         /// <summary>
         /// Get the height of all the text if constrained to the height of the RectTransform.
@@ -4777,7 +4769,7 @@ namespace TMPro
         /// <summary>
         /// Function to conveniently set the point size of both Placeholder and Input Field text object.
         /// </summary>
-        /// <param name="pointSize">The font size in points to apply to the placeholder and text.</param>
+        /// <param name="pointSize"></param>
         public void SetGlobalPointSize(float pointSize)
         {
             TMP_Text placeholderTextComponent = m_Placeholder as TMP_Text;
@@ -4791,7 +4783,7 @@ namespace TMPro
         /// <summary>
         /// Function to conveniently set the Font Asset of both Placeholder and Input Field text object.
         /// </summary>
-        /// <param name="fontAsset">The font asset to apply to the placeholder and text.</param>
+        /// <param name="fontAsset"></param>
         public void SetGlobalFontAsset(TMP_FontAsset fontAsset)
         {
             TMP_Text placeholderTextComponent = m_Placeholder as TMP_Text;

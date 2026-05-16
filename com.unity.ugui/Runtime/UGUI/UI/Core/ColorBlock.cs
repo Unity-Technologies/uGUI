@@ -21,6 +21,7 @@ namespace UnityEngine.UI
         [SerializeField]
         private Color m_PressedColor;
 
+        [FormerlySerializedAs("m_HighlightedColor")]
         [SerializeField]
         private Color m_SelectedColor;
 
