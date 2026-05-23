@@ -15,7 +15,7 @@ namespace UnityEngine.UI
     public class ContentSizeFitter : UIBehaviour, ILayoutSelfController
     {
         /// <summary>
-        /// The size fit modes avaliable to use.
+        /// Determines how the size of the layout element will adapt to its size properties.
         /// </summary>
         public enum FitMode
         {
@@ -28,11 +28,23 @@ namespace UnityEngine.UI
             /// </summary>
             MinSize,
             /// <summary>
-            /// Resize to the preferred size of the content.
+            /// Resize to the preferred size of the content and clamp it between its min and max sizes.
             /// </summary>
-            PreferredSize
+            PreferredSize,
+            /// <summary>
+            /// Clamp size of the content between minimum and maximum sizes.
+            /// </summary>
+            Clamped,
         }
 
+        // Class-level constants
+        private static readonly DrivenTransformProperties[] k_DrivenPropertyByAxis =
+        {
+            DrivenTransformProperties.SizeDeltaX,
+            DrivenTransformProperties.SizeDeltaY
+        };
+
+        [Tooltip("Controls how the width of this RectTransform automatically resizes based on its content.")]
         [SerializeField] protected FitMode m_HorizontalFit = FitMode.Unconstrained;
 
         /// <summary>
@@ -40,6 +52,7 @@ namespace UnityEngine.UI
         /// </summary>
         public FitMode horizontalFit { get { return m_HorizontalFit; } set { if (SetPropertyUtility.SetStruct(ref m_HorizontalFit, value)) SetDirty(); } }
 
+        [Tooltip("Controls how the height of this RectTransform automatically resizes based on its content.")]
         [SerializeField] protected FitMode m_VerticalFit = FitMode.Unconstrained;
 
         /// <summary>
@@ -87,20 +100,33 @@ namespace UnityEngine.UI
         private void HandleSelfFittingAlongAxis(int axis)
         {
             FitMode fitting = (axis == 0 ? horizontalFit : verticalFit);
-            if (fitting == FitMode.Unconstrained)
+
+            switch (fitting)
             {
-                // Keep a reference to the tracked transform, but don't control its properties:
-                m_Tracker.Add(this, rectTransform, DrivenTransformProperties.None);
-                return;
+                case FitMode.Unconstrained:
+                    m_Tracker.Add(this, rectTransform, DrivenTransformProperties.None);
+                    break;
+                case FitMode.MinSize:
+                    m_Tracker.Add(this, rectTransform, k_DrivenPropertyByAxis[axis]);
+                    rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)axis, LayoutUtility.GetMinSize(m_Rect, axis));
+                    break;
+                case FitMode.PreferredSize:
+                    m_Tracker.Add(this, rectTransform, k_DrivenPropertyByAxis[axis]);
+                    rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)axis, LayoutUtility.GetPreferredSize(m_Rect, axis));
+                    break;
+                case FitMode.Clamped:
+                    HandleClampedFittingAlongAxis(axis);
+                    break;
             }
+        }
 
-            m_Tracker.Add(this, rectTransform, (axis == 0 ? DrivenTransformProperties.SizeDeltaX : DrivenTransformProperties.SizeDeltaY));
+        private void HandleClampedFittingAlongAxis(int axis)
+        {
+            float min = LayoutUtility.GetMinSize(m_Rect, axis);
+            float max = LayoutUtility.GetMaxSize(m_Rect, axis);
+            var size = Mathf.Clamp(m_Rect.rect.size[axis], min, max);
 
-            // Set size to min or preferred size
-            if (fitting == FitMode.MinSize)
-                rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)axis, LayoutUtility.GetMinSize(m_Rect, axis));
-            else
-                rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)axis, LayoutUtility.GetPreferredSize(m_Rect, axis));
+            rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)axis, size);
         }
 
         /// <summary>

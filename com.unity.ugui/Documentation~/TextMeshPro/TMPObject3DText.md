@@ -8,7 +8,7 @@ By default, a TextMesh Pro 3D Text GameObject has the following components:
 > **Note:** If you want to use the Rect Transform component's anchoring system, the TextMesh Pro component's parent GameObject must also have a Rect Transform component.
 
 * **Mesh Renderer:** Renders the GameObject. For more information, see the [Mesh Renderer](https://docs.unity3d.com/Manual/class-MeshRenderer.html) documentation in the Unity Manual.
-* **TextMesh Pro UGUI (Script):** Contains the text to display, and the properties that control its appearance and behavior. These properties are described [below](#properties).
+* **TextMeshPro - Text:** Contains the text to display, and the [properties](#properties-overview) that control its appearance and behavior.
 * **Material:** A Unity material that uses one of the TextMesh Pro shaders to further control the text's appearance. For more information see the [Shaders](Shaders.md) section.
 
 ## Properties Overview

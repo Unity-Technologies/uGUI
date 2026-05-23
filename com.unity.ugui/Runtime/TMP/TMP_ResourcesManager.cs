@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 
 namespace TMPro
 {
     /// <summary>
-    ///
+    /// Central registry for TextMesh Pro font assets and access to the loaded <see cref="TMP_Settings"/> asset.
     /// </summary>
-    public class TMP_ResourceManager
+    public static class TMP_ResourceManager
     {
         // ======================================================
         // TEXT SETTINGS MANAGEMENT
@@ -57,12 +57,24 @@ namespace TMPro
             }
         }
 
-        static readonly Dictionary<EntityId, FontAssetRef> s_FontAssetReferences = new Dictionary<EntityId, FontAssetRef>();
-        static readonly Dictionary<int, TMP_FontAsset> s_FontAssetNameReferenceLookup = new Dictionary<int, TMP_FontAsset>();
-        static readonly Dictionary<long, TMP_FontAsset> s_FontAssetFamilyNameAndStyleReferenceLookup = new Dictionary<long, TMP_FontAsset>();
-        static readonly List<EntityId> s_FontAssetRemovalList = new List<EntityId>(16);
+        static readonly Dictionary<EntityId, FontAssetRef> s_FontAssetReferences = new();
+        static readonly Dictionary<int, TMP_FontAsset> s_FontAssetNameReferenceLookup = new();
+        static readonly Dictionary<long, TMP_FontAsset> s_FontAssetFamilyNameAndStyleReferenceLookup = new();
+        static readonly List<EntityId> s_FontAssetRemovalList = new(16);
 
         static readonly int k_RegularStyleHashCode = TMP_TextUtilities.GetHashCode("Regular");
+
+#if UNITY_EDITOR
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        static void ResetStaticsOnLoad()
+        {
+            s_TextSettings = default;
+            s_FontAssetReferences.Clear();
+            s_FontAssetNameReferenceLookup.Clear();
+            s_FontAssetFamilyNameAndStyleReferenceLookup.Clear();
+            s_FontAssetRemovalList.Clear();
+        }
+#endif
 
         /// <summary>
         /// Add font asset to resource manager.

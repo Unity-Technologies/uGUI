@@ -190,7 +190,7 @@ namespace UnityEditor.UI
             ChildClassPropertiesGUI();
 
             //if the TargetGraphic is changed, reset the outgoing Graphic
-			if (graphic != m_TargetGraphicProperty.objectReferenceValue)
+			if (graphic && graphic != m_TargetGraphicProperty.objectReferenceValue)
 			{
 				CanvasRenderer renderer = graphic.GetComponent<CanvasRenderer>();
 				if (renderer != null)

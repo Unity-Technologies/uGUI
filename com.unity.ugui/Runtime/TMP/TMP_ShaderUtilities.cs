@@ -1,6 +1,6 @@
-using UnityEngine;
+using System;
 using System.Linq;
-using System.Collections;
+using UnityEngine;
 
 
 namespace TMPro
@@ -8,133 +8,135 @@ namespace TMPro
     public static class ShaderUtilities
     {
         // Shader Property IDs
-        public static int ID_MainTex;
+        public static readonly int ID_MainTex = Shader.PropertyToID("_MainTex");
 
-        public static int ID_FaceTex;
-        public static int ID_FaceColor;
-        public static int ID_FaceDilate;
-        public static int ID_Shininess;
+        public static readonly int ID_FaceTex = Shader.PropertyToID("_FaceTex");
+        public static readonly int ID_FaceColor = Shader.PropertyToID("_FaceColor");
+        public static readonly int ID_FaceDilate = Shader.PropertyToID("_FaceDilate");
+        public static readonly int ID_Shininess = Shader.PropertyToID("_FaceShininess");
 
         /// <summary>
         /// Property ID for the _OutlineOffset1 shader property used by URP and HDRP shaders
         /// </summary>
-        public static int ID_OutlineOffset1;
+        public static readonly int ID_OutlineOffset1 = Shader.PropertyToID("_OutlineOffset1");
 
         /// <summary>
         /// Property ID for the _OutlineOffset2 shader property used by URP and HDRP shaders
         /// </summary>
-        public static int ID_OutlineOffset2;
+        public static readonly int ID_OutlineOffset2 = Shader.PropertyToID("_OutlineOffset2");
 
         /// <summary>
         /// Property ID for the _OutlineOffset3 shader property used by URP and HDRP shaders
         /// </summary>
-        public static int ID_OutlineOffset3;
+        public static readonly int ID_OutlineOffset3 = Shader.PropertyToID("_OutlineOffset3");
 
         /// <summary>
         /// Property ID for the ID_AdditiveOutlineMode shader property used by URP and HDRP shaders
         /// </summary>
-        public static int ID_OutlineMode;
+        public static readonly int ID_OutlineMode = Shader.PropertyToID("_OutlineMode");
 
         /// <summary>
         /// Property ID for the _IsoPerimeter shader property used by URP and HDRP shaders
         /// </summary>
-        public static int ID_IsoPerimeter;
+        public static readonly int ID_IsoPerimeter = Shader.PropertyToID("_IsoPerimeter");
 
         /// <summary>
         /// Property ID for the _Softness shader property used by URP and HDRP shaders
         /// </summary>
-        public static int ID_Softness;
+        public static readonly int ID_Softness = Shader.PropertyToID("_Softness");
 
-        public static int ID_UnderlayColor;
-        public static int ID_UnderlayOffsetX;
-        public static int ID_UnderlayOffsetY;
-        public static int ID_UnderlayDilate;
-        public static int ID_UnderlaySoftness;
+        public static readonly int ID_UnderlayColor = Shader.PropertyToID("_UnderlayColor");
+        public static readonly int ID_UnderlayOffsetX = Shader.PropertyToID("_UnderlayOffsetX");
+        public static readonly int ID_UnderlayOffsetY = Shader.PropertyToID("_UnderlayOffsetY");
+        public static readonly int ID_UnderlayDilate = Shader.PropertyToID("_UnderlayDilate");
+        public static readonly int ID_UnderlaySoftness = Shader.PropertyToID("_UnderlaySoftness");
 
         /// <summary>
         /// Property ID for the _UnderlayOffset shader property used by URP and HDRP shaders
         /// </summary>
-        public static int ID_UnderlayOffset;
+        public static readonly int ID_UnderlayOffset = Shader.PropertyToID("_UnderlayOffset");
 
         /// <summary>
         /// Property ID for the _UnderlayIsoPerimeter shader property used by URP and HDRP shaders
         /// </summary>
-        public static int ID_UnderlayIsoPerimeter;
+        public static readonly int ID_UnderlayIsoPerimeter = Shader.PropertyToID("_UnderlayIsoPerimeter");
 
-        public static int ID_WeightNormal;
-        public static int ID_WeightBold;
+        public static readonly int ID_WeightNormal = Shader.PropertyToID("_WeightNormal");
+        public static readonly int ID_WeightBold = Shader.PropertyToID("_WeightBold");
 
-        public static int ID_OutlineTex;
-        public static int ID_OutlineWidth;
-        public static int ID_OutlineSoftness;
-        public static int ID_OutlineColor;
+        public static readonly int ID_OutlineTex = Shader.PropertyToID("_OutlineTex");
+        public static readonly int ID_OutlineWidth = Shader.PropertyToID("_OutlineWidth");
+        public static readonly int ID_OutlineSoftness = Shader.PropertyToID("_OutlineSoftness");
+        public static readonly int ID_OutlineColor = Shader.PropertyToID("_OutlineColor");
 
-        public static int ID_Outline2Color;
-        public static int ID_Outline2Width;
+        public static readonly int ID_Outline2Color = Shader.PropertyToID("_Outline2Color");
+        public static readonly int ID_Outline2Width = Shader.PropertyToID("_Outline2Width");
 
-        public static int ID_Padding;
-        public static int ID_GradientScale;
-        public static int ID_ScaleX;
-        public static int ID_ScaleY;
-        public static int ID_PerspectiveFilter;
-        public static int ID_Sharpness;
+        public static readonly int ID_Padding = Shader.PropertyToID("_Padding");
+        public static readonly int ID_GradientScale = Shader.PropertyToID("_GradientScale");
+        public static readonly int ID_ScaleX = Shader.PropertyToID("_ScaleX");
+        public static readonly int ID_ScaleY = Shader.PropertyToID("_ScaleY");
+        public static readonly int ID_PerspectiveFilter = Shader.PropertyToID("_PerspectiveFilter");
+        public static readonly int ID_Sharpness = Shader.PropertyToID("_Sharpness");
 
-        public static int ID_TextureWidth;
-        public static int ID_TextureHeight;
+        public static readonly int ID_TextureWidth = Shader.PropertyToID("_TextureWidth");
+        public static readonly int ID_TextureHeight = Shader.PropertyToID("_TextureHeight");
 
-        public static int ID_BevelAmount;
+        public static readonly int ID_BevelAmount = Shader.PropertyToID("_Bevel");
 
-        public static int ID_GlowColor;
-        public static int ID_GlowOffset;
-        public static int ID_GlowPower;
-        public static int ID_GlowOuter;
-        public static int ID_GlowInner;
+        public static readonly int ID_GlowColor = Shader.PropertyToID("_GlowColor");
+        public static readonly int ID_GlowOffset = Shader.PropertyToID("_GlowOffset");
+        public static readonly int ID_GlowPower = Shader.PropertyToID("_GlowPower");
+        public static readonly int ID_GlowOuter = Shader.PropertyToID("_GlowOuter");
+        public static readonly int ID_GlowInner = Shader.PropertyToID("_GlowInner");
 
-        public static int ID_LightAngle;
+        public static readonly int ID_LightAngle = Shader.PropertyToID("_LightAngle");
 
-        public static int ID_EnvMap;
-        public static int ID_EnvMatrix;
-        public static int ID_EnvMatrixRotation;
+        public static readonly int ID_EnvMap = Shader.PropertyToID("_Cube");
+        public static readonly int ID_EnvMatrix = Shader.PropertyToID("_EnvMatrix");
+        public static readonly int ID_EnvMatrixRotation = Shader.PropertyToID("_EnvMatrixRotation");
 
         //public static int ID_MaskID;
-        public static int ID_MaskCoord;
-        public static int ID_ClipRect;
-        public static int ID_MaskSoftnessX;
-        public static int ID_MaskSoftnessY;
-        public static int ID_VertexOffsetX;
-        public static int ID_VertexOffsetY;
-        public static int ID_UseClipRect;
+        public static readonly int ID_MaskCoord = Shader.PropertyToID("_MaskCoord");
+        public static readonly int ID_ClipRect = Shader.PropertyToID("_ClipRect");
+        public static readonly int ID_MaskSoftnessX = Shader.PropertyToID("_MaskSoftnessX");
+        public static readonly int ID_MaskSoftnessY = Shader.PropertyToID("_MaskSoftnessY");
+        public static readonly int ID_VertexOffsetX = Shader.PropertyToID("_VertexOffsetX");
+        public static readonly int ID_VertexOffsetY = Shader.PropertyToID("_VertexOffsetY");
+        public static readonly int ID_UseClipRect = Shader.PropertyToID("_UseClipRect");
 
-        public static int ID_StencilID;
-        public static int ID_StencilOp;
-        public static int ID_StencilComp;
-        public static int ID_StencilReadMask;
-        public static int ID_StencilWriteMask;
+        public static readonly int ID_StencilID = Shader.PropertyToID("_Stencil");
+        public static readonly int ID_StencilOp = Shader.PropertyToID("_StencilOp");
+        public static readonly int ID_StencilComp = Shader.PropertyToID("_StencilComp");
+        public static readonly int ID_StencilReadMask = Shader.PropertyToID("_StencilReadMask");
+        public static readonly int ID_StencilWriteMask = Shader.PropertyToID("_StencilWriteMask");
 
-        public static int ID_ShaderFlags;
-        public static int ID_ScaleRatio_A;
-        public static int ID_ScaleRatio_B;
-        public static int ID_ScaleRatio_C;
+        public static readonly int ID_ShaderFlags = Shader.PropertyToID("_ShaderFlags");
+        public static readonly int ID_ScaleRatio_A = Shader.PropertyToID("_ScaleRatioA");
+        public static readonly int ID_ScaleRatio_B = Shader.PropertyToID("_ScaleRatioB");
+        public static readonly int ID_ScaleRatio_C = Shader.PropertyToID("_ScaleRatioC");
 
-        public static string Keyword_Bevel = "BEVEL_ON";
-        public static string Keyword_Glow = "GLOW_ON";
-        public static string Keyword_Underlay = "UNDERLAY_ON";
-        public static string Keyword_Ratios = "RATIOS_OFF";
-        //public static string Keyword_MASK_OFF = "MASK_OFF";
-        public static string Keyword_MASK_SOFT = "MASK_SOFT";
-        public static string Keyword_MASK_HARD = "MASK_HARD";
-        public static string Keyword_MASK_TEX = "MASK_TEX";
-        public static string Keyword_Outline = "OUTLINE_ON";
+        public static readonly string Keyword_Bevel = "BEVEL_ON";
+        public static readonly string Keyword_Glow = "GLOW_ON";
+        public static readonly string Keyword_Underlay = "UNDERLAY_ON";
+        public static readonly string Keyword_Ratios = "RATIOS_OFF";
+        //public static readonly string Keyword_MASK_OFF = "MASK_OFF";
+        public static readonly string Keyword_MASK_SOFT = "MASK_SOFT";
+        public static readonly string Keyword_MASK_HARD = "MASK_HARD";
+        public static readonly string Keyword_MASK_TEX = "MASK_TEX";
+        public static readonly string Keyword_Outline = "OUTLINE_ON";
 
-        public static string ShaderTag_ZTestMode = "unity_GUIZTestMode";
-        public static string ShaderTag_CullMode = "_CullMode";
+        public static readonly string ShaderTag_ZTestMode = "unity_GUIZTestMode";
+        public static readonly string ShaderTag_CullMode = "_CullMode";
 
         /// <summary>
         /// The shader tag used to designate the XR motion vectors pass.
         /// </summary>
-        public static string ShaderTag_Spacewarp = "_XRMotionVectorsPass";
+        public static readonly string ShaderTag_Spacewarp = "_XRMotionVectorsPass";
 
-        private static float m_clamp = 1.0f;
+        private static readonly float m_clamp = 1.0f;
+
+        [Obsolete("Not used anymore")]
         public static bool isInitialized = false;
 
 
@@ -168,115 +170,22 @@ namespace TMPro
         }
         static Shader k_ShaderRef_MobileBitmap;
 
-
-        /// <summary>
-        ///
-        /// </summary>
-        static ShaderUtilities()
+#if UNITY_EDITOR
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        static void ResetStaticsOnLoad()
         {
-            GetShaderPropertyIDs();
+            k_ShaderRef_MobileSDF = default;
+            k_ShaderRef_MobileBitmap = default;
         }
+#endif
 
         /// <summary>
-        ///
+        /// Populates the shader property IDs used by TextMesh Pro materials.
         /// </summary>
+        [Obsolete("Calling this method is no longer required")]
         public static void GetShaderPropertyIDs()
         {
-            if (isInitialized == false)
-            {
-                //Debug.Log("Getting Shader property IDs");
-                isInitialized = true;
-
-                ID_MainTex = Shader.PropertyToID("_MainTex");
-
-                ID_FaceTex = Shader.PropertyToID("_FaceTex");
-                ID_FaceColor = Shader.PropertyToID("_FaceColor");
-                ID_FaceDilate = Shader.PropertyToID("_FaceDilate");
-                ID_Shininess = Shader.PropertyToID("_FaceShininess");
-
-                ID_OutlineOffset1 = Shader.PropertyToID("_OutlineOffset1");
-                ID_OutlineOffset2 = Shader.PropertyToID("_OutlineOffset2");
-                ID_OutlineOffset3 = Shader.PropertyToID("_OutlineOffset3");
-                ID_OutlineMode = Shader.PropertyToID("_OutlineMode");
-
-                ID_IsoPerimeter = Shader.PropertyToID("_IsoPerimeter");
-                ID_Softness = Shader.PropertyToID("_Softness");
-
-                ID_UnderlayColor = Shader.PropertyToID("_UnderlayColor");
-                ID_UnderlayOffsetX = Shader.PropertyToID("_UnderlayOffsetX");
-                ID_UnderlayOffsetY = Shader.PropertyToID("_UnderlayOffsetY");
-                ID_UnderlayDilate = Shader.PropertyToID("_UnderlayDilate");
-                ID_UnderlaySoftness = Shader.PropertyToID("_UnderlaySoftness");
-
-                ID_UnderlayOffset = Shader.PropertyToID("_UnderlayOffset");
-                ID_UnderlayIsoPerimeter = Shader.PropertyToID("_UnderlayIsoPerimeter");
-
-                ID_WeightNormal = Shader.PropertyToID("_WeightNormal");
-                ID_WeightBold = Shader.PropertyToID("_WeightBold");
-
-                ID_OutlineTex = Shader.PropertyToID("_OutlineTex");
-                ID_OutlineWidth = Shader.PropertyToID("_OutlineWidth");
-                ID_OutlineSoftness = Shader.PropertyToID("_OutlineSoftness");
-                ID_OutlineColor = Shader.PropertyToID("_OutlineColor");
-
-                ID_Outline2Color = Shader.PropertyToID("_Outline2Color");
-                ID_Outline2Width = Shader.PropertyToID("_Outline2Width");
-
-                ID_Padding = Shader.PropertyToID("_Padding");
-                ID_GradientScale = Shader.PropertyToID("_GradientScale");
-                ID_ScaleX = Shader.PropertyToID("_ScaleX");
-                ID_ScaleY = Shader.PropertyToID("_ScaleY");
-                ID_PerspectiveFilter = Shader.PropertyToID("_PerspectiveFilter");
-                ID_Sharpness = Shader.PropertyToID("_Sharpness");
-
-                ID_TextureWidth = Shader.PropertyToID("_TextureWidth");
-                ID_TextureHeight = Shader.PropertyToID("_TextureHeight");
-
-                ID_BevelAmount = Shader.PropertyToID("_Bevel");
-
-                ID_LightAngle = Shader.PropertyToID("_LightAngle");
-
-                ID_EnvMap = Shader.PropertyToID("_Cube");
-                ID_EnvMatrix = Shader.PropertyToID("_EnvMatrix");
-                ID_EnvMatrixRotation = Shader.PropertyToID("_EnvMatrixRotation");
-
-
-                ID_GlowColor = Shader.PropertyToID("_GlowColor");
-                ID_GlowOffset = Shader.PropertyToID("_GlowOffset");
-                ID_GlowPower = Shader.PropertyToID("_GlowPower");
-                ID_GlowOuter = Shader.PropertyToID("_GlowOuter");
-                ID_GlowInner = Shader.PropertyToID("_GlowInner");
-
-                //ID_MaskID = Shader.PropertyToID("_MaskID");
-                ID_MaskCoord = Shader.PropertyToID("_MaskCoord");
-                ID_ClipRect = Shader.PropertyToID("_ClipRect");
-                ID_UseClipRect = Shader.PropertyToID("_UseClipRect");
-                ID_MaskSoftnessX = Shader.PropertyToID("_MaskSoftnessX");
-                ID_MaskSoftnessY = Shader.PropertyToID("_MaskSoftnessY");
-                ID_VertexOffsetX = Shader.PropertyToID("_VertexOffsetX");
-                ID_VertexOffsetY = Shader.PropertyToID("_VertexOffsetY");
-
-                ID_StencilID = Shader.PropertyToID("_Stencil");
-                ID_StencilOp = Shader.PropertyToID("_StencilOp");
-                ID_StencilComp = Shader.PropertyToID("_StencilComp");
-                ID_StencilReadMask = Shader.PropertyToID("_StencilReadMask");
-                ID_StencilWriteMask = Shader.PropertyToID("_StencilWriteMask");
-
-                ID_ShaderFlags = Shader.PropertyToID("_ShaderFlags");
-                ID_ScaleRatio_A = Shader.PropertyToID("_ScaleRatioA");
-                ID_ScaleRatio_B = Shader.PropertyToID("_ScaleRatioB");
-                ID_ScaleRatio_C = Shader.PropertyToID("_ScaleRatioC");
-
-                // Set internal shader references
-                if (k_ShaderRef_MobileSDF == null)
-                    k_ShaderRef_MobileSDF = Shader.Find("TextMeshPro/Mobile/Distance Field");
-
-                if (k_ShaderRef_MobileBitmap == null)
-                    k_ShaderRef_MobileBitmap = Shader.Find("TextMeshPro/Mobile/Bitmap");
-            }
         }
-
-
 
         // Scale Ratios to ensure property ranges are optimum in Material Editor
         public static void UpdateShaderRatios(Material mat)
@@ -390,9 +299,6 @@ namespace TMPro
         public static float GetPadding(Material material, bool enableExtraPadding, bool isBold)
         {
             //Debug.Log("GetPadding() called.");
-
-            if (isInitialized == false)
-                GetShaderPropertyIDs();
 
             // Return if Material is null
             if (material == null) return 0;
@@ -578,9 +484,6 @@ namespace TMPro
         public static float GetPadding(Material[] materials, bool enableExtraPadding, bool isBold)
         {
             //Debug.Log("GetPadding() called.");
-
-            if (isInitialized == false)
-                GetShaderPropertyIDs();
 
             // Return if Material is null
             if (materials == null) return 0;

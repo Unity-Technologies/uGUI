@@ -6,7 +6,11 @@ The **Canvas Renderer** component renders a graphical UI object contained within
 
 ## Properties
 
-The Canvas Renderer has no properties exposed in the inspector.
+The following table describes the properties of the Canvas Renderer component:
+
+|**Property:** |**Function:** |
+|:---|:---|
+|**Cull Transparent Mesh** | Whether to ignore this renderer when the mesh is transparent. If true, geometry emitted by this renderer will be ignored when the mesh is transparent.|
 
 
 ## Details

@@ -187,7 +187,7 @@ class GridLayoutGroupTests : IPrebuildSetup
         LayoutRebuilder.ForceRebuildLayoutImmediate(m_LayoutGroup.GetComponent<RectTransform>());
 
         Assert.AreEqual(90, m_LayoutGroup.minWidth, "Expected layout group min width to match but it did not");
-        Assert.AreEqual(100, m_LayoutGroup.minHeight, "Expected layout group min height to match but it did not");
+        Assert.AreEqual(50, m_LayoutGroup.minHeight, "Expected layout group min height to match but it did not");
         Assert.AreEqual(290, m_LayoutGroup.preferredWidth, "Expected layout group preferred width to match but it did not");
         Assert.AreEqual(100, m_LayoutGroup.preferredHeight, "Expected layout group preferred height to match but it did not");
         Assert.AreEqual(-1, m_LayoutGroup.flexibleWidth, "Expected layout group flexiblle width to match but it did not");

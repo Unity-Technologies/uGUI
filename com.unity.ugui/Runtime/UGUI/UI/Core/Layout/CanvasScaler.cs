@@ -70,13 +70,8 @@ namespace UnityEngine.UI
         /// <summary>
         /// Scales all UI elements in the Canvas by this factor.
         /// </summary>
-
-        /// <summary>
-        /// Scales all UI elements in the Canvas by this factor.
-        /// </summary>
         public float scaleFactor { get { return m_ScaleFactor; } set { m_ScaleFactor = Mathf.Max(0.01f, value); } }
 
-        /// Scale the canvas area with the width as reference, the height as reference, or something in between.
         /// <summary>
         /// Scale the canvas area with the width as reference, the height as reference, or something in between.
         /// </summary>
