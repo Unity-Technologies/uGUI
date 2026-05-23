@@ -82,29 +82,13 @@ namespace UnityEngine.UI
         : UIBehaviour,
           ICanvasElement
     {
-        protected static Material s_DefaultUI = null;
-        protected static Texture2D s_WhiteTexture = null;
-        protected static Mesh s_Mesh;
-        private static readonly VertexHelper s_VertexHelper = new VertexHelper();
-
-#if UNITY_EDITOR
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-        static void ResetStaticsOnLoad()
-        {
-            s_DefaultUI = null;
-            s_WhiteTexture = null;
-
-            if (s_Mesh != null)
-            {
-                DestroyImmediate(s_Mesh);
-                s_Mesh = null;
-            }
-        }
-#endif
+        static protected Material s_DefaultUI = null;
+        static protected Texture2D s_WhiteTexture = null;
 
         /// <summary>
         /// Default material used to draw UI elements if no explicit material was specified.
         /// </summary>
+
         static public Material defaultGraphicMaterial
         {
             get
@@ -229,6 +213,9 @@ namespace UnityEngine.UI
         [NonSerialized] protected UnityAction m_OnDirtyLayoutCallback;
         [NonSerialized] protected UnityAction m_OnDirtyVertsCallback;
         [NonSerialized] protected UnityAction m_OnDirtyMaterialCallback;
+
+        [NonSerialized] protected static Mesh s_Mesh;
+        [NonSerialized] private static readonly VertexHelper s_VertexHelper = new VertexHelper();
 
         [NonSerialized] protected Mesh m_CachedMesh;
         [NonSerialized] protected Vector2[] m_CachedUvs;

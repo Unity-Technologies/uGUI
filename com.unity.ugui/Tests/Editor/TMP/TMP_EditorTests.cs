@@ -1,11 +1,7 @@
-
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using NUnit.Framework;
-using System;
 using System.IO;
-using System.Text;
-using Object = UnityEngine.Object;
 
 namespace TMPro
 {
@@ -57,34 +53,9 @@ namespace TMPro
 
         private readonly string[] testStrings = new string[] { m_TextBlock_00, m_TextBlock_01, m_TextBlock_02, m_TextBlock_03, m_TextBlock_04, m_TextBlock_05, m_TextBlock_06 };
 
-        private void AssertRenderedText(string expected)
-        {
-            expected ??= string.Empty;
-
-            m_TextComponent.ForceMeshUpdate();
-
-            Assert.AreEqual(expected.Length, m_TextComponent.textInfo.characterCount);
-
-            for (int i = 0; i < expected.Length; i++)
-                Assert.AreEqual(expected[i], m_TextComponent.textInfo.characterInfo[i].character, $"Character mismatch at index {i}.");
-        }
-
-        private void AssertCharacterStyle(int index, FontStyles style, bool expected)
-        {
-            FontStyles actualStyle = m_TextComponent.textInfo.characterInfo[index].style;
-            bool hasStyle = (actualStyle & style) == style;
-
-            Assert.AreEqual(expected, hasStyle, $"Expected character at index {index} to {(expected ? "have" : "not have")} style {style}.");
-        }
-
-        private void AssertCharacterStyleRange(int startIndex, int length, FontStyles style, bool expected)
-        {
-            for (int i = startIndex; i < startIndex + length; i++)
-                AssertCharacterStyle(i, style, expected);
-        }
 
         [OneTimeSetUp]
-        public void OneTimeSetup()
+        public void Setup()
         {
             if (Directory.Exists(Path.GetFullPath("Assets/TextMesh Pro")) || Directory.Exists(Path.GetFullPath("Packages/com.unity.textmeshpro.tests/TextMesh Pro")))
             {
@@ -412,208 +383,14 @@ namespace TMPro
         }
 #endif
 
-        // =============================================
-        // SetText Tests
-        // =============================================
-
-        [Test]
-        public void SetText_String_Null_ClearsText()
-        {
-            m_TextComponent.SetText("Previously assigned text.");
-            m_TextComponent.ForceMeshUpdate();
-            Assert.Greater(m_TextComponent.textInfo.characterCount, 0);
-
-            m_TextComponent.SetText((string)null);
-
-            AssertRenderedText(string.Empty);
-        }
-
-        [Test]
-        public void SetText_CharArray_Null_ClearsText()
-        {
-            m_TextComponent.SetText("Previously assigned text.");
-            m_TextComponent.ForceMeshUpdate();
-            Assert.Greater(m_TextComponent.textInfo.characterCount, 0);
-
-            m_TextComponent.SetText((char[])null);
-
-            AssertRenderedText(string.Empty);
-        }
-
-        [Test]
-        public void SetText_StringBuilder_Null_ClearsText()
-        {
-            m_TextComponent.SetText("Previously assigned text.");
-            m_TextComponent.ForceMeshUpdate();
-            Assert.Greater(m_TextComponent.textInfo.characterCount, 0);
-
-            m_TextComponent.SetText((StringBuilder)null);
-
-            AssertRenderedText(string.Empty);
-        }
-
-        [Test]
-        public void SetText_ReadOnlySpan_Empty_ClearsText()
-        {
-            m_TextComponent.SetText("Previously assigned text.");
-            m_TextComponent.ForceMeshUpdate();
-            Assert.Greater(m_TextComponent.textInfo.characterCount, 0);
-
-            m_TextComponent.SetText(ReadOnlySpan<char>.Empty);
-
-            AssertRenderedText(string.Empty);
-        }
-
-        [Test]
-        [TestCase("")]
-        [TestCase("A")]
-        [TestCase("A simple line of text.")]
-        [TestCase("The quick brown fox jumps over the lazy dog while TextMesh Pro lays out the generated characters.")]
-        public void SetText_String_PlainText_RendersExpectedCharacters(string sourceText)
-        {
-            m_TextComponent.SetText(sourceText);
-
-            AssertRenderedText(sourceText);
-        }
-
-        [Test]
-        [TestCase("")]
-        [TestCase("A")]
-        [TestCase("Character array input with enough length to exercise more than a trivial copy.")]
-        public void SetText_CharArray_PlainText_RendersExpectedCharacters(string sourceText)
-        {
-            m_TextComponent.SetText(sourceText.ToCharArray());
-
-            AssertRenderedText(sourceText);
-        }
-
-        [Test]
-        [TestCase("")]
-        [TestCase("A")]
-        [TestCase("StringBuilder input with a longer sentence to validate characterInfo output.")]
-        public void SetText_StringBuilder_PlainText_RendersExpectedCharacters(string sourceText)
-        {
-            m_TextComponent.SetText(new StringBuilder(sourceText));
-
-            AssertRenderedText(sourceText);
-        }
-
-        [Test]
-        [TestCase("")]
-        [TestCase("A")]
-        [TestCase("ReadOnlySpan input with a longer sentence to validate characterInfo output.")]
-        public void SetText_ReadOnlySpan_PlainText_RendersExpectedCharacters(string sourceText)
-        {
-            m_TextComponent.SetText(sourceText.AsSpan());
-
-            AssertRenderedText(sourceText);
-        }
-
-        [Test]
-        public void SetText_ReadOnlySpan_Range_CopiesExpectedSubstring()
-        {
-            const string sourceText = "0123456789";
-
-            m_TextComponent.SetText(sourceText.AsSpan(), 2, 4);
-
-            AssertRenderedText("2345");
-        }
-
-        [Test]
-        public void SetText_ReadOnlySpan_Range_ClampsStartAndLength()
-        {
-            const string sourceText = "abcdef";
-
-            m_TextComponent.SetText(sourceText.AsSpan(), 4, 10);
-
-            AssertRenderedText("ef");
-        }
-
-        [Test]
-        [TestCase("This block contains <b>bold</b> and <i>italicized</i> characters.", "This block contains bold and italicized characters.")]
-        [TestCase("A <u>underlined</u> word and a <s>struck</s> word.", "A underlined word and a struck word.")]
-        [TestCase("Nested <b><i>bold italic</i></b> text returns to normal.", "Nested bold italic text returns to normal.")]
-        [TestCase("A <color=#ff0000>red</color> word renders without color tags.", "A red word renders without color tags.")]
-        public void SetText_String_RichTextTags_RendersExpectedCharacters(string sourceText, string expectedText)
-        {
-            m_TextComponent.SetText(sourceText);
-
-            AssertRenderedText(expectedText);
-        }
-
-        [Test]
-        [TestCase("A <style=H1>heading</style> B", "A *heading* B")]
-        [TestCase("A <style=Quote>quote</style> B", "A quote B")]
-        public void SetText_String_StyleTags_RendersExpectedCharacters(string sourceText, string expectedText)
-        {
-            m_TextComponent.SetText(sourceText);
-
-            AssertRenderedText(expectedText);
-        }
-
-        [Test]
-        public void SetText_String_BoldTag_SetsAndClearsBoldStyle()
-        {
-            m_TextComponent.SetText("A <b>bold</b> B");
-
-            AssertRenderedText("A bold B");
-            AssertCharacterStyleRange(0, 2, FontStyles.Bold, false);
-            AssertCharacterStyleRange(2, 4, FontStyles.Bold, true);
-            AssertCharacterStyleRange(6, 2, FontStyles.Bold, false);
-        }
-
-        [Test]
-        public void SetText_String_ItalicTag_SetsAndClearsItalicStyle()
-        {
-            m_TextComponent.SetText("A <i>italic</i> B");
-
-            AssertRenderedText("A italic B");
-            AssertCharacterStyleRange(0, 2, FontStyles.Italic, false);
-            AssertCharacterStyleRange(2, 6, FontStyles.Italic, true);
-            AssertCharacterStyleRange(8, 2, FontStyles.Italic, false);
-        }
-
-        [Test]
-        public void SetText_String_NestedBoldItalicTags_SetAndClearExpectedStyles()
-        {
-            m_TextComponent.SetText("A <b><i>BI</i></b> C");
-
-            AssertRenderedText("A BI C");
-            AssertCharacterStyleRange(0, 2, FontStyles.Bold, false);
-            AssertCharacterStyleRange(0, 2, FontStyles.Italic, false);
-            AssertCharacterStyleRange(2, 2, FontStyles.Bold, true);
-            AssertCharacterStyleRange(2, 2, FontStyles.Italic, true);
-            AssertCharacterStyleRange(4, 2, FontStyles.Bold, false);
-            AssertCharacterStyleRange(4, 2, FontStyles.Italic, false);
-        }
-
-        [Test]
-        public void SetText_String_UnderlineAndStrikethroughTags_SetAndClearExpectedStyles()
-        {
-            m_TextComponent.SetText("A <u>U</u> <s>S</s> Z");
-
-            AssertRenderedText("A U S Z");
-            AssertCharacterStyle(2, FontStyles.Underline, true);
-            AssertCharacterStyle(4, FontStyles.Strikethrough, true);
-            AssertCharacterStyleRange(0, 2, FontStyles.Underline, false);
-            AssertCharacterStyleRange(3, 4, FontStyles.Underline, false);
-            AssertCharacterStyleRange(0, 4, FontStyles.Strikethrough, false);
-            AssertCharacterStyleRange(5, 2, FontStyles.Strikethrough, false);
-        }
 
         // Add tests that check position of individual characters in a complex block of text.
         // These test also use the data contained inside the TMP_TextInfo class.
 
 
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
-        {
-            if (m_TextComponent != null)
-            {
-                Object.DestroyImmediate(m_TextComponent.gameObject);
-                m_TextComponent = null;
-            }
-
+        //[OneTimeTearDown]
+        //public void Cleanup()
+        //{
         //    // Remove TMP Essential Resources if they were imported in the project as a result of running tests.
         //    if (TMPro_EventManager.temporaryResourcesImported == true)
         //    {
@@ -623,6 +400,7 @@ namespace TMPro
         //            TMPro_EventManager.temporaryResourcesImported = false;
         //        }
         //    }
-        }
+        //}
+
     }
 }

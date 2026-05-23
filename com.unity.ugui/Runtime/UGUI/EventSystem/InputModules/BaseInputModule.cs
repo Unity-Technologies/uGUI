@@ -171,27 +171,11 @@ namespace UnityEngine.EventSystems
         }
 
         /// <summary>
-        /// Finds and returns a common root <see cref="GameObject"/> for two given
-        /// <see cref="GameObject"/> instances.
+        /// Given 2 GameObjects, return a common root GameObject (or null).
         /// </summary>
-        /// <remarks>
-        /// Walks up the transform hierarchy of both objects to find the first common
-        /// ancestor. Used by the event system to determine exit/enter boundaries
-        /// when the pointer moves between UI elements that share a common root.
-        /// </remarks>
-        /// <param name="g1">The first <see cref="GameObject"/> to use in the search for a common root.</param>
-        /// <param name="g2">The second <see cref="GameObject"/> to use in the search for a common root.</param>
-        /// <returns>The common root <see cref="GameObject"/>, or null if none found.</returns>
-        /// <example>
-        /// <para>Use this to find a common ancestor of two UI objects for event boundaries.
-        /// The following gets the common root of a button and a slider under a panel.</para>
-        /// <code><![CDATA[
-        /// GameObject a = transform.Find("Panel/Button").gameObject;
-        /// GameObject b = transform.Find("Panel/Slider").gameObject;
-        /// GameObject root = FindCommonRoot(a, b); // Returns the Panel's GameObject.
-        /// if (root != null) Debug.Log("Common root: " + root.name);
-        /// ]]></code>
-        /// </example>
+        /// <param name="g1">GameObject to compare</param>
+        /// <param name="g2">GameObject to compare</param>
+        /// <returns></returns>
         protected static GameObject FindCommonRoot(GameObject g1, GameObject g2)
         {
             if (g1 == null || g2 == null)
@@ -326,7 +310,7 @@ namespace UnityEngine.EventSystems
         /// </summary>
         /// <param name="x">X movement.</param>
         /// <param name="y">Y movement.</param>
-        /// <param name="moveDeadZone">Move dead zone.</param>
+        /// <param name="deadZone">Dead zone.</param>
         protected virtual AxisEventData GetAxisEventData(float x, float y, float moveDeadZone)
         {
             if (m_AxisEventData == null)

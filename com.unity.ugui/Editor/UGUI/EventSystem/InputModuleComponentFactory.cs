@@ -13,7 +13,6 @@ namespace UnityEditor.EventSystems
         }
 
         private static AddInputModuleComponentDelegate m_AddInputModuleComponentOverride = null;
-        public static AddInputModuleComponentDelegate InputModuleComponentOverride { get { return m_AddInputModuleComponentOverride; } }
 
         public static BaseInputModule AddInputModule(GameObject gameObject)
         {

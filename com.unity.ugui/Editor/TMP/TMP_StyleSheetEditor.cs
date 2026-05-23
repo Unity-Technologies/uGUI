@@ -48,12 +48,12 @@ namespace TMPro.EditorUtilities
             // HashCode
             Rect rect1 = new Rect(rect0.x + rect0.width + 5, position.y, 65, position.height);
             GUI.Label(rect1, "HashCode");
-            EditorGUI.BeginDisabledGroup(true);
+            GUI.enabled = false;
             rect1.x += 65;
             rect1.width = position.width / 2 - 75;
             EditorGUI.PropertyField(rect1, hashCodeProperty, GUIContent.none);
 
-            EditorGUI.EndDisabledGroup();
+            GUI.enabled = true;
 
             // Text Tags
             EditorGUI.BeginChangeCheck();
@@ -185,27 +185,22 @@ namespace TMPro.EditorUtilities
             rect.width = totalWidth * 0.175f;
 
             // Move Style up.
-            bool isDisabled = m_SelectedElement == -1 || m_SelectedElement == 0;
-            EditorGUI.BeginDisabledGroup(isDisabled);
+            bool guiEnabled = GUI.enabled;
+            if (m_SelectedElement == -1 || m_SelectedElement == 0) { GUI.enabled = false; }
             if (GUI.Button(rect, "Up"))
             {
                 SwapStyleElements(m_SelectedElement, m_SelectedElement - 1);
             }
-            EditorGUI.EndDisabledGroup();
-            if (isDisabled)
-                ConsumeMouseClick(currentEvent, rect);
+            GUI.enabled = guiEnabled;
 
             // Move Style down.
             rect.x += rect.width;
-            isDisabled = m_SelectedElement == -1 || m_SelectedElement == elementCount - 1;
-            EditorGUI.BeginDisabledGroup(isDisabled);
+            if (m_SelectedElement == elementCount - 1) { GUI.enabled = false; }
             if (GUI.Button(rect, "Down"))
             {
                 SwapStyleElements(m_SelectedElement, m_SelectedElement + 1);
             }
-            EditorGUI.EndDisabledGroup();
-            if (isDisabled)
-                ConsumeMouseClick(currentEvent, rect);
+            GUI.enabled = guiEnabled;
 
             // Add Style
             rect.x += rect.width + totalWidth * 0.3f;
@@ -228,20 +223,17 @@ namespace TMPro.EditorUtilities
 
             // Delete style
             rect.x += rect.width;
-            using (new EditorGUI.DisabledScope(m_SelectedElement == -1 || m_SelectedElement >= elementCount))
+            if (m_SelectedElement == -1 || m_SelectedElement >= elementCount) GUI.enabled = false;
+            if (GUI.Button(rect, "-"))
             {
-                if (GUI.Button(rect, "-"))
-                {
-                    int index = m_SelectedElement == -1 ? 0 : m_SelectedElement;
+                int index = m_SelectedElement == -1 ? 0 : m_SelectedElement;
 
-                    m_StyleListProp.DeleteArrayElementAtIndex(index);
+                m_StyleListProp.DeleteArrayElementAtIndex(index);
 
-                    elementCount = m_StyleListProp.arraySize;
-                    m_SelectedElement = elementCount > 0 ? Mathf.Clamp(index, 0, elementCount - 1) : -1;
-                    serializedObject.ApplyModifiedProperties();
-                    m_StyleSheet.RefreshStyles();
-                    return;
-                }
+                m_SelectedElement = -1;
+                serializedObject.ApplyModifiedProperties();
+                m_StyleSheet.RefreshStyles();
+                return;
             }
 
             // Return if we can't display any items.
@@ -254,15 +246,14 @@ namespace TMPro.EditorUtilities
             pagePos.width = totalWidth * 0.35f;
 
             // Previous Page
-            isDisabled = m_Page <= 0;
-            EditorGUI.BeginDisabledGroup(isDisabled);
+            if (m_Page > 0) GUI.enabled = true;
+            else GUI.enabled = false;
+
             if (GUI.Button(pagePos, "Previous"))
                 m_Page -= 1 * shiftMultiplier;
-            EditorGUI.EndDisabledGroup();
-            if (isDisabled)
-                ConsumeMouseClick(currentEvent, pagePos);
 
             // PAGE COUNTER
+            GUI.enabled = true;
             pagePos.x += pagePos.width;
             pagePos.width = totalWidth * 0.30f;
             int totalPages = (int)(elementCount / (float)itemsPerPage + 0.999f);
@@ -271,16 +262,15 @@ namespace TMPro.EditorUtilities
             // Next Page
             pagePos.x += pagePos.width;
             pagePos.width = totalWidth * 0.35f;
-            isDisabled = itemsPerPage * (m_Page + 1) >= elementCount;
-            EditorGUI.BeginDisabledGroup(isDisabled);
+            if (itemsPerPage * (m_Page + 1) < elementCount) GUI.enabled = true;
+            else GUI.enabled = false;
+
             if (GUI.Button(pagePos, "Next"))
                 m_Page += 1 * shiftMultiplier;
-            EditorGUI.EndDisabledGroup();
-            if (isDisabled)
-                ConsumeMouseClick(currentEvent, pagePos);
 
             // Clamp page range
             m_Page = Mathf.Clamp(m_Page, 0, elementCount / itemsPerPage);
+
 
             if (serializedObject.ApplyModifiedProperties())
             {
@@ -294,16 +284,12 @@ namespace TMPro.EditorUtilities
             }
 
             // Clear selection if mouse event was not consumed.
+            GUI.enabled = true;
             if (currentEvent.type == EventType.MouseDown && currentEvent.button == 0)
                 m_SelectedElement = -1;
 
         }
 
-        static void ConsumeMouseClick(Event e, Rect rect)
-        {
-            if (e.type == EventType.MouseDown && e.button == 0 && rect.Contains(e.mousePosition))
-                e.Use();
-        }
 
         // Check if any of the Style elements were clicked on.
         static bool DoSelectionCheck(Rect selectionArea)
