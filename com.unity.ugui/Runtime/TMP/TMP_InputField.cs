@@ -2533,7 +2533,7 @@ namespace TMPro
                 }
                 else
                 {
-                    // Special handling for <CR><LF>
+                    // Special handling for \r\n: if we are on the \r character, we want to move to the end of the \r\n pair, not just after the \r character.
                     if (m_TextComponent.textInfo.characterInfo[caretSelectPositionInternal].character == '\r' && m_TextComponent.textInfo.characterInfo[caretSelectPositionInternal + 1].character == '\n')
                         position = m_TextComponent.textInfo.characterInfo[caretSelectPositionInternal + 1].index + m_TextComponent.textInfo.characterInfo[caretSelectPositionInternal + 1].stringLength;
                     else
@@ -2610,8 +2610,8 @@ namespace TMPro
                         ? m_TextComponent.textInfo.characterInfo[0].index
                         : m_TextComponent.textInfo.characterInfo[caretSelectPositionInternal - 1].index;
 
-                    // Special handling for <CR><LF>
-                    if (position > 0 && m_TextComponent.textInfo.characterInfo[caretSelectPositionInternal - 1].character == '\n' && m_TextComponent.textInfo.characterInfo[caretSelectPositionInternal - 2].character == '\r')
+                    // Special handling for \r\n: if we are on the \n character, we want to move to the start of the \r\n pair, not just before the \n character.
+                    if (position > 0 && caretSelectPositionInternal > 1 && m_TextComponent.textInfo.characterInfo[caretSelectPositionInternal - 1].character == '\n' && m_TextComponent.textInfo.characterInfo[caretSelectPositionInternal - 2].character == '\r')
                         position = m_TextComponent.textInfo.characterInfo[caretSelectPositionInternal - 2].index;
                 }
             }
