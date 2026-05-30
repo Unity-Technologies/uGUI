@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace UnityEngine.UI
 {
@@ -10,16 +12,7 @@ namespace UnityEngine.UI
     /// </remarks>
     public static class FontUpdateTracker
     {
-        static readonly Dictionary<Font, HashSet<Text>> m_Tracked = new Dictionary<Font, HashSet<Text>>();
-
-#if UNITY_EDITOR
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-        static void ResetStaticsOnLoad()
-        {
-            Font.textureRebuilt -= RebuildForFont;
-            m_Tracked.Clear();
-        }
-#endif
+        static Dictionary<Font, HashSet<Text>> m_Tracked = new Dictionary<Font, HashSet<Text>>();
 
         /// <summary>
         /// Register a Text element for receiving texture atlas rebuild calls.

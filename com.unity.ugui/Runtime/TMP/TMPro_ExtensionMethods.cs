@@ -1,4 +1,6 @@
-using UnityEngine;
+﻿using UnityEngine;
+using System.Text;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace TMPro
@@ -277,8 +279,8 @@ namespace TMPro
         public const float FLOAT_UNSET = -32767;
         public const int INT_UNSET = -32767;
 
-        public static readonly Vector2 MAX_16BIT = new Vector2(FLOAT_MAX, FLOAT_MAX);
-        public static readonly Vector2 MIN_16BIT = new Vector2(FLOAT_MIN, FLOAT_MIN);
+        public static Vector2 MAX_16BIT = new Vector2(FLOAT_MAX, FLOAT_MAX);
+        public static Vector2 MIN_16BIT = new Vector2(FLOAT_MIN, FLOAT_MIN);
 
         public static bool Approximately(float a, float b)
         {

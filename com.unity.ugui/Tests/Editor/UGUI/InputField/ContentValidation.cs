@@ -11,6 +11,7 @@ namespace Core.InputField
         [TestCase(ContentType.Alphanumeric, "123456", "123456")]
         [TestCase(ContentType.Alphanumeric, "0123456", "0123456")]
         [TestCase(ContentType.Alphanumeric, "111110123456", "111110123456")]
+        [TestCase(ContentType.Alphanumeric, "123456", "123456")]
         [TestCase(ContentType.Alphanumeric, "-1.0", "10")]
         [TestCase(ContentType.Alphanumeric, "-00.45", "0045")]
         [TestCase(ContentType.Alphanumeric, "-1111101.23456", "111110123456")]

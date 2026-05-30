@@ -1,18 +1,5 @@
 # Changelog
 
-## [2.6.0] - 2026-03-30
-
-### Added
-- New Maximum Width and Height properties added to ILayoutElement.
-- New Clamped FitMode added to ContentSizeFitter.
-
-### Changed
-- ContentSizeFitter's PreferredSize FitMode now respects Maximum Width and Height of ILayoutElement.
-- GridLayoutGroup, VerticalLayoutGroup and HorizontalLayoutGroup calculate their maximum width and height based on their children's layout element properties.
-
-### Added
-- New SafeArea component that insets a RectTransform to respect the device's safe area. Supports per-edge control over which sides are inset, a configurable reference orientation so that edge assignments remain stable across device rotations, and a balance mode that symmetrically mirrors the inset on the opposite edge to keep the UI centered.
-
 ## [2.5.0] - 2026-02-27
 
 ### Added
