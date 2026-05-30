@@ -91,22 +91,25 @@ namespace UnityEngine.UI
             bool useScale = (axis == 0 ? m_ChildScaleWidth : m_ChildScaleHeight);
             bool childForceExpandSize = (axis == 0 ? m_ChildForceExpandWidth : m_ChildForceExpandHeight);
 
+            bool alongOtherAxis = (isVertical ^ (axis == 1));
+
             float totalMin = combinedPadding;
+            float totalMax = alongOtherAxis ? LayoutUtility.DefaultMaxSize : combinedPadding;
             float totalPreferred = combinedPadding;
             float totalFlexible = 0;
 
-            bool alongOtherAxis = (isVertical ^ (axis == 1));
             var rectChildrenCount = rectChildren.Count;
             for (int i = 0; i < rectChildrenCount; i++)
             {
                 RectTransform child = rectChildren[i];
-                float min, preferred, flexible;
-                GetChildSizes(child, axis, controlSize, childForceExpandSize, out min, out preferred, out flexible);
+                float min, max, preferred, flexible;
+                GetChildSizes(child, axis, controlSize, childForceExpandSize, out min, out max, out preferred, out flexible);
 
                 if (useScale)
                 {
                     float scaleFactor = child.localScale[axis];
                     min *= scaleFactor;
+                    max *= scaleFactor;
                     preferred *= scaleFactor;
                     flexible *= scaleFactor;
                 }
@@ -114,12 +117,14 @@ namespace UnityEngine.UI
                 if (alongOtherAxis)
                 {
                     totalMin = Mathf.Max(min + combinedPadding, totalMin);
+                    totalMax = Mathf.Min(max + combinedPadding, totalMax);
                     totalPreferred = Mathf.Max(preferred + combinedPadding, totalPreferred);
                     totalFlexible = Mathf.Max(flexible, totalFlexible);
                 }
                 else
                 {
                     totalMin += min + spacing;
+                    totalMax += max + spacing;
                     totalPreferred += preferred + spacing;
 
                     // Increment flexible size with element's flexible size.
@@ -130,10 +135,11 @@ namespace UnityEngine.UI
             if (!alongOtherAxis && rectChildren.Count > 0)
             {
                 totalMin -= spacing;
+                totalMax -= spacing;
                 totalPreferred -= spacing;
             }
-            totalPreferred = Mathf.Max(totalMin, totalPreferred);
-            SetLayoutInputForAxis(totalMin, totalPreferred, totalFlexible, axis);
+            totalPreferred = Mathf.Clamp(totalPreferred, totalMin, totalMax);
+            SetLayoutInputForAxis(totalMin, totalMax, totalPreferred, totalFlexible, axis);
         }
 
         /// <summary>
@@ -160,8 +166,8 @@ namespace UnityEngine.UI
                 for (int i = startIndex; m_ReverseArrangement ? i >= endIndex : i < endIndex; i += increment)
                 {
                     RectTransform child = rectChildren[i];
-                    float min, preferred, flexible;
-                    GetChildSizes(child, axis, controlSize, childForceExpandSize, out min, out preferred, out flexible);
+                    float min, max, preferred, flexible;
+                    GetChildSizes(child, axis, controlSize, childForceExpandSize, out min, out max, out preferred, out flexible);
                     float scaleFactor = useScale ? child.localScale[axis] : 1f;
 
                     float requiredSpace = Mathf.Clamp(innerSize, min, flexible > 0 ? size : preferred);
@@ -198,8 +204,8 @@ namespace UnityEngine.UI
                 for (int i = startIndex; m_ReverseArrangement ? i >= endIndex : i < endIndex; i += increment)
                 {
                     RectTransform child = rectChildren[i];
-                    float min, preferred, flexible;
-                    GetChildSizes(child, axis, controlSize, childForceExpandSize, out min, out preferred, out flexible);
+                    float min, max, preferred, flexible;
+                    GetChildSizes(child, axis, controlSize, childForceExpandSize, out min, out max, out preferred, out flexible);
                     float scaleFactor = useScale ? child.localScale[axis] : 1f;
 
                     float childSize = Mathf.Lerp(min, preferred, minMaxLerp);
@@ -219,17 +225,19 @@ namespace UnityEngine.UI
         }
 
         private void GetChildSizes(RectTransform child, int axis, bool controlSize, bool childForceExpand,
-            out float min, out float preferred, out float flexible)
+            out float min, out float max, out float preferred, out float flexible)
         {
             if (!controlSize)
             {
                 min = child.sizeDelta[axis];
+                max = min;
                 preferred = min;
                 flexible = 0;
             }
             else
             {
                 min = LayoutUtility.GetMinSize(child, axis);
+                max = LayoutUtility.GetMaxSize(child, axis);
                 preferred = LayoutUtility.GetPreferredSize(child, axis);
                 flexible = LayoutUtility.GetFlexibleSize(child, axis);
             }

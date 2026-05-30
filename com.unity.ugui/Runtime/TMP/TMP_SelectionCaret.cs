@@ -11,11 +11,10 @@ namespace TMPro
     [TMPHelpURL("index")]
     public class TMP_SelectionCaret : MaskableGraphic
     {
+        /// <inheritdoc/>
         /// <summary>
         /// Override to Cull function of MaskableGraphic to prevent Culling.
         /// </summary>
-        /// <param name="clipRect"></param>
-        /// <param name="validRect"></param>
         public override void Cull(Rect clipRect, bool validRect)
         {
             //Debug.Log("***** Cull (" + clipRect + ")   Valid Rect: " + validRect + "   Cull: " + canvasRenderer.cull + " *****");

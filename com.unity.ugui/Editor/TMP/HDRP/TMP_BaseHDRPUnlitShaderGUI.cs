@@ -1,4 +1,4 @@
-﻿#if HDRP_10_7_OR_NEWER
+#if HDRP_10_7_OR_NEWER
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.Rendering.HighDefinition;
@@ -7,14 +7,14 @@ using UnityEditor.Rendering.HighDefinition;
 namespace TMPro.EditorUtilities
 {
     /// <summary>Base class for TextMesh Pro shader GUIs.</summary>
-    #if HDRP_11_OR_NEWER
+#if HDRP_11_OR_NEWER
     internal abstract class TMP_BaseHDRPUnlitShaderGUI : UnlitShaderGraphGUI
-    #else
+#else
     internal abstract class TMP_BaseHDRPUnlitShaderGUI : HDUnlitGUI
-    #endif
+#endif
     {
         /// <summary>Representation of a #pragma shader_feature.</summary>
-        /// <description>It is assumed that the first feature option is for no keyword (underscores).</description>
+        /// <remarks>It is assumed that the first feature option is for no keyword (underscores).</remarks>
         protected class ShaderFeature
         {
             public string undoLabel;
@@ -140,7 +140,6 @@ namespace TMPro.EditorUtilities
         void PrepareGUI()
         {
             m_IsNewGUI = false;
-            ShaderUtilities.GetShaderPropertyIDs();
 
             // New GUI just got constructed. This happens in response to a selection,
             // but also after undo/redo events.
@@ -439,7 +438,8 @@ namespace TMPro.EditorUtilities
         {
             MaterialProperty property = BeginProperty(name);
             s_TempLabel.text = label;
-            Color value = EditorGUI.ColorField(EditorGUILayout.GetControlRect(), s_TempLabel, property.colorValue, false, true, true);
+            bool isHDR = ((property.propertyFlags & UnityEngine.Rendering.ShaderPropertyFlags.HDR) != 0);
+            Color value = EditorGUI.ColorField(EditorGUILayout.GetControlRect(), s_TempLabel, property.colorValue, false, true, isHDR);
             if (EndProperty())
             {
                 property.colorValue = value;

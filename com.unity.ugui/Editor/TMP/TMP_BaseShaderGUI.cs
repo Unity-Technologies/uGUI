@@ -1,5 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
+using UnityEngine.Rendering;
 
 namespace TMPro.EditorUtilities
 {
@@ -7,7 +8,7 @@ namespace TMPro.EditorUtilities
     public abstract class TMP_BaseShaderGUI : ShaderGUI
     {
         /// <summary>Representation of a #pragma shader_feature.</summary>
-        /// <description>It is assumed that the first feature option is for no keyword (underscores).</description>
+        /// <remarks>It is assumed that the first feature option is for no keyword (underscores).</remarks>
         protected class ShaderFeature
         {
             public string undoLabel;
@@ -134,7 +135,6 @@ namespace TMPro.EditorUtilities
         void PrepareGUI()
         {
             m_IsNewGUI = false;
-            ShaderUtilities.GetShaderPropertyIDs();
 
             // New GUI just got constructed. This happens in response to a selection,
             // but also after undo/redo events.
@@ -438,7 +438,8 @@ namespace TMPro.EditorUtilities
         {
             MaterialProperty property = BeginProperty(name);
             s_TempLabel.text = label;
-            Color value = EditorGUI.ColorField(EditorGUILayout.GetControlRect(), s_TempLabel, property.colorValue, false, true, true);
+            bool isHDR = ((property.propertyFlags & ShaderPropertyFlags.HDR) != 0);
+            Color value = EditorGUI.ColorField(EditorGUILayout.GetControlRect(), s_TempLabel, property.colorValue, false, true, isHDR);
             if (EndProperty())
             {
                 property.colorValue = value;

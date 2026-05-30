@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections;
 
@@ -148,12 +148,15 @@ namespace TMPro
 
         //private Transform m_transform;
         //private bool m_isAddingRectTransform;
-        private static Vector2 k_defaultSize = new Vector2(100, 100);
+        private static readonly Vector2 k_defaultSize = new Vector2(100, 100);
 
 
         /// <summary>
-        /// 
+        /// Gets the <see cref="TextMeshPro"/> component on the same GameObject, caching the reference after first access.
         /// </summary>
+        /// <remarks>
+        /// Text Container is obsolete; new projects should rely on RectTransform sizing on <see cref="TextMeshPro"/> directly instead of this helper.
+        /// </remarks>
         public TextMeshPro textMeshPro
         {
             get
@@ -172,9 +175,9 @@ namespace TMPro
             return;
         }
 
-
+        /// <inheritdoc/>
         /// <summary>
-        /// 
+        /// Updates container dimensions and notifies the text component when enabled.
         /// </summary>
         protected override void OnEnable()
         {
@@ -184,9 +187,7 @@ namespace TMPro
         }
 
 
-        /// <summary>
-        /// 
-        /// </summary>
+        /// <inheritdoc/>
         protected override void OnDisable()
         {
             //Debug.Log("OnDisable() called.");

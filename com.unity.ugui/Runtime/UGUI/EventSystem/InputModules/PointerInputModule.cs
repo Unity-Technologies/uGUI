@@ -61,12 +61,32 @@ namespace UnityEngine.EventSystems
         }
 
         /// <summary>
-        /// Given a touch populate the PointerEventData and return if we are pressed or released.
+        /// Populates a <see cref="PointerEventData"/> object using touch input and
+        /// determines if the touch was pressed or released.
         /// </summary>
-        /// <param name="input">Touch being processed</param>
-        /// <param name="pressed">Are we pressed this frame</param>
-        /// <param name="released">Are we released this frame</param>
-        /// <returns></returns>
+        /// <remarks>
+        /// Builds or reuses <see cref="PointerEventData"/> for the touch and updates
+        /// position, phase, and delta. The out parameters indicate if this frame is
+        /// a press or release, which the event system uses to fire pointer down/up
+        /// and click events.
+        /// </remarks>
+        /// <param name="input">The <see cref="Touch"/> input data to process into pointer event data.</param>
+        /// <param name="pressed">Whether the touch began or is active this frame.</param>
+        /// <param name="released">Whether the touch ended or was canceled this frame.</param>
+        /// <returns>The <see cref="PointerEventData"/> for the touch.</returns>
+        /// <example>
+        /// <para>Get touch data and forward press/release to pointer handlers. Requires an
+        /// active touch and event system. The following forwards pointer down/up.</para>
+        /// <code><![CDATA[
+        /// Touch t = Input.GetTouch(0);
+        /// bool pressed, released;
+        /// PointerEventData data = GetTouchPointerEventData(t, out pressed, out released);
+        /// if (pressed)
+        ///     ExecuteEvents.Execute(gameObject, data, ExecuteEvents.pointerDownHandler);
+        /// if (released)
+        ///     ExecuteEvents.Execute(gameObject, data, ExecuteEvents.pointerUpHandler);
+        /// ]]></code>
+        /// </example>
         protected PointerEventData GetTouchPointerEventData(Touch input, out bool pressed, out bool released)
         {
             PointerEventData pointerData;

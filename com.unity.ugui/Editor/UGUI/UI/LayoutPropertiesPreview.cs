@@ -94,9 +94,10 @@ namespace UnityEditor.Events
             ILayoutElement source = null;
 
             // Show properties
-
             ShowProp(ref labelRect, ref valueRect, ref sourceRect, "Min Width", LayoutUtility.GetLayoutProperty(rect, e => e.minWidth, 0, out source).ToString(CultureInfo.InvariantCulture.NumberFormat), source);
             ShowProp(ref labelRect, ref valueRect, ref sourceRect, "Min Height", LayoutUtility.GetLayoutProperty(rect, e => e.minHeight, 0, out source).ToString(CultureInfo.InvariantCulture.NumberFormat), source);
+            ShowProp(ref labelRect, ref valueRect, ref sourceRect, "Max Width", LayoutUtility.GetLayoutProperty(rect, e => e.maxWidth, 0, out source).ToString(CultureInfo.InvariantCulture.NumberFormat), source);
+            ShowProp(ref labelRect, ref valueRect, ref sourceRect, "Max Height", LayoutUtility.GetLayoutProperty(rect, e => e.maxHeight, 0, out source).ToString(CultureInfo.InvariantCulture.NumberFormat), source);
             ShowProp(ref labelRect, ref valueRect, ref sourceRect, "Preferred Width", LayoutUtility.GetLayoutProperty(rect, e => e.preferredWidth, 0, out source).ToString(CultureInfo.InvariantCulture.NumberFormat), source);
             ShowProp(ref labelRect, ref valueRect, ref sourceRect, "Preferred Height", LayoutUtility.GetLayoutProperty(rect, e => e.preferredHeight, 0, out source).ToString(CultureInfo.InvariantCulture.NumberFormat), source);
 
