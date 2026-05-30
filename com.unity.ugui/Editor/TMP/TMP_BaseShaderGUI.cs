@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using UnityEngine.Rendering;
 
 namespace TMPro.EditorUtilities
 {
@@ -438,7 +439,8 @@ namespace TMPro.EditorUtilities
         {
             MaterialProperty property = BeginProperty(name);
             s_TempLabel.text = label;
-            Color value = EditorGUI.ColorField(EditorGUILayout.GetControlRect(), s_TempLabel, property.colorValue, false, true, true);
+            bool isHDR = ((property.propertyFlags & ShaderPropertyFlags.HDR) != 0);
+            Color value = EditorGUI.ColorField(EditorGUILayout.GetControlRect(), s_TempLabel, property.colorValue, false, true, isHDR);
             if (EndProperty())
             {
                 property.colorValue = value;
