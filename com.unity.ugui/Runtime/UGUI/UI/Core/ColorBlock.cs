@@ -21,7 +21,6 @@ namespace UnityEngine.UI
         [SerializeField]
         private Color m_PressedColor;
 
-        [FormerlySerializedAs("m_HighlightedColor")]
         [SerializeField]
         private Color m_SelectedColor;
 
@@ -190,7 +189,7 @@ namespace UnityEngine.UI
         /// <summary>
         /// Simple getter for a code generated default ColorBlock.
         /// </summary>
-        public static ColorBlock defaultColorBlock;
+        public static readonly ColorBlock defaultColorBlock;
 
         static ColorBlock()
         {

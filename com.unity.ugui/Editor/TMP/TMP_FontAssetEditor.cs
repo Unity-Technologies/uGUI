@@ -1926,20 +1926,13 @@ namespace TMPro.EditorUtilities
             }
         }
 
-        /// <summary>
-        /// Overrided method from the Editor class.
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc />
         public override bool HasPreviewGUI()
         {
             return true;
         }
 
-        /// <summary>
-        /// Overrided method to implement custom preview inspector.
-        /// </summary>
-        /// <param name="rect"></param>
-        /// <param name="background"></param>
+        /// <inheritdoc />
         public override void OnPreviewGUI(Rect rect, GUIStyle background)
         {
             if (m_SelectedMarkToBaseRecord != -1)

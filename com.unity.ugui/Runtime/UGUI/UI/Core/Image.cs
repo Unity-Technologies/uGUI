@@ -231,6 +231,23 @@ namespace UnityEngine.UI
         }
 
         static protected Material s_ETC1DefaultUI = null;
+        static SecondarySpriteTexture[] s_TempNewSecondaryTextures = Array.Empty<SecondarySpriteTexture>();
+
+        // To track textureless images, which will be rebuild if sprite atlas manager registered a Sprite Atlas that will give this image new texture
+        static readonly List<Image> m_TrackedTexturelessImages = new List<Image>();
+        static bool s_Initialized;
+
+#if UNITY_EDITOR
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        static void ResetStaticsOnLoad()
+        {
+            SpriteAtlasManager.atlasRegistered -= RebuildImage;
+            s_ETC1DefaultUI = null;
+            s_TempNewSecondaryTextures = Array.Empty<SecondarySpriteTexture>();
+            m_TrackedTexturelessImages.Clear();
+            s_Initialized = default;
+        }
+#endif
 
         [FormerlySerializedAs("m_Frame")]
         [SerializeField]
@@ -291,6 +308,8 @@ namespace UnityEngine.UI
 
                         ResetAlphaHitThresholdIfNeeded();
                         SetAllDirty();
+                        if (m_Tracked)
+                            UnTrackImage(this);
                         TrackSprite();
                     }
                 }
@@ -349,10 +368,10 @@ namespace UnityEngine.UI
         /// is set to /null/.
         /// </remarks>
         /// <example>
-        /// Note: The script example below has two buttons.  The button textures are loaded from the
+        /// <para>Note: The script example below has two buttons.  The button textures are loaded from the
         /// /Resources/ folder.  (They are not used in the shown example).  Two sprites are added to
         /// the example code.  /Example1/ and /Example2/ are functions called by the button OnClick
-        /// functions.  Example1 calls overrideSprite and Example2 sets overrideSprite to null.
+        /// functions.  Example1 calls overrideSprite and Example2 sets overrideSprite to null.</para>
         /// <code>
         /// <![CDATA[
         /// using System.Collections;
@@ -400,6 +419,8 @@ namespace UnityEngine.UI
                 if (SetPropertyUtility.SetClass(ref m_OverrideSprite, value))
                 {
                     SetAllDirty();
+                    if (m_Tracked)
+                        UnTrackImage(this);
                     TrackSprite();
                 }
             }
@@ -931,7 +952,6 @@ namespace UnityEngine.UI
                 UnTrackImage(this);
         }
 
-        static SecondarySpriteTexture[] s_TempNewSecondaryTextures = {};
         SecondarySpriteTexture [] m_SecondaryTextures;
 
         internal SecondarySpriteTexture [] secondaryTextures => m_SecondaryTextures; // Internal for testing only
@@ -1013,7 +1033,6 @@ namespace UnityEngine.UI
                 for (var i = 0; i < m_SecondaryTextures.Length; ++i)
                 {
                     var secondaryTex = m_SecondaryTextures[i];
-                
                     renderer.SetSecondaryTexture(i, secondaryTex.name, secondaryTex.texture);
                 }
             }
@@ -1837,6 +1856,9 @@ namespace UnityEngine.UI
         /// </summary>
         public virtual float minWidth { get { return 0; } }
 
+        /// <inheritdoc/>
+        public virtual float maxWidth { get { return LayoutUtility.DefaultMaxSize; } }
+
         /// <summary>
         /// If there is a sprite being rendered returns the size of that sprite.
         /// In the case of a slided or tiled sprite will return the calculated minimum size possible
@@ -1862,6 +1884,9 @@ namespace UnityEngine.UI
         /// See ILayoutElement.minHeight.
         /// </summary>
         public virtual float minHeight { get { return 0; } }
+
+        /// <inheritdoc/>
+        public virtual float maxHeight { get { return LayoutUtility.DefaultMaxSize; } }
 
         /// <summary>
         /// If there is a sprite being rendered returns the size of that sprite.
@@ -1972,10 +1997,6 @@ namespace UnityEngine.UI
 
             return local + spriteRect.position;
         }
-
-        // To track textureless images, which will be rebuild if sprite atlas manager registered a Sprite Atlas that will give this image new texture
-        static List<Image> m_TrackedTexturelessImages = new List<Image>();
-        static bool s_Initialized;
 
         static void RebuildImage(SpriteAtlas spriteAtlas)
         {

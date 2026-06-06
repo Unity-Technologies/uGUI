@@ -13,6 +13,14 @@ namespace UnityEngine.UI
     {
         static ClipperRegistry s_Instance;
 
+#if UNITY_EDITOR
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        static void ResetStaticsOnLoad()
+        {
+            s_Instance = default;
+        }
+#endif
+
         readonly IndexedSet<IClipper> m_Clippers = new IndexedSet<IClipper>();
 
         protected ClipperRegistry()

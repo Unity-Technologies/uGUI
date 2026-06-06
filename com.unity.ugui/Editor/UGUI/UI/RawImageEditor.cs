@@ -76,6 +76,17 @@ namespace UnityEditor.UI
         }
 
         /// <summary>
+        /// Repaint this element constantly if it's a RenderTexture.
+        /// </summary>
+        /// <returns> True if the rawImage is not null and is RenderTexture; otherwise, false.</returns>
+
+        public override bool RequiresConstantRepaint()
+        {
+            RawImage rawImage = target as RawImage;
+            return rawImage != null && rawImage.mainTexture is RenderTexture;
+        }
+
+        /// <summary>
         /// Draw the Image preview.
         /// </summary>
 

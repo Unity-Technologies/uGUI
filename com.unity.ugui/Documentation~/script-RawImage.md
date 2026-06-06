@@ -14,7 +14,9 @@ The **Raw Image** control displays a non-interactive image to the user. You can 
 |**Color** |The color to apply to the image. |
 |**Material** | The [Material](https://docs.unity3d.com/Manual/class-Material.html) to use for rendering the image. |
 |**Raycast Target** | Enable **Raycast Target** if you want Unity to consider the image a target for raycasting. |
-|**UV Rectangle** |The image's offset and size within the control rectangle, given in normalized coordinates (range 0.0 to 1.0). The edges of the image are stretched to fill the space around the UV rectangle. |
+|**Raycast Padding** | Space added to the [RectTransform](class-RectTransform.md) for raycasting. |
+|**Maskable**        | Enable **Maskable** to allow [Masks](script-Mask.md) to hide this object. |
+|**UV Rect** |The image's offset and size within the control rectangle, in normalized coordinates (0.0 – 1.0). The edges stretch to fill the space around the UV rectangle. |
 
 
 ## Details

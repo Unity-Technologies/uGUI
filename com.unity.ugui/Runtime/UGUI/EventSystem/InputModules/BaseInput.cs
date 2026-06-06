@@ -42,10 +42,30 @@ namespace UnityEngine.EventSystems
         }
 
         /// <summary>
-        /// Interface to Input.GetMouseButtonDown. Can be overridden to provide custom input instead of using the Input class.
+        /// Checks whether the user pressed the specified mouse button during this frame.
         /// </summary>
-        /// <param name="button"></param>
-        /// <returns></returns>
+        /// <remarks>
+        /// Override this method in a custom input module to supply your own mouse
+        /// button logic. The default implementation forwards to Unity's
+        /// <see cref="Input.GetMouseButtonDown"/>. Use this when implementing custom
+        /// input or testing without device input.
+        /// </remarks>
+        /// <param name="button">The mouse button index to check, where 0 is left, 1 is right, and 2 is middle.</param>
+        /// <returns>true if the user pressed the specified mouse button during this
+        /// frame; otherwise, false.</returns>
+        /// <example>
+        /// <para>Override to supply custom mouse button input (for example, for testing).
+        /// The following example simulates a left click when the user presses <b>Space</b>.</para>
+        /// <code><![CDATA[
+        /// public override bool GetMouseButtonDown(int button)
+        /// {
+        ///     // For example, simulate a left click when the user presses the Space key.
+        ///     if (button == 0 && Input.GetKeyDown(KeyCode.Space))
+        ///         return true;
+        ///     return Input.GetMouseButtonDown(button);
+        /// }
+        /// ]]></code>
+        /// </example>
         public virtual bool GetMouseButtonDown(int button)
         {
             return Input.GetMouseButtonDown(button);

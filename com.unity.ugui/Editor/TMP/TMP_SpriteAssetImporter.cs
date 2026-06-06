@@ -41,7 +41,7 @@ namespace TMPro
         }
 
         /// <summary>
-        ///
+        /// Draws the sprite asset importer editor panel.
         /// </summary>
         public void OnGUI()
         {

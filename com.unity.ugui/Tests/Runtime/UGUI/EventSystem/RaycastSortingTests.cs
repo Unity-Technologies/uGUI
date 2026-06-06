@@ -2,11 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
+
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.EventSystems;
+#endif
 
 internal class RaycastSortingTests : IPrebuildSetup
 {
@@ -16,14 +20,15 @@ internal class RaycastSortingTests : IPrebuildSetup
 
     const string kPrefabPath = "Assets/Resources/RaycastSortingPrefab.prefab";
 
-    public void Setup()
+    void IPrebuildSetup.Setup()
     {
 #if UNITY_EDITOR
         var rootGO = new GameObject("RootGO");
         var cameraGO = new GameObject("Camera", typeof(Camera));
         var camera = cameraGO.GetComponent<Camera>();
         cameraGO.transform.SetParent(rootGO.transform);
-        var eventSystemGO = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+        var eventSystemGO = new GameObject("EventSystem", typeof(EventSystem));
+        InputModuleComponentFactory.AddInputModule(eventSystemGO);
         eventSystemGO.transform.SetParent(rootGO.transform);
 
         var backCanvasGO = new GameObject("BackCanvas", typeof(Canvas), typeof(GraphicRaycaster));

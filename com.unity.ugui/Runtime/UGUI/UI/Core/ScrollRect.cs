@@ -1124,6 +1124,8 @@ namespace UnityEngine.UI
         /// Called by the layout system.
         /// </summary>
         public virtual float minWidth { get { return -1; } }
+        /// <inheritdoc/>
+        public virtual float maxWidth { get { return LayoutUtility.DefaultMaxSize; } }
         /// <summary>
         /// Called by the layout system.
         /// </summary>
@@ -1137,6 +1139,8 @@ namespace UnityEngine.UI
         /// Called by the layout system.
         /// </summary>
         public virtual float minHeight { get { return -1; } }
+        /// <inheritdoc/>
+        public virtual float maxHeight { get { return LayoutUtility.DefaultMaxSize; } }
         /// <summary>
         /// Called by the layout system.
         /// </summary>
