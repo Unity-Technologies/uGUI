@@ -43,7 +43,6 @@ namespace UnityEngine.UI
 
         protected DrivenRectTransformTracker m_Tracker;
         private Vector2 m_TotalMinSize = Vector2.zero;
-        private Vector2 m_TotalMaxSize = Vector2.positiveInfinity;
         private Vector2 m_TotalPreferredSize = Vector2.zero;
         private Vector2 m_TotalFlexibleSize = Vector2.zero;
 
@@ -89,9 +88,6 @@ namespace UnityEngine.UI
         /// </summary>
         public virtual float minWidth { get { return GetTotalMinSize(0); } }
 
-        /// <inheritdoc/>
-        public virtual float maxWidth { get { return GetTotalMaxSize(0); } }
-
         /// <summary>
         /// See LayoutElement.preferredWidth
         /// </summary>
@@ -106,9 +102,6 @@ namespace UnityEngine.UI
         /// See LayoutElement.minHeight
         /// </summary>
         public virtual float minHeight { get { return GetTotalMinSize(1); } }
-
-        /// <inheritdoc/>
-        public virtual float maxHeight { get { return GetTotalMaxSize(1); } }
 
         /// <summary>
         /// See LayoutElement.preferredHeight
@@ -172,16 +165,6 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Gets the maximum size for the layout group on the given axis.
-        /// </summary>
-        /// <param name="axis"> The axis index. 0 is horizontal and 1 is vertical.</param>
-        /// <returns>The maximum size of the layout group along the specified axis.</returns>
-        protected float GetTotalMaxSize(int axis)
-        {
-            return m_TotalMaxSize[axis];
-        }
-
-        /// <summary>
         /// The preferred size for the layout group on the given axis.
         /// </summary>
         /// <param name="axis">The axis index. 0 is horizontal and 1 is vertical.</param>
@@ -230,17 +213,15 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Set the calculated layout properties for the given axis.
+        /// Used to set the calculated layout properties for the given axis.
         /// </summary>
         /// <param name="totalMin">The min size for the layout group.</param>
-        /// <param name="totalMax">The maximum size for the layout group.</param>
         /// <param name="totalPreferred">The preferred size for the layout group.</param>
         /// <param name="totalFlexible">The flexible size for the layout group.</param>
         /// <param name="axis">The axis to set sizes for. 0 is horizontal and 1 is vertical.</param>
-        protected void SetLayoutInputForAxis(float totalMin, float totalMax, float totalPreferred, float totalFlexible, int axis)
+        protected void SetLayoutInputForAxis(float totalMin, float totalPreferred, float totalFlexible, int axis)
         {
             m_TotalMinSize[axis] = totalMin;
-            m_TotalMaxSize[axis] = totalMax;
             m_TotalPreferredSize[axis] = totalPreferred;
             m_TotalFlexibleSize[axis] = totalFlexible;
         }

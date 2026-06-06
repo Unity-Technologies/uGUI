@@ -35,11 +35,6 @@ namespace UnityEngine.UI
         float minWidth { get; }
 
         /// <summary>
-        /// The maximum width this layout element may be allocated.
-        /// </summary>
-        float maxWidth { get; }
-
-        /// <summary>
         /// The preferred width this layout element should be allocated if there is sufficient space.
         /// </summary>
         /// <remarks>
@@ -87,11 +82,6 @@ namespace UnityEngine.UI
         /// The minimum height this layout element may be allocated.
         /// </summary>
         float minHeight { get; }
-
-        /// <summary>
-        /// The maximum height this layout element may be allocated.
-        /// </summary>
-        float maxHeight { get; }
 
         /// <summary>
         /// The preferred height this layout element should be allocated if there is sufficient space.
