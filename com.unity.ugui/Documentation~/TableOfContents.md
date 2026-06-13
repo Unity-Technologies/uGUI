@@ -14,7 +14,6 @@
     * [Raycasters](Raycasters.md)
   * [Reference](UIReference.md)
     * [Rect Transform](class-RectTransform.md)
-    * [Safe Area](script-SafeArea.md)
     * [Canvas Components](comp-CanvasComponents.md)
       * [Canvas](class-Canvas.md)
       * [Canvas Scaler](script-CanvasScaler.md)

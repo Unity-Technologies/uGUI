@@ -25,15 +25,7 @@ namespace UnityEngine.UI
             public ColorWriteMask colorMask;
         }
 
-        private static readonly List<MatEntry> m_List = new List<MatEntry>();
-
-#if UNITY_EDITOR
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-        static void ResetStaticsOnLoad()
-        {
-            ClearAll();
-        }
-#endif
+        private static List<MatEntry> m_List = new List<MatEntry>();
 
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         [Obsolete("Use Material.Add instead.", true)]

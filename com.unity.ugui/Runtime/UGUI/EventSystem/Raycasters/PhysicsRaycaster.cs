@@ -197,7 +197,7 @@ namespace UnityEngine.EventSystems
 #if PACKAGE_PHYSICS
         private class RaycastHitComparer : IComparer<RaycastHit>
         {
-            public static readonly RaycastHitComparer instance = new RaycastHitComparer();
+            public static RaycastHitComparer instance = new RaycastHitComparer();
             public int Compare(RaycastHit x, RaycastHit y)
             {
                 return x.distance.CompareTo(y.distance);

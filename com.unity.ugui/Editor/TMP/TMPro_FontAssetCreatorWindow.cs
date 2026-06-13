@@ -186,6 +186,9 @@ namespace TMPro.EditorUtilities
             // Set Editor window size.
             minSize = new Vector2(315, minSize.y);
 
+            // Initialize & Get shader property IDs.
+            ShaderUtilities.GetShaderPropertyIDs();
+
             // Load last selected preset if we are not already in the process of regenerating an existing font asset (via the Context menu)
             if (EditorPrefs.HasKey(k_FontAssetCreationSettingsContainerKey))
             {

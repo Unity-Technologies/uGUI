@@ -23,6 +23,8 @@ namespace UnityEngine.UI
         private TextGenerator m_TextCache;
         private TextGenerator m_TextCacheForLayout;
 
+        static protected Material s_DefaultText = null;
+
         // We use this flag instead of Unregistering/Registering the callback to avoid allocation.
         [NonSerialized] protected bool m_DisableFontTextureRebuiltCallback = false;
 
@@ -720,9 +722,6 @@ namespace UnityEngine.UI
             get { return 0; }
         }
 
-        /// <inheritdoc/>
-        public virtual float maxWidth { get { return LayoutUtility.DefaultMaxSize; } }
-
         public virtual float preferredWidth
         {
             get
@@ -738,9 +737,6 @@ namespace UnityEngine.UI
         {
             get { return 0; }
         }
-
-        /// <inheritdoc/>
-        public virtual float maxHeight { get { return LayoutUtility.DefaultMaxSize; } }
 
         public virtual float preferredHeight
         {

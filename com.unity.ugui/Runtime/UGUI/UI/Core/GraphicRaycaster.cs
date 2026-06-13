@@ -42,7 +42,9 @@ namespace UnityEngine.UI
         /// <summary>
         /// Priority of the raycaster based upon sort order.
         /// </summary>
-        /// <value>The sortOrder priority.</value>
+        /// <returns>
+        /// The sortOrder priority.
+        /// </returns>
         public override int sortOrderPriority
         {
             get
@@ -58,7 +60,9 @@ namespace UnityEngine.UI
         /// <summary>
         /// Priority of the raycaster based upon render order.
         /// </summary>
-        /// <value>The renderOrder priority.</value>
+        /// <returns>
+        /// The renderOrder priority.
+        /// </returns>
         public override int renderOrderPriority
         {
             get
@@ -285,7 +289,11 @@ namespace UnityEngine.UI
         /// <summary>
         /// The camera that will generate rays for this raycaster.
         /// </summary>
-        /// <value>Null if Camera mode is ScreenSpaceOverlay or ScreenSpaceCamera and has no camera; canvas.worldCanvas if not null; otherwise Camera.main.</value>
+        /// <returns>
+        /// - Null if Camera mode is ScreenSpaceOverlay or ScreenSpaceCamera and has no camera.
+        /// - canvas.worldCanvas if not null
+        /// - Camera.main.
+        /// </returns>
         public override Camera eventCamera
         {
             get

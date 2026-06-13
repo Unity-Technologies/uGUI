@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using System.Collections.Generic;
 using UnityEngine.UI.Collections;
 
 namespace UnityEngine.UI
@@ -9,8 +10,7 @@ namespace UnityEngine.UI
     /// </summary>
     public static class GraphicRebuildTracker
     {
-        // Fast Enter PlayMode: Don't need to reset these variables
-        static readonly IndexedSet<Graphic> m_Tracked = new IndexedSet<Graphic>();
+        static IndexedSet<Graphic> m_Tracked = new IndexedSet<Graphic>();
         static bool s_Initialized;
 
         /// <summary>
