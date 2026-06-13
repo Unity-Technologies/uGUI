@@ -41,7 +41,7 @@ namespace TMPro
         }
 
         /// <summary>
-        ///
+        /// List of mark-to-base adjustment records used for positioning combining marks relative to base glyphs.
         /// </summary>
         public List<MarkToBaseAdjustmentRecord> MarkToBaseAdjustmentRecords
         {
@@ -50,7 +50,7 @@ namespace TMPro
         }
 
         /// <summary>
-        ///
+        /// List of mark-to-mark adjustment records used for positioning combining marks relative to other marks.
         /// </summary>
         public List<MarkToMarkAdjustmentRecord> MarkToMarkAdjustmentRecords
         {

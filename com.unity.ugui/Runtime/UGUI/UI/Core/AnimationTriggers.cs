@@ -27,7 +27,6 @@ namespace UnityEngine.UI
         [SerializeField]
         private string m_PressedTrigger = kDefaultPressedAnimName;
 
-        [FormerlySerializedAs("m_HighlightedTrigger")]
         [SerializeField]
         private string m_SelectedTrigger = kDefaultSelectedAnimName;
 

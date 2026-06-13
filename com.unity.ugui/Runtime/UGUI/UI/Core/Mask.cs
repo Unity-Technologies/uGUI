@@ -142,7 +142,32 @@ namespace UnityEngine.UI
             return RectTransformUtility.RectangleContainsScreenPoint(rectTransform, sp, eventCamera);
         }
 
-        /// Stencil calculation time!
+        /// <summary>
+        /// Modifies the material for masking. Used when the mask needs to modify the stencil buffer.
+        /// </summary>
+        /// <remarks>
+        /// The mask creates modified copies of the base <see cref="Material"/> that write
+        /// to the stencil buffer so that child graphics can be clipped to the mask shape.
+        /// Multiple nested masks use increasing stencil depths up to a maximum of 8.
+        /// Override <see cref="GetModifiedMaterial"/> to customize behavior.
+        /// </remarks>
+        /// <param name="baseMaterial">The base material to apply the masking modification to.</param>
+        /// <returns>The modified material for rendering.</returns>
+        /// <example>
+        /// <para>The graphic system typically calls this method when the mask needs a
+        /// modified material. Override to apply custom stencil or shader logic. Call
+        /// base first to get the default stencil material, then optionally apply
+        /// custom properties (e.g. a different stencil comparison or color write mask).</para>
+        /// <code><![CDATA[
+        /// public override Material GetModifiedMaterial(Material baseMaterial)
+        /// {
+        ///     Material modified = base.GetModifiedMaterial(baseMaterial);
+        ///     // apply custom stencil or shader logic, e.g. change comparison:
+        ///     if (modified != null) modified.SetInt("_StencilComp", (int)CompareFunction.NotEqual);
+        ///     return modified;
+        /// }
+        /// ]]></code>
+        /// </example>
         public virtual Material GetModifiedMaterial(Material baseMaterial)
         {
             if (!MaskEnabled())
