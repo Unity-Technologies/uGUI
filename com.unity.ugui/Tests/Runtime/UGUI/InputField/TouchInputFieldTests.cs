@@ -117,7 +117,13 @@ namespace InputfieldTests
                 validation));
         }
 
+        // Switch2: temporarily excluded. Switch1 sets TouchscreenKeyboard.useBackgroundThread = true
+        // in OneTimeSetUp so the SoftwareKeyboard does not block the main thread; Switch2 has no
+        // equivalent yet, so this test hangs because OnSelect synchronously opens the SoftwareKeyboard.
+        // PR #103268 adds the Switch2 BackthreadKeyboard equivalent; remove RuntimePlatform.Switch2
+        // from the exclude list once that lands.
         [UnityTest]
+        [UnityPlatform(exclude = new[] { RuntimePlatform.Switch2 })]
         [TestCase("*Azé09", "*Azé09", InputField.CharacterValidation.None, ExpectedResult = null)]
         [TestCase("*Azé09?.", "Az09", InputField.CharacterValidation.Alphanumeric, ExpectedResult = null)]
         [TestCase("Abc10x", "10", InputField.CharacterValidation.Integer, ExpectedResult = null)]
@@ -206,8 +212,13 @@ namespace InputfieldTests
             Assert.AreEqual(text.Substring(0, Math.Min(text.Length, inputField.characterLimit)), inputField.text);
         }
 
+        // Switch2: temporarily excluded. Switch1 sets TouchscreenKeyboard.useBackgroundThread = true
+        // in OneTimeSetUp so the SoftwareKeyboard does not block the main thread; Switch2 has no
+        // equivalent yet, so this test hangs because OnSelect synchronously opens the SoftwareKeyboard.
+        // PR #103268 adds the Switch2 BackthreadKeyboard equivalent; remove RuntimePlatform.Switch2
+        // from the exclude list once that lands.
         [UnityTest]
-        [UnityPlatform(exclude = new[] { RuntimePlatform.tvOS })] // UUM-71764 (tvOS)
+        [UnityPlatform(exclude = new[] { RuntimePlatform.Switch2, RuntimePlatform.tvOS })] // UUM-71764 (tvOS)
         public IEnumerator SendsEndEditEventOnDeselect()
         {
             InputField inputField = m_PrefabRoot.GetComponentInChildren<InputField>();
@@ -253,8 +264,13 @@ namespace InputfieldTests
             Assert.AreEqual("ab", inputField.text, "\\0 characters should be stripped");
         }
 
+        // Switch2: temporarily excluded. Switch1 sets TouchscreenKeyboard.useBackgroundThread = true
+        // in OneTimeSetUp so the SoftwareKeyboard does not block the main thread; Switch2 has no
+        // equivalent yet, so this test hangs waiting for TouchScreenKeyboard.visible.
+        // PR #103268 adds the Switch2 BackthreadKeyboard equivalent; remove RuntimePlatform.Switch2
+        // from the exclude list once that lands.
         [UnityTest]
-        [UnityPlatform(exclude = new[] { RuntimePlatform.tvOS})] // UUM-71764 (tvOS)
+        [UnityPlatform(exclude = new[] { RuntimePlatform.Switch2, RuntimePlatform.tvOS })] // UUM-71764 (tvOS)
         public IEnumerator FocusOpensTouchScreenKeyboard()
         {
             var isInPlaceEditingDisabled = typeof(TouchScreenKeyboard).GetProperty("disableInPlaceEditing",
