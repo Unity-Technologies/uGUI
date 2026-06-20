@@ -29,11 +29,6 @@ namespace UnityEngine.UI
 
         private bool m_IsMaskingGraphic = false;
 
-        [NonSerialized]
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-        [Obsolete("Not used anymore.", true)]
-        protected bool m_IncludeForMasking = false;
-
         [Serializable]
         public class CullStateChangedEvent : UnityEvent<bool> {}
 
@@ -87,11 +82,6 @@ namespace UnityEngine.UI
                 m_IsMaskingGraphic = value;
             }
         }
-
-        [NonSerialized]
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-        [Obsolete("Not used anymore", true)]
-        protected bool m_ShouldRecalculate = true;
 
         [NonSerialized]
         protected int m_StencilValue;
@@ -215,10 +205,6 @@ namespace UnityEngine.UI
             UpdateClipParent();
             SetMaterialDirty();
         }
-
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-        [Obsolete("Not used anymore.", true)]
-        public virtual void ParentMaskStateChanged() {}
 
         protected override void OnCanvasHierarchyChanged()
         {

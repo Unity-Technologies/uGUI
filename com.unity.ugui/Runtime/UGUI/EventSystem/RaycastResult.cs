@@ -127,7 +127,7 @@ namespace UnityEngine.EventSystems
         /// </summary>
         /// <remarks>This is only useful in the context of EventSystem UI Toolkit interoperability.</remarks>
         /// <seealso cref="UnityEngine.UIElements.EventSystemUIToolkitInteroperabilityBridge"/>
-        [Obsolete("RaycastResult.document is obsolete. Use RaycastResult.panelComponent instead.")]
+        [Obsolete("RaycastResult.document is obsolete. Use RaycastResult.panelComponent instead.", true)]
         public UIDocument document
         {
             get => panelComponent as UIDocument;

@@ -132,13 +132,13 @@ namespace UnityEngine.EventSystems
         /// World-space position where a ray cast into the screen hits something
         /// </summary>
 
-        [Obsolete("Use either pointerCurrentRaycast.worldPosition or pointerPressRaycast.worldPosition")]
+        [Obsolete("Use either pointerCurrentRaycast.worldPosition or pointerPressRaycast.worldPosition", true)]
         public Vector3 worldPosition { get; set; }
 
         /// <summary>
         /// World-space normal where a ray cast into the screen hits something
         /// </summary>
-        [Obsolete("Use either pointerCurrentRaycast.worldNormal or pointerPressRaycast.worldNormal")]
+        [Obsolete("Use either pointerCurrentRaycast.worldNormal or pointerPressRaycast.worldNormal", true)]
         public Vector3 worldNormal { get; set; }
 
         /// <summary>

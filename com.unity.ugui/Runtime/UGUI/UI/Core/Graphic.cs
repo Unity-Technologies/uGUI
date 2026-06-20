@@ -82,13 +82,29 @@ namespace UnityEngine.UI
         : UIBehaviour,
           ICanvasElement
     {
-        static protected Material s_DefaultUI = null;
-        static protected Texture2D s_WhiteTexture = null;
+        protected static Material s_DefaultUI = null;
+        protected static Texture2D s_WhiteTexture = null;
+        protected static Mesh s_Mesh;
+        private static readonly VertexHelper s_VertexHelper = new VertexHelper();
+
+#if UNITY_EDITOR
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        static void ResetStaticsOnLoad()
+        {
+            s_DefaultUI = null;
+            s_WhiteTexture = null;
+
+            if (s_Mesh != null)
+            {
+                DestroyImmediate(s_Mesh);
+                s_Mesh = null;
+            }
+        }
+#endif
 
         /// <summary>
         /// Default material used to draw UI elements if no explicit material was specified.
         /// </summary>
-
         static public Material defaultGraphicMaterial
         {
             get
@@ -214,15 +230,13 @@ namespace UnityEngine.UI
         [NonSerialized] protected UnityAction m_OnDirtyVertsCallback;
         [NonSerialized] protected UnityAction m_OnDirtyMaterialCallback;
 
-        [NonSerialized] protected static Mesh s_Mesh;
-        [NonSerialized] private static readonly VertexHelper s_VertexHelper = new VertexHelper();
-
         [NonSerialized] protected Mesh m_CachedMesh;
         [NonSerialized] protected Vector2[] m_CachedUvs;
         // Tween controls for the Graphic
         [NonSerialized]
         private readonly TweenRunner<ColorTween> m_ColorTweenRunner;
 
+		[Obsolete("useLegacyMeshGeneration is deprecated now that the legacy mesh generation is no longer supported.")]
         protected bool useLegacyMeshGeneration { get; set; }
 
         // Called by Unity prior to deserialization,
@@ -232,7 +246,9 @@ namespace UnityEngine.UI
             if (m_ColorTweenRunner == null)
                 m_ColorTweenRunner = new TweenRunner<ColorTween>();
             m_ColorTweenRunner.Init(this);
-            useLegacyMeshGeneration = true;
+#pragma warning disable 618
+            useLegacyMeshGeneration = false;
+#pragma warning restore 618
         }
 
         /// <summary>
@@ -687,9 +703,11 @@ namespace UnityEngine.UI
         /// </summary>
         protected virtual void UpdateGeometry()
         {
+#pragma warning disable 618
             if (useLegacyMeshGeneration)
+#pragma warning restore 618
             {
-                DoLegacyMeshGeneration();
+                Debug.LogError("Legacy mesh generation is no longer supported.", this);
             }
             else
             {
@@ -716,33 +734,6 @@ namespace UnityEngine.UI
             canvasRenderer.SetMesh(workerMesh);
         }
 
-        private void DoLegacyMeshGeneration()
-        {
-            if (rectTransform != null && rectTransform.rect.width >= 0 && rectTransform.rect.height >= 0)
-            {
-#pragma warning disable 618
-                OnPopulateMesh(workerMesh);
-#pragma warning restore 618
-            }
-            else
-            {
-                workerMesh.Clear();
-            }
-
-            var components = ListPool<Component>.Get();
-            GetComponents(typeof(IMeshModifier), components);
-
-            for (var i = 0; i < components.Count; i++)
-            {
-#pragma warning disable 618
-                ((IMeshModifier)components[i]).ModifyMesh(workerMesh);
-#pragma warning restore 618
-            }
-
-            ListPool<Component>.Release(components);
-            canvasRenderer.SetMesh(workerMesh);
-        }
-
         protected static Mesh workerMesh
         {
             get
@@ -755,11 +746,7 @@ namespace UnityEngine.UI
                 return s_Mesh;
             }
         }
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-        [Obsolete("Use OnPopulateMesh instead.", true)]
-        protected virtual void OnFillVBO(System.Collections.Generic.List<UIVertex> vbo) {}
 
-        [Obsolete("Use OnPopulateMesh(VertexHelper vh) instead.", false)]
         /// <summary>
         /// Callback function when a UI element needs to generate vertices. Fills the vertex buffer data.
         /// </summary>
@@ -767,6 +754,7 @@ namespace UnityEngine.UI
         /// <remarks>
         /// Used by Text, UI.Image, and RawImage for example to generate vertices specific to their use case.
         /// </remarks>
+        [Obsolete("Use OnPopulateMesh(VertexHelper vh) instead.", true)]
         protected virtual void OnPopulateMesh(Mesh m)
         {
             OnPopulateMesh(s_VertexHelper);

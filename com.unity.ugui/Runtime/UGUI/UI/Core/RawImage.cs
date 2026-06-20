@@ -22,7 +22,6 @@ namespace UnityEngine.UI
 
         protected RawImage()
         {
-            useLegacyMeshGeneration = false;
         }
 
         /// <summary>

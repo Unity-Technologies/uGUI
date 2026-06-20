@@ -25,11 +25,15 @@ namespace UnityEngine.UI
             public ColorWriteMask colorMask;
         }
 
-        private static List<MatEntry> m_List = new List<MatEntry>();
+        private static readonly List<MatEntry> m_List = new List<MatEntry>();
 
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-        [Obsolete("Use Material.Add instead.", true)]
-        public static Material Add(Material baseMat, int stencilID) { return null; }
+#if UNITY_EDITOR
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        static void ResetStaticsOnLoad()
+        {
+            ClearAll();
+        }
+#endif
 
         /// <summary>
         /// Add a new material using the specified base and stencil ID.

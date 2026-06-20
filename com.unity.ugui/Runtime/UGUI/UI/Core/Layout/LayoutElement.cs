@@ -19,6 +19,8 @@ namespace UnityEngine.UI
         [SerializeField] private float m_FlexibleWidth = -1;
         [SerializeField] private float m_FlexibleHeight = -1;
         [SerializeField] private int m_LayoutPriority = 1;
+        [SerializeField] private float m_MaxWidth = -1;
+        [SerializeField] private float m_MaxHeight = -1;
 
         /// <summary>
         /// Should this RectTransform be ignored by the layout system?
@@ -31,9 +33,7 @@ namespace UnityEngine.UI
         public virtual void CalculateLayoutInputHorizontal() {}
         public virtual void CalculateLayoutInputVertical() {}
 
-        /// <summary>
-        /// The minimum width this layout element may be allocated.
-        /// </summary>
+        /// <inheritdoc/>
         /// <example>
         /// <code>
         /// <![CDATA[
@@ -63,9 +63,7 @@ namespace UnityEngine.UI
         /// </example>
         public virtual float minWidth { get { return m_MinWidth; } set { if (SetPropertyUtility.SetStruct(ref m_MinWidth, value)) SetDirty(); } }
 
-        /// <summary>
-        /// The minimum height this layout element may be allocated.
-        /// </summary>
+        /// <inheritdoc/>
         /// <example>
         /// <code>
         /// <![CDATA[
@@ -95,9 +93,67 @@ namespace UnityEngine.UI
         /// </example>
         public virtual float minHeight { get { return m_MinHeight; } set { if (SetPropertyUtility.SetStruct(ref m_MinHeight, value)) SetDirty(); } }
 
-        /// <summary>
-        /// The preferred width this layout element should be allocated if there is sufficient space. The preferredWidth can be set to -1 to remove the size.
-        /// </summary>
+        /// <inheritdoc/>
+        /// <example>
+        /// <code>
+        /// <![CDATA[
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when using UI elements.
+        ///
+        /// public class ExampleClass : MonoBehaviour
+        /// {
+        ///     public Transform MyContentPanel;
+        ///
+        ///     //Sets the maximum width on all children in the content panel.
+        ///     public void Start()
+        ///     {
+        ///         //Assign all the children of the content panel to an array.
+        ///         LayoutElement[] myLayoutElements = MyContentPanel.GetComponentsInChildren<LayoutElement>();
+        ///
+        ///         //For each child in the array change its LayoutElement's maximum width size to 200.
+        ///         foreach (LayoutElement element in myLayoutElements)
+        ///         {
+        ///             element.maxWidth = 200f;
+        ///         }
+        ///     }
+        /// }
+        /// ]]>
+        ///</code>
+        /// </example>
+        public virtual float maxWidth { get { return m_MaxWidth; } set { if (SetPropertyUtility.SetStruct(ref m_MaxWidth, value)) SetDirty(); } }
+
+        /// <inheritdoc/>
+        /// <example>
+        /// <code>
+        /// <![CDATA[
+        /// using UnityEngine;
+        /// using System.Collections;
+        /// using UnityEngine.UI; // Required when using UI elements.
+        ///
+        /// public class ExampleClass : MonoBehaviour
+        /// {
+        ///     public Transform MyContentPanel;
+        ///
+        ///     //Sets the maximum height on all children in the content panel.
+        ///     public void Start()
+        ///     {
+        ///         //Assign all the children of the content panel to an array.
+        ///         LayoutElement[] myLayoutElements = MyContentPanel.GetComponentsInChildren<LayoutElement>();
+        ///
+        ///         //For each child in the array change its LayoutElement's maximum height size to 64.
+        ///         foreach (LayoutElement element in myLayoutElements)
+        ///         {
+        ///             element.maxHeight = 64f;
+        ///         }
+        ///     }
+        /// }
+        /// ]]>
+        ///</code>
+        /// </example>
+        public virtual float maxHeight { get { return m_MaxHeight; } set { if (SetPropertyUtility.SetStruct(ref m_MaxHeight, value)) SetDirty(); } }
+
+        /// <inheritdoc/>
         /// <example>
         /// <code>
         /// <![CDATA[
@@ -127,9 +183,7 @@ namespace UnityEngine.UI
         /// </example>
         public virtual float preferredWidth { get { return m_PreferredWidth; } set { if (SetPropertyUtility.SetStruct(ref m_PreferredWidth, value)) SetDirty(); } }
 
-        /// <summary>
-        /// The preferred height this layout element should be allocated if there is sufficient space.
-        /// </summary>
+        /// <inheritdoc/>
         /// <example>
         /// <code>
         /// <![CDATA[
@@ -173,7 +227,6 @@ namespace UnityEngine.UI
         /// The Priority of layout this element has.
         /// </summary>
         public virtual int layoutPriority { get { return m_LayoutPriority; } set { if (SetPropertyUtility.SetStruct(ref m_LayoutPriority, value)) SetDirty(); } }
-
 
         protected LayoutElement()
         {}

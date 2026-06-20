@@ -161,26 +161,38 @@ namespace UnityEngine.UI
         {
             base.CalculateLayoutInputHorizontal();
 
-            int minColumns = 0;
-            int preferredColumns = 0;
+            float totalMin, totalMax, totalPreferred = 0;
+            float cellWidthWithSpacing = cellSize.x + spacing.x;
+
+            // If constraint type is fixed, we can calculate total min, max, and preferred to be the same desired value.
             if (m_Constraint == Constraint.FixedColumnCount)
             {
-                minColumns = preferredColumns = m_ConstraintCount;
+                // ConstraintCount is the number of columns, we can use the number of columns to calculate the width
+                totalMin = totalMax = totalPreferred = padding.horizontal + cellWidthWithSpacing * m_ConstraintCount - spacing.x;
             }
             else if (m_Constraint == Constraint.FixedRowCount)
             {
-                minColumns = preferredColumns = Mathf.CeilToInt(rectChildren.Count / (float)m_ConstraintCount - 0.001f);
+                // We can calculate the number of columns based on the constraint count (rows).
+                // Then we use the number of columns to calculate the total width of the layout group.
+                int columns = Mathf.CeilToInt(rectChildren.Count / (float)m_ConstraintCount - 0.001f);
+                totalMin = totalMax = totalPreferred = padding.horizontal + cellWidthWithSpacing * columns - spacing.x;
             }
             else
             {
-                minColumns = 1;
-                preferredColumns = Mathf.CeilToInt(Mathf.Sqrt(rectChildren.Count));
+                // Flexible mode...
+                totalMax = LayoutUtility.DefaultMaxSize;
+                totalMin = padding.horizontal + cellWidthWithSpacing - spacing.x;
+
+                // Calculate the preferredColumnCount, we want to calculate as close to a square grid as possible.
+                // To achieve this, we take the square root of the total child count and round the result.
+                float squareRootOfChildren = Mathf.Sqrt(rectChildren.Count);
+                int preferredColumnCount = Mathf.CeilToInt(squareRootOfChildren);
+
+                // Calculate the total width of the cells, then subtract spacing.x to remove trailing space.
+                totalPreferred = padding.horizontal + cellWidthWithSpacing * preferredColumnCount - spacing.x;
             }
 
-            SetLayoutInputForAxis(
-                padding.horizontal + (cellSize.x + spacing.x) * minColumns - spacing.x,
-                padding.horizontal + (cellSize.x + spacing.x) * preferredColumns - spacing.x,
-                -1, 0);
+            SetLayoutInputForAxis(totalMin, totalMax, totalPreferred, -1, 0);
         }
 
         /// <summary>
@@ -189,24 +201,42 @@ namespace UnityEngine.UI
         /// </summary>
         public override void CalculateLayoutInputVertical()
         {
-            int minRows = 0;
+            float totalMin, totalMax, totalPreferred = 0;
+            float cellHeightWithSpacing = cellSize.y + spacing.y;
+
+            // If constraint type is fixed, we can calculate total min, max, and preferred to be the same desired value.
             if (m_Constraint == Constraint.FixedColumnCount)
             {
-                minRows = Mathf.CeilToInt(rectChildren.Count / (float)m_ConstraintCount - 0.001f);
+                // We can calculate the number of rows based on the constraint count (columns).
+                // Then we use the number of rows to calculate the total height of the layout group.
+                var rows = Mathf.CeilToInt(rectChildren.Count / (float)m_ConstraintCount - 0.001f);
+                totalMin = totalMax = totalPreferred = padding.vertical + cellHeightWithSpacing * rows - spacing.y;
             }
             else if (m_Constraint == Constraint.FixedRowCount)
             {
-                minRows = m_ConstraintCount;
+                // ConstraintCount is the number of rows, we can use the number of rows to calculate the height.
+                totalMin = totalMax = totalPreferred = padding.vertical + cellHeightWithSpacing * m_ConstraintCount - spacing.y;
             }
             else
             {
-                float width = rectTransform.rect.width;
-                int cellCountX = Mathf.Max(1, Mathf.FloorToInt((width - padding.horizontal + spacing.x + 0.001f) / (cellSize.x + spacing.x)));
-                minRows = Mathf.CeilToInt(rectChildren.Count / (float)cellCountX);
+                // Flexible mode...
+                totalMax = LayoutUtility.DefaultMaxSize;
+                totalMin = padding.vertical + cellHeightWithSpacing - spacing.y;
+
+                // Find the usable width available and the horizontal size of each cell with spacing.
+                float usableWidth = rectTransform.rect.width - padding.horizontal + spacing.x + 0.001f;
+                float cellWidthWithSpacing = cellSize.x + spacing.x;
+
+                // Calculate how many cells fit into a single row ensuring that least 1 cell per row
+                // Then calculate the number of rows the total number of cells will fit in.
+                int cellCountX = Mathf.Max(1, Mathf.FloorToInt(usableWidth / cellWidthWithSpacing));
+                int rowCount = Mathf.CeilToInt(rectChildren.Count / (float)cellCountX);
+
+                // Calculate the total height of the cells, then subtract spacing.y to remove trailing space.
+                totalPreferred =  padding.vertical + cellHeightWithSpacing * rowCount - spacing.y;
             }
 
-            float minSpace = padding.vertical + (cellSize.y + spacing.y) * minRows - spacing.y;
-            SetLayoutInputForAxis(minSpace, minSpace, -1, 1);
+            SetLayoutInputForAxis(totalMin, totalMax, totalPreferred, -1, 1);
         }
 
         /// <summary>

@@ -31,6 +31,14 @@ namespace UnityEngine.UI
 #endif
         }
 
+#if UNITY_EDITOR
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        static void ResetStaticsOnLoad()
+        {
+            m_CurrentFactory = DefaultRuntimeFactory.Default;
+        }
+#endif
+
         /// <summary>
         /// Factory interface to create a GameObject in this class.
         /// It is necessary to use this interface in the whole class so MenuOption and Editor can work using ObjectFactory and default Presets.
@@ -48,7 +56,7 @@ namespace UnityEngine.UI
 
         private class DefaultRuntimeFactory : IFactoryControls
         {
-            public static IFactoryControls Default = new DefaultRuntimeFactory();
+            public static readonly IFactoryControls Default = new DefaultRuntimeFactory();
 
             public GameObject CreateGameObject(string name, params Type[] components)
             {
@@ -100,12 +108,12 @@ namespace UnityEngine.UI
         private const float  kWidth       = 160f;
         private const float  kThickHeight = 30f;
         private const float  kThinHeight  = 20f;
-        private static Vector2 s_ThickElementSize       = new Vector2(kWidth, kThickHeight);
-        private static Vector2 s_ThinElementSize        = new Vector2(kWidth, kThinHeight);
-        private static Vector2 s_ImageElementSize       = new Vector2(100f, 100f);
-        private static Color   s_DefaultSelectableColor = new Color(1f, 1f, 1f, 1f);
-        private static Color   s_PanelColor             = new Color(1f, 1f, 1f, 0.392f);
-        private static Color   s_TextColor              = new Color(50f / 255f, 50f / 255f, 50f / 255f, 1f);
+        private static readonly Vector2 s_ThickElementSize       = new Vector2(kWidth, kThickHeight);
+        private static readonly Vector2 s_ThinElementSize        = new Vector2(kWidth, kThinHeight);
+        private static readonly Vector2 s_ImageElementSize       = new Vector2(100f, 100f);
+        private static readonly Color   s_DefaultSelectableColor = new Color(1f, 1f, 1f, 1f);
+        private static readonly Color   s_PanelColor             = new Color(1f, 1f, 1f, 0.392f);
+        private static readonly Color   s_TextColor              = new Color(50f / 255f, 50f / 255f, 50f / 255f, 1f);
 
         // Helper methods at top
 

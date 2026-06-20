@@ -261,23 +261,6 @@ internal class ScrollRectTests : IPrebuildSetup
         Assert.Less(scrollRect.velocity.magnitude, 1);
     }
 
-    [UnityTest][Ignore("Fails")]
-    public IEnumerator LateUpdateWithElasticShouldDecelerate()
-    {
-        ScrollRect scrollRect = m_PrefabRoot.GetComponentInChildren<ScrollRect>();
-        scrollRect.velocity = Vector2.one;
-        scrollRect.inertia = false;
-        scrollRect.content.anchoredPosition = Vector2.one * 2;
-        scrollRect.movementType = ScrollRect.MovementType.Elastic;
-
-        yield return null;
-        Assert.AreNotEqual(1, scrollRect.velocity.magnitude);
-        var newMagnitude = scrollRect.velocity.magnitude;
-
-        yield return null;
-        Assert.AreNotEqual(newMagnitude, scrollRect.velocity.magnitude);
-    }
-
     [UnityTest]
     public IEnumerator LateUpdateWithElasticNoOffsetShouldZeroVelocity()
     {
@@ -321,25 +304,6 @@ internal class ScrollRectTests : IPrebuildSetup
         });
 
         Assert.AreEqual(expected, scrollRect.content.anchoredPosition);
-    }
-
-    [Test][Ignore("Tests fail without mocking")]
-    [TestCase(ScrollRect.MovementType.Clamped, 1f, 1f)]
-    [TestCase(ScrollRect.MovementType.Unrestricted, 150, 150)]
-    [TestCase(ScrollRect.MovementType.Elastic, 150, 150)]
-    public void OnScrollClampedShouldClampContentAnchoredPosition(ScrollRect.MovementType movementType, float anchoredPosX,
-        float anchoredPosY)
-    {
-        ScrollRect scrollRect = m_PrefabRoot.GetComponentInChildren<ScrollRect>();
-        Vector2 scrollDelta = new Vector2(50, -50);
-        scrollRect.movementType = movementType;
-        scrollRect.content.anchoredPosition = new Vector2(2.5f, 2.5f);
-
-        scrollRect.OnScroll(new PointerEventData(m_PrefabRoot.GetComponentInChildren<EventSystem>())
-        {
-            scrollDelta = scrollDelta
-        });
-        Assert.AreEqual(new Vector2(anchoredPosX, anchoredPosY), scrollRect.content.anchoredPosition);
     }
 
     [Test]
