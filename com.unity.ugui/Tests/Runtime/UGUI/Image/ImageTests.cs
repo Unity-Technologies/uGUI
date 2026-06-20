@@ -261,30 +261,18 @@ internal class ImageTests
         yield return ValidateSecondaryTextures(s_EmptySecondaryTexArray);
     }
 
+    //UUM-114080 Prevent a crash caused by calling DestroyImmediate on the default uGUI material
     [Test]
-    public void TrackedTexturelessImagesWillNotLeak()
+    public void DestroyImmediate_OnDefaultMaterial_LogError()
     {
-        Image image = new GameObject().AddComponent<Image>();
+        var defaultMaterial = m_Image.defaultMaterial;
+        var name = defaultMaterial.name;
+        Object.DestroyImmediate(defaultMaterial, true);
 
-        var texture = new Texture2D(2, 2);
+        LogAssert.Expect(LogType.Error, $"Destroying object \"{name}\" is not allowed at this time.");
 
-        Sprite spriteA = Sprite.Create(texture, new Rect(0, 0, 2, 2), new Vector2(0, 0));
-        Sprite spriteB = Sprite.Create(texture, new Rect(0, 0, 2, 2), new Vector2(0, 0));
-
-        GameObject.DestroyImmediate(texture); // Sprite A and B are now textureless
-
-        var trackedTexturelessImages = typeof(Image).GetField("m_TrackedTexturelessImages", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
-        int startCount = (trackedTexturelessImages.GetValue(null) as System.Collections.Generic.List<Image>).Count;
-
-        image.sprite = spriteA; // calls TrackSprite()
-        Assert.AreEqual((trackedTexturelessImages.GetValue(null) as System.Collections.Generic.List<Image>).Count, startCount + 1);
-
-        image.sprite = spriteB; // calls TrackSprite()
-        Assert.AreEqual((trackedTexturelessImages.GetValue(null) as System.Collections.Generic.List<Image>).Count, startCount + 1);
-
-        Object.DestroyImmediate(image.gameObject, true);
-
-        Assert.AreEqual((trackedTexturelessImages.GetValue(null) as System.Collections.Generic.List<Image>).Count, startCount);
+        //This is to ensure that the cached default material pointer in native is still valid.
+        Assert.That(m_Image.defaultMaterial.name, Is.EqualTo(name));
     }
 
     [TearDown]

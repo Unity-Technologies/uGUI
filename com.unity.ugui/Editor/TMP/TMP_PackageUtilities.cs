@@ -1022,7 +1022,7 @@ namespace TMPro
     public class TMP_PackageUtilities : Editor
     {
         /// <summary>
-        /// Imports the TextMesh Pro essential resources into the project.
+        ///
         /// </summary>
         [MenuItem("Window/TextMeshPro/Import TMP Essential Resources", false, 2050)]
         public static void ImportProjectResourcesMenu()
@@ -1032,7 +1032,7 @@ namespace TMPro
 
 
         /// <summary>
-        /// Imports the TextMesh Pro examples and extras content into the project.
+        ///
         /// </summary>
         [MenuItem("Window/TextMeshPro/Import TMP Examples and Extras", false, 2051)]
         public static void ImportExamplesContentMenu()
@@ -1047,7 +1047,7 @@ namespace TMPro
         {
             string packageFullPath = TMP_EditorUtility.packageFullPath;
 
-            UnityEditor.AssetPackage.Package.Import(packageFullPath + "/Package Resources/TMP Examples & Extras.unitypackage", true);
+            AssetDatabase.ImportPackage(packageFullPath + "/Package Resources/TMP Examples & Extras.unitypackage", true);
         }
 
         private static string k_SettingsFilePath;
@@ -1075,7 +1075,7 @@ namespace TMPro
 
             string packageFullPath = TMP_EditorUtility.packageFullPath;
 
-            UnityEditor.AssetPackage.Package.Import(packageFullPath + "/Package Resources/TMP Essential Resources.unitypackage", true);
+            AssetDatabase.ImportPackage(packageFullPath + "/Package Resources/TMP Essential Resources.unitypackage", true);
         }
 
         internal static void RegisterResourceImportCallback()

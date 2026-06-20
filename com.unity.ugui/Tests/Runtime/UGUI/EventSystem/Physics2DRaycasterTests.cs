@@ -44,10 +44,10 @@ internal class Physics2DRaycasterTests
     [TearDown]
     public void TearDown()
     {
-        Object.DestroyImmediate(m_CamGO);
-        Object.DestroyImmediate(m_RedSprite.gameObject);
-        Object.DestroyImmediate(m_BlueSprite.gameObject);
-        Object.DestroyImmediate(m_GreenSprite.gameObject);
+        GameObject.DestroyImmediate(m_CamGO);
+        GameObject.DestroyImmediate(m_RedSprite.gameObject);
+        GameObject.DestroyImmediate(m_BlueSprite.gameObject);
+        GameObject.DestroyImmediate(m_GreenSprite.gameObject);
     }
 
     static void AssertRaycastResultsOrder(List<RaycastResult> results, params SpriteRenderer[] expectedOrder)
@@ -135,15 +135,5 @@ internal class Physics2DRaycasterTests
 
         var results = PerformRaycast();
         AssertRaycastResultsOrder(results, m_RedSprite, m_BlueSprite, m_GreenSprite);
-
-        // Unparent so they can be destroyed by the TearDown
-        m_RedSprite.transform.parent = null;
-        m_BlueSprite.transform.parent = null;
-        m_GreenSprite.transform.parent = null;
-
-        // Cleanup
-        Object.DestroyImmediate(sortingGroupRed);
-        Object.DestroyImmediate(sortingGroupBlue);
-        Object.DestroyImmediate(sortingGroupGreen);
     }
 }
