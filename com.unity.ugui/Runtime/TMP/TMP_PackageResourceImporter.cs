@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 
 using System;
 using System.IO;
@@ -50,7 +50,7 @@ namespace TMPro
                     }
                     GUILayout.Space(5f);
 
-                    GUI.enabled = (!m_EssentialResourcesImported || m_EssentialResourcesNeedUpdate) && !EditorApplication.isPlaying;
+                    GUI.enabled = !m_EssentialResourcesImported || m_EssentialResourcesNeedUpdate;
                     if (GUILayout.Button("Import TMP Essentials"))
                     {
                         m_EssentialResourcesNeedUpdate = false;
@@ -60,7 +60,7 @@ namespace TMPro
                         AssetDatabase.importPackageCompleted += ImportCallback;
 
                         string packageFullPath = GetPackageFullPath();
-                        UnityEditor.AssetPackage.Package.Import(packageFullPath + "/Package Resources/TMP Essential Resources.unitypackage", false);
+                        AssetDatabase.ImportPackage(packageFullPath + "/Package Resources/TMP Essential Resources.unitypackage", false);
                     }
 
                     GUILayout.Space(5f);
@@ -78,7 +78,7 @@ namespace TMPro
                         GUILayout.Label("The Examples & Extras package contains addition resources and examples that will make discovering and learning about TextMesh Pro's powerful features easier. These additional resources will be placed in the same folder as the TMP essential resources.", new GUIStyle(EditorStyles.label) { wordWrap = true });
                     GUILayout.Space(5f);
 
-                    GUI.enabled = ((m_EssentialResourcesImported && !m_ExamplesAndExtrasResourcesImported) || m_ExamplesAndExtrasNeedUpdate) && !EditorApplication.isPlaying;
+                    GUI.enabled = (m_EssentialResourcesImported && !m_ExamplesAndExtrasResourcesImported) || m_ExamplesAndExtrasNeedUpdate;
                     if (GUILayout.Button("Import TMP Examples & Extras"))
                     {
                         // Set flag to get around importing scripts as per of this package which results in an assembly reload which in turn prevents / clears any callbacks.
@@ -89,7 +89,7 @@ namespace TMPro
                         //AssetDatabase.DisallowAutoRefresh();
 
                         string packageFullPath = GetPackageFullPath();
-                        UnityEditor.AssetPackage.Package.Import(packageFullPath + "/Package Resources/TMP Examples & Extras.unitypackage", false);
+                        AssetDatabase.ImportPackage(packageFullPath + "/Package Resources/TMP Examples & Extras.unitypackage", false);
                     }
                     GUILayout.Space(5f);
                     GUI.enabled = true;
@@ -146,9 +146,9 @@ namespace TMPro
                 m_EssentialResourcesImported = true;
                 TMPro_EventManager.ON_RESOURCES_LOADED();
 
-#if UNITY_2018_3_OR_NEWER
+                #if UNITY_2018_3_OR_NEWER
                 SettingsService.NotifySettingsProviderChanged();
-#endif
+                #endif
             }
             else if (packageName == "TMP Examples & Extras")
             {
@@ -222,10 +222,10 @@ namespace TMPro
             string packageFullPath = GetPackageFullPath();
 
             if (importEssentials)
-                UnityEditor.AssetPackage.Package.Import(packageFullPath + "/Package Resources/TMP Essential Resources.unitypackage", interactive);
+                AssetDatabase.ImportPackage(packageFullPath + "/Package Resources/TMP Essential Resources.unitypackage", interactive);
 
             if (importExamples)
-                UnityEditor.AssetPackage.Package.Import(packageFullPath + "/Package Resources/TMP Examples & Extras.unitypackage", interactive);
+                AssetDatabase.ImportPackage(packageFullPath + "/Package Resources/TMP Examples & Extras.unitypackage", interactive);
         }
     }
 
@@ -316,7 +316,7 @@ namespace TMPro
                     //         return;
                     //
                     //     AssetDatabase.importPackageCompleted += ImportCallback;
-                    //     UnityEditor.AssetPackage.Package.Import(packagePath, true);
+                    //     AssetDatabase.ImportPackage(packagePath, true);
                     // }
                     GUILayout.Space(5f);
                     GUI.enabled = true;
@@ -359,7 +359,7 @@ namespace TMPro
             if (string.IsNullOrEmpty(packagePath))
                 return;
 
-            UnityEditor.AssetPackage.Package.Import(packagePath, interactive);
+            AssetDatabase.ImportPackage(packagePath, interactive);
         }
     }
 

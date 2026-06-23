@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Collections;
@@ -151,6 +151,7 @@ namespace TMPro.EditorUtilities
 
             Undo.RecordObject(mat, "Paste Material");
 
+            ShaderUtilities.GetShaderPropertyIDs(); // Make sure we have valid Property IDs
             if (mat.HasProperty(ShaderUtilities.ID_GradientScale))
             {
                 // Preserve unique SDF properties from destination material.
@@ -190,6 +191,7 @@ namespace TMPro.EditorUtilities
 
             Undo.RecordObject(mat, "Reset Material");
 
+            ShaderUtilities.GetShaderPropertyIDs(); // Make sure we have valid Property IDs
             if (mat.HasProperty(ShaderUtilities.ID_GradientScale))
             {
                 bool isSRPShader = mat.HasProperty(ShaderUtilities.ID_IsoPerimeter);
@@ -283,6 +285,8 @@ namespace TMPro.EditorUtilities
             if (m_copiedAtlasProperties != null)
             {
                 Undo.RecordObject(mat, "Paste Texture");
+
+                ShaderUtilities.GetShaderPropertyIDs(); // Make sure we have valid Property IDs
 
                 if (m_copiedAtlasProperties.HasProperty(ShaderUtilities.ID_MainTex))
                     mat.SetTexture(ShaderUtilities.ID_MainTex, m_copiedAtlasProperties.GetTexture(ShaderUtilities.ID_MainTex));

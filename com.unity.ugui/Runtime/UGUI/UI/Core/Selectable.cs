@@ -23,16 +23,6 @@ namespace UnityEngine.UI
     {
         protected static Selectable[] s_Selectables = new Selectable[10];
         protected static int s_SelectableCount = 0;
-
-#if UNITY_EDITOR
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-        static void ResetStaticsOnLoad()
-        {
-            s_Selectables = new Selectable[10];
-            s_SelectableCount = default;
-        }
-#endif
-
         private bool m_EnableCalled = false;
 
         /// <summary>
@@ -78,7 +68,7 @@ namespace UnityEngine.UI
         /// A List instance of the allSelectablesArray to maintain API compatibility.
         /// </summary>
 
-        [Obsolete("Replaced with allSelectablesArray to have better performance when disabling an element", true)]
+        [Obsolete("Replaced with allSelectablesArray to have better performance when disabling a element", false)]
         public static List<Selectable> allSelectables
         {
             get

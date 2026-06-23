@@ -4,7 +4,7 @@ using UnityEngine.Serialization;
 
 namespace UnityEngine.EventSystems
 {
-    [Obsolete("TouchInputModule is no longer required as Touch input is now handled in StandaloneInputModule.", true)]
+    [Obsolete("TouchInputModule is no longer required as Touch input is now handled in StandaloneInputModule.")]
     [AddComponentMenu("Event/Touch Input Module")]
     [UGUIHelpURL("TouchInputModule")]
     public class TouchInputModule : PointerInputModule
@@ -21,7 +21,7 @@ namespace UnityEngine.EventSystems
         [FormerlySerializedAs("m_AllowActivationOnStandalone")]
         private bool m_ForceModuleActive;
 
-        [Obsolete("allowActivationOnStandalone has been deprecated. Use forceModuleActive instead (UnityUpgradable) -> forceModuleActive", true)]
+        [Obsolete("allowActivationOnStandalone has been deprecated. Use forceModuleActive instead (UnityUpgradable) -> forceModuleActive")]
         public bool allowActivationOnStandalone
         {
             get { return m_ForceModuleActive; }

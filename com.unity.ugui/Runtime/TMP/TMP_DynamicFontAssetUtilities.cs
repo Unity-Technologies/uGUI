@@ -9,17 +9,9 @@ namespace TMPro
     {
         private static TMP_DynamicFontAssetUtilities s_Instance = new TMP_DynamicFontAssetUtilities();
 
-#if UNITY_EDITOR
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-        static void ResetStaticsOnLoad()
-        {
-            s_Instance = new TMP_DynamicFontAssetUtilities();
-        }
-#endif
-
         private Dictionary<ulong, FontReference> s_SystemFontLookup;
         private string[] s_SystemFontPaths;
-        private const uint s_RegularStyleNameHashCode = 1291372090;
+        private uint s_RegularStyleNameHashCode = 1291372090;
 
         public struct FontReference
         {

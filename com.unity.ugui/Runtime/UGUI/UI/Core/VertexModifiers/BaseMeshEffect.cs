@@ -4,6 +4,17 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
+    [Obsolete("Use BaseMeshEffect instead", true)]
+    /// <summary>
+    /// Obsolete class use BaseMeshEffect instead.
+    /// </summary>
+    public abstract class BaseVertexEffect
+    {
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [Obsolete("Use BaseMeshEffect.ModifyMeshes instead", true)] //We can't upgrade automatically since the signature changed.
+        public abstract void ModifyVertices(List<UIVertex> vertices);
+    }
+
     /// <summary>
     /// Base class for effects that modify the generated Mesh.
     /// </summary>
@@ -15,15 +26,25 @@ namespace UnityEngine.UI
     ///
     ///public class PositionAsUV1 : BaseMeshEffect
     ///{
-    ///    public override void ModifyMesh(VertexHelper vh)
+    ///    protected PositionAsUV1()
+    ///    {}
+    ///
+    ///    public override void ModifyMesh(Mesh mesh)
     ///    {
-    ///        UIVertex vert = new UIVertex();
-    ///        for (int i = 0; i < vh.currentVertCount; i++)
+    ///        if (!IsActive())
+    ///            return;
+    ///
+    ///        var verts = mesh.vertices.ToList();
+    ///        var uvs = ListPool<Vector2>.Get();
+    ///
+    ///        for (int i = 0; i < verts.Count; i++)
     ///        {
-    ///            vh.PopulateUIVertex(ref vert, i);
-    ///            vert.uv1 =  new Vector2(vert.position.x, vert.position.y);
-    ///            vh.SetUIVertex(vert, i);
+    ///            var vert = verts[i];
+    ///            uvs.Add(new Vector2(verts[i].x, verts[i].y));
+    ///            verts[i] = vert;
     ///        }
+    ///        mesh.SetUVs(1, uvs);
+    ///        ListPool<Vector2>.Release(uvs);
     ///    }
     ///}
     /// ]]>
@@ -88,7 +109,6 @@ namespace UnityEngine.UI
         /// Function that is called when the Graphic is populating the mesh.
         /// </summary>
         /// <param name="mesh">The generated mesh of the Graphic element that needs modification.</param>
-		[Obsolete("Use IMeshModifier.ModifyMesh(VertexHelper verts) instead", true)]
         public virtual void ModifyMesh(Mesh mesh)
         {
             using (var vh = new VertexHelper(mesh))

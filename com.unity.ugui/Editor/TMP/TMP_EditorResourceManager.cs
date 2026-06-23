@@ -45,19 +45,6 @@ namespace TMPro
     {
         private static TMP_EditorResourceManager s_Instance;
 
-#if UNITY_EDITOR
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-        static void ResetStaticsOnLoad()
-        {
-            if (s_Instance != null)
-            {
-                Canvas.willRenderCanvases -= s_Instance.OnPreRenderCanvases;
-                Canvas.willRenderCanvases += s_Instance.OnPreRenderCanvases;
-                // s_Instance = null;  // Shoudn't need to be reset as this is an Editor singleton.
-            }
-        }
-#endif
-
         private readonly List<Object> m_ObjectUpdateQueue = new List<Object>();
         private HashSet<EntityId> m_ObjectUpdateQueueLookup = new HashSet<EntityId>();
 
