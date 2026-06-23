@@ -1838,11 +1838,11 @@ namespace TMPro
                 if (!char.IsWhiteSpace((char)unicode) && unicode != 0x200B)
                 {
                     // Limit the mesh of the main text object to 65535 vertices and use sub objects for the overflow.
-                    if (m_materialReferences[m_currentMaterialIndex].referenceCount < TMP_Math.MAX_QUADS_PER_MESH)
+                    if (m_materialReferences[m_currentMaterialIndex].referenceCount < 16383)
                         m_materialReferences[m_currentMaterialIndex].referenceCount += 1;
                     else if (isUsingFallbackOrAlternativeTypeface)
                     {
-                        if (materialIndexPairs.TryGetValue(m_currentMaterialIndex, out int prev_fallbackMaterialIndex) && m_materialReferences[prev_fallbackMaterialIndex].referenceCount < TMP_Math.MAX_QUADS_PER_MESH)
+                        if (materialIndexPairs.TryGetValue(m_currentMaterialIndex, out int prev_fallbackMaterialIndex) && m_materialReferences[prev_fallbackMaterialIndex].referenceCount < 16383)
                         {
                             m_currentMaterialIndex = prev_fallbackMaterialIndex;
                         }
@@ -2435,34 +2435,11 @@ namespace TMPro
                             m_textInfo.characterInfo[m_characterCount].textElement = m_Ellipsis.character;
                             m_textInfo.characterInfo[m_characterCount].elementType = TMP_TextElementType.Character;
                             m_textInfo.characterInfo[m_characterCount].fontAsset = m_Ellipsis.fontAsset;
-                            int ellipsisMaterialIndex = m_Ellipsis.materialIndex;
+                            m_textInfo.characterInfo[m_characterCount].material = m_Ellipsis.material;
+                            m_textInfo.characterInfo[m_characterCount].materialReferenceIndex = m_Ellipsis.materialIndex;
 
-                            // UUM-134477: If the ellipsis material's submesh is at the MAX_QUADS_PER_MESH quad cap,
-                            // walk to a submesh that uses the ellipsis font's own atlas AND has room.
-                            // Bound on the logical material count (m_textInfo.materialCount),
-                            // not m_materialReferences.Length: that array is statically over-allocated and never shrunk,
-                            // so its length exceeds the current text's material count and trailing slots hold stale data.
-                            while (ellipsisMaterialIndex < m_textInfo.materialCount - 1 &&
-                                (m_materialReferences[ellipsisMaterialIndex].referenceCount >= TMP_Math.MAX_QUADS_PER_MESH ||
-                                m_materialReferences[ellipsisMaterialIndex].fontAsset != m_Ellipsis.fontAsset ||
-                                m_materialReferences[ellipsisMaterialIndex].spriteAsset != null))
-                                ++ellipsisMaterialIndex;
-
-                            // Guard against the case where MAX_QUADS_PER_MESH characters + trailing whitespace fill the primary mesh, leaving no room for the ellipsis character
-                            // In that case, the ellipsis character will not be rendered.
-                            if (m_materialReferences[ellipsisMaterialIndex].referenceCount < TMP_Math.MAX_QUADS_PER_MESH &&
-                                m_materialReferences[ellipsisMaterialIndex].fontAsset == m_Ellipsis.fontAsset &&
-                                m_materialReferences[ellipsisMaterialIndex].spriteAsset == null)
-                            {
-                                m_textInfo.characterInfo[m_characterCount].material = m_materialReferences[ellipsisMaterialIndex].material;
-                                m_textInfo.characterInfo[m_characterCount].materialReferenceIndex = ellipsisMaterialIndex;
-                                // Need to increase reference count in the event the primary mesh has no characters.
-                                ++m_materialReferences[ellipsisMaterialIndex].referenceCount;
-                            } else {
-                                // fallback to end of text character if we can't find available slot for ellipsis character.
-                                charCode = 0x03;
-                                m_textInfo.characterInfo[m_characterCount].textElement = m_currentFontAsset.characterLookupTable[charCode];
-                            }
+                            // Need to increase reference count in the event the primary mesh has no characters.
+                            m_materialReferences[m_Underline.materialIndex].referenceCount += 1;
 
                             // Indicates the source parsing data has been modified.
                             m_isTextTruncated = true;

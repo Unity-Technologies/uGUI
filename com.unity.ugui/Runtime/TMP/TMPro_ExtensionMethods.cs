@@ -280,10 +280,6 @@ namespace TMPro
         public static readonly Vector2 MAX_16BIT = new Vector2(FLOAT_MAX, FLOAT_MAX);
         public static readonly Vector2 MIN_16BIT = new Vector2(FLOAT_MIN, FLOAT_MIN);
 
-        // Max quads (visible glyphs) per submesh. 16383 * 4 = 65532 vertices, which stays under
-        // Unity's 65535-vertex UInt16 mesh-index limit; text beyond this spills into a new submesh.
-        internal const int MAX_QUADS_PER_MESH = 16383;
-
         public static bool Approximately(float a, float b)
         {
             return (b - 0.0001f) < a && a < (b + 0.0001f);
