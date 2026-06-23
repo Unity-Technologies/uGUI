@@ -4,16 +4,18 @@
 
 ![](images/UI_ContentSizeFitterInspector.png)
 
-|**Property:** |**Function:** |
-|:---|:---|
-|**Horizontal Fit** |How the width is controlled. |
-|&nbsp;&nbsp;&nbsp;&nbsp;Unconstrained |Do not drive the width based on the layout element. |
-|&nbsp;&nbsp;&nbsp;&nbsp;Min Size |Drive the width based on the minimum width of the layout element. |
-|&nbsp;&nbsp;&nbsp;&nbsp;Preferred Size |Drive the width based on the preferred width of the layout element. |
-|**Vertical Fit** |How the height is controlled. |
-|&nbsp;&nbsp;&nbsp;&nbsp;Unconstrained |Do not drive the height based on the layout element. |
-|&nbsp;&nbsp;&nbsp;&nbsp;Min Size |Drive the height based on the minimum height of the layout element. |
-|&nbsp;&nbsp;&nbsp;&nbsp;Preferred Size |Drive the height based on the preferred height of the layout element. |
+| **Property:**                          | **Function:**                                                                                                                                           |
+|:---------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Horizontal Fit**                     | How the width is controlled.                                                                                                                            |
+| &nbsp;&nbsp;&nbsp;&nbsp;Unconstrained  | Do not drive the width based on the layout element.                                                                                                     |
+| &nbsp;&nbsp;&nbsp;&nbsp;Min Size       | Drive the width based on the minimum width of the layout element.                                                                                       |
+| &nbsp;&nbsp;&nbsp;&nbsp;Preferred Size | Drive the width based on the preferred width of the layout element.                                                                                     |
+| &nbsp;&nbsp;&nbsp;&nbsp;Clamped        | Ensures that the width of the layout element stays within the minimum and maximum bounds. This option does not drive the width of the layout element.   |
+| **Vertical Fit**                       | How the height is controlled.                                                                                                                           |
+| &nbsp;&nbsp;&nbsp;&nbsp;Unconstrained  | Do not drive the height based on the layout element.                                                                                                    |
+| &nbsp;&nbsp;&nbsp;&nbsp;Min Size       | Drive the height based on the minimum height of the layout element.                                                                                     |
+| &nbsp;&nbsp;&nbsp;&nbsp;Preferred Size | Drive the height based on the preferred height of the layout element.                                                                                   |
+| &nbsp;&nbsp;&nbsp;&nbsp;Clamped        | Ensures that the height of the layout element stays within the minimum and maximum bounds. This option does not drive the height of the layout element. |
 
 
 ## Description

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 
@@ -23,7 +23,8 @@ namespace TMPro
 
     public static class TMP_TextUtilities
     {
-        private static Vector3[] m_rectWorldCorners = new Vector3[4];
+        // Note: this variable exists to avoid repeated allocations in IsIntersectingRectTransform
+        private static readonly Vector3[] m_rectWorldCorners = new Vector3[4];
 
 
         // TEXT INPUT COMPONENT RELATED FUNCTIONS
@@ -62,12 +63,15 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function returning the index of the character whose origin is closest to the cursor.
+        /// Method returning the index of the character whose origin is closest to the cursor.
         /// </summary>
         /// <param name="textComponent">A reference to the text object.</param>
         /// <param name="position">Position to check for intersection.</param>
         /// <param name="camera">The scene camera which may be assigned to a Canvas using ScreenSpace Camera or WorldSpace render mode. Set to null is using ScreenSpace Overlay.</param>
-        /// <returns></returns>
+        /// <returns>Character index for cursor insertion.</returns>
+        /// <remarks>
+        /// Combines nearest-character search with horizontal placement within the glyph so caret insertion lands before or after the glyph center when clicking.
+        /// </remarks>
         public static int GetCursorIndexFromPosition(TMP_Text textComponent, Vector3 position, Camera camera)
         {
             int index = TMP_TextUtilities.FindNearestCharacter(textComponent, position, camera, false);
@@ -132,13 +136,16 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function returning the index of the character whose origin is closest to the cursor.
+        /// Method returning the index of the character whose origin is closest to the cursor.
         /// </summary>
         /// <param name="textComponent">A reference to the text object.</param>
         /// <param name="position">Position to check for intersection.</param>
         /// <param name="camera">The scene camera which may be assigned to a Canvas using ScreenSpace Camera or WorldSpace render mode. Set to null is using ScreenSpace Overlay.</param>
         /// <param name="cursor">The position of the cursor insertion position relative to the position.</param>
-        /// <returns></returns>
+        /// <returns>The index of the character whose origin is closest to the cursor.</returns>
+        /// <remarks>
+        /// Resolves the line first, then picks the nearest glyph on that line and splits left versus right using the midpoint between the glyph corners.
+        /// </remarks>
         public static int GetCursorIndexFromPosition(TMP_Text textComponent, Vector3 position, Camera camera, out CaretPosition cursor)
         {
             int line = FindNearestLine(textComponent, position, camera);
@@ -186,12 +193,15 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function returning the line nearest to the position.
+        /// Method returning the line nearest to the position.
         /// </summary>
-        /// <param name="textComponent"></param>
-        /// <param name="position"></param>
-        /// <param name="camera"></param>
-        /// <returns></returns>
+        /// <param name="text">TMP instance whose <see cref="TMP_Text.textInfo"/> line metrics define bounds.</param>
+        /// <param name="position">Pointer or world position converted through the RectTransform before comparison.</param>
+        /// <param name="camera">Camera used to project screen points; null when the canvas is screen-space overlay.</param>
+        /// <returns>Zero-based line index when inside vertical bounds, otherwise the closest line by vertical distance.</returns>
+        /// <remarks>
+        /// Prefers the line whose ascender and descender contain the point, falling back to whichever line minimizes vertical distance when the point sits between rows.
+        /// </remarks>
         public static int FindNearestLine(TMP_Text text, Vector3 position, Camera camera)
         {
             RectTransform rectTransform = text.rectTransform;
@@ -232,13 +242,17 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function returning the nearest character to position on a given line.
+        /// Method returning the nearest character to position on a given line.
         /// </summary>
-        /// <param name="text"></param>
-        /// <param name="position"></param>
-        /// <param name="line"></param>
-        /// <param name="camera"></param>
-        /// <returns></returns>
+        /// <param name="text">TMP instance whose character metrics are used for the search.</param>
+        /// <param name="position">Position converted into the RectTransform space before distance tests.</param>
+        /// <param name="line">Zero-based line index previously returned from <see cref="FindNearestLine"/>.</param>
+        /// <param name="camera">Camera used for screen to world conversion; null for overlay canvases.</param>
+        /// <param name="visibleOnly">Skips characters marked not visible when true, keeping invisible placeholders out of hit results.</param>
+        /// <returns>Character index within <see cref="TMP_Text.textInfo"/> constrained to the requested line.</returns>
+        /// <remarks>
+        /// Chooses the glyph rectangle that contains the point when possible; otherwise it minimizes squared distance to the quad edges for caret placement.
+        /// </remarks>
         public static int FindNearestCharacterOnLine(TMP_Text text, Vector3 position, int line, Camera camera, bool visibleOnly)
         {
             RectTransform rectTransform = text.rectTransform;
@@ -295,12 +309,15 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function used to determine if the position intersects with the RectTransform.
+        /// Method used to determine if the position intersects with the RectTransform.
         /// </summary>
         /// <param name="rectTransform">A reference to the RectTranform of the text object.</param>
         /// <param name="position">Position to check for intersection.</param>
         /// <param name="camera">The scene camera which may be assigned to a Canvas using ScreenSpace Camera or WorldSpace render mode. Set to null is using ScreenSpace Overlay.</param>
-        /// <returns></returns>
+        /// <returns>Whether the transformed point lies inside the world-space rectangle described by the four corners.</returns>
+        /// <remarks>
+        /// Projects the point through <see cref="ScreenPointToWorldPointInRectangle"/> then tests against the cached world corners from <see cref="RectTransform.GetWorldCorners"/>.
+        /// </remarks>
         public static bool IsIntersectingRectTransform(RectTransform rectTransform, Vector3 position, Camera camera)
         {
             // Convert position into Worldspace coordinates
@@ -320,14 +337,17 @@ namespace TMPro
         // CHARACTER HANDLING
 
         /// <summary>
-        /// Function returning the index of the character at the given position (if any).
+        /// Method returning the index of the character at the given position (if any).
         /// Returns @@-1@@ if no character is found at the specified position.
         /// </summary>
         /// <param name="text">A reference to the TextMeshPro component.</param>
         /// <param name="position">Position to check for intersection.</param>
         /// <param name="camera">The scene camera which is rendering the text or whichever one might be assigned to a Canvas using ScreenSpace Camera or WorldSpace render mode. Set to null is using ScreenSpace Overlay.</param>
         /// <param name="visibleOnly">Only check for visible characters.</param>
-        /// <returns></returns>
+        /// <returns>Character index if intersecting, -1 otherwise.</returns>
+        /// <remarks>
+        /// Iterates every character quad until one contains the point, skipping invisible glyphs when <paramref name="visibleOnly"/> is enabled for lightweight hit tests.
+        /// </remarks>
         public static int FindIntersectingCharacter(TMP_Text text, Vector3 position, Camera camera, bool visibleOnly)
         {
             RectTransform rectTransform = text.rectTransform;
@@ -393,13 +413,16 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function to find the nearest character to position.
+        /// Method to find the nearest character to position.
         /// </summary>
         /// <param name="text">A reference to the TMP Text component.</param>
         /// <param name="position">Position to check for intersection.</param>
         /// <param name="camera">The scene camera which may be assigned to a Canvas using ScreenSpace Camera or WorldSpace render mode. Set to null is using ScreenSpace Overlay.</param>
         /// <param name="visibleOnly">Only check for visible characters.</param>
-        /// <returns></returns>
+        /// <returns>Zero-based character index in <see cref="TMP_Text.textInfo"/> whose quad is closest by edge distance.</returns>
+        /// <remarks>
+        /// Returns immediately when a quad contains the point; otherwise it tracks the minimum distance-to-edge metric across all candidate glyphs.
+        /// </remarks>
         public static int FindNearestCharacter(TMP_Text text, Vector3 position, Camera camera, bool visibleOnly)
         {
             RectTransform rectTransform = text.rectTransform;
@@ -453,7 +476,7 @@ namespace TMPro
         /// <param name="position">Position to check for intersection.</param>
         /// <param name="camera">The scene camera which may be assigned to a Canvas using ScreenSpace Camera or WorldSpace render mode. Set to null is using ScreenSpace Overlay.</param>
         /// <param name="visibleOnly">Only check for visible characters.</param>
-        /// <returns></returns>
+        /// <returns>Index of the nearest character.</returns>
         //public static int FindNearestCharacter(TextMeshProUGUI text, Vector3 position, Camera camera, bool visibleOnly)
         //{
         //    RectTransform rectTransform = text.rectTransform;
@@ -510,7 +533,7 @@ namespace TMPro
         /// <param name="position">Position to check for intersection.</param>
         /// <param name="camera">The camera which is rendering the text object.</param>
         /// <param name="visibleOnly">Only check for visible characters.</param>
-        /// <returns></returns>
+        /// <returns>Index of the nearest character.</returns>
         //public static int FindNearestCharacter(TextMeshPro text, Vector3 position, Camera camera, bool visibleOnly)
         //{
         //    Transform textTransform = text.transform;
@@ -562,12 +585,15 @@ namespace TMPro
 
         // WORD HANDLING
         /// <summary>
-        /// Function returning the index of the word at the given position (if any).
+        /// Method returning the index of the word at the given position (if any).
         /// </summary>
         /// <param name="text">A reference to the TMP_Text component.</param>
         /// <param name="position">Position to check for intersection.</param>
         /// <param name="camera">The scene camera which may be assigned to a Canvas using ScreenSpace Camera or WorldSpace render mode. Set to null is using ScreenSpace Overlay.</param>
-        /// <returns></returns>
+        /// <returns>Zero-based word index when the pointer lies inside the word bounds, or -1 when no word region contains the point.</returns>
+        /// <remarks>
+        /// Builds axis-aligned bounds per word segment, including multi-line words, and returns on the first intersecting quad.
+        /// </remarks>
         public static int FindIntersectingWord(TMP_Text text, Vector3 position, Camera camera)
         {
             RectTransform rectTransform = text.rectTransform;
@@ -691,8 +717,8 @@ namespace TMPro
         /// </summary>
         /// <param name="text">A reference to the TextMeshPro UGUI component.</param>
         /// <param name="position">Position to check for intersection.</param>
-        /// <param name="camera">The scene camera which may be assigned to a Canvas using ScreenSpace Camera or WorldSpace render mode. Set to null is using ScreenSpace Overlay.</param>
-        /// <returns></returns>
+        /// <param name="camera">The camera which is rendering the text object.</param>
+        /// <returns>Index of the word if position intersects a word, -1 otherwise.</returns>
         //public static int FindIntersectingWord(TextMeshProUGUI text, Vector3 position, Camera camera)
         //{
         //    RectTransform rectTransform = text.rectTransform;
@@ -819,7 +845,7 @@ namespace TMPro
         /// <param name="text">A reference to the TextMeshPro component.</param>
         /// <param name="position">Position to check for intersection.</param>
         /// <param name="camera">The camera which is rendering the text object.</param>
-        /// <returns></returns>
+        /// <returns>Index of the word if position intersects a word, -1 otherwise.</returns>
         //public static int FindIntersectingWord(TextMeshPro text, Vector3 position, Camera camera)
         //{
         //    Transform textTransform = text.transform;
@@ -939,12 +965,15 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function returning the index of the word at the given position (if any).
+        /// Method returning the index of the word at the given position (if any).
         /// </summary>
         /// <param name="text">A reference to the TMP_Text component.</param>
-        /// <param name="position"></param>
+        /// <param name="position">Position to check for intersection.</param>
         /// <param name="camera">The scene camera which may be assigned to a Canvas using ScreenSpace Camera or WorldSpace render mode. Set to null is using ScreenSpace Overlay.</param>
-        /// <returns></returns>
+        /// <returns>Zero-based word index whose bounds minimize edge distance when the point is outside every word quad.</returns>
+        /// <remarks>
+        /// Similar to character picking but aggregates metrics per word region so tooltips can snap to whole tokens instead of individual glyphs.
+        /// </remarks>
         public static int FindNearestWord(TMP_Text text, Vector3 position, Camera camera)
         {
             RectTransform rectTransform = text.rectTransform;
@@ -1082,7 +1111,7 @@ namespace TMPro
         /// Function returning the index of the word at the given position (if any).
         /// </summary>
         /// <param name="text">A reference to the TextMeshPro UGUI component.</param>
-        /// <param name="position"></param>
+        /// <param name="position">Position to check for intersection.</param>
         /// <param name="camera">The scene camera which may be assigned to a Canvas using ScreenSpace Camera or WorldSpace render mode. Set to null is using ScreenSpace Overlay.</param>
         /// <returns></returns>
         //public static int FindNearestWord(TextMeshProUGUI text, Vector3 position, Camera camera)
@@ -1314,12 +1343,15 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function returning the line intersecting the position.
+        /// Method returning the line intersecting the position.
         /// </summary>
-        /// <param name="textComponent"></param>
-        /// <param name="position"></param>
-        /// <param name="camera"></param>
-        /// <returns></returns>
+        /// <param name="text">The text component.</param>
+        /// <param name="position">Position to check for intersection.</param>
+        /// <param name="camera">The scene camera which may be assigned to a Canvas using ScreenSpace Camera or WorldSpace render mode. Set to null is using ScreenSpace Overlay.</param>
+        /// <returns>First line whose ascender and descender straddle the vertical position, or -1 when no line contains the point.</returns>
+        /// <remarks>
+        /// Unlike <see cref="FindNearestLine"/> this returns -1 instead of a closest line when the pointer sits outside all bands.
+        /// </remarks>
         public static int FindIntersectingLine(TMP_Text text, Vector3 position, Camera camera)
         {
             RectTransform rectTransform = text.rectTransform;
@@ -1349,12 +1381,15 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function returning the index of the Link at the given position (if any).
+        /// Method returning the index of the Link at the given position (if any).
         /// </summary>
         /// <param name="text">A reference to the TMP_Text component.</param>
         /// <param name="position">Position to check for intersection.</param>
         /// <param name="camera">The scene camera which may be assigned to a Canvas using ScreenSpace Camera or WorldSpace render mode. Set to null is using ScreenSpace Overlay.</param>
-        /// <returns></returns>
+        /// <returns>Zero-based link index from <see cref="TMP_Text.textInfo"/> when the point hits link geometry, otherwise -1.</returns>
+        /// <remarks>
+        /// Honors page filters so overflow pages do not report links that belong to hidden sheets.
+        /// </remarks>
         public static int FindIntersectingLink(TMP_Text text, Vector3 position, Camera camera)
         {
             Transform rectTransform = text.transform;
@@ -1642,12 +1677,15 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function returning the index of the word at the given position (if any).
+        /// Method returning the index of the link at the given position (if any).
         /// </summary>
         /// <param name="text">A reference to the TMP_Text component.</param>
         /// <param name="position">Position to check for intersection.</param>
         /// <param name="camera">The scene camera which may be assigned to a Canvas using ScreenSpace Camera or WorldSpace render mode. Set to null is using ScreenSpace Overlay.</param>
-        /// <returns></returns>
+        /// <returns>Zero-based link index minimizing distance to the link bounds when the pointer is near but not inside a region.</returns>
+        /// <remarks>
+        /// Mirrors the word nearest algorithm but operates on link spans so hover highlights can snap to the closest rich-text anchor.
+        /// </remarks>
         public static int FindNearestLink(TMP_Text text, Vector3 position, Camera camera)
         {
             RectTransform rectTransform = text.rectTransform;
@@ -2043,11 +2081,14 @@ namespace TMPro
         /// <summary>
         /// Method to convert ScreenPoint to WorldPoint aligned with Rectangle
         /// </summary>
-        /// <param name="transform"></param>
-        /// <param name="screenPoint"></param>
-        /// <param name="cam"></param>
-        /// <param name="worldPoint"></param>
-        /// <returns></returns>
+        /// <param name="transform">RectTransform (or Transform) to convert into.</param>
+        /// <param name="screenPoint">Screen-space position.</param>
+        /// <param name="cam">Camera; null for overlay canvas.</param>
+        /// <param name="worldPoint">Resulting world position on the plane defined by the transform.</param>
+        /// <returns>Whether a ray from the camera intersects the plane defined by the transform orientation and position.</returns>
+        /// <remarks>
+        /// Builds a plane using the transform forward and projects the screen ray to recover a world-space point suitable for RectTransform hit tests.
+        /// </remarks>
         public static bool ScreenPointToWorldPointInRectangle(Transform transform, Vector2 screenPoint, Camera cam, out Vector3 worldPoint)
         {
             worldPoint = (Vector3)Vector2.zero;
@@ -2113,12 +2154,15 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function returning the Square Distance from a Point to a Line.
+        /// Method returning the Square Distance from a Point to a Line.
         /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <param name="point"></param>
-        /// <returns></returns>
+        /// <param name="a">First endpoint of the segment in the same space as the test point.</param>
+        /// <param name="b">Second endpoint of the segment; when equal to <paramref name="a"/> the method returns squared distance to that point.</param>
+        /// <param name="point">Sample position whose closest point on the segment ab is projected to minimize Euclidean distance.</param>
+        /// <returns>Squared distance from <paramref name="point"/> to the closest location on segment ab, avoiding a costly square root.</returns>
+        /// <remarks>
+        /// Used heavily by caret picking to compare proximity to each edge of glyph quads without allocating temporary structs.
+        /// </remarks>
         public static float DistanceToLine(Vector3 a, Vector3 b, Vector3 point)
         {
             // If a and b are the same point, just return distance to that point
@@ -2232,8 +2276,11 @@ namespace TMPro
         /// <summary>
         /// Returns the case insensitive hashcode for the given string.
         /// </summary>
-        /// <param name="s"></param>
-        /// <returns></returns>
+        /// <param name="s">The string to hash.</param>
+        /// <returns>32-bit hash code combining uppercased ASCII letters so differently cased keys collide intentionally.</returns>
+        /// <remarks>
+        /// Applies the same mixing polynomial used elsewhere in TMP for stable font feature lookups across platforms.
+        /// </remarks>
         public static int GetHashCode(string s)
         {
             if (string.IsNullOrEmpty(s))
@@ -2248,9 +2295,13 @@ namespace TMPro
         }
 
         /// <summary>
-        /// Function which returns a simple hashcode from a string.
+        /// Method which returns a simple hashcode from a string.
         /// </summary>
-        /// <returns></returns>
+        /// <param name="s">The string to hash.</param>
+        /// <returns>Iteratively mixed hash bits using each character code unit without case folding.</returns>
+        /// <remarks>
+        /// Faster than the case-insensitive variant when the caller already normalized casing.
+        /// </remarks>
         public static int GetSimpleHashCode(string s)
         {
             int hashCode = 0;
@@ -2262,9 +2313,13 @@ namespace TMPro
         }
 
         /// <summary>
-        /// Function which returns a simple hashcode from a string converted to lowercase.
+        /// Method which returns a simple hashcode from a string converted to lowercase.
         /// </summary>
-        /// <returns></returns>
+        /// <param name="s">The string to hash (converted to lowercase).</param>
+        /// <returns>Unsigned DJB-style accumulation after folding ASCII characters through the fast lowercase table.</returns>
+        /// <remarks>
+        /// Matches legacy TMP asset bundle keys that were persisted with lowercase folding for case-insensitive lookups.
+        /// </remarks>
         public static uint GetSimpleHashCodeLowercase(string s)
         {
             uint hashCode = 5381;
@@ -2292,10 +2347,13 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function to convert Hex to Int
+        /// Method to convert Hex to Int
         /// </summary>
-        /// <param name="hex"></param>
-        /// <returns></returns>
+        /// <param name="hex">Single hexadecimal digit character drawn from ASCII ranges 0-9, A-F, or a-f.</param>
+        /// <returns>Integer nibble value from 0 through 15, or 15 when the character does not match a known hex digit.</returns>
+        /// <remarks>
+        /// Fallback to 15 keeps legacy callers from throwing when parsing partially malformed rich-text color attributes.
+        /// </remarks>
         public static int HexToInt(char hex)
         {
             switch (hex)
@@ -2328,10 +2386,13 @@ namespace TMPro
 
 
         /// <summary>
-        /// Function to convert a properly formatted string which contains an hex value to its decimal value.
+        /// Method to convert a properly formatted string which contains an hex value to its decimal value.
         /// </summary>
-        /// <param name="s"></param>
-        /// <returns></returns>
+        /// <param name="s">String containing hexadecimal digits without leading prefixes; processed from most significant nibble.</param>
+        /// <returns>Combined integer value after multiplying each nibble by successive powers of sixteen.</returns>
+        /// <remarks>
+        /// Powers characters using <see cref="Mathf.Pow"/> so multi-byte color strings become single ARGB component values.
+        /// </remarks>
         public static int StringHexToInt(string s)
         {
             int value = 0;

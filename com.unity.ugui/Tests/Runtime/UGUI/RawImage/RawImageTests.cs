@@ -51,9 +51,6 @@ class RawImageTests
         // Wait a frame to allow mesh generation.
         yield return null;
 
-        // Mesh generation would have crashed when accessing RawTexture::mainTexture.
-        Assert.Pass();
-
         // Clean up resources
         Object.DestroyImmediate(canvasGO);
         Object.DestroyImmediate(sprite);
