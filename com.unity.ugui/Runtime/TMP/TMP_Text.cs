@@ -19,9 +19,6 @@ namespace TMPro
 
         void Rebuild(CanvasUpdate update);
 
-        [Obsolete("GetInstanceID() is obsolete, use GetEntityId() instead.", true)]
-        int GetInstanceID();
-
         EntityId GetEntityId();
     }
 
@@ -785,7 +782,7 @@ namespace TMPro
         /// <summary>
         /// Controls whether or not word wrapping is applied. When disabled, the text will be displayed on a single line.
         /// </summary>
-        [Obsolete("The enabledWordWrapping property is now obsolete. Please use the textWrappingMode property instead.")]
+        [Obsolete("The enableWordWrapping property is now obsolete. Please use the textWrappingMode property instead.", true)]
         public bool enableWordWrapping
         {
             get { return m_TextWrappingMode == TextWrappingModes.Normal || textWrappingMode == TextWrappingModes.PreserveWhitespace; }
@@ -914,7 +911,7 @@ namespace TMPro
         /// <summary>
         /// Determines if kerning is enabled or disabled.
         /// </summary>
-        [Obsolete("The \"enableKerning\" property has been deprecated. Use the \"fontFeatures\" property to control what features are enabled on the text component.")]
+        [Obsolete("The \"enableKerning\" property has been deprecated. Use the \"fontFeatures\" property to control what features are enabled on the text component.", true)]
         public bool enableKerning
         {
             get { return m_ActiveFontFeatures.Contains(OTL_FeatureTag.kern); }
@@ -2578,7 +2575,7 @@ namespace TMPro
         /// </summary>
         /// <param name="sourceText">String containing the text.</param>
         /// <param name="syncTextInputBox">This optional parameter no longer provides any functionality as this function now simple sets the .text property which is reflected in the Text Input Box.</param>
-        [Obsolete("Use the SetText(string) function instead.")]
+        [Obsolete("Use the SetText(string) function instead.", true)]
         public void SetText(string sourceText, bool syncTextInputBox = true)
         {
             int srcLength = sourceText == null ? 0 : sourceText.Length;

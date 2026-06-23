@@ -629,41 +629,6 @@ namespace TMPro
         /// <param name="materialReferences">The material reference array.</param>
         /// <param name="materialReferenceIndexLookup">The lookup dictionary.</param>
         /// <returns>The index of the added or existing material reference.</returns>
-        [Obsolete("AddMaterialReference(Material material, TMP_FontAsset fontAsset, ref MaterialReference[] materialReferences, Dictionary<int, int> materialReferenceIndexLookup) is obsolete, use AddMaterialReference(Material material, TMP_FontAsset fontAsset, ref MaterialReference[] materialReferences, Dictionary<int, int> materialReferenceIndexLookup) instead.", true)]
-        public static int AddMaterialReference(Material material, TMP_FontAsset fontAsset, ref MaterialReference[] materialReferences, Dictionary<int, int> materialReferenceIndexLookup)
-        {
-            int materialID = material.GetEntityId();
-            int index;
-
-            if (materialReferenceIndexLookup.TryGetValue(materialID, out index))
-                return index;
-
-            index = materialReferenceIndexLookup.Count;
-
-            // Add new reference index
-            materialReferenceIndexLookup[materialID] = index;
-
-            if (index >= materialReferences.Length)
-                System.Array.Resize(ref materialReferences, Mathf.NextPowerOfTwo(index + 1));
-
-            materialReferences[index].index = index;
-            materialReferences[index].fontAsset = fontAsset;
-            materialReferences[index].spriteAsset = null;
-            materialReferences[index].material = material;
-            materialReferences[index].isDefaultMaterial = materialID == fontAsset.material.GetEntityId();
-            materialReferences[index].referenceCount = 0;
-
-            return index;
-        }
-
-        /// <summary>
-        /// Adds a new material reference and returns its index in the material reference array.
-        /// </summary>
-        /// <param name="material">The material to add.</param>
-        /// <param name="fontAsset">The font asset.</param>
-        /// <param name="materialReferences">The material reference array.</param>
-        /// <param name="materialReferenceIndexLookup">The lookup dictionary.</param>
-        /// <returns>The index of the added or existing material reference.</returns>
         public static int AddMaterialReference(Material material, TMP_FontAsset fontAsset, ref MaterialReference[] materialReferences, Dictionary<EntityId, int> materialReferenceIndexLookup)
         {
             EntityId materialID = material.GetEntityId();
@@ -689,39 +654,6 @@ namespace TMPro
 
             return index;
         }
-
-
-        /// <summary>
-        /// Adds a new material reference for a sprite asset and returns its index in the array.
-        /// </summary>
-        /// <param name="material">The material to add.</param>
-        /// <param name="spriteAsset">The sprite asset.</param>
-        /// <param name="materialReferences">The material reference array.</param>
-        /// <param name="materialReferenceIndexLookup">The lookup dictionary.</param>
-        /// <returns>The index of the added or existing material reference.</returns>
-        [Obsolete("AddMaterialReference(Material material, TMP_SpriteAsset spriteAsset, ref MaterialReference[] materialReferences, Dictionary<int, int> materialReferenceIndexLookup) is obsolete, use AddMaterialReference(Material material, TMP_SpriteAsset spriteAsset, ref MaterialReference[] materialReferences, Dictionary<int, int> materialReferenceIndexLookup) instead.", true )]
-        public static int AddMaterialReference(Material material, TMP_SpriteAsset spriteAsset, ref MaterialReference[] materialReferences, Dictionary<int, int> materialReferenceIndexLookup)
-        {
-            int materialID = material.GetEntityId();
-            int index;
-
-            if (materialReferenceIndexLookup.TryGetValue(materialID, out index))
-                return index;
-            index = materialReferenceIndexLookup.Count;
-            // Add new reference index
-            materialReferenceIndexLookup[materialID] = index;
-            if (index >= materialReferences.Length)
-                System.Array.Resize(ref materialReferences, Mathf.NextPowerOfTwo(index + 1));
-            materialReferences[index].index = index;
-            materialReferences[index].fontAsset = materialReferences[0].fontAsset;
-            materialReferences[index].spriteAsset = spriteAsset;
-            materialReferences[index].material = material;
-            materialReferences[index].isDefaultMaterial = true;
-            materialReferences[index].referenceCount = 0;
-            return index;
-        }
-
-
 
 
         /// <summary>

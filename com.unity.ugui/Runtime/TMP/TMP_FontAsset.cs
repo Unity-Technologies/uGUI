@@ -475,7 +475,7 @@ namespace TMPro
         /// The general information about the font.
         /// This property and FaceInfo_Legacy type are no longer used in version 1.1.0 of the font asset.
         /// </summary>
-		[Obsolete("The fontInfo property and underlying type is now obsolete. Please use the faceInfo property and FaceInfo type instead.")]
+		[Obsolete("The fontInfo property and underlying type is now obsolete. Please use the faceInfo property and FaceInfo type instead.", true)]
         public FaceInfo_Legacy fontInfo
         {
             get { return m_fontInfo; }

@@ -68,7 +68,7 @@ namespace UnityEngine.UI
 
         public virtual bool MaskEnabled() { return IsActive() && graphic != null; }
 
-        [Obsolete("Not used anymore.")]
+        [Obsolete("Not used anymore.", true)]
         public virtual void OnSiblingGraphicEnabledDisabled() {}
 
         protected override void OnEnable()

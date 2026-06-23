@@ -78,7 +78,7 @@ namespace UnityEngine.UI
         /// A List instance of the allSelectablesArray to maintain API compatibility.
         /// </summary>
 
-        [Obsolete("Replaced with allSelectablesArray to have better performance when disabling a element", false)]
+        [Obsolete("Replaced with allSelectablesArray to have better performance when disabling an element", true)]
         public static List<Selectable> allSelectables
         {
             get

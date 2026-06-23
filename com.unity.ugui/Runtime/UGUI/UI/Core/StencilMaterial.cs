@@ -35,10 +35,6 @@ namespace UnityEngine.UI
         }
 #endif
 
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-        [Obsolete("Use Material.Add instead.", true)]
-        public static Material Add(Material baseMat, int stencilID) { return null; }
-
         /// <summary>
         /// Add a new material using the specified base and stencil ID.
         /// </summary>

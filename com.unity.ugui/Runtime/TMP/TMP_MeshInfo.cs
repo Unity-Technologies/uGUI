@@ -66,7 +66,7 @@ namespace TMPro
             this.mesh = mesh;
 
             // Limit the mesh to less than 65535 vertices which is the limit for Unity's Mesh.
-            size = Mathf.Min(size, 16383);
+            size = Mathf.Min(size, TMP_Math.MAX_QUADS_PER_MESH);
 
             int sizeX4 = size * 4;
             int sizeX6 = size * 6;
@@ -250,7 +250,7 @@ namespace TMPro
             // If the requested size will exceed the 16 bit mesh limit, switch mesh to use 32 bit.
             //if (size > 16383 && this.mesh.indexFormat == IndexFormat.UInt16)
             //    this.mesh.indexFormat = IndexFormat.UInt32;
-            size = Mathf.Min(size, 16383);
+            size = Mathf.Min(size, TMP_Math.MAX_QUADS_PER_MESH);
 
             int size_X4 = size * 4;
             int size_X6 = size * 6;

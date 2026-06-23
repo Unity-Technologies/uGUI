@@ -136,7 +136,7 @@ namespace TMPro
 
         private static readonly float m_clamp = 1.0f;
 
-        [Obsolete("Not used anymore")]
+        [Obsolete("You no longer need to check if isInitialized is true. This class is now automatically initialized.", true)]
         public static bool isInitialized = false;
 
 
@@ -180,9 +180,9 @@ namespace TMPro
 #endif
 
         /// <summary>
-        /// Populates the shader property IDs used by TextMesh Pro materials.
+        /// Obsolete. Calling this method is no longer required.
         /// </summary>
-        [Obsolete("Calling this method is no longer required")]
+        [Obsolete("Calling this method is no longer required.", true)]
         public static void GetShaderPropertyIDs()
         {
         }

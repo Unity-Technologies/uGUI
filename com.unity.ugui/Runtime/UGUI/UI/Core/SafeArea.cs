@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
@@ -15,7 +16,7 @@ namespace UnityEngine.UI
     [AddComponentMenu("UI (Canvas)/Safe Area")]
     [ExecuteAlways]
     [UGUIHelpURL("SafeArea")]
-    public class SafeArea : MonoBehaviour
+    public class SafeArea : UIBehaviour
     {
         private RectTransform m_RectTransform;
         private DrivenRectTransformTracker m_Tracker;
@@ -178,14 +179,20 @@ namespace UnityEngine.UI
         }
 
 
-        private void Awake()
+        /// <summary>Called when the script instance is loaded. Caches the RectTransform and initializes the driven transform tracker.</summary>
+        protected override void Awake()
         {
+            base.Awake();
+
             m_RectTransform = transform as RectTransform;
             m_Tracker = new DrivenRectTransformTracker();
         }
 
-        private void OnEnable()
+        /// <summary>Called when it becomes enabled. Claims driven ownership of the RectTransform and applies the safe area values.</summary>
+        protected override void OnEnable()
         {
+            base.OnEnable();
+
             if (m_RectTransform == null)
             {
                 m_RectTransform = transform as RectTransform;
@@ -198,14 +205,18 @@ namespace UnityEngine.UI
             }
         }
 
-        private void OnDisable()
+        /// <summary>Called when it becomes disabled. Clears the RectTransform property tracking.</summary>
+        protected override void OnDisable()
         {
             SafeClearDrivenRectTransformTracker();
+            base.OnDisable();
         }
 
-        private void OnDestroy()
+        /// <summary>Called when the component is destroyed. Clears the RectTransform property tracking.</summary>
+        protected override void OnDestroy()
         {
             SafeClearDrivenRectTransformTracker();
+            base.OnDestroy();
         }
 
         private void SafeClearDrivenRectTransformTracker()
@@ -333,8 +344,11 @@ namespace UnityEngine.UI
         }
 
 #if UNITY_EDITOR
-        private void OnValidate()
+        /// <summary>Called in the editor when the script is loaded or an inspector value changes. Warns about conflicting RectTransform drivers.</summary>
+        protected override void OnValidate()
         {
+            base.OnValidate();
+
             if (m_RectTransform == null)
                 m_RectTransform = transform as RectTransform;
 

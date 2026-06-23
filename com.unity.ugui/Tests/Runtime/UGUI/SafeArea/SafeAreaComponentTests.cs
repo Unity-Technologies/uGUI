@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 
@@ -34,6 +35,12 @@ namespace SafeAreaTests
 
             if (_canvasGo != null)
                 Object.DestroyImmediate(_canvasGo);
+        }
+
+        [Test]
+        public void SafeArea_InheritsFromUIBehaviour()
+        {
+            Assert.IsInstanceOf<UIBehaviour>(_safeArea);
         }
 
         [Test]

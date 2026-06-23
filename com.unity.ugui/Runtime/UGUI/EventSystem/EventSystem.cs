@@ -124,7 +124,7 @@ namespace UnityEngine.EventSystems
             get { return m_CurrentSelected; }
         }
 
-        [Obsolete("lastSelectedGameObject is no longer supported")]
+        [Obsolete("lastSelectedGameObject is no longer supported", true)]
         public GameObject lastSelectedGameObject
         {
             get { return null; }

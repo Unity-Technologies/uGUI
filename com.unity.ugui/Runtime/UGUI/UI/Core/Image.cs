@@ -621,7 +621,7 @@ namespace UnityEngine.UI
         // Whether this is being tracked for Atlas Binding.
         private bool m_Tracked = false;
 
-        [Obsolete("eventAlphaThreshold has been deprecated. Use eventMinimumAlphaThreshold instead (UnityUpgradable) -> alphaHitTestMinimumThreshold")]
+        [Obsolete("eventAlphaThreshold has been deprecated. Use eventMinimumAlphaThreshold instead (UnityUpgradable) -> alphaHitTestMinimumThreshold", true)]
 
         /// <summary>
         /// Obsolete. You should use UI.Image.alphaHitTestMinimumThreshold instead.
@@ -682,7 +682,6 @@ namespace UnityEngine.UI
 
         protected Image()
         {
-            useLegacyMeshGeneration = false;
         }
 
         /// <summary>

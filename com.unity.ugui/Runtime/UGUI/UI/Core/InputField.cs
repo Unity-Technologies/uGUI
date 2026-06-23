@@ -735,7 +735,7 @@ namespace UnityEngine.UI
         /// </example>
         public SubmitEvent onSubmit { get { return m_OnSubmit; } set { SetPropertyUtility.SetClass(ref m_OnSubmit, value); } }
 
-        [Obsolete("onValueChange has been renamed to onValueChanged")]
+        [Obsolete("onValueChange has been renamed to onValueChanged", true)]
         public OnChangeEvent onValueChange { get { return onValueChanged; } set { onValueChanged = value; } }
 
         /// <summary>
@@ -1059,12 +1059,6 @@ namespace UnityEngine.UI
             }
         }
         private bool hasSelection { get { return m_CaretPosition != m_CaretSelectPosition; } }
-
-#if UNITY_EDITOR
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-        [Obsolete("caretSelectPosition has been deprecated. Use selectionFocusPosition instead (UnityUpgradable) -> selectionFocusPosition", true)]
-        public int caretSelectPosition { get { return selectionFocusPosition; } protected set { selectionFocusPosition = value; } }
-#endif
 
         /// <summary>
         /// Get: Returns the focus position as thats the position that moves around even during selection.
@@ -1748,7 +1742,7 @@ namespace UnityEngine.UI
             }
         }
 
-        [Obsolete("This function is no longer used. Please use RectTransformUtility.ScreenPointToLocalPointInRectangle() instead.")]
+        [Obsolete("This function is no longer used. Please use RectTransformUtility.ScreenPointToLocalPointInRectangle() instead.", true)]
         public Vector2 ScreenToLocal(Vector2 screen)
         {
             var theCanvas = m_TextComponent.canvas;

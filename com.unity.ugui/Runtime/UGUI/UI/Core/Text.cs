@@ -28,7 +28,6 @@ namespace UnityEngine.UI
 
         protected Text()
         {
-            useLegacyMeshGeneration = false;
         }
 
         /// <summary>
