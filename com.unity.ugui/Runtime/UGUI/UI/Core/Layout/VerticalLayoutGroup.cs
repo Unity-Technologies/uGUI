@@ -1,12 +1,13 @@
 namespace UnityEngine.UI
 {
+    /// <summary>
+    /// Arranges child layout elements vertically.
+    /// </summary>
     [AddComponentMenu("Layout/Vertical Layout Group", 151)]
     [UGUIHelpURL("VerticalLayoutGroup")]
-    /// <summary>
-    /// Layout child layout elements below each other.
-    /// </summary>
     public class VerticalLayoutGroup : HorizontalOrVerticalLayoutGroup
     {
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a VerticalLayoutGroup to a GameObject.</summary>
         protected VerticalLayoutGroup()
         {}
 

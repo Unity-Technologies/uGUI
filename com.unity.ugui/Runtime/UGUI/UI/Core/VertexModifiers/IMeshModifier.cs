@@ -9,13 +9,15 @@ namespace UnityEngine.UI
     /// </summary>
     public interface IMeshModifier
     {
+        /// <summary>Obsolete. Please use <see cref="ModifyMesh(VertexHelper)"/> instead.</summary>
+        /// <param name="mesh">The <see cref="Mesh"/> to modify.</param>
         [Obsolete("Use IMeshModifier.ModifyMesh(VertexHelper verts) instead", true)]
         void ModifyMesh(Mesh mesh);
 
         /// <summary>
-        /// Call used to modify mesh.
-        /// Place any custom mesh processing in this function.
+        /// Callback used for modifying the mesh. Place any custom mesh processing in this function.
         /// </summary>
+        /// <param name="verts">The <see cref="VertexHelper"/> containing the mesh data to modify.</param>
         void ModifyMesh(VertexHelper verts);
     }
 }

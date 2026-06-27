@@ -4,11 +4,12 @@ using UnityEngine.Pool;
 
 namespace UnityEngine.UI
 {
+    /// <summary>
+    /// Adds a drop shadow to a graphic by duplicating its mesh vertices, offsetting them by
+    /// <see cref="effectDistance"/>, and recoloring them with <see cref="effectColor"/>.
+    /// </summary>
     [AddComponentMenu("UI (Canvas)/Effects/Shadow", 80)]
     [UGUIHelpURL("Shadow")]
-    /// <summary>
-    /// Adds an outline to a graphic using IVertexModifier.
-    /// </summary>
     public class Shadow : BaseMeshEffect
     {
         [SerializeField]
@@ -22,6 +23,9 @@ namespace UnityEngine.UI
 
         private const float kMaxEffectDistance = 600f;
 
+        /// <summary>
+        /// Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a Shadow to a GameObject.
+        /// </summary>
         protected Shadow()
         {}
 
@@ -89,6 +93,17 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// Appends shadow copies of the vertices in <paramref name="verts"/> from index <paramref name="start"/> up to
+        /// (but not including) <paramref name="end"/>, offset by (<paramref name="x"/>, <paramref name="y"/>) and
+        /// recolored with <paramref name="color"/>. Pre-sizes the list capacity to avoid extra allocations.
+        /// </summary>
+        /// <param name="verts">The vertex list to append the shadow copies to.</param>
+        /// <param name="color">The color to apply to the shadow vertices.</param>
+        /// <param name="start">The index of the first vertex in <paramref name="verts"/> to copy.</param>
+        /// <param name="end">The exclusive upper index of vertices in <paramref name="verts"/> to copy.</param>
+        /// <param name="x">Horizontal offset of the shadow.</param>
+        /// <param name="y">Vertical offset of the shadow.</param>
         protected void ApplyShadowZeroAlloc(List<UIVertex> verts, Color32 color, int start, int end, float x, float y)
         {
             UIVertex vt;
@@ -128,6 +143,11 @@ namespace UnityEngine.UI
             ApplyShadowZeroAlloc(verts, color, start, end, x, y);
         }
 
+        /// <summary>
+        /// Applies the shadow effect to the geometry held in <paramref name="vh"/> by appending
+        /// offset, recolored copies of all current vertices behind the originals.
+        /// </summary>
+        /// <param name="vh">The <see cref="VertexHelper"/> containing the graphic's mesh data to modify.</param>
         public override void ModifyMesh(VertexHelper vh)
         {
             if (!IsActive())

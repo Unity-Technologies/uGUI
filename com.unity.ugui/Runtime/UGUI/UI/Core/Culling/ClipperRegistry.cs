@@ -23,6 +23,7 @@ namespace UnityEngine.UI
 
         readonly IndexedSet<IClipper> m_Clippers = new IndexedSet<IClipper>();
 
+        /// <summary>Protected constructor. ClipperRegistry is a singleton; access it via <see cref="instance"/>.</summary>
         protected ClipperRegistry()
         {
             // This is needed for AOT platforms. Without it the compile doesn't get the definition of the Dictionarys

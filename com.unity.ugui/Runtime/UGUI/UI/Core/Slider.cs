@@ -8,10 +8,6 @@ using UnityEditor;
 
 namespace UnityEngine.UI
 {
-    [AddComponentMenu("UI (Canvas)/Slider", 34)]
-    [ExecuteAlways]
-    [RequireComponent(typeof(RectTransform))]
-    [UGUIHelpURL("Slider")]
     /// <summary>
     /// A standard slider that can be moved between a minimum and maximum value.
     /// </summary>
@@ -20,6 +16,10 @@ namespace UnityEngine.UI
     /// The anchors of the fill and handle RectTransforms are driven by the Slider. The fill and handle can be direct children of the GameObject with the Slider, or intermediary RectTransforms can be placed in between for additional control.
     /// When a change to the slider value occurs, a callback is sent to any registered listeners of UI.Slider.onValueChanged.
     /// </remarks>
+    [AddComponentMenu("UI (Canvas)/Slider", 34)]
+    [ExecuteAlways]
+    [RequireComponent(typeof(RectTransform))]
+    [UGUIHelpURL("Slider")]
     public class Slider : Selectable, IDragHandler, IInitializePotentialDragHandler, ICanvasElement
     {
         /// <summary>
@@ -48,10 +48,10 @@ namespace UnityEngine.UI
             TopToBottom,
         }
 
-        [Serializable]
         /// <summary>
-        /// Event type used by the UI.Slider.
+        /// A <see cref="UnityEngine.Events.UnityEvent{T0}"/> raised when the slider value changes, passing the new value as a float.
         /// </summary>
+        [Serializable]
         public class SliderEvent : UnityEvent<float> {}
 
         [SerializeField]
@@ -234,6 +234,7 @@ namespace UnityEngine.UI
         /// </example>
         public bool wholeNumbers { get { return m_WholeNumbers; } set { if (SetPropertyUtility.SetStruct(ref m_WholeNumbers, value)) { Set(m_Value); UpdateVisuals(); } } }
 
+        /// <summary>Serialized backing field for <see cref="value"/>.</summary>
         [SerializeField]
         protected float m_Value;
 
@@ -378,6 +379,7 @@ namespace UnityEngine.UI
         // Size of each step.
         float stepSize { get { return wholeNumbers ? 1 : (maxValue - minValue) * 0.1f; } }
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a Slider to a GameObject.</summary>
         protected Slider()
         {}
 
@@ -406,6 +408,10 @@ namespace UnityEngine.UI
 
 #endif // if UNITY_EDITOR
 
+        /// <summary>
+        /// Called by the canvas update system to rebuild the slider fill and handle visuals.
+        /// </summary>
+        /// <param name="executing">The current canvas update stage.</param>
         public virtual void Rebuild(CanvasUpdate executing)
         {
 #if UNITY_EDITOR
@@ -426,6 +432,7 @@ namespace UnityEngine.UI
         public virtual void GraphicUpdateComplete()
         {}
 
+        /// <summary>Called when it becomes enabled. Registers for canvas rebuilding and updates visuals.</summary>
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -439,6 +446,7 @@ namespace UnityEngine.UI
 #endif
         }
 
+        /// <summary>Called when it becomes disabled. Unregisters from canvas rebuilding.</summary>
         protected override void OnDisable()
         {
 #if UNITY_EDITOR
@@ -462,6 +470,7 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>Called when animation properties are applied. Updates the slider visual state.</summary>
         protected override void OnDidApplyAnimationProperties()
         {
             // Has value changed? Various elements of the slider have the old normalisedValue assigned, we can use this to perform a comparison.
@@ -554,6 +563,7 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>Called when the RectTransform dimensions change. Updates the slider visual state.</summary>
         protected override void OnRectTransformDimensionsChange()
         {
             base.OnRectTransformDimensionsChange();
@@ -649,6 +659,10 @@ namespace UnityEngine.UI
             return IsActive() && IsInteractable() && eventData.button == PointerEventData.InputButton.Left;
         }
 
+        /// <summary>
+        /// Called when the pointer is pressed on the slider. Sets the value based on the press position.
+        /// </summary>
+        /// <param name="eventData">The pointer event data for the press.</param>
         public override void OnPointerDown(PointerEventData eventData)
         {
             if (!MayDrag(eventData))
@@ -670,6 +684,10 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// Called while dragging the slider. Updates the value based on the drag position.
+        /// </summary>
+        /// <param name="eventData">The pointer event data for the drag.</param>
         public virtual void OnDrag(PointerEventData eventData)
         {
             if (!MayDrag(eventData))
@@ -677,6 +695,10 @@ namespace UnityEngine.UI
             UpdateDrag(eventData, eventData.pressEventCamera);
         }
 
+        /// <summary>
+        /// Called when a move event occurs. Adjusts the value by one step in the specified direction.
+        /// </summary>
+        /// <param name="eventData">The axis event data containing the move direction.</param>
         public override void OnMove(AxisEventData eventData)
         {
             if (!IsActive() || !IsInteractable())
@@ -714,9 +736,8 @@ namespace UnityEngine.UI
             }
         }
 
-        /// <summary>
-        /// See Selectable.FindSelectableOnLeft
-        /// </summary>
+        /// <inheritdoc/>
+        /// <returns>The nearest Selectable to the left, or null if the slider handles that direction.</returns>
         public override Selectable FindSelectableOnLeft()
         {
             if (navigation.mode == Navigation.Mode.Automatic && axis == Axis.Horizontal)
@@ -724,9 +745,8 @@ namespace UnityEngine.UI
             return base.FindSelectableOnLeft();
         }
 
-        /// <summary>
-        /// See Selectable.FindSelectableOnRight
-        /// </summary>
+        /// <inheritdoc/>
+        /// <returns>The nearest Selectable to the right, or null if the slider handles that direction.</returns>
         public override Selectable FindSelectableOnRight()
         {
             if (navigation.mode == Navigation.Mode.Automatic && axis == Axis.Horizontal)
@@ -734,9 +754,8 @@ namespace UnityEngine.UI
             return base.FindSelectableOnRight();
         }
 
-        /// <summary>
-        /// See Selectable.FindSelectableOnUp
-        /// </summary>
+        /// <inheritdoc/>
+        /// <returns>The nearest Selectable above, or null if the slider handles that direction.</returns>
         public override Selectable FindSelectableOnUp()
         {
             if (navigation.mode == Navigation.Mode.Automatic && axis == Axis.Vertical)
@@ -744,9 +763,8 @@ namespace UnityEngine.UI
             return base.FindSelectableOnUp();
         }
 
-        /// <summary>
-        /// See Selectable.FindSelectableOnDown
-        /// </summary>
+        /// <inheritdoc/>
+        /// <returns>The nearest Selectable below, or null if the slider handles that direction.</returns>
         public override Selectable FindSelectableOnDown()
         {
             if (navigation.mode == Navigation.Mode.Automatic && axis == Axis.Vertical)
@@ -754,6 +772,10 @@ namespace UnityEngine.UI
             return base.FindSelectableOnDown();
         }
 
+        /// <summary>
+        /// Called when a potential drag is detected. Disables inertia for immediate response.
+        /// </summary>
+        /// <param name="eventData">The pointer event data.</param>
         public virtual void OnInitializePotentialDrag(PointerEventData eventData)
         {
             eventData.useDragThreshold = false;

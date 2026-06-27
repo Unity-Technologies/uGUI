@@ -20,6 +20,7 @@ namespace UnityEngine.UI
         [SerializeField] Texture m_Texture;
         [SerializeField] Rect m_UVRect = new Rect(0f, 0f, 1f, 1f);
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a RawImage to a GameObject.</summary>
         protected RawImage()
         {
         }
@@ -136,6 +137,10 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// Populates the mesh with a simple quad mapped to the current UV rect.
+        /// </summary>
+        /// <param name="vh">The <see cref="VertexHelper"/> to populate.</param>
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             Texture tex = mainTexture;
@@ -160,6 +165,7 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>Called when animation properties are applied. Marks the graphic dirty for a rebuild.</summary>
         protected override void OnDidApplyAnimationProperties()
         {
             SetMaterialDirty();

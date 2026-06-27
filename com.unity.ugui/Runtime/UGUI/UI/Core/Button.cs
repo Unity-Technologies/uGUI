@@ -13,10 +13,8 @@ namespace UnityEngine.UI
     [UGUIHelpURL("Button")]
     public class Button : Selectable, IPointerClickHandler, ISubmitHandler
     {
+        /// <summary>A <see cref="UnityEngine.Events.UnityEvent"/> raised when the button is clicked.</summary>
         [Serializable]
-        /// <summary>
-        /// Function definition for a button click event.
-        /// </summary>
         public class ButtonClickedEvent : UnityEvent {}
 
         // Event delegates triggered on click.
@@ -24,6 +22,7 @@ namespace UnityEngine.UI
         [SerializeField]
         private ButtonClickedEvent m_OnClick = new ButtonClickedEvent();
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a Button to a GameObject.</summary>
         protected Button()
         {}
 

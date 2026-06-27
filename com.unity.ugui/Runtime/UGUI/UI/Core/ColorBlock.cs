@@ -3,10 +3,10 @@ using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
-    [Serializable]
     /// <summary>
     /// Structure that stores the state of a color transition on a Selectable.
     /// </summary>
+    [Serializable]
     public struct ColorBlock : IEquatable<ColorBlock>
     {
         [FormerlySerializedAs("normalColor")]
@@ -205,6 +205,9 @@ namespace UnityEngine.UI
             };
         }
 
+        /// <summary>Returns true if the given object is a <see cref="ColorBlock"/> with identical values to this one.</summary>
+        /// <param name="obj">The object to compare.</param>
+        /// <returns>True if equal.</returns>
         public override bool Equals(object obj)
         {
             if (!(obj is ColorBlock))
@@ -213,6 +216,9 @@ namespace UnityEngine.UI
             return Equals((ColorBlock)obj);
         }
 
+        /// <summary>Returns true if the given <see cref="ColorBlock"/> has identical values to this one.</summary>
+        /// <param name="other">The ColorBlock to compare.</param>
+        /// <returns>True if all fields are equal.</returns>
         public bool Equals(ColorBlock other)
         {
             return normalColor == other.normalColor &&
@@ -224,16 +230,26 @@ namespace UnityEngine.UI
                 fadeDuration == other.fadeDuration;
         }
 
+        /// <summary>Returns true if two <see cref="ColorBlock"/> instances have identical values.</summary>
+        /// <param name="point1">First ColorBlock.</param>
+        /// <param name="point2">Second ColorBlock.</param>
+        /// <returns>True if equal.</returns>
         public static bool operator==(ColorBlock point1, ColorBlock point2)
         {
             return point1.Equals(point2);
         }
 
+        /// <summary>Returns true if two <see cref="ColorBlock"/> instances differ in any value.</summary>
+        /// <param name="point1">First ColorBlock.</param>
+        /// <param name="point2">Second ColorBlock.</param>
+        /// <returns>True if not equal.</returns>
         public static bool operator!=(ColorBlock point1, ColorBlock point2)
         {
             return !point1.Equals(point2);
         }
 
+        /// <summary>Returns a hash code for this <see cref="ColorBlock"/>.</summary>
+        /// <returns>An integer hash code.</returns>
         public override int GetHashCode()
         {
             return base.GetHashCode();

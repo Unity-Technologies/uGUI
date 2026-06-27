@@ -592,13 +592,14 @@ namespace TMPro.EditorUtilities
 #if UNITY_2023_3_OR_NEWER
                                 if (m_GenerationSettings.pointSize != m_SamplingPointSize_prop.floatValue || m_FaceInfoDirty)
                                 {
-                                    LoadFontFace((int)m_SamplingPointSize_prop.floatValue, m_FontFaceIndex_prop.intValue);
+                                    FontEngineError error = LoadFontFace((int)m_SamplingPointSize_prop.floatValue, m_FontFaceIndex_prop.intValue, out FontFaceHandle faceHandle);
 #else
                                 if (m_GenerationSettings.pointSize != m_SamplingPointSize_prop.intValue || m_FaceInfoDirty)
                                 {
-                                    LoadFontFace(m_SamplingPointSize_prop.intValue, m_FontFaceIndex_prop.intValue);
+                                    FontEngineError error = LoadFontFace(m_SamplingPointSize_prop.intValue, m_FontFaceIndex_prop.intValue, out FontFaceHandle faceHandle);
 #endif
-                                    m_fontAsset.faceInfo = FontEngine.GetFaceInfo();
+                                    if (error == FontEngineError.Success)
+                                        m_fontAsset.faceInfo = FontEngine.GetFaceInfo(faceHandle);
                                     m_FaceInfoDirty = false;
                                 }
 
@@ -2012,14 +2013,19 @@ namespace TMPro.EditorUtilities
 
         FontEngineError LoadFontFace(int pointSize, int faceIndex)
         {
+            return LoadFontFace(pointSize, faceIndex, out _);
+        }
+
+        FontEngineError LoadFontFace(int pointSize, int faceIndex, out FontFaceHandle faceHandle)
+        {
             if (m_fontAsset.SourceFont_EditorRef != null)
             {
-                if (FontEngine.LoadFontFace(m_fontAsset.SourceFont_EditorRef, pointSize, faceIndex) == FontEngineError.Success)
+                if (FontEngine.LoadFontFace(m_fontAsset.SourceFont_EditorRef, pointSize, faceIndex, out faceHandle) == FontEngineError.Success)
                     return FontEngineError.Success;
             }
 
             // Requires Unity 2018.4.35f1
-            return FontEngine.LoadFontFace(m_fontAsset.faceInfo.familyName, m_fontAsset.faceInfo.styleName, pointSize);
+            return FontEngine.LoadFontFace(m_fontAsset.faceInfo.familyName, m_fontAsset.faceInfo.styleName, pointSize, out faceHandle);
         }
 
 

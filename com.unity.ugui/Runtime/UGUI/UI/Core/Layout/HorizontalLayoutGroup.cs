@@ -1,12 +1,13 @@
 namespace UnityEngine.UI
 {
+    /// <summary>
+    /// Arranges child elements side by side horizontally.
+    /// </summary>
     [AddComponentMenu("Layout/Horizontal Layout Group", 150)]
     [UGUIHelpURL("HorizontalLayoutGroup")]
-    /// <summary>
-    /// Layout class for arranging child elements side by side.
-    /// </summary>
     public class HorizontalLayoutGroup : HorizontalOrVerticalLayoutGroup
     {
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a HorizontalLayoutGroup to a GameObject.</summary>
         protected HorizontalLayoutGroup()
         {}
 

@@ -21,6 +21,7 @@ namespace UnityEngine.UI
         private readonly Dictionary<Canvas, IndexedSet<Graphic>> m_Graphics = new Dictionary<Canvas, IndexedSet<Graphic>>();
         private readonly Dictionary<Canvas, IndexedSet<Graphic>> m_RaycastableGraphics = new Dictionary<Canvas, IndexedSet<Graphic>>();
 
+        /// <summary>Protected default constructor. GraphicRegistry is a singleton; access it via <see cref="instance"/>.</summary>
         protected GraphicRegistry()
         {
             // Avoid runtime generation of these types. Some platforms are AOT only and do not support

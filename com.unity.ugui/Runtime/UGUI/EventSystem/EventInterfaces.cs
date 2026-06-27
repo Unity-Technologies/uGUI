@@ -108,6 +108,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Use this callback to detect clicks.
         /// </summary>
+        /// <param name="eventData">The pointer event data for the click.</param>
         void OnPointerClick(PointerEventData eventData);
     }
 
@@ -123,6 +124,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Called by a BaseInputModule before a drag is started.
         /// </summary>
+        /// <param name="eventData">The pointer event data for the drag.</param>
         void OnBeginDrag(PointerEventData eventData);
     }
 
@@ -137,6 +139,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Called by a BaseInputModule when a drag has been found but before it is valid to begin the drag.
         /// </summary>
+        /// <param name="eventData">The pointer event data for the drag.</param>
         void OnInitializePotentialDrag(PointerEventData eventData);
     }
 
@@ -238,6 +241,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// When dragging is occurring this will be called every time the cursor is moved.
         /// </summary>
+        /// <param name="eventData">The pointer event data for the drag.</param>
         void OnDrag(PointerEventData eventData);
     }
 
@@ -253,6 +257,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Called by a BaseInputModule when a drag is ended.
         /// </summary>
+        /// <param name="eventData">The pointer event data for the drag.</param>
         void OnEndDrag(PointerEventData eventData);
     }
 
@@ -380,6 +385,9 @@ namespace UnityEngine.EventSystems
     /// </remarks>
     public interface ISubmitHandler : IEventSystemHandler
     {
+        /// <summary>
+        /// Called when a submit event occurs.</summary>
+        /// <param name="eventData">The base event data.</param>
         void OnSubmit(BaseEventData eventData);
     }
 

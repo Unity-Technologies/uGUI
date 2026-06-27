@@ -19,13 +19,13 @@ namespace UnityEngine.UI
     {
         /// <summary>
         /// After this method is invoked, layout horizontal input properties should return up-to-date values.
-        ///  Children will already have up-to-date layout horizontal inputs when this methods is called.
+        /// Children will already have up-to-date layout horizontal inputs when this method is called.
         /// </summary>
         void CalculateLayoutInputHorizontal();
 
         /// <summary>
-        ///After this method is invoked, layout vertical input properties should return up-to-date values.
-        ///Children will already have up-to-date layout vertical inputs when this methods is called.
+        /// After this method is invoked, layout vertical input properties should return up-to-date values.
+        /// Children will already have up-to-date layout vertical inputs when this methods is called.
         /// </summary>
         void CalculateLayoutInputVertical();
 

@@ -9,6 +9,7 @@ namespace UnityEngine.UI
     [ExecuteAlways]
     public abstract class HorizontalOrVerticalLayoutGroup : LayoutGroup
     {
+        /// <summary>Serialized backing field for <see cref="spacing"/>.</summary>
         [SerializeField] protected float m_Spacing = 0;
 
         /// <summary>
@@ -16,6 +17,7 @@ namespace UnityEngine.UI
         /// </summary>
         public float spacing { get { return m_Spacing; } set { SetProperty(ref m_Spacing, value); } }
 
+        /// <summary>Serialized backing field for <see cref="childForceExpandWidth"/>.</summary>
         [SerializeField] protected bool m_ChildForceExpandWidth = true;
 
         /// <summary>
@@ -23,6 +25,7 @@ namespace UnityEngine.UI
         /// </summary>
         public bool childForceExpandWidth { get { return m_ChildForceExpandWidth; } set { SetProperty(ref m_ChildForceExpandWidth, value); } }
 
+        /// <summary>Serialized backing field for <see cref="childForceExpandHeight"/>.</summary>
         [SerializeField] protected bool m_ChildForceExpandHeight = true;
 
         /// <summary>
@@ -30,6 +33,7 @@ namespace UnityEngine.UI
         /// </summary>
         public bool childForceExpandHeight { get { return m_ChildForceExpandHeight; } set { SetProperty(ref m_ChildForceExpandHeight, value); } }
 
+        /// <summary>Serialized backing field for <see cref="childControlWidth"/>.</summary>
         [SerializeField] protected bool m_ChildControlWidth = true;
 
         /// <summary>
@@ -42,6 +46,7 @@ namespace UnityEngine.UI
         /// </remarks>
         public bool childControlWidth { get { return m_ChildControlWidth; } set { SetProperty(ref m_ChildControlWidth, value); } }
 
+        /// <summary>Serialized backing field for <see cref="childControlHeight"/>.</summary>
         [SerializeField] protected bool m_ChildControlHeight = true;
 
         /// <summary>
@@ -54,6 +59,7 @@ namespace UnityEngine.UI
         /// </remarks>
         public bool childControlHeight { get { return m_ChildControlHeight; } set { SetProperty(ref m_ChildControlHeight, value); } }
 
+        /// <summary>Serialized backing field for <see cref="childScaleWidth"/>.</summary>
         [SerializeField] protected bool m_ChildScaleWidth = false;
 
         /// <summary>
@@ -61,6 +67,7 @@ namespace UnityEngine.UI
         /// </summary>
         public bool childScaleWidth { get { return m_ChildScaleWidth; } set { SetProperty(ref m_ChildScaleWidth, value); } }
 
+        /// <summary>Serialized backing field for <see cref="childScaleHeight"/>.</summary>
         [SerializeField] protected bool m_ChildScaleHeight = false;
 
         /// <summary>
@@ -77,6 +84,7 @@ namespace UnityEngine.UI
         /// </remarks>
         public bool reverseArrangement { get { return m_ReverseArrangement; } set { SetProperty(ref m_ReverseArrangement, value); } }
 
+        /// <summary>Serialized backing field for <see cref="reverseArrangement"/>.</summary>
         [SerializeField] protected bool m_ReverseArrangement = false;
 
         /// <summary>

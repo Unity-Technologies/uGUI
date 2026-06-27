@@ -2,13 +2,13 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
+    /// <summary>
+    /// Add this component to a GameObject to make it into a layout element or override values on an existing layout element.
+    /// </summary>
     [AddComponentMenu("Layout/Layout Element", 140)]
     [RequireComponent(typeof(RectTransform))]
     [ExecuteAlways]
     [UGUIHelpURL("LayoutElement")]
-    /// <summary>
-    /// Add this component to a GameObject to make it into a layout element or override values on an existing layout element.
-    /// </summary>
     public class LayoutElement : UIBehaviour, ILayoutElement, ILayoutIgnorer
     {
         [SerializeField] private bool m_IgnoreLayout = false;
@@ -30,7 +30,9 @@ namespace UnityEngine.UI
         /// </remarks>
         public virtual bool ignoreLayout { get { return m_IgnoreLayout; } set { if (SetPropertyUtility.SetStruct(ref m_IgnoreLayout, value)) SetDirty(); } }
 
+        /// <summary>Called by the layout system. Calculates and stores horizontal layout properties.</summary>
         public virtual void CalculateLayoutInputHorizontal() {}
+        /// <summary>Called by the layout system. Calculates and stores vertical layout properties.</summary>
         public virtual void CalculateLayoutInputVertical() {}
 
         /// <inheritdoc/>
@@ -228,31 +230,37 @@ namespace UnityEngine.UI
         /// </summary>
         public virtual int layoutPriority { get { return m_LayoutPriority; } set { if (SetPropertyUtility.SetStruct(ref m_LayoutPriority, value)) SetDirty(); } }
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a LayoutElement to a GameObject.</summary>
         protected LayoutElement()
         {}
 
+        /// <summary>Called when it becomes enabled. Notifies the layout system that a rebuild is needed.</summary>
         protected override void OnEnable()
         {
             base.OnEnable();
             SetDirty();
         }
 
+        /// <summary>Called when the parent changes. Notifies the layout system that a rebuild is needed.</summary>
         protected override void OnTransformParentChanged()
         {
             SetDirty();
         }
 
+        /// <summary>Called when it becomes disabled. Notifies the layout system that a rebuild is needed.</summary>
         protected override void OnDisable()
         {
             SetDirty();
             base.OnDisable();
         }
 
+        /// <summary>Called when animation properties are applied. Notifies the layout system that a rebuild is needed.</summary>
         protected override void OnDidApplyAnimationProperties()
         {
             SetDirty();
         }
 
+        /// <summary>Called before the parent changes. Notifies the layout system that a rebuild is needed.</summary>
         protected override void OnBeforeTransformParentChanged()
         {
             SetDirty();

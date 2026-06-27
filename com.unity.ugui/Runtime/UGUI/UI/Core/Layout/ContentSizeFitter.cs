@@ -2,16 +2,16 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
-    [AddComponentMenu("Layout/Content Size Fitter", 141)]
-    [ExecuteAlways]
-    [RequireComponent(typeof(RectTransform))]
-    [UGUIHelpURL("ContentSizeFitter")]
     /// <summary>
     /// Resizes a RectTransform to fit the size of its content.
     /// </summary>
     /// <remarks>
     /// The ContentSizeFitter can be used on GameObjects that have one or more ILayoutElement components, such as Text, Image, HorizontalLayoutGroup, VerticalLayoutGroup, and GridLayoutGroup.
     /// </remarks>
+    [AddComponentMenu("Layout/Content Size Fitter", 141)]
+    [ExecuteAlways]
+    [RequireComponent(typeof(RectTransform))]
+    [UGUIHelpURL("ContentSizeFitter")]
     public class ContentSizeFitter : UIBehaviour, ILayoutSelfController
     {
         /// <summary>
@@ -44,6 +44,7 @@ namespace UnityEngine.UI
             DrivenTransformProperties.SizeDeltaY
         };
 
+        /// <summary>Serialized backing field for <see cref="horizontalFit"/>.</summary>
         [Tooltip("Controls how the width of this RectTransform automatically resizes based on its content.")]
         [SerializeField] protected FitMode m_HorizontalFit = FitMode.Unconstrained;
 
@@ -52,6 +53,7 @@ namespace UnityEngine.UI
         /// </summary>
         public FitMode horizontalFit { get { return m_HorizontalFit; } set { if (SetPropertyUtility.SetStruct(ref m_HorizontalFit, value)) SetDirty(); } }
 
+        /// <summary>Serialized backing field for <see cref="verticalFit"/>.</summary>
         [Tooltip("Controls how the height of this RectTransform automatically resizes based on its content.")]
         [SerializeField] protected FitMode m_VerticalFit = FitMode.Unconstrained;
 
@@ -76,15 +78,18 @@ namespace UnityEngine.UI
         private DrivenRectTransformTracker m_Tracker;
         #pragma warning restore 649
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a ContentSizeFitter to a GameObject.</summary>
         protected ContentSizeFitter()
         {}
 
+        /// <summary>Called when it becomes enabled. Registers for a layout rebuild.</summary>
         protected override void OnEnable()
         {
             base.OnEnable();
             SetDirty();
         }
 
+        /// <summary>Called when it becomes disabled. Registers for a layout rebuild.</summary>
         protected override void OnDisable()
         {
             m_Tracker.Clear();
@@ -92,6 +97,7 @@ namespace UnityEngine.UI
             base.OnDisable();
         }
 
+        /// <summary>Called when the RectTransform dimensions change. Registers for a layout rebuild.</summary>
         protected override void OnRectTransformDimensionsChange()
         {
             SetDirty();
@@ -129,23 +135,20 @@ namespace UnityEngine.UI
             rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)axis, size);
         }
 
-        /// <summary>
-        /// Calculate and apply the horizontal component of the size to the RectTransform
-        /// </summary>
+        /// <summary>Resizes the RectTransform's width according to the <see cref="horizontalFit"/> mode.</summary>
         public virtual void SetLayoutHorizontal()
         {
             m_Tracker.Clear();
             HandleSelfFittingAlongAxis(0);
         }
 
-        /// <summary>
-        /// Calculate and apply the vertical component of the size to the RectTransform
-        /// </summary>
+        /// <summary>Resizes the RectTransform's height according to the <see cref="verticalFit"/> mode.</summary>
         public virtual void SetLayoutVertical()
         {
             HandleSelfFittingAlongAxis(1);
         }
 
+        /// <summary>If active, it marks this RectTransform's layout to be recalculated.</summary>
         protected void SetDirty()
         {
             if (!IsActive())

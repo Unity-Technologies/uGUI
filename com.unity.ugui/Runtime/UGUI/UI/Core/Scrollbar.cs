@@ -5,10 +5,6 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
-    [AddComponentMenu("UI (Canvas)/Scrollbar", 36)]
-    [ExecuteAlways]
-    [RequireComponent(typeof(RectTransform))]
-    [UGUIHelpURL("Scrollbar")]
     /// <summary>
     /// A standard scrollbar with a variable sized handle that can be dragged between 0 and 1.
     /// </summary>
@@ -17,6 +13,10 @@ namespace UnityEngine.UI
     /// The anchors of the handle RectTransforms are driven by the Scrollbar. The handle can be a direct child of the GameObject with the Scrollbar, or intermediary RectTransforms can be placed in between for additional control.
     /// When a change to the scrollbar value occurs, a callback is sent to any registered listeners of onValueChanged.
     /// </remarks>
+    [AddComponentMenu("UI (Canvas)/Scrollbar", 36)]
+    [ExecuteAlways]
+    [RequireComponent(typeof(RectTransform))]
+    [UGUIHelpURL("Scrollbar")]
     public class Scrollbar : Selectable, IBeginDragHandler, IDragHandler, IInitializePotentialDragHandler, ICanvasElement
     {
         /// <summary>
@@ -45,10 +45,10 @@ namespace UnityEngine.UI
             TopToBottom,
         }
 
-        [Serializable]
         /// <summary>
-        /// UnityEvent callback for when a scrollbar is scrolled.
+        /// A <see cref="UnityEngine.Events.UnityEvent{T0}"/> raised when the scrollbar value changes, passing the new value as a float.
         /// </summary>
+        [Serializable]
         public class ScrollEvent : UnityEvent<float> {}
 
         [SerializeField]
@@ -68,6 +68,7 @@ namespace UnityEngine.UI
         /// </summary>
         public Direction direction { get { return m_Direction; } set { if (SetPropertyUtility.SetStruct(ref m_Direction, value)) UpdateVisuals(); } }
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a Scrollbar to a GameObject.</summary>
         protected Scrollbar()
         {}
 
@@ -175,6 +176,10 @@ namespace UnityEngine.UI
 
 #endif // if UNITY_EDITOR
 
+        /// <summary>
+		/// Called by the canvas update system to rebuild the scrollbar handle.
+		/// </summary>
+        /// <param name="executing">The current canvas update stage.</param>
         public virtual void Rebuild(CanvasUpdate executing)
         {
 #if UNITY_EDITOR
@@ -183,18 +188,15 @@ namespace UnityEngine.UI
 #endif
         }
 
-        /// <summary>
-        /// See ICanvasElement.LayoutComplete.
-        /// </summary>
+        /// <inheritdoc/>
         public virtual void LayoutComplete()
         {}
 
-        /// <summary>
-        /// See ICanvasElement.GraphicUpdateComplete.
-        /// </summary>
+        /// <inheritdoc/>
         public virtual void GraphicUpdateComplete()
         {}
 
+        /// <summary>Called when it becomes enabled. Begins driving RectTransform properties and updates visuals.</summary>
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -204,6 +206,7 @@ namespace UnityEngine.UI
             UpdateVisuals();
         }
 
+        /// <summary>Called when it becomes disabled. Stops driving RectTransform properties.</summary>
         protected override void OnDisable()
         {
             m_Tracker.Clear();
@@ -250,6 +253,7 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>Called when the RectTransform dimensions change. Updates visuals.</summary>
         protected override void OnRectTransformDimensionsChange()
         {
             base.OnRectTransformDimensionsChange();
@@ -359,6 +363,7 @@ namespace UnityEngine.UI
             return IsActive() && IsInteractable() && eventData.button == PointerEventData.InputButton.Left;
         }
 
+        /// <inheritdoc/>
         /// <summary>
         /// Handling for when the scrollbar value is begin being dragged.
         /// </summary>
@@ -381,6 +386,7 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <inheritdoc/>
         /// <summary>
         /// Handling for when the scrollbar value is dragged.
         /// </summary>
@@ -393,9 +399,8 @@ namespace UnityEngine.UI
                 UpdateDrag(eventData);
         }
 
-        /// <summary>
-        /// Event triggered when pointer is pressed down on the scrollbar.
-        /// </summary>
+        /// <inheritdoc/>
+        /// <remarks>Starts a coroutine to scroll toward the pointer position while the pointer is pressed.</remarks>
         public override void OnPointerDown(PointerEventData eventData)
         {
             if (!MayDrag(eventData))
@@ -406,6 +411,9 @@ namespace UnityEngine.UI
             m_PointerDownRepeat = StartCoroutine(ClickRepeat(eventData.pointerPressRaycast.screenPosition, eventData.enterEventCamera));
         }
 
+        /// <summary>Coroutine that repeatedly scrolls toward the pointer position while the button is held down.</summary>
+        /// <param name="eventData">The pointer event data for the held press.</param>
+        /// <returns>An enumerator for the coroutine.</returns>
         protected IEnumerator ClickRepeat(PointerEventData eventData)
         {
             return ClickRepeat(eventData.pointerPressRaycast.screenPosition, eventData.enterEventCamera);
@@ -414,6 +422,9 @@ namespace UnityEngine.UI
         /// <summary>
         /// Coroutine function for handling continual press during Scrollbar.OnPointerDown.
         /// </summary>
+        /// <param name="screenPosition">The screen position to scroll toward.</param>
+        /// <param name="camera">The camera for screen-to-world conversion.</param>
+        /// <returns>An enumerator for the coroutine.</returns>
         protected IEnumerator ClickRepeat(Vector2 screenPosition, Camera camera)
         {
             while (isPointerDownAndNotDragging)
@@ -427,18 +438,14 @@ namespace UnityEngine.UI
             StopCoroutine(m_PointerDownRepeat);
         }
 
-        /// <summary>
-        /// Event triggered when pointer is released after pressing on the scrollbar.
-        /// </summary>
+        /// <inheritdoc/>
         public override void OnPointerUp(PointerEventData eventData)
         {
             base.OnPointerUp(eventData);
             isPointerDownAndNotDragging = false;
         }
 
-        /// <summary>
-        /// Handling for movement events.
-        /// </summary>
+        /// <inheritdoc/>
         public override void OnMove(AxisEventData eventData)
         {
             if (!IsActive() || !IsInteractable())
@@ -476,9 +483,8 @@ namespace UnityEngine.UI
             }
         }
 
-        /// <summary>
-        /// Prevents selection if we we move on the Horizontal axis. See Selectable.FindSelectableOnLeft.
-        /// </summary>
+        /// <inheritdoc/>
+        /// <remarks>Prevents selection if the Scrollbar moves on the Horizontal axis.</remarks>
         public override Selectable FindSelectableOnLeft()
         {
             if (navigation.mode == Navigation.Mode.Automatic && axis == Axis.Horizontal)
@@ -486,9 +492,8 @@ namespace UnityEngine.UI
             return base.FindSelectableOnLeft();
         }
 
-        /// <summary>
-        /// Prevents selection if we we move on the Horizontal axis.  See Selectable.FindSelectableOnRight.
-        /// </summary>
+        /// <inheritdoc/>
+        /// <remarks>Prevents selection if the Scrollbar moves on the Horizontal axis.</remarks>
         public override Selectable FindSelectableOnRight()
         {
             if (navigation.mode == Navigation.Mode.Automatic && axis == Axis.Horizontal)
@@ -496,9 +501,8 @@ namespace UnityEngine.UI
             return base.FindSelectableOnRight();
         }
 
-        /// <summary>
-        /// Prevents selection if we we move on the Vertical axis. See Selectable.FindSelectableOnUp.
-        /// </summary>
+        /// <inheritdoc/>
+        /// <remarks>Prevents selection if the Scrollbar moves on the Vertical axis.</remarks>
         public override Selectable FindSelectableOnUp()
         {
             if (navigation.mode == Navigation.Mode.Automatic && axis == Axis.Vertical)
@@ -506,9 +510,8 @@ namespace UnityEngine.UI
             return base.FindSelectableOnUp();
         }
 
-        /// <summary>
-        /// Prevents selection if we we move on the Vertical axis. See Selectable.FindSelectableOnDown.
-        /// </summary>
+        /// <inheritdoc/>
+        /// <remarks>Prevents selection if the Scrollbar moves on the Vertical axis.</remarks>
         public override Selectable FindSelectableOnDown()
         {
             if (navigation.mode == Navigation.Mode.Automatic && axis == Axis.Vertical)
@@ -516,9 +519,7 @@ namespace UnityEngine.UI
             return base.FindSelectableOnDown();
         }
 
-        /// <summary>
-        /// See: IInitializePotentialDragHandler.OnInitializePotentialDrag
-        /// </summary>
+        /// <inheritdoc/>
         public virtual void OnInitializePotentialDrag(PointerEventData eventData)
         {
             eventData.useDragThreshold = false;

@@ -174,6 +174,12 @@ namespace TMPro.EditorUtilities
         List<uint> m_ExcludedCharacters = new List<uint>();
 
         private FaceInfo m_FaceInfo;
+        private FontFaceHandle m_FontFaceHandle;
+
+        // Font faces this creator window loaded, isolated under a window-unique owner id so they get
+        // their own per-face lock and never contend with live runtime/dynamic font faces. Unloaded in
+        // OnDisable so testing multiple fonts in one session doesn't leave faces in the shared cache.
+        private readonly HashSet<FontFaceHandle> m_LoadedFaceHandles = new HashSet<FontFaceHandle>();
 
         bool m_IncludeFontFeatures;
 
@@ -213,8 +219,18 @@ namespace TMPro.EditorUtilities
         {
             //Debug.Log("TextMeshPro Editor Window has been disabled.");
 
-            // Destroy Engine only if it has been initialized already
-            FontEngine.DestroyFontEngine();
+            // Do not destroy the FontEngine here — it is shared across the Editor and is likely
+            // still in use by dynamic font assets in the project.
+
+            // Release the font faces this window loaded (isolated under our owner id). If a generation
+            // is still running on a background thread, cancel it first; UnloadFontFace drains the
+            // per-face lock, so it waits for any in-flight render to finish before freeing the face.
+            if (m_IsProcessing)
+                FontEngine.SendCancellationRequest();
+
+            foreach (FontFaceHandle handle in m_LoadedFaceHandles)
+                FontEngine.UnloadFontFace(handle);
+            m_LoadedFaceHandles.Clear();
 
             ClearGeneratedData();
 
@@ -704,21 +720,20 @@ namespace TMPro.EditorUtilities
                     m_SavedFontAtlas = null;
                     m_OutputFeedback = string.Empty;
 
-                    // Initialize font engine
-                    FontEngineError errorCode = FontEngine.InitializeFontEngine();
+                    // Load into a face isolated to this window (owner id = window EntityId) so the
+                    // background generation below doesn't lock against live dynamic font assets that
+                    // share this source font. Tracked for unload in OnDisable. LoadFontFace lazily
+                    // initializes the FreeType library, so no explicit InitializeFontEngine is needed
+                    // (enumeration in OnEnable has typically already done so).
+                    FontEngineError errorCode = FontEngine.LoadFontFace(m_SourceFont, 0, m_SourceFontFaceIndex, GetEntityId(), out m_FontFaceHandle);
+
                     if (errorCode != FontEngineError.Success)
                     {
-                        Debug.Log("Font Asset Creator - Error [" + errorCode + "] has occurred while Initializing the FreeType Library.");
+                        Debug.LogWarning("Unable to load font face for [" + m_SourceFont.name + "]. Make sure \"Include Font Data\" is enabled in the Font Import Settings. You may disable it after creating the static Font Asset.", m_SourceFont);
                     }
-
-                    if (errorCode == FontEngineError.Success)
+                    else
                     {
-                        errorCode = FontEngine.LoadFontFace(m_SourceFont, 0, m_SourceFontFaceIndex);
-
-                        if (errorCode != FontEngineError.Success)
-                        {
-                            Debug.LogWarning("Unable to load font face for [" + m_SourceFont.name + "]. Make sure \"Include Font Data\" is enabled in the Font Import Settings. You may disable it after creating the static Font Asset.", m_SourceFont);
-                        }
+                        m_LoadedFaceHandles.Add(m_FontFaceHandle);
                     }
 
 
@@ -807,7 +822,7 @@ namespace TMPro.EditorUtilities
                                 uint unicode = characterSet[i];
                                 uint glyphIndex;
 
-                                if (FontEngine.TryGetGlyphIndex(unicode, out glyphIndex))
+                                if (FontEngine.TryGetGlyphIndex(m_FontFaceHandle, unicode, out glyphIndex))
                                 {
                                     // Skip over potential duplicate characters.
                                     if (m_CharacterLookupMap.ContainsKey(unicode))
@@ -855,7 +870,7 @@ namespace TMPro.EditorUtilities
                                     {
                                         m_AtlasGenerationProgressLabel = "Packing glyphs - Pass (" + iteration + ")";
 
-                                        FontEngine.SetFaceSize(m_PointSize);
+                                        FontEngine.SetFaceSize(ref m_FontFaceHandle, m_PointSize);
 
                                         m_Padding = (int)(m_PaddingMode == PaddingMode.Percentage ? m_PointSize * m_PaddingFieldValue / 100f : m_PaddingFieldValue);
 
@@ -871,7 +886,7 @@ namespace TMPro.EditorUtilities
                                             uint glyphIndex = m_AvailableGlyphsToAdd[i];
                                             Glyph glyph;
 
-                                            if (FontEngine.TryGetGlyphWithIndexValue(glyphIndex, glyphLoadFlags, out glyph))
+                                            if (FontEngine.TryGetGlyphWithIndexValue(m_FontFaceHandle, glyphIndex, glyphLoadFlags, out glyph))
                                             {
                                                 if (glyph.glyphRect.width > 0 && glyph.glyphRect.height > 0)
                                                 {
@@ -927,7 +942,7 @@ namespace TMPro.EditorUtilities
                                     m_AtlasGenerationProgressLabel = "Packing glyphs...";
 
                                     // Set point size
-                                    FontEngine.SetFaceSize(m_PointSize);
+                                    FontEngine.SetFaceSize(ref m_FontFaceHandle, m_PointSize);
 
                                     m_Padding = (int)(m_PaddingMode == PaddingMode.Percentage ? m_PointSize * m_PaddingFieldValue / 100 : m_PaddingFieldValue);
 
@@ -943,7 +958,7 @@ namespace TMPro.EditorUtilities
                                         uint glyphIndex = m_AvailableGlyphsToAdd[i];
                                         Glyph glyph;
 
-                                        if (FontEngine.TryGetGlyphWithIndexValue(glyphIndex, glyphLoadFlags, out glyph))
+                                        if (FontEngine.TryGetGlyphWithIndexValue(m_FontFaceHandle, glyphIndex, glyphLoadFlags, out glyph))
                                         {
                                             if (glyph.glyphRect.width > 0 && glyph.glyphRect.height > 0)
                                             {
@@ -972,7 +987,7 @@ namespace TMPro.EditorUtilities
                             {
                                 int packingModifier = ((GlyphRasterModes)m_GlyphRenderMode & GlyphRasterModes.RASTER_MODE_BITMAP) == GlyphRasterModes.RASTER_MODE_BITMAP ? 0 : 1;
 
-                                FontEngine.SetFaceSize(m_PointSize);
+                                FontEngine.SetFaceSize(ref m_FontFaceHandle, m_PointSize);
 
                                 m_Padding = (int)(m_PaddingMode == PaddingMode.Percentage ? m_PointSize * m_PaddingFieldValue / 100 : m_PaddingFieldValue);
 
@@ -1046,7 +1061,7 @@ namespace TMPro.EditorUtilities
                             }
 
                             // Get the face info for the current sampling point size.
-                            m_FaceInfo = FontEngine.GetFaceInfo();
+                            m_FaceInfo = FontEngine.GetFaceInfo(m_FontFaceHandle);
 
                             autoEvent.Set();
                         });
@@ -1078,7 +1093,7 @@ namespace TMPro.EditorUtilities
                                 // Render and add glyphs to the given atlas texture.
                                 if (m_GlyphsToRender.Count > 0)
                                 {
-                                    FontEngine.RenderGlyphsToTexture(m_GlyphsToRender, m_Padding, m_GlyphRenderMode, m_AtlasTextureBuffer, m_AtlasWidth, m_AtlasHeight);
+                                    FontEngine.RenderGlyphsToTexture(m_FontFaceHandle, m_GlyphsToRender, m_Padding, m_GlyphRenderMode, m_AtlasTextureBuffer, m_AtlasWidth, m_AtlasHeight);
                                 }
 
                                 m_IsRenderingDone = true;
@@ -1214,9 +1229,18 @@ namespace TMPro.EditorUtilities
         /// <returns></returns>
         string[] GetFontFaces()
         {
-            if (FontEngine.LoadFontFace(m_SourceFont, 0, 0) != FontEngineError.Success)
+            if (m_SourceFont == null)
                 return Array.Empty<string>();
-            return FontEngine.GetFontFaces();
+
+            // Isolate enumeration under this window's owner id (same as generation) so it never touches the
+            // shared cache entry that live dynamic font assets use for this source font. Tracked in
+            // m_LoadedFaceHandles for unload in OnDisable. faceIndex 0 is sufficient — GetFontFaces
+            // enumerates every face/style in the file regardless of which index was loaded.
+            if (FontEngine.LoadFontFace(m_SourceFont, 0, 0, GetEntityId(), out FontFaceHandle faceHandle) != FontEngineError.Success)
+                return Array.Empty<string>();
+
+            m_LoadedFaceHandles.Add(faceHandle);
+            return FontEngine.GetFontFaces(faceHandle);
         }
 
 
@@ -1994,7 +2018,7 @@ namespace TMPro.EditorUtilities
         #if TEXTCORE_FONT_ENGINE_1_5_OR_NEWER
         void PopulateGlyphAdjustmentTable(TMP_FontFeatureTable fontFeatureTable)
         {
-            GlyphPairAdjustmentRecord[] adjustmentRecords = FontEngine.GetPairAdjustmentRecords(m_AvailableGlyphsToAdd);
+            GlyphPairAdjustmentRecord[] adjustmentRecords = FontEngine.GetPairAdjustmentRecords(m_FontFaceHandle, m_AvailableGlyphsToAdd);
 
             if (adjustmentRecords == null)
                 return;
@@ -2019,7 +2043,7 @@ namespace TMPro.EditorUtilities
 
         void PopulateLigatureTable(TMP_FontFeatureTable fontFeatureTable)
         {
-            UnityEngine.TextCore.LowLevel.LigatureSubstitutionRecord[] ligatureRecords = FontEngine.GetLigatureSubstitutionRecords(m_AvailableGlyphsToAdd);
+            UnityEngine.TextCore.LowLevel.LigatureSubstitutionRecord[] ligatureRecords = FontEngine.GetLigatureSubstitutionRecords(m_FontFaceHandle, m_AvailableGlyphsToAdd);
             if (ligatureRecords != null)
                 AddLigatureRecords(fontFeatureTable, ligatureRecords);
         }
@@ -2053,11 +2077,11 @@ namespace TMPro.EditorUtilities
 
         void PopulateDiacriticalMarkAdjustmentTables(TMP_FontFeatureTable fontFeatureTable)
         {
-            UnityEngine.TextCore.LowLevel.MarkToBaseAdjustmentRecord[] markToBaseRecords = FontEngine.GetMarkToBaseAdjustmentRecords(m_AvailableGlyphsToAdd);
+            UnityEngine.TextCore.LowLevel.MarkToBaseAdjustmentRecord[] markToBaseRecords = FontEngine.GetMarkToBaseAdjustmentRecords(m_FontFaceHandle, m_AvailableGlyphsToAdd);
             if (markToBaseRecords != null)
                 AddMarkToBaseAdjustmentRecords(fontFeatureTable, markToBaseRecords);
 
-            UnityEngine.TextCore.LowLevel.MarkToMarkAdjustmentRecord[] markToMarkRecords = FontEngine.GetMarkToMarkAdjustmentRecords(m_AvailableGlyphsToAdd);
+            UnityEngine.TextCore.LowLevel.MarkToMarkAdjustmentRecord[] markToMarkRecords = FontEngine.GetMarkToMarkAdjustmentRecords(m_FontFaceHandle, m_AvailableGlyphsToAdd);
             if (markToMarkRecords != null)
                 AddMarkToMarkAdjustmentRecords(fontFeatureTable, markToMarkRecords);
 

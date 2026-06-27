@@ -6,21 +6,23 @@ using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
-    [AddComponentMenu("UI (Canvas)/Mask", 13)]
-    [ExecuteAlways]
-    [RequireComponent(typeof(RectTransform))]
-    [DisallowMultipleComponent]
-    [UGUIHelpURL("Mask")]
     /// <summary>
     /// A component for masking children elements.
     /// </summary>
     /// <remarks>
     /// By using this element any children elements that have masking enabled will mask where a sibling Graphic would write 0 to the stencil buffer.
     /// </remarks>
+    [AddComponentMenu("UI (Canvas)/Mask", 13)]
+    [ExecuteAlways]
+    [RequireComponent(typeof(RectTransform))]
+    [DisallowMultipleComponent]
+    [UGUIHelpURL("Mask")]
     public class Mask : UIBehaviour, ICanvasRaycastFilter, IMaterialModifier
     {
         [NonSerialized]
         private RectTransform m_RectTransform;
+		
+        /// <summary>The RectTransform of this Mask's GameObject.</summary>
         public RectTransform rectTransform
         {
             get { return m_RectTransform ?? (m_RectTransform = GetComponent<RectTransform>()); }
@@ -63,14 +65,21 @@ namespace UnityEngine.UI
         [NonSerialized]
         private Material m_UnmaskMaterial;
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a Mask to a GameObject.</summary>
         protected Mask()
         {}
 
+        /// <summary>
+		/// Returns whether this mask is enabled and its graphic is valid.
+		/// </summary>
+        /// <returns>True if the mask is active and has a valid graphic.</returns>
         public virtual bool MaskEnabled() { return IsActive() && graphic != null; }
 
+        /// <summary>Obsolete. No longer called or used.</summary>
         [Obsolete("Not used anymore.", true)]
         public virtual void OnSiblingGraphicEnabledDisabled() {}
 
+        /// <summary>Called when it becomes enabled. Notifies clippable children and triggers a material update.</summary>
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -87,6 +96,7 @@ namespace UnityEngine.UI
             MaskUtilities.NotifyStencilStateChanged(this);
         }
 
+        /// <summary>Called when it becomes disabled. Notifies clippable children and triggers a material update.</summary>
         protected override void OnDisable()
         {
             // we call base OnDisable first here
@@ -134,6 +144,12 @@ namespace UnityEngine.UI
 
 #endif
 
+        /// <summary>
+		/// Returns whether the given screen position hits the visible (unmasked) area of this mask graphic.
+		/// </summary>
+        /// <param name="sp">The screen position to test.</param>
+        /// <param name="eventCamera">The camera used for the raycast.</param>
+        /// <returns>True if the position is within the unmasked area.</returns>
         public virtual bool IsRaycastLocationValid(Vector2 sp, Camera eventCamera)
         {
             if (!isActiveAndEnabled)

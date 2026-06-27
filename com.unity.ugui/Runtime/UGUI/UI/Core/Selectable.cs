@@ -5,14 +5,14 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
+    /// <summary>
+    /// Simple selectable object - derived from to create a selectable control.
+    /// </summary>
     [AddComponentMenu("UI (Canvas)/Selectable", 35)]
     [ExecuteAlways]
     [SelectionBase]
     [DisallowMultipleComponent]
     [UGUIHelpURL("Selectable")]
-    /// <summary>
-    /// Simple selectable object - derived from to create a selectable control.
-    /// </summary>
     public class Selectable
         :
         UIBehaviour,
@@ -21,7 +21,9 @@ namespace UnityEngine.UI
         IPointerEnterHandler, IPointerExitHandler,
         ISelectHandler, IDeselectHandler
     {
+        /// <summary>Global array of all currently active Selectable instances.</summary>
         protected static Selectable[] s_Selectables = new Selectable[10];
+        /// <summary>The number of active Selectable instances in <see cref="s_Selectables"/>.</summary>
         protected static int s_SelectableCount = 0;
 
 #if UNITY_EDITOR
@@ -194,6 +196,7 @@ namespace UnityEngine.UI
 
 
         private bool m_GroupsAllowInteraction = true;
+        /// <summary>This selectable's index in the global <see cref="s_Selectables"/> array.</summary>
         protected int m_CurrentIndex = -1;
 
         /// <summary>
@@ -386,6 +389,7 @@ namespace UnityEngine.UI
         private bool             isPointerDown     { get; set; }
         private bool             hasSelection      { get; set; }
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a Selectable to a GameObject.</summary>
         protected Selectable()
         {}
 
@@ -436,6 +440,8 @@ namespace UnityEngine.UI
         }
 
         private readonly List<CanvasGroup> m_CanvasGroupCache = new List<CanvasGroup>();
+		
+        /// <summary>Called when a parent CanvasGroup changes. Re-evaluates the interactable state.</summary>
         protected override void OnCanvasGroupChanged()
         {
             var parentGroupAllowsInteraction = ParentGroupAllowsInteraction();
@@ -493,18 +499,19 @@ namespace UnityEngine.UI
         /// ]]>
         ///</code>
         /// </example>
+        /// <returns>True if this Selectable is interactive.</returns>
         public virtual bool IsInteractable()
         {
             return m_GroupsAllowInteraction && m_Interactable;
         }
 
-        // Call from unity if animation properties have changed
+        /// <summary>Called when animation properties are applied. Triggers a state transition.</summary>
         protected override void OnDidApplyAnimationProperties()
         {
             OnSetProperty();
         }
 
-        // Select on enable and add to the list.
+        /// <summary>Called when it becomes enabled. Registers in the global selectable list and performs an initial state transition.</summary>
         protected override void OnEnable()
         {
             //Check to avoid multiple OnEnable() calls for each selectable
@@ -535,6 +542,7 @@ namespace UnityEngine.UI
             m_EnableCalled = true;
         }
 
+        /// <summary>Called when the parent changes. Re-evaluates interactability based on parent CanvasGroups.</summary>
         protected override void OnTransformParentChanged()
         {
             base.OnTransformParentChanged();
@@ -553,7 +561,7 @@ namespace UnityEngine.UI
             DoStateTransition(currentSelectionState, false);
         }
 
-        // Remove from the list.
+        /// <summary>Called when it becomes disabled. Unregisters from the global selectable list and clears pointer state.</summary>
         protected override void OnDisable()
         {
             //Check to avoid multiple OnDisable() calls for each selectable
@@ -617,6 +625,7 @@ namespace UnityEngine.UI
 
 #endif // if UNITY_EDITOR
 
+        /// <summary>The current selection state of this Selectable.</summary>
         protected SelectionState currentSelectionState
         {
             get
@@ -659,10 +668,10 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Transition the Selectable to the entered state.
+        /// Applies a visual state transition to the provided state.
         /// </summary>
-        /// <param name="state">State to transition to</param>
-        /// <param name="instant">Should the transition occur instantly.</param>
+        /// <param name="state">SelectionState to transition to</param>
+        /// <param name="instant">Should the transition occur instantly, without animation.</param>
         protected virtual void DoStateTransition(SelectionState state, bool instant)
         {
             if (!gameObject.activeInHierarchy)
@@ -914,6 +923,7 @@ namespace UnityEngine.UI
         /// ]]>
         ///</code>
         /// </example>
+        /// <returns>The nearest Selectable to the left, or null.</returns>
         public virtual Selectable FindSelectableOnLeft()
         {
             if (m_Navigation.mode == Navigation.Mode.Explicit)
@@ -953,6 +963,7 @@ namespace UnityEngine.UI
         /// ]]>
         ///</code>
         /// </example>
+        /// <returns>The nearest Selectable to the right, or null.</returns>
         public virtual Selectable FindSelectableOnRight()
         {
             if (m_Navigation.mode == Navigation.Mode.Explicit)
@@ -992,6 +1003,7 @@ namespace UnityEngine.UI
         /// ]]>
         ///</code>
         /// </example>
+        /// <returns>The nearest Selectable above, or null.</returns>
         public virtual Selectable FindSelectableOnUp()
         {
             if (m_Navigation.mode == Navigation.Mode.Explicit)
@@ -1031,6 +1043,7 @@ namespace UnityEngine.UI
         /// ]]>
         ///</code>
         /// </example>
+        /// <returns>The nearest Selectable below, or null.</returns>
         public virtual Selectable FindSelectableOnDown()
         {
             if (m_Navigation.mode == Navigation.Mode.Explicit)
@@ -1071,6 +1084,7 @@ namespace UnityEngine.UI
         /// ]]>
         ///</code>
         /// </example>
+        /// <param name="eventData">The axis event data containing the move direction.</param>
         public virtual void OnMove(AxisEventData eventData)
         {
             switch (eventData.moveDir)
@@ -1212,7 +1226,7 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Evaluate current state and transition to pressed state.
+        /// Called when the pointer is pressed. Evaluates the current selection state and transitions to the appropriate state.
         /// </summary>
         /// <example>
         /// <code>
@@ -1233,6 +1247,7 @@ namespace UnityEngine.UI
         /// ]]>
         /// </code>
         /// </example>
+        /// <param name="eventData">The pointer event data for the press.</param>
         public virtual void OnPointerDown(PointerEventData eventData)
         {
             if (eventData.button != PointerEventData.InputButton.Left)
@@ -1247,7 +1262,7 @@ namespace UnityEngine.UI
         }
 
         /// <summary>
-        /// Evaluate eventData and transition to appropriate state.
+        /// Called when the pointer is released. Evaluates the eventData and transitions to appropriate state.
         /// </summary>
         /// <example>
         /// <code>
@@ -1273,6 +1288,7 @@ namespace UnityEngine.UI
         /// ]]>
         /// </code>
         /// </example>
+        /// <param name="eventData">The pointer event data for the release.</param>
         public virtual void OnPointerUp(PointerEventData eventData)
         {
             if (eventData.button != PointerEventData.InputButton.Left)
@@ -1305,6 +1321,7 @@ namespace UnityEngine.UI
         /// ]]>
         /// </code>
         /// </example>
+        /// <param name="eventData">The pointer event data for the enter.</param>
         public virtual void OnPointerEnter(PointerEventData eventData)
         {
             isPointerInside = true;
@@ -1333,6 +1350,7 @@ namespace UnityEngine.UI
         /// ]]>
         /// </code>
         /// </example>
+        /// <param name="eventData">The pointer event data for the exit.</param>
         public virtual void OnPointerExit(PointerEventData eventData)
         {
             isPointerInside = false;
@@ -1361,6 +1379,7 @@ namespace UnityEngine.UI
         /// ]]>
         /// </code>
         /// </example>
+        /// <param name="eventData">The base event data.</param>
         public virtual void OnSelect(BaseEventData eventData)
         {
             hasSelection = true;
@@ -1388,6 +1407,7 @@ namespace UnityEngine.UI
         /// ]]>
         /// </code>
         /// </example>
+        /// <param name="eventData">The base event data.</param>
         public virtual void OnDeselect(BaseEventData eventData)
         {
             hasSelection = false;

@@ -32,6 +32,7 @@ namespace UnityEngine.UI
         /// <param name="rect">The RectTransform of the layout element to query.</param>
         /// <param name="axis">The axis to query. This can be 0 or 1.</param>
         /// <remarks>All components on the GameObject that implement the ILayoutElement are queried. The one with the highest priority which has a value for this setting is used. If multiple components have this setting and have the same priority, the maximum value out of those is used.</remarks>
+        /// <returns>The minimum size for the specified axis.</returns>
         public static float GetMinSize(RectTransform rect, int axis)
         {
             return axis == 0 ? GetMinWidth(rect) : GetMinHeight(rect);
@@ -42,7 +43,8 @@ namespace UnityEngine.UI
         /// </summary>
         /// <param name="rect">The RectTransform of the layout element to query.</param>
         /// <param name="axis">The axis to query. This can be 0 or 1.</param>
-        /// <returns>All components on the GameObject that implement the ILayoutElement are queried. The one with the highest priority which has a value for this setting is used. If multiple components have this setting and have the same priority, the maximum value out of those is used.</returns>
+        /// <remarks>All components on the GameObject that implement the ILayoutElement are queried. The one with the highest priority which has a value for this setting is used. If multiple components have this setting and have the same priority, the minimum value out of those is used.</remarks>
+        /// <returns>The maximum size for the specified axis.</returns>
         public static float GetMaxSize(RectTransform rect, int axis)
         {
             return axis == 0 ? GetMaxWidth(rect) : GetMaxHeight(rect);
@@ -56,6 +58,7 @@ namespace UnityEngine.UI
         /// <remarks>
         /// All components on the GameObject that implement the ILayoutElement are queried. The one with the highest priority which has a value for this setting is used. If multiple components have this setting and have the same priority, the maximum value out of those is used.
         /// </remarks>
+        /// <returns>The preferred size for the specified axis.</returns>
         public static float GetPreferredSize(RectTransform rect, int axis)
         {
             return axis == 0 ? GetPreferredWidth(rect) : GetPreferredHeight(rect);
@@ -69,6 +72,7 @@ namespace UnityEngine.UI
         /// </remarks>
         /// <param name="rect">The RectTransform of the layout element to query.</param>
         /// <param name="axis">The axis to query. This can be 0 or 1.</param>
+        /// <returns>The flexible size for the specified axis.</returns>
         public static float GetFlexibleSize(RectTransform rect, int axis)
         {
             return axis == 0 ? GetFlexibleWidth(rect) : GetFlexibleHeight(rect);
@@ -81,6 +85,7 @@ namespace UnityEngine.UI
         /// <remarks>
         /// All components on the GameObject that implement the ILayoutElement are queried. The one with the highest priority which has a value for this setting is used. If multiple components have this setting and have the same priority, the maximum value out of those is used.
         /// </remarks>
+        /// <returns>The minimum width of the layout element.</returns>
         public static float GetMinWidth(RectTransform rect)
         {
             return GetLayoutProperty(rect, k_GetMinWidth, 0);
@@ -91,9 +96,10 @@ namespace UnityEngine.UI
         /// Returns the maximum width of the layout element.
         /// </summary>
         /// <param name="rect">The RectTransform of the layout element to query.</param>
-        /// <returns>
+        /// <remarks>
         /// All components on the GameObject that implement the ILayoutElement are queried. The one with the highest priority which has a value for this setting is used. If multiple components have this setting and have the same priority, the minimum value out of those is used.
-        /// </returns>
+        /// </remarks>
+        /// <returns>The maximum width of the layout element.</returns>
         public static float GetMaxWidth(RectTransform rect)
         {
             return GetLayoutProperty(rect, k_GetMaxWidth, k_LessThan, DefaultMaxSize, out _);
@@ -103,9 +109,10 @@ namespace UnityEngine.UI
         /// Returns the preferred width of the layout element.
         /// </summary>
         /// <param name="rect">The RectTransform of the layout element to query.</param>
-        /// <returns>
+        /// <remarks>
         /// All components on the GameObject that implement the ILayoutElement are queried. The one with the highest priority which has a value for this setting is used. If multiple components have this setting and have the same priority, the maximum value out of those is used. The final value is clamped to the available minimum and maximum widths.
-        /// </returns>
+        /// </remarks>
+        /// <returns>The preferred width of the layout element.</returns>
         public static float GetPreferredWidth(RectTransform rect)
         {
             return GetPreferredLayoutProperty(rect, k_GetMinWidth, k_GetPreferredWidth, k_GetMaxWidth, 0);
@@ -118,6 +125,7 @@ namespace UnityEngine.UI
         /// All components on the GameObject that implement the ILayoutElement are queried. The one with the highest priority which has a value for this setting is used. If multiple components have this setting and have the same priority, the maximum value out of those is used
         /// </remarks>
         /// <param name="rect">The RectTransform of the layout element to query.</param>
+        /// <returns>The flexible width of the layout element.</returns>
         public static float GetFlexibleWidth(RectTransform rect)
         {
             return GetLayoutProperty(rect, k_GetFlexibleWidth, 0);
@@ -130,6 +138,7 @@ namespace UnityEngine.UI
         /// <remarks>
         /// All components on the GameObject that implement the ILayoutElement are queried. The one with the highest priority which has a value for this setting is used. If multiple components have this setting and have the same priority, the maximum value out of those is used.
         /// </remarks>
+        /// <returns>The minimum height of the layout element.</returns>
         public static float GetMinHeight(RectTransform rect)
         {
             return GetLayoutProperty(rect, k_GetMinHeight, 0);
@@ -139,9 +148,10 @@ namespace UnityEngine.UI
         /// Returns the maximum height of the layout element.
         /// </summary>
         /// <param name="rect">The RectTransform of the layout element to query.</param>
-        /// <returns>
+        /// <remarks>
         /// All components on the GameObject that implement the ILayoutElement are queried. The one with the highest priority which has a value for this setting is used. If multiple components have this setting and have the same priority, the minimum value out of those is used. The final value is clamped to the available minimum and maximum heights.
-        /// </returns>
+        /// </remarks>
+        /// <returns>The maximum height of the layout element.</returns>
         public static float GetMaxHeight(RectTransform rect)
         {
             return GetLayoutProperty(rect, k_GetMaxHeight, k_LessThan, DefaultMaxSize, out _);
@@ -154,6 +164,7 @@ namespace UnityEngine.UI
         /// <remarks>
         /// All components on the GameObject that implement the ILayoutElement are queried. The one with the highest priority which has a value for this setting is used. If multiple components have this setting and have the same priority, the maximum value out of those is used.
         /// </remarks>
+        /// <returns>The preferred height of the layout element.</returns>
         public static float GetPreferredHeight(RectTransform rect)
         {
             return GetPreferredLayoutProperty(rect, k_GetMinHeight, k_GetPreferredHeight, k_GetMaxHeight, 0);
@@ -166,6 +177,7 @@ namespace UnityEngine.UI
         /// All components on the GameObject that implement the ILayoutElement are queried. The one with the highest priority which has a value for this setting is used. If multiple components have this setting and have the same priority, the maximum value out of those is used.
         /// </remarks>
         /// <param name="rect">The RectTransform of the layout element to query.</param>
+        /// <returns>The flexible height of the layout element.</returns>
         public static float GetFlexibleHeight(RectTransform rect)
         {
             return GetLayoutProperty(rect, k_GetFlexibleHeight, 0);

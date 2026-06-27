@@ -57,9 +57,12 @@ namespace UnityEngine.UI
 
         private bool m_ListsInitalized = false;
 
+        /// <summary>Creates a new empty VertexHelper.</summary>
         public VertexHelper()
         {}
 
+        /// <summary>Creates a new VertexHelper populated with data from an existing mesh.</summary>
+        /// <param name="m">The mesh to read vertex data from.</param>
         public VertexHelper(Mesh m)
         {
             InitializeListIfRequired();
@@ -213,6 +216,7 @@ namespace UnityEngine.UI
         /// <summary>
         /// Fill the given mesh with the stream data.
         /// </summary>
+        /// <param name="mesh">The mesh to write the current vertex and index data into.</param>
         public void FillMesh(Mesh mesh)
         {
             InitializeListIfRequired();
@@ -379,6 +383,7 @@ namespace UnityEngine.UI
         /// <summary>
         /// Create a stream of UI vertex (in triangles) from the stream.
         /// </summary>
+        /// <param name="stream">The list to populate with the current vertex data in triangle-stream format.</param>
         public void GetUIVertexStream(List<UIVertex> stream)
         {
             if (stream == null)

@@ -3,10 +3,10 @@ using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
-    [Serializable]
     /// <summary>
     /// Struct for storing Text generation settings.
     /// </summary>
+    [Serializable]
     public class FontData : ISerializationCallbackReceiver
     {
         [SerializeField]

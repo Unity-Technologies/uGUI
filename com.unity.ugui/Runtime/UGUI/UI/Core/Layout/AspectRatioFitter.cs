@@ -2,14 +2,14 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
+    /// <summary>
+    /// Resizes a RectTransform to fit a specified aspect ratio.
+    /// </summary>
     [AddComponentMenu("Layout/Aspect Ratio Fitter", 142)]
     [ExecuteAlways]
     [RequireComponent(typeof(RectTransform))]
     [DisallowMultipleComponent]
     [UGUIHelpURL("AspectRatioFitter")]
-    /// <summary>
-    /// Resizes a RectTransform to fit a specified aspect ratio.
-    /// </summary>
     public class AspectRatioFitter : UIBehaviour, ILayoutSelfController
     {
         /// <summary>
@@ -77,8 +77,10 @@ namespace UnityEngine.UI
         private DrivenRectTransformTracker m_Tracker;
         #pragma warning restore 649
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add an AspectRatioFitter to a GameObject.</summary>
         protected AspectRatioFitter() {}
 
+        /// <summary>Called when it becomes enabled. Applies the aspect ratio constraint to the RectTransform.</summary>
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -86,6 +88,7 @@ namespace UnityEngine.UI
             SetDirty();
         }
 
+        /// <summary>Checks if the object setup is supported and the AspectMode is valid.</summary>
         protected override void Start()
         {
             base.Start();
@@ -94,6 +97,7 @@ namespace UnityEngine.UI
                 this.enabled = false;
         }
 
+        /// <summary>Called when it becomes disabled. Removes aspect-ratio sizing constraints.</summary>
         protected override void OnDisable()
         {
             m_Tracker.Clear();
@@ -101,6 +105,7 @@ namespace UnityEngine.UI
             base.OnDisable();
         }
 
+        /// <summary>Called when the parent transform changes. Applies the aspect ratio constraint to the RectTransform.</summary>
         protected override void OnTransformParentChanged()
         {
             base.OnTransformParentChanged();
@@ -222,6 +227,10 @@ namespace UnityEngine.UI
             UpdateRect();
         }
 
+        /// <summary>
+        /// Returns whether this component is valid on the current object (not valid on a root Canvas).
+        /// </summary>
+        /// <returns>True if valid.</returns>
         public bool IsComponentValidOnObject()
         {
             Canvas canvas = gameObject.GetComponent<Canvas>();
@@ -232,6 +241,10 @@ namespace UnityEngine.UI
             return true;
         }
 
+        /// <summary>
+        /// Returns whether the current aspect mode is valid for this object.
+        /// </summary>
+        /// <returns>True if valid.</returns>
         public bool IsAspectModeValid()
         {
             if (!DoesParentExists() && (aspectMode == AspectMode.EnvelopeParent || aspectMode == AspectMode.FitInParent))

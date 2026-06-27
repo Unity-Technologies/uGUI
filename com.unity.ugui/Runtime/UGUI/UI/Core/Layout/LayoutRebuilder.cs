@@ -10,7 +10,7 @@ namespace UnityEngine.UI
     public class LayoutRebuilder : ICanvasElement
     {
         private RectTransform m_ToRebuild;
-        //There are a few of reasons we need to cache the Hash fromt he transform:
+        // There are a few of reasons we need to cache the Hash from the transform:
         //  - This is a ValueType (struct) and .Net calculates Hash from the Value Type fields.
         //  - The key of a Dictionary should have a constant Hash value.
         //  - It's possible for the Transform to get nulled from the Native side.
@@ -50,11 +50,13 @@ namespace UnityEngine.UI
             MarkLayoutForRebuild(driven);
         }
 
+        /// <summary>The Transform this LayoutRebuilder is targeting for rebuild.</summary>
         public Transform transform { get { return m_ToRebuild; }}
 
         /// <summary>
         /// Has the native representation of this LayoutRebuilder been destroyed?
         /// </summary>
+        /// <returns>True if the target transform has been destroyed.</returns>
         public bool IsDestroyed()
         {
             return m_ToRebuild == null;
@@ -81,6 +83,10 @@ namespace UnityEngine.UI
             s_Rebuilders.Release(rebuilder);
         }
 
+        /// <summary>
+        /// Rebuilds the layout during the CanvasUpdate.Layout update stage.
+        /// </summary>
+        /// <param name="executing">The canvas update stage currently being executed.</param>
         public void Rebuild(CanvasUpdate executing)
         {
             switch (executing)
@@ -266,14 +272,20 @@ namespace UnityEngine.UI
                 s_Rebuilders.Release(rebuilder);
         }
 
+        /// <summary>Called when the layout rebuild is complete. Returns this instance to the rebuilder pool.</summary>
         public void LayoutComplete()
         {
             s_Rebuilders.Release(this);
         }
 
+        /// <summary>Called when the graphic update is complete.</summary>
         public void GraphicUpdateComplete()
         {}
 
+        /// <summary>
+        /// Returns the instance ID of the target transform as a hash code.
+        /// </summary>
+        /// <returns>The instance ID of the target transform.</returns>
         public override int GetHashCode()
         {
             return m_CachedHashFromTransform;
@@ -289,6 +301,10 @@ namespace UnityEngine.UI
             return obj.GetHashCode() == GetHashCode();
         }
 
+        /// <summary>
+        /// Returns a descriptive string showing the target transform's name.
+        /// </summary>
+        /// <returns>A string describing this LayoutRebuilder.</returns>
         public override string ToString()
         {
             return "(Layout Rebuilder for) " + m_ToRebuild;

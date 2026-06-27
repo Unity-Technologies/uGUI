@@ -23,6 +23,8 @@ namespace UnityEngine.UI
     public static class DefaultControls
     {
         static IFactoryControls m_CurrentFactory = DefaultRuntimeFactory.Default;
+
+        /// <summary>The factory for creating GameObjects for the default UI controls. Can be overridden in the Editor to support Undo and Presets.</summary>
         public static IFactoryControls factory
         {
             get { return m_CurrentFactory; }
@@ -51,6 +53,10 @@ namespace UnityEngine.UI
         /// </remarks>
         public interface IFactoryControls
         {
+            /// <summary>Creates a new <see cref="GameObject"/> with the given name and components.</summary>
+            /// <param name="name">The name to assign to the new GameObject.</param>
+            /// <param name="components">The component types to add to the new GameObject.</param>
+            /// <returns>The newly created GameObject.</returns>
             GameObject CreateGameObject(string name, params Type[] components);
         }
 

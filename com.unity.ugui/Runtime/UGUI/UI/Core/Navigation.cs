@@ -3,23 +3,17 @@ using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
-    [Serializable]
     /// <summary>
     /// Structure storing details related to navigation.
     /// </summary>
+    [Serializable]
     public struct Navigation : IEquatable<Navigation>
     {
-        /*
-         * This looks like it's not flags, but it is flags,
-         * the reason is that Automatic is considered horizontal
-         * and verical mode combined
-         */
-        [Flags]
         /// <summary>
         /// Navigation mode enumeration.
         /// </summary>
         /// <remarks>
-        /// This looks like it's not flags, but it is flags, the reason is that Automatic is considered horizontal and vertical mode combined
+        /// This looks like it's not flags, but it is flags. The reason is that Automatic is considered horizontal and vertical mode combined
         /// </remarks>
         /// <example>
         /// <code>
@@ -44,6 +38,7 @@ namespace UnityEngine.UI
         /// ]]>
         ///</code>
         /// </example>
+        [Flags]
         public enum Mode
         {
             /// <summary>
@@ -296,6 +291,9 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>Returns true if the given <see cref="Navigation"/> has the same mode and selection targets.</summary>
+        /// <param name="other">The Navigation to compare.</param>
+        /// <returns>True if all fields are equal.</returns>
         public bool Equals(Navigation other)
         {
             return mode == other.mode &&

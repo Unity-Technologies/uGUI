@@ -14,7 +14,6 @@ namespace UnityEngine.UI
     /// <summary>
     /// Turn a simple label into a interactable input field.
     /// </summary>
-
     [AddComponentMenu("UI (Canvas)/Legacy/Input Field", 103)]
     [UGUIHelpURL("InputField")]
     public class InputField
@@ -180,26 +179,32 @@ namespace UnityEngine.UI
             MultiLineNewline
         }
 
+        /// <summary>Delegate for the <see cref="onValidateInput"/> callback. Called for each character entered to validate or replace it.</summary>
+        /// <param name="text">The current text of the input field, before the new character is added.</param>
+        /// <param name="charIndex">The index at which the new character is being inserted.</param>
+        /// <param name="addedChar">The character the user is attempting to add.</param>
+        /// <returns>The character to insert, or <c>'\0'</c> to reject the input.</returns>
         public delegate char OnValidateInput(string text, int charIndex, char addedChar);
 
-        [Serializable]
         /// <summary>
-        ///   Unity Event with a inputfield as a param.
+        /// A <see cref="UnityEngine.Events.UnityEvent{T0}"/> raised when the user submits the input field, passing the final text.
         /// </summary>
+        [Serializable]
         public class SubmitEvent : UnityEvent<string> {}
 
-        [Serializable]
         /// <summary>
-        ///   Unity Event with a inputfield as a param.
+        /// A <see cref="UnityEngine.Events.UnityEvent{T0}"/> raised when editing ends, passing the final text.
         /// </summary>
+        [Serializable]
         public class EndEditEvent : UnityEvent<string> {}
 
-        [Serializable]
         /// <summary>
-        /// The callback sent anytime the Inputfield is updated.
+        /// A <see cref="UnityEngine.Events.UnityEvent{T0}"/> raised each time the text changes, passing the new text.
         /// </summary>
+        [Serializable]
         public class OnChangeEvent : UnityEvent<string> {}
 
+        /// <summary>Reference to the on-screen keyboard opened on mobile platforms.</summary>
         protected TouchScreenKeyboard m_Keyboard;
         static private readonly char[] kSeparators = { ' ', '.', ',', '\t', '\r', '\n' };
 
@@ -220,6 +225,7 @@ namespace UnityEngine.UI
         [FormerlySerializedAs("text")]
         protected Text m_TextComponent;
 
+        /// <summary>Serialized backing field for the placeholder graphic shown when the field is empty.</summary>
         [SerializeField]
         protected Graphic m_Placeholder;
 
@@ -282,6 +288,7 @@ namespace UnityEngine.UI
         [SerializeField]
         private Color m_SelectionColor = new Color(168f / 255f, 206f / 255f, 255f / 255f, 192f / 255f);
 
+        /// <summary>Serialized backing field for <see cref="text"/>.</summary>
         [SerializeField]
         [Multiline]
         [FormerlySerializedAs("mValue")]
@@ -301,13 +308,17 @@ namespace UnityEngine.UI
         [SerializeField]
         private bool m_ShouldActivateOnSelect = true;
 
+        /// <summary>The character index where the caret is.</summary>
         protected int m_CaretPosition = 0;
+        /// <summary>The character index of the selection anchor opposite the caret.</summary>
         protected int m_CaretSelectPosition = 0;
         private RectTransform caretRectTrans = null;
+        /// <summary>Cached vertex array used to render the caret and selection highlight quads.</summary>
         protected UIVertex[] m_CursorVerts = null;
         private TextGenerator m_InputTextCache;
         private CanvasRenderer m_CachedInputRenderer;
         private bool m_PreventFontCallback = false;
+        /// <summary>Mesh used to render the caret and selection geometry.</summary>
         [NonSerialized] protected Mesh m_Mesh;
         private bool m_AllowInput = false;
         private bool m_ShouldActivateNextUpdate = false;
@@ -316,10 +327,13 @@ namespace UnityEngine.UI
         private const float kHScrollSpeed = 0.05f;
         private const float kVScrollSpeed = 0.10f;
         static readonly RangeInt k_KeyboardSelectionResetValue = new RangeInt(-1, -1);
+        /// <summary>Whether the blinking caret is currently in its visible phase.</summary>
         protected bool m_CaretVisible;
         private Coroutine m_BlinkCoroutine = null;
         private float m_BlinkStartTime = 0.0f;
+        /// <summary>Index of the first character visible in the scrolled input window.</summary>
         protected int m_DrawStart = 0;
+        /// <summary>Index one past the last visible character in the scrolled input window.</summary>
         protected int m_DrawEnd = 0;
         private Coroutine m_DragCoroutine = null;
         private string m_OriginalText = "";
@@ -349,11 +363,13 @@ namespace UnityEngine.UI
         const string kEmailSpecialCharacters = "!#$%&'*+-/=?^_`{|}~";
         const string kOculusQuestDeviceModel = "Oculus Quest";
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add an InputField to a GameObject.</summary>
         protected InputField()
         {
             EnforceTextHOverflow();
         }
 
+        /// <summary>The mesh used to render the caret and selection geometry. Created on demand.</summary>
         protected Mesh mesh
         {
             get
@@ -364,6 +380,7 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>The TextGenerator used to measure and lay out the input text.</summary>
         protected TextGenerator cachedInputTextGenerator
         {
             get
@@ -478,6 +495,7 @@ namespace UnityEngine.UI
         /// <remarks>
         /// This is not necessarily the same as what is visible on screen.
         /// </remarks>
+        /// <param name="input">The new text value to set.</param>
         public void SetTextWithoutNotify(string input)
         {
             SetText(input, false);
@@ -735,6 +753,7 @@ namespace UnityEngine.UI
         /// </example>
         public SubmitEvent onSubmit { get { return m_OnSubmit; } set { SetPropertyUtility.SetClass(ref m_OnSubmit, value); } }
 
+        /// <summary>Obsolete. Please use <see cref="onValueChanged"/> instead.</summary>
         [Obsolete("onValueChange has been renamed to onValueChanged", true)]
         public OnChangeEvent onValueChange { get { return onValueChanged; } set { onValueChanged = value; } }
 
@@ -1048,6 +1067,7 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>Internal accessor for the selection anchor position, clamped to the valid range.</summary>
         protected int caretSelectPositionInternal
         {
             get { return m_CaretSelectPosition + compositionString.Length; }
@@ -1159,6 +1179,7 @@ namespace UnityEngine.UI
         }
     #endif // if UNITY_ANDROID
 
+        /// <summary>Called when it becomes enabled. Registers for material callbacks and updates the label.</summary>
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -1180,6 +1201,10 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// Called when it becomes disabled. Deactivates the input field and unregisters callbacks.
+        /// It also releases the caret and selection mesh.
+        /// </summary>
         protected override void OnDisable()
         {
             // the coroutine will be terminated, so this will ensure it restarts when we are next activated
@@ -1205,6 +1230,7 @@ namespace UnityEngine.UI
             base.OnDisable();
         }
 
+        /// <summary>Called when destroyed. Unregisters from canvas layout rebuilding.</summary>
         protected override void OnDestroy()
         {
             CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
@@ -1742,6 +1768,9 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>Obsolete. Please use <see cref="RectTransformUtility.ScreenPointToLocalPointInRectangle"/> instead.</summary>
+        /// <param name="screen">The screen-space point to convert.</param>
+        /// <returns>The point in the text component's local space.</returns>
         [Obsolete("This function is no longer used. Please use RectTransformUtility.ScreenPointToLocalPointInRectangle() instead.", true)]
         public Vector2 ScreenToLocal(Vector2 screen)
         {
@@ -1957,9 +1986,8 @@ namespace UnityEngine.UI
             m_UpdateDrag = false;
         }
 
-        /// <summary>
-        /// The action to perform when the event system sends a pointer down Event.
-        /// </summary>
+        /// <inheritdoc/>
+        /// <remarks>Handles focus for the input field and positions the text caret.</remarks>
         public override void OnPointerDown(PointerEventData eventData)
         {
             if (!MayDrag(eventData))
@@ -1994,9 +2022,12 @@ namespace UnityEngine.UI
             eventData.Use();
         }
 
+        /// <summary>Describes the editing state returned by key-press processing.</summary>
         protected enum EditState
         {
+            /// <summary>Editing continues normally.</summary>
             Continue,
+            /// <summary>Editing should end (e.g. the user pressed Enter).</summary>
             Finish
         }
 
@@ -3383,10 +3414,7 @@ namespace UnityEngine.UI
             UpdateLabel();
         }
 
-        /// <summary>
-        /// What to do when the event system sends a submit Event.
-        /// </summary>
-        /// <param name="eventData">The data on which to process</param>
+        /// <inheritdoc/>
         public override void OnSelect(BaseEventData eventData)
         {
             base.OnSelect(eventData);
@@ -3395,10 +3423,7 @@ namespace UnityEngine.UI
                 ActivateInputField();
         }
 
-        /// <summary>
-        /// What to do when the event system sends a pointer click Event
-        /// </summary>
-        /// <param name="eventData">The data on which to process</param>
+        /// <inheritdoc/>
         public virtual void OnPointerClick(PointerEventData eventData)
         {
             if (eventData.button != PointerEventData.InputButton.Left)
@@ -3463,10 +3488,8 @@ namespace UnityEngine.UI
             MarkGeometryAsDirty();
         }
 
-        /// <summary>
-        /// What to do when the event system sends a Deselect Event. Defaults to deactivating the inputfield.
-        /// </summary>
-        /// <param name="eventData">The data sent by the EventSystem</param>
+        /// <inheritdoc/>
+        /// <remarks>Deactivates the input field.</remarks>
         public override void OnDeselect(BaseEventData eventData)
         {
             if (compositionString.Length > 0)
@@ -3478,6 +3501,8 @@ namespace UnityEngine.UI
             base.OnDeselect(eventData);
         }
 
+        /// <inheritdoc/>
+        /// <remarks>Finishes editing if the field is focused.</remarks>
         public virtual void OnSubmit(BaseEventData eventData)
         {
             if (!IsActive() || !IsInteractable())
@@ -3602,6 +3627,8 @@ namespace UnityEngine.UI
             contentType = ContentType.Custom;
         }
 
+        /// <inheritdoc/>
+        /// <remarks>Locks to <see cref="SelectionState.Selected"/> once focus has been established.</remarks>
         protected override void DoStateTransition(SelectionState state, bool instant)
         {
             if (m_HasDoneFocusTransition)
@@ -3612,19 +3639,13 @@ namespace UnityEngine.UI
             base.DoStateTransition(state, instant);
         }
 
-        /// <summary>
-        /// See ILayoutElement.CalculateLayoutInputHorizontal.
-        /// </summary>
+        /// <inheritdoc/>
         public virtual void CalculateLayoutInputHorizontal() {}
 
-        /// <summary>
-        /// See ILayoutElement.CalculateLayoutInputVertical.
-        /// </summary>
+        /// <inheritdoc/>
         public virtual void CalculateLayoutInputVertical() {}
 
-        /// <summary>
-        /// See ILayoutElement.minWidth.
-        /// </summary>
+        /// <inheritdoc/>
         public virtual float minWidth { get { return 5; } }
 
         /// <inheritdoc/>
@@ -3644,14 +3665,10 @@ namespace UnityEngine.UI
             }
         }
 
-        /// <summary>
-        /// See ILayoutElement.flexibleWidth.
-        /// </summary>
+        /// <inheritdoc/>
         public virtual float flexibleWidth { get { return -1; } }
 
-        /// <summary>
-        /// See ILayoutElement.minHeight.
-        /// </summary>
+        /// <inheritdoc/>
         public virtual float minHeight { get { return 0; } }
 
         /// <inheritdoc/>
@@ -3671,14 +3688,10 @@ namespace UnityEngine.UI
             }
         }
 
-        /// <summary>
-        /// See ILayoutElement.flexibleHeight.
-        /// </summary>
+        /// <inheritdoc/>
         public virtual float flexibleHeight { get { return -1; } }
 
-        /// <summary>
-        /// See ILayoutElement.layoutPriority.
-        /// </summary>
+        /// <inheritdoc/>
         public virtual int layoutPriority { get { return 1; } }
     }
 }

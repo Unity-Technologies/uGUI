@@ -50,6 +50,7 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>Called when the component becomes enabled. Marks the associated graphic's vertices as dirty.</summary>
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -57,6 +58,7 @@ namespace UnityEngine.UI
                 graphic.SetVerticesDirty();
         }
 
+        /// <summary>Called when the component becomes disabled. Marks the associated graphic's vertices as dirty.</summary>
         protected override void OnDisable()
         {
             if (graphic != null)
@@ -98,6 +100,10 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>
+        /// Called when the associated <see cref="Graphic"/> populates its mesh. Override to apply custom vertex modifications.
+        /// </summary>
+        /// <param name="vh">The <see cref="VertexHelper"/> containing the mesh data to modify.</param>
         public abstract void ModifyMesh(VertexHelper vh);
     }
 }

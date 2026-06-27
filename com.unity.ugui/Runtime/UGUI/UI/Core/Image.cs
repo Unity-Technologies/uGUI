@@ -230,6 +230,7 @@ namespace UnityEngine.UI
             Left,
         }
 
+        /// <summary>Default material used for ETC1 compressed images on platforms that require it.</summary>
         static protected Material s_ETC1DefaultUI = null;
         static SecondarySpriteTexture[] s_TempNewSecondaryTextures = Array.Empty<SecondarySpriteTexture>();
 
@@ -482,6 +483,7 @@ namespace UnityEngine.UI
 
         /// Filling method for filled sprites.
         [SerializeField] private FillMethod m_FillMethod = FillMethod.Radial360;
+        /// <summary>Gets or sets the fill method used when the image type is <see cref="Type.Filled"/>.</summary>
         public FillMethod fillMethod { get { return m_FillMethod; } set { if (SetPropertyUtility.SetStruct(ref m_FillMethod, value)) { SetVerticesDirty(); m_FillOrigin = 0; } } }
 
         /// Amount of the Image shown. 0-1 range with 0 being nothing shown, and 1 being the full Image.
@@ -621,12 +623,11 @@ namespace UnityEngine.UI
         // Whether this is being tracked for Atlas Binding.
         private bool m_Tracked = false;
 
-        [Obsolete("eventAlphaThreshold has been deprecated. Use eventMinimumAlphaThreshold instead (UnityUpgradable) -> alphaHitTestMinimumThreshold", true)]
-
         /// <summary>
         /// Obsolete. You should use UI.Image.alphaHitTestMinimumThreshold instead.
         /// The alpha threshold specifies the minimum alpha a pixel must have for the event to considered a "hit" on the Image.
         /// </summary>
+        [Obsolete("eventAlphaThreshold has been deprecated. Use eventMinimumAlphaThreshold instead (UnityUpgradable) -> alphaHitTestMinimumThreshold", true)]
         public float eventAlphaThreshold { get { return 1 - alphaHitTestMinimumThreshold; } set { alphaHitTestMinimumThreshold = 1 - value; } }
 
         /// <summary>
@@ -680,6 +681,7 @@ namespace UnityEngine.UI
         public bool useSpriteMesh { get { return m_UseSpriteMesh; } set { if (SetPropertyUtility.SetStruct(ref m_UseSpriteMesh, value)) SetVerticesDirty(); } }
 
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add an Image to a GameObject.</summary>
         protected Image()
         {
         }
@@ -758,6 +760,7 @@ namespace UnityEngine.UI
         // case 1066689 cache referencePixelsPerUnit when canvas parent is disabled;
         private float m_CachedReferencePixelsPerUnit = 100;
 
+        /// <summary>Pixels per unit, accounting for the Sprite and Canvas settings.</summary>
         public float pixelsPerUnit
         {
             get
@@ -773,6 +776,7 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>Pixels per unit scaled by <see cref="pixelsPerUnitMultiplier"/>.</summary>
         protected float multipliedPixelsPerUnit
         {
             get { return pixelsPerUnit * m_PixelsPerUnitMultiplier; }
@@ -900,6 +904,7 @@ namespace UnityEngine.UI
         /// <summary>
         /// Update the UI renderer mesh.
         /// </summary>
+        /// <param name="toFill">The VertexHelper to populate with geometry.</param>
         protected override void OnPopulateMesh(VertexHelper toFill)
         {
             if (activeSprite == null)
@@ -937,12 +942,14 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>Called when it becomes enabled. Registers with the sprite atlas system if needed.</summary>
         protected override void OnEnable()
         {
             base.OnEnable();
             TrackSprite();
         }
 
+        /// <summary>Called when it becomes disabled. Unregisters from the sprite atlas system.</summary>
         protected override void OnDisable()
         {
             base.OnDisable();
@@ -1065,6 +1072,7 @@ namespace UnityEngine.UI
             SetSecondaryTextures(canvasRenderer);
         }
 
+        /// <summary>Called when the Canvas hierarchy changes. Updates cached canvas-related values.</summary>
         protected override void OnCanvasHierarchyChanged()
         {
             base.OnCanvasHierarchyChanged();
@@ -1840,19 +1848,13 @@ namespace UnityEngine.UI
             }
         }
 
-        /// <summary>
-        /// See ILayoutElement.CalculateLayoutInputHorizontal.
-        /// </summary>
+        /// <inheritdoc/>
         public virtual void CalculateLayoutInputHorizontal() {}
 
-        /// <summary>
-        /// See ILayoutElement.CalculateLayoutInputVertical.
-        /// </summary>
+        /// <inheritdoc/>
         public virtual void CalculateLayoutInputVertical() {}
 
-        /// <summary>
-        /// See ILayoutElement.minWidth.
-        /// </summary>
+        /// <inheritdoc/>
         public virtual float minWidth { get { return 0; } }
 
         /// <inheritdoc/>
@@ -1874,14 +1876,10 @@ namespace UnityEngine.UI
             }
         }
 
-        /// <summary>
-        /// See ILayoutElement.flexibleWidth.
-        /// </summary>
+        /// <inheritdoc/>
         public virtual float flexibleWidth { get { return -1; } }
 
-        /// <summary>
-        /// See ILayoutElement.minHeight.
-        /// </summary>
+        /// <inheritdoc/>
         public virtual float minHeight { get { return 0; } }
 
         /// <inheritdoc/>
@@ -1903,14 +1901,10 @@ namespace UnityEngine.UI
             }
         }
 
-        /// <summary>
-        /// See ILayoutElement.flexibleHeight.
-        /// </summary>
+        /// <inheritdoc/>
         public virtual float flexibleHeight { get { return -1; } }
 
-        /// <summary>
-        /// See ILayoutElement.layoutPriority.
-        /// </summary>
+        /// <inheritdoc/>
         public virtual int layoutPriority { get { return 0; } }
 
         /// <summary>
@@ -2026,6 +2020,7 @@ namespace UnityEngine.UI
             m_TrackedTexturelessImages.Remove(g);
         }
 
+        /// <summary>Called when animation properties are applied. Marks the graphic dirty for a rebuild.</summary>
         protected override void OnDidApplyAnimationProperties()
         {
             SetMaterialDirty();

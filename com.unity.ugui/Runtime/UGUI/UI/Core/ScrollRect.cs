@@ -4,18 +4,18 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
-    [AddComponentMenu("UI (Canvas)/Scroll Rect", 37)]
-    [SelectionBase]
-    [ExecuteAlways]
-    [DisallowMultipleComponent]
-    [RequireComponent(typeof(RectTransform))]
-    [UGUIHelpURL("ScrollRect")]
     /// <summary>
     /// A component for making a child RectTransform scroll.
     /// </summary>
     /// <remarks>
     /// ScrollRect will not do any clipping on its own. Combined with a Mask component, it can be turned into a scroll view.
     /// </remarks>
+    [AddComponentMenu("UI (Canvas)/Scroll Rect", 37)]
+    [SelectionBase]
+    [ExecuteAlways]
+    [DisallowMultipleComponent]
+    [RequireComponent(typeof(RectTransform))]
+    [UGUIHelpURL("ScrollRect")]
     public class ScrollRect : UIBehaviour, IInitializePotentialDragHandler, IBeginDragHandler, IEndDragHandler, IDragHandler, IScrollHandler, ICanvasElement, ILayoutElement, ILayoutGroup
     {
         /// <summary>
@@ -95,10 +95,10 @@ namespace UnityEngine.UI
             AutoHideAndExpandViewport,
         }
 
-        [Serializable]
         /// <summary>
-        /// Event type used by the ScrollRect.
+        /// A <see cref="UnityEngine.Events.UnityEvent{T0}"/> raised when the scroll position changes, passing the normalized position as a <see cref="Vector2"/>.
         /// </summary>
+        [Serializable]
         public class ScrollRectEvent : UnityEvent<Vector2> {}
 
         [SerializeField]
@@ -459,10 +459,13 @@ namespace UnityEngine.UI
 
         // The offset from handle position to mouse down position
         private Vector2 m_PointerStartLocalCursor = Vector2.zero;
+
+        /// <summary>The content's anchored position at the start of a drag.</summary>
         protected Vector2 m_ContentStartPosition = Vector2.zero;
 
         private RectTransform m_ViewRect;
 
+        /// <summary>The Viewport's RectTransform, falling back to this ScrollRect's own RectTransform when no viewport is assigned.</summary>
         protected RectTransform viewRect
         {
             get
@@ -475,6 +478,7 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>The cached bounds of the content RectTransform, computed each frame.</summary>
         protected Bounds m_ContentBounds;
         private Bounds m_ViewBounds;
 
@@ -521,6 +525,7 @@ namespace UnityEngine.UI
         private DrivenRectTransformTracker m_Tracker;
         #pragma warning restore 649
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a ScrollRect to a GameObject.</summary>
         protected ScrollRect()
         {}
 
@@ -545,9 +550,11 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>Called by the canvas update system after layout is complete. No-op for ScrollRect.</summary>
         public virtual void LayoutComplete()
         {}
 
+        /// <summary>Called by the canvas update system after graphic updates. No-op for ScrollRect.</summary>
         public virtual void GraphicUpdateComplete()
         {}
 
@@ -569,6 +576,7 @@ namespace UnityEngine.UI
             m_VSliderWidth = (m_VerticalScrollbarRect == null ? 0 : m_VerticalScrollbarRect.rect.width);
         }
 
+        /// <summary>Called when it becomes enabled. Registers for canvas layout rebuilding.</summary>
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -582,6 +590,7 @@ namespace UnityEngine.UI
             SetDirty();
         }
 
+        /// <summary>Called when it becomes disabled. Unregisters from canvas layout rebuilding.</summary>
         protected override void OnDisable()
         {
             CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
@@ -626,6 +635,7 @@ namespace UnityEngine.UI
         /// ]]>
         ///</code>
         /// </example>
+        /// <returns>True if the ScrollRect and its content are active.</returns>
         public override bool IsActive()
         {
             return base.IsActive() && m_Content != null;
@@ -645,6 +655,10 @@ namespace UnityEngine.UI
             m_Velocity = Vector2.zero;
         }
 
+        /// <summary>
+		/// Called when a scroll event occurs. Scrolls the content by the event delta.
+		/// </summary>
+        /// <param name="data">The pointer event data containing the scroll delta.</param>
         public virtual void OnScroll(PointerEventData data)
         {
             if (!IsActive())
@@ -681,6 +695,10 @@ namespace UnityEngine.UI
             UpdateBounds();
         }
 
+        /// <inheritdoc/>
+        /// <summary>
+		/// Called when a potential drag is detected. Stops any ongoing deceleration.
+		/// </summary>
         public virtual void OnInitializePotentialDrag(PointerEventData eventData)
         {
             if (eventData.button != PointerEventData.InputButton.Left)
@@ -689,6 +707,7 @@ namespace UnityEngine.UI
             m_Velocity = Vector2.zero;
         }
 
+        /// <inheritdoc/>
         /// <summary>
         /// Handling for when the content is beging being dragged.
         /// </summary>
@@ -726,6 +745,7 @@ namespace UnityEngine.UI
             m_Dragging = true;
         }
 
+        /// <inheritdoc/>
         /// <summary>
         /// Handling for when the content has finished being dragged.
         /// </summary>
@@ -755,6 +775,7 @@ namespace UnityEngine.UI
             m_Dragging = false;
         }
 
+        /// <inheritdoc/>
         /// <summary>
         /// Handling for when the content is dragged.
         /// </summary>
@@ -813,6 +834,7 @@ namespace UnityEngine.UI
         /// <summary>
         /// Sets the anchored position of the content.
         /// </summary>
+        /// <param name="position">The new anchored position for the content RectTransform.</param>
         protected virtual void SetContentAnchoredPosition(Vector2 position)
         {
             if (!m_Horizontal)
@@ -827,6 +849,7 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>Called every frame after Update. Applies inertia and elastic spring-back when not dragging.</summary>
         protected virtual void LateUpdate()
         {
             if (!m_Content)
@@ -1086,6 +1109,7 @@ namespace UnityEngine.UI
             return (1 - (1 / ((Mathf.Abs(overStretching) * 0.55f / viewSize) + 1))) * viewSize * Mathf.Sign(overStretching);
         }
 
+        /// <summary>Called when the RectTransform dimensions change. Marks this for a layout update.</summary>
         protected override void OnRectTransformDimensionsChange()
         {
             SetDirty();

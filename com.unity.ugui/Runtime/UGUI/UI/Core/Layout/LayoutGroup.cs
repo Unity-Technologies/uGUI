@@ -5,14 +5,15 @@ using UnityEngine.Pool;
 
 namespace UnityEngine.UI
 {
+    /// <summary>
+    /// Abstract base class for layout groups.
+    /// </summary>
     [DisallowMultipleComponent]
     [ExecuteAlways]
     [RequireComponent(typeof(RectTransform))]
-    /// <summary>
-    /// Abstract base class to use for layout groups.
-    /// </summary>
     public abstract class LayoutGroup : UIBehaviour, ILayoutElement, ILayoutGroup
     {
+        /// <summary>Serialized backing field for <see cref="padding"/>.</summary>
         [SerializeField] protected RectOffset m_Padding = new RectOffset();
 
         /// <summary>
@@ -20,6 +21,7 @@ namespace UnityEngine.UI
         /// </summary>
         public RectOffset padding { get { return m_Padding; } set { SetProperty(ref m_Padding, value); } }
 
+        /// <summary>Serialized backing field for <see cref="childAlignment"/>.</summary>
         [SerializeField] protected TextAnchor m_ChildAlignment = TextAnchor.UpperLeft;
 
         /// <summary>
@@ -31,6 +33,7 @@ namespace UnityEngine.UI
         public TextAnchor childAlignment { get { return m_ChildAlignment; } set { SetProperty(ref m_ChildAlignment, value); } }
 
         [System.NonSerialized] private RectTransform m_Rect;
+        /// <summary>The RectTransform of this layout group's GameObject.</summary>
         protected RectTransform rectTransform
         {
             get
@@ -41,6 +44,7 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>Tracks driven RectTransform properties to prevent manual editing during layout.</summary>
         protected DrivenRectTransformTracker m_Tracker;
         private Vector2 m_TotalMinSize = Vector2.zero;
         private Vector2 m_TotalMaxSize = Vector2.positiveInfinity;
@@ -48,8 +52,13 @@ namespace UnityEngine.UI
         private Vector2 m_TotalFlexibleSize = Vector2.zero;
 
         [System.NonSerialized] private List<RectTransform> m_RectChildren = new List<RectTransform>();
+        /// <summary>The list of valid child RectTransforms used during layout calculations.</summary>
         protected List<RectTransform> rectChildren { get { return m_RectChildren; } }
 
+        /// <summary>
+        /// Called by the layout system. This base implementation collects valid child RectTransforms.
+        /// Override in subclasses to calculate the horizontal layout sizes.
+        /// </summary>
         public virtual void CalculateLayoutInputHorizontal()
         {
             m_RectChildren.Clear();
@@ -82,6 +91,7 @@ namespace UnityEngine.UI
             m_Tracker.Clear();
         }
 
+        /// <summary>Called by the layout system. Override in subclasses to calculate the vertical layout sizes.</summary>
         public abstract void CalculateLayoutInputVertical();
 
         /// <summary>
@@ -127,17 +137,24 @@ namespace UnityEngine.UI
 
         // ILayoutController Interface
 
+        /// <summary>Called by the layout system. Override in subclasses to perform the horizontal layout.</summary>
         public abstract void SetLayoutHorizontal();
+        /// <summary>Called by the layout system. Override in subclasses to perform the vertical layout.</summary>
         public abstract void SetLayoutVertical();
 
         // Implementation
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> on a concrete subclass.</summary>
         protected LayoutGroup()
         {
             if (m_Padding == null)
                 m_Padding = new RectOffset();
         }
 
+        /// <summary>
+        /// Called when it becomes enabled. Registers for the OnChildRectTransformDimensionsChange callback and
+        /// marks this for a layout rebuild.
+        /// </summary>
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -145,6 +162,10 @@ namespace UnityEngine.UI
             SetDirty();
         }
 
+        /// <summary>
+        /// Called when it becomes disabled. Unregisters from the OnChildRectTransformDimensionsChange callback and
+        /// marks this for a layout rebuild.
+        /// </summary>
         protected override void OnDisable()
         {
             m_Tracker.Clear();
@@ -265,6 +286,7 @@ namespace UnityEngine.UI
         /// <param name="rect">The RectTransform of the child layout element.</param>
         /// <param name="axis">The axis to set the position and size along. 0 is horizontal and 1 is vertical.</param>
         /// <param name="pos">The position from the left side or top.</param>
+        /// <param name="scaleFactor">The scale factor to apply to the child's size.</param>
         protected void SetChildAlongAxisWithScale(RectTransform rect, int axis, float pos, float scaleFactor)
         {
             if (rect == null)
@@ -307,6 +329,7 @@ namespace UnityEngine.UI
         /// <param name="axis">The axis to set the position and size along. 0 is horizontal and 1 is vertical.</param>
         /// <param name="pos">The position from the left side or top.</param>
         /// <param name="size">The size.</param>
+        /// <param name="scaleFactor">The scale factor to apply to the child's size.</param>
         protected void SetChildAlongAxisWithScale(RectTransform rect, int axis, float pos, float size, float scaleFactor)
         {
             if (rect == null)
@@ -346,6 +369,7 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>Called when the RectTransform dimensions change. Registers for a layout rebuild.</summary>
         protected override void OnRectTransformDimensionsChange()
         {
             base.OnRectTransformDimensionsChange();
@@ -353,6 +377,7 @@ namespace UnityEngine.UI
                 SetDirty();
         }
 
+        /// <summary>Called when child transforms are added or removed. Registers for a layout rebuild.</summary>
         protected virtual void OnTransformChildrenChanged()
         {
             SetDirty();
@@ -370,6 +395,7 @@ namespace UnityEngine.UI
         /// <summary>
         /// Helper method used to set a given property if it has changed.
         /// </summary>
+        /// <typeparam name="T">The type of the property being set.</typeparam>
         /// <param name="currentValue">A reference to the member value.</param>
         /// <param name="newValue">The new value.</param>
         protected void SetProperty<T>(ref T currentValue, T newValue)

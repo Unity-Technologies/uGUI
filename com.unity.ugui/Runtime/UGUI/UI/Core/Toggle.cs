@@ -33,10 +33,10 @@ namespace UnityEngine.UI
             Fade
         }
 
-        [Serializable]
         /// <summary>
-        /// UnityEvent callback for when a toggle is toggled.
+        /// A <see cref="UnityEngine.Events.UnityEvent{T0}"/> raised when the toggle value changes, passing the new state as a bool.
         /// </summary>
+        [Serializable]
         public class ToggleEvent : UnityEvent<bool>
         {}
 
@@ -112,6 +112,7 @@ namespace UnityEngine.UI
         [SerializeField]
         private bool m_IsOn;
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a Toggle to a GameObject.</summary>
         protected Toggle()
         {}
 
@@ -126,6 +127,7 @@ namespace UnityEngine.UI
 
 #endif // if UNITY_EDITOR
 
+        /// <inheritdoc/>
         public virtual void Rebuild(CanvasUpdate executing)
         {
 #if UNITY_EDITOR
@@ -134,12 +136,15 @@ namespace UnityEngine.UI
 #endif
         }
 
+        /// <inheritdoc/>
         public virtual void LayoutComplete()
         {}
 
+        /// <inheritdoc/>
         public virtual void GraphicUpdateComplete()
         {}
 
+        /// <summary>Called when destroyed. Updates the ToggleGroup's state, if there is one.</summary>
         protected override void OnDestroy()
         {
             if (m_Group != null)
@@ -147,6 +152,7 @@ namespace UnityEngine.UI
             base.OnDestroy();
         }
 
+        /// <summary>Called when it becomes enabled. Registers with the toggle group and updates the visual state.</summary>
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -154,16 +160,18 @@ namespace UnityEngine.UI
             PlayEffect(true);
         }
 
+        /// <summary>Called when it becomes disabled. Unregisters from the toggle group.</summary>
         protected override void OnDisable()
         {
             SetToggleGroup(null, false);
             base.OnDisable();
         }
 
+        /// <summary>Called when animation properties are applied. Updates the toggle state to reflect animated values.</summary>
         protected override void OnDidApplyAnimationProperties()
         {
             // Check if isOn has been changed by the animation.
-            // Unfortunately there is no way to check if we don�t have a graphic.
+            // Unfortunately there is no way to check if we don't have a graphic.
             if (graphic != null)
             {
                 bool oldValue = !Mathf.Approximately(graphic.canvasRenderer.GetColor().a, 0);
@@ -323,9 +331,7 @@ namespace UnityEngine.UI
             isOn = !isOn;
         }
 
-        /// <summary>
-        /// React to clicks.
-        /// </summary>
+        /// <inheritdoc/>
         public virtual void OnPointerClick(PointerEventData eventData)
         {
             if (eventData.button != PointerEventData.InputButton.Left)
@@ -334,6 +340,8 @@ namespace UnityEngine.UI
             InternalToggle();
         }
 
+        /// <inheritdoc/>
+        /// <remarks>Toggles the value.</remarks>
         public virtual void OnSubmit(BaseEventData eventData)
         {
             InternalToggle();

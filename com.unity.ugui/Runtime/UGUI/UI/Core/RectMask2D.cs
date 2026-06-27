@@ -5,11 +5,6 @@ using UnityEngine.Pool;
 
 namespace UnityEngine.UI
 {
-    [AddComponentMenu("UI (Canvas)/Rect Mask 2D", 14)]
-    [ExecuteAlways]
-    [DisallowMultipleComponent]
-    [RequireComponent(typeof(RectTransform))]
-    [UGUIHelpURL("RectMask2D")]
     /// <summary>
     /// A 2D rectangular mask that allows for clipping / masking of areas outside the mask.
     /// </summary>
@@ -22,6 +17,11 @@ namespace UnityEngine.UI
     /// *Requires fewer draw calls
     /// *Culls elements that are outside the mask area.
     /// </remarks>
+    [AddComponentMenu("UI (Canvas)/Rect Mask 2D", 14)]
+    [ExecuteAlways]
+    [DisallowMultipleComponent]
+    [RequireComponent(typeof(RectTransform))]
+    [UGUIHelpURL("RectMask2D")]
     public class RectMask2D : UIBehaviour, IClipper, ICanvasRaycastFilter
     {
         [NonSerialized]
@@ -126,9 +126,11 @@ namespace UnityEngine.UI
             get { return m_RectTransform ?? (m_RectTransform = GetComponent<RectTransform>()); }
         }
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a RectMask2D to a GameObject.</summary>
         protected RectMask2D()
         {}
 
+        /// <summary>Called when it becomes enabled. Registers with the <see cref="ClipperRegistry"/> and notifies clippable children.</summary>
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -137,6 +139,7 @@ namespace UnityEngine.UI
             MaskUtilities.Notify2DMaskStateChanged(this);
         }
 
+        /// <summary>Called when it becomes disabled. Unregisters from the <see cref="ClipperRegistry"/> and notifies clippable children.</summary>
         protected override void OnDisable()
         {
             // we call base OnDisable first here
@@ -151,6 +154,7 @@ namespace UnityEngine.UI
             MaskUtilities.Notify2DMaskStateChanged(this);
         }
 
+        /// <summary>Called when destroyed. Unregisters from the <see cref="ClipperRegistry"/>.</summary>
         protected override void OnDestroy()
         {
             ClipperRegistry.Unregister(this);
@@ -175,6 +179,10 @@ namespace UnityEngine.UI
 
 #endif
 
+        /// <summary>Returns whether the given screen position is within this mask's rect.</summary>
+        /// <param name="sp">The screen position to test.</param>
+        /// <param name="eventCamera">The camera for the raycast.</param>
+        /// <returns>True if the point is inside the masked rectangle, or if the component is disabled.</returns>
         public virtual bool IsRaycastLocationValid(Vector2 sp, Camera eventCamera)
         {
             if (!isActiveAndEnabled)
@@ -202,6 +210,7 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>Applies the mask's clipping rectangle to all registered clippable children.</summary>
         public virtual void PerformClipping()
         {
             if (ReferenceEquals(Canvas, null))
@@ -284,6 +293,7 @@ namespace UnityEngine.UI
             UpdateClipSoftness();
         }
 
+        /// <summary>Propagates the current clip softness to all registered clippable children.</summary>
         public virtual void UpdateClipSoftness()
         {
             if (ReferenceEquals(Canvas, null))
@@ -343,6 +353,8 @@ namespace UnityEngine.UI
             m_ForceClip = true;
         }
 
+        /// <inheritdoc/>
+        /// <remarks>Sets flag to recalculate clip rects.</remarks>
         protected override void OnTransformParentChanged()
         {
             m_Canvas = null;
@@ -350,6 +362,8 @@ namespace UnityEngine.UI
             m_ShouldRecalculateClipRects = true;
         }
 
+        /// <inheritdoc/>
+        /// <remarks>Sets flag to recalculate clip rects.</remarks>
         protected override void OnCanvasHierarchyChanged()
         {
             m_Canvas = null;

@@ -4,11 +4,6 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
-    [RequireComponent(typeof(Canvas))]
-    [ExecuteAlways]
-    [AddComponentMenu("Layout/Canvas Scaler", 101)]
-    [DisallowMultipleComponent]
-    [UGUIHelpURL("CanvasScaler")]
     /// <summary>
     ///   The Canvas Scaler component is used for controlling the overall scale and pixel density of UI elements in the Canvas. This scaling affects everything under the Canvas, including font sizes and image borders.
     /// </summary>
@@ -23,6 +18,11 @@ namespace UnityEngine.UI
     ///
     /// For a Canvas set to 'World Space' the Canvas Scaler can be used to control the pixel density of UI elements in the Canvas.
     /// </remarks>
+    [RequireComponent(typeof(Canvas))]
+    [ExecuteAlways]
+    [AddComponentMenu("Layout/Canvas Scaler", 101)]
+    [DisallowMultipleComponent]
+    [UGUIHelpURL("CanvasScaler")]
     public class CanvasScaler : UIBehaviour
     {
         /// <summary>
@@ -53,6 +53,7 @@ namespace UnityEngine.UI
         ///</summary>
         public ScaleMode uiScaleMode { get { return m_UiScaleMode; } set { m_UiScaleMode = value; } }
 
+        /// <summary>Serialized backing field for <see cref="referencePixelsPerUnit"/>.</summary>
         [Tooltip("If a sprite has this 'Pixels Per Unit' setting, then one pixel in the sprite will cover one unit in the UI.")]
         [SerializeField] protected float m_ReferencePixelsPerUnit = 100;
 
@@ -64,6 +65,7 @@ namespace UnityEngine.UI
 
         // Constant Pixel Size settings
 
+        /// <summary>Serialized backing field for <see cref="scaleFactor"/>.</summary>
         [Tooltip("Scales all UI elements in the Canvas by this factor.")]
         [SerializeField] protected float m_ScaleFactor = 1;
 
@@ -91,6 +93,7 @@ namespace UnityEngine.UI
             Shrink = 2
         }
 
+        /// <summary>Serialized backing field for <see cref="referenceResolution"/>.</summary>
         [Tooltip("The resolution the UI layout is designed for. If the screen resolution is larger, the UI will be scaled up, and if it's smaller, the UI will be scaled down. This is done in accordance with the Screen Match Mode.")]
         [SerializeField] protected Vector2 m_ReferenceResolution = new Vector2(800, 600);
 
@@ -117,6 +120,7 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>Serialized backing field for <see cref="screenMatchMode"/>.</summary>
         [Tooltip("A mode used to scale the canvas area if the aspect ratio of the current resolution doesn't fit the reference resolution.")]
         [SerializeField] protected ScreenMatchMode m_ScreenMatchMode = ScreenMatchMode.MatchWidthOrHeight;
         /// <summary>
@@ -124,6 +128,7 @@ namespace UnityEngine.UI
         /// </summary>
         public ScreenMatchMode screenMatchMode { get { return m_ScreenMatchMode; } set { m_ScreenMatchMode = value; } }
 
+        /// <summary>Serialized backing field for <see cref="matchWidthOrHeight"/>.</summary>
         [Tooltip("Determines if the scaling is using the width or height as reference, or a mix in between.")]
         [Range(0, 1)]
         [SerializeField] protected float m_MatchWidthOrHeight = 0;
@@ -182,6 +187,7 @@ namespace UnityEngine.UI
             Picas
         }
 
+        /// <summary>Serialized backing field for <see cref="physicalUnit"/>.</summary>
         [Tooltip("The physical unit to specify positions and sizes in.")]
         [SerializeField] protected Unit m_PhysicalUnit = Unit.Points;
 
@@ -190,6 +196,7 @@ namespace UnityEngine.UI
         /// </summary>
         public Unit physicalUnit { get { return m_PhysicalUnit; } set { m_PhysicalUnit = value; } }
 
+        /// <summary>Serialized backing field for <see cref="fallbackScreenDPI"/>.</summary>
         [Tooltip("The DPI to assume if the screen DPI is not known.")]
         [SerializeField] protected float m_FallbackScreenDPI = 96;
 
@@ -198,6 +205,7 @@ namespace UnityEngine.UI
         /// </summary>
         public float fallbackScreenDPI { get { return m_FallbackScreenDPI; } set { m_FallbackScreenDPI = value; } }
 
+        /// <summary>Serialized backing field for <see cref="defaultSpriteDPI"/>.</summary>
         [Tooltip("The pixels per inch to use for sprites that have a 'Pixels Per Unit' setting that matches the 'Reference Pixels Per Unit' setting.")]
         [SerializeField] protected float m_DefaultSpriteDPI = 96;
 
@@ -209,6 +217,7 @@ namespace UnityEngine.UI
 
         // World Canvas settings
 
+        /// <summary>Serialized backing field for <see cref="dynamicPixelsPerUnit"/>.</summary>
         [Tooltip("The amount of pixels per unit to use for dynamically created bitmaps in the UI, such as Text.")]
         [SerializeField] protected float m_DynamicPixelsPerUnit = 1;
 
@@ -226,10 +235,13 @@ namespace UnityEngine.UI
         [System.NonSerialized]
         private float m_PrevReferencePixelsPerUnit = 100;
 
+        /// <summary>Flag indicating whether the Canvas is in World Space mode.</summary>
         [SerializeField] protected bool m_PresetInfoIsWorld = false;
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a CanvasScaler to a GameObject.</summary>
         protected CanvasScaler() {}
 
+        /// <summary>Called when it becomes enabled. Applies the initial canvas scaling.</summary>
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -243,6 +255,7 @@ namespace UnityEngine.UI
             Handle();
         }
 
+        /// <summary>Called when it becomes disabled. Resets the Canvas to its default scale.</summary>
         protected override void OnDisable()
         {
             SetScaleFactor(1);

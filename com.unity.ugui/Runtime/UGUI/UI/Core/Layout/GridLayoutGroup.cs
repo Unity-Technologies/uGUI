@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 namespace UnityEngine.UI
 {
-    [AddComponentMenu("Layout/Grid Layout Group", 152)]
-    [UGUIHelpURL("GridLayoutGroup")]
     /// <summary>
     /// Layout class to arrange child elements in a grid format.
     /// </summary>
     /// <remarks>
     /// The GridLayoutGroup component is used to layout child layout elements in a uniform grid where all cells have the same size. The size and the spacing between cells is controlled by the GridLayoutGroup itself. The children have no influence on their sizes.
     /// </remarks>
+    [AddComponentMenu("Layout/Grid Layout Group", 152)]
+    [UGUIHelpURL("GridLayoutGroup")]
     public class GridLayoutGroup : LayoutGroup
     {
         /// <summary>
@@ -73,6 +73,7 @@ namespace UnityEngine.UI
             FixedRowCount = 2
         }
 
+        /// <summary>Serialized backing field for <see cref="startCorner"/>.</summary>
         [SerializeField] protected Corner m_StartCorner = Corner.UpperLeft;
 
         /// <summary>
@@ -80,6 +81,7 @@ namespace UnityEngine.UI
         /// </summary>
         public Corner startCorner { get { return m_StartCorner; } set { SetProperty(ref m_StartCorner, value); } }
 
+        /// <summary>Serialized backing field for <see cref="startAxis"/>.</summary>
         [SerializeField] protected Axis m_StartAxis = Axis.Horizontal;
 
         /// <summary>
@@ -90,6 +92,7 @@ namespace UnityEngine.UI
         /// </remarks>
         public Axis startAxis { get { return m_StartAxis; } set { SetProperty(ref m_StartAxis, value); } }
 
+        /// <summary>Serialized backing field for <see cref="cellSize"/>.</summary>
         [SerializeField] protected Vector2 m_CellSize = new Vector2(100, 100);
 
         /// <summary>
@@ -97,6 +100,7 @@ namespace UnityEngine.UI
         /// </summary>
         public Vector2 cellSize { get { return m_CellSize; } set { SetProperty(ref m_CellSize, value); } }
 
+        /// <summary>Serialized backing field for <see cref="spacing"/>.</summary>
         [SerializeField] protected Vector2 m_Spacing = Vector2.zero;
 
         /// <summary>
@@ -104,6 +108,7 @@ namespace UnityEngine.UI
         /// </summary>
         public Vector2 spacing { get { return m_Spacing; } set { SetProperty(ref m_Spacing, value); } }
 
+        /// <summary>Serialized backing field for <see cref="constraint"/>.</summary>
         [SerializeField] protected Constraint m_Constraint = Constraint.Flexible;
 
         /// <summary>
@@ -114,6 +119,7 @@ namespace UnityEngine.UI
         /// </remarks>
         public Constraint constraint { get { return m_Constraint; } set { SetProperty(ref m_Constraint, value); } }
 
+        /// <summary>Serialized backing field for <see cref="constraintCount"/>.</summary>
         [SerializeField] protected int m_ConstraintCount = 2;
 
         /// <summary>
@@ -141,6 +147,7 @@ namespace UnityEngine.UI
         /// </remarks>
         public int generatedColumnCount { get; private set; }
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a GridLayoutGroup to a GameObject.</summary>
         protected GridLayoutGroup()
         {}
 

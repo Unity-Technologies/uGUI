@@ -97,6 +97,7 @@ namespace UnityEngine.UI
         private readonly IndexedSet<ICanvasElement> m_LayoutRebuildQueue = new IndexedSet<ICanvasElement>();
         private readonly IndexedSet<ICanvasElement> m_GraphicRebuildQueue = new IndexedSet<ICanvasElement>();
 
+        /// <summary>Protected constructor. CanvasUpdateRegistry is a singleton; access it via <see cref="instance"/>.</summary>
         protected CanvasUpdateRegistry()
         {
             Canvas.willRenderCanvases += PerformUpdate;

@@ -8,9 +8,6 @@ using UnityEngine.UI.CoroutineTween;
 
 namespace UnityEngine.UI
 {
-    [AddComponentMenu("UI (Canvas)/Legacy/Dropdown", 102)]
-    [RequireComponent(typeof(RectTransform))]
-    [UGUIHelpURL("Dropdown")]
     /// <summary>
     ///   A standard dropdown that presents a list of options when clicked, of which one can be chosen.
     /// </summary>
@@ -19,8 +16,14 @@ namespace UnityEngine.UI
     ///
     /// When a dropdown event occurs a callback is sent to any registered listeners of onValueChanged.
     /// </remarks>
+    [AddComponentMenu("UI (Canvas)/Legacy/Dropdown", 102)]
+    [RequireComponent(typeof(RectTransform))]
+    [UGUIHelpURL("Dropdown")]
     public class Dropdown : Selectable, IPointerClickHandler, ISubmitHandler, ICancelHandler
     {
+        /// <summary>
+        /// Component placed on each item in the dropdown list. Handles hover highlighting and cancel navigation.
+        /// </summary>
         protected internal class DropdownItem : MonoBehaviour, IPointerEnterHandler, ICancelHandler
         {
             [SerializeField]
@@ -32,16 +35,24 @@ namespace UnityEngine.UI
             [SerializeField]
             private Toggle m_Toggle;
 
+            /// <summary>The text component that displays the item label.</summary>
             public Text          text          { get { return m_Text;          } set { m_Text = value;           } }
+            /// <summary>The image component that displays the item icon.</summary>
             public Image         image         { get { return m_Image;         } set { m_Image = value;          } }
+            /// <summary>The RectTransform of this dropdown item.</summary>
             public RectTransform rectTransform { get { return m_RectTransform; } set { m_RectTransform = value;  } }
+            /// <summary>The Toggle component that tracks whether this item is selected.</summary>
             public Toggle        toggle        { get { return m_Toggle;        } set { m_Toggle = value;         } }
 
+            /// <summary>Called when the pointer enters this item. Selects it for keyboard navigation.</summary>
+            /// <param name="eventData">The pointer event data.</param>
             public virtual void OnPointerEnter(PointerEventData eventData)
             {
                 EventSystem.current.SetSelectedGameObject(gameObject);
             }
 
+            /// <summary>Called when a cancel event is received. Hides the dropdown.</summary>
+            /// <param name="eventData">The base event data.</param>
             public virtual void OnCancel(BaseEventData eventData)
             {
                 Dropdown dropdown = GetComponentInParent<Dropdown>();
@@ -50,10 +61,10 @@ namespace UnityEngine.UI
             }
         }
 
-        [Serializable]
         /// <summary>
-        /// Class to store the text and/or image of a single option in the dropdown list.
+        /// Stores the text and/or image of a single option in the dropdown list.
         /// </summary>
+        [Serializable]
         public class OptionData
         {
             [SerializeField]
@@ -71,25 +82,28 @@ namespace UnityEngine.UI
             /// </summary>
             public Sprite image { get { return m_Image; } set { m_Image = value; } }
 
+            /// <summary>Creates an empty OptionData.</summary>
             public OptionData()
             {
             }
 
+            /// <summary>Creates an OptionData with the specified text.</summary>
+            /// <param name="text">The label to display for this option.</param>
             public OptionData(string text)
             {
                 this.text = text;
             }
 
+            /// <summary>Creates an OptionData with the specified image.</summary>
+            /// <param name="image">The sprite to display for this option.</param>
             public OptionData(Sprite image)
             {
                 this.image = image;
             }
 
-            /// <summary>
-            /// Create an object representing a single option for the dropdown list.
-            /// </summary>
-            /// <param name="text">Optional text for the option.</param>
-            /// <param name="image">Optional image for the option.</param>
+            /// <summary>Creates an OptionData with text and an image.</summary>
+            /// <param name="text">The label to display for this option.</param>
+            /// <param name="image">The sprite to display for this option.</param>
             public OptionData(string text, Sprite image)
             {
                 this.text = text;
@@ -97,34 +111,30 @@ namespace UnityEngine.UI
             }
         }
 
-        [Serializable]
         /// <summary>
-        /// Class used internally to store the list of options for the dropdown list.
+        /// Class used internally to store the list of <see cref="OptionData"/> entries for the Dropdown.
         /// </summary>
         /// <remarks>
         /// The usage of this class is not exposed in the runtime API. It's only relevant for the PropertyDrawer drawing the list of options.
         /// </remarks>
+        [Serializable]
         public class OptionDataList
         {
             [SerializeField]
             private List<OptionData> m_Options;
 
-            /// <summary>
-            /// The list of options for the dropdown list.
-            /// </summary>
+            /// <summary>The list of options for the dropdown list.</summary>
             public List<OptionData> options { get { return m_Options; } set { m_Options = value; } }
 
-
+            /// <summary>Creates an OptionDataList with an empty options list.</summary>
             public OptionDataList()
             {
                 options = new List<OptionData>();
             }
         }
 
+        /// <summary>A <see cref="UnityEngine.Events.UnityEvent{T0}"/> raised when the selected index changes, passing the new index as an int.</summary>
         [Serializable]
-        /// <summary>
-        /// UnityEvent callback for when a dropdown current option is changed.
-        /// </summary>
         public class DropdownEvent : UnityEvent<int> {}
 
         // Template used to create the dropdown.
@@ -428,9 +438,11 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a Dropdown to a GameObject.</summary>
         protected Dropdown()
         {}
 
+        /// <summary>Called when the component wakes up. Hides the dropdown template and configures the caption image visibility.</summary>
         protected override void Awake()
         {
             #if UNITY_EDITOR
@@ -445,6 +457,7 @@ namespace UnityEngine.UI
                 m_Template.gameObject.SetActive(false);
         }
 
+        /// <summary>Initializes the tween runner and refreshes the displayed value.</summary>
         protected override void Start()
         {
             m_AlphaTweenRunner = new TweenRunner<FloatTween>();
@@ -466,6 +479,7 @@ namespace UnityEngine.UI
         }
 
 #endif
+        /// <summary>Called when it becomes disabled. Immediately hides the dropdown list.</summary>
         protected override void OnDisable()
         {
             //Destroy dropdown and blocker in case user deactivates the dropdown when they click an option (case 935649)

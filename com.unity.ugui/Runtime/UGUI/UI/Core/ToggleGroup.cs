@@ -5,15 +5,15 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
-    [AddComponentMenu("UI (Canvas)/Toggle Group", 31)]
-    [DisallowMultipleComponent]
-    [UGUIHelpURL("ToggleGroup")]
     /// <summary>
     /// A component that represents a group of UI.Toggles.
     /// </summary>
     /// <remarks>
     /// When using a group reference from a `UI.Toggle`. Only one member of a group can be on at a time.
     /// </remarks>
+    [AddComponentMenu("UI (Canvas)/Toggle Group", 31)]
+    [DisallowMultipleComponent]
+    [UGUIHelpURL("ToggleGroup")]
     public class ToggleGroup : UIBehaviour
     {
         [SerializeField] private bool m_AllowSwitchOff = false;
@@ -27,8 +27,10 @@ namespace UnityEngine.UI
         /// </remarks>
         public bool allowSwitchOff { get { return m_AllowSwitchOff; } set { m_AllowSwitchOff = value; } }
 
+        /// <summary>The toggles registered with this group.</summary>
         protected List<Toggle> m_Toggles = new List<Toggle>();
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a ToggleGroup to a GameObject.</summary>
         protected ToggleGroup()
         {}
 
@@ -42,6 +44,7 @@ namespace UnityEngine.UI
             base.Start();
         }
 
+        /// <summary>Called when it becomes enabled. Validates the toggle group state.</summary>
         protected override void OnEnable()
         {
             EnsureValidState();
@@ -164,6 +167,7 @@ namespace UnityEngine.UI
         /// <remarks>
         /// This method can be used to switch all toggles off, regardless of whether the allowSwitchOff property is enabled or not.
         /// </remarks>
+        /// <param name="sendCallback">If false, the toggles are turned off without invoking their onValueChanged.</param>
         public void SetAllTogglesOff(bool sendCallback = true)
         {
             bool oldAllowSwitchOff = m_AllowSwitchOff;

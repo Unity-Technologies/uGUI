@@ -41,9 +41,16 @@ namespace UnityEngine.EventSystems
         protected virtual void OnRectTransformDimensionsChange()
         {}
 
+        /// <summary>
+        /// Called before a direct or indirect parent is reparented to a new Transform.
+        /// </summary>
         protected virtual void OnBeforeTransformParentChanged()
         {}
 
+        /// <summary>
+        /// Called when a direct or indirect parent has reparented to a new Transform.
+        /// See <see cref="MonoBehaviour.OnTransformParentChanged"/> for more information.
+        /// </summary>
         protected virtual void OnTransformParentChanged()
         {}
 

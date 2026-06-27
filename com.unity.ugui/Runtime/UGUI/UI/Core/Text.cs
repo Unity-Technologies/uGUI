@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 namespace UnityEngine.UI
 {
-    [RequireComponent(typeof(CanvasRenderer))]
-    [AddComponentMenu("UI (Canvas)/Legacy/Text", 100)]
-    [UGUIHelpURL("Text")]
     /// <summary>
     /// The default Graphic to draw font data to screen.
     /// </summary>
+    [RequireComponent(typeof(CanvasRenderer))]
+    [AddComponentMenu("UI (Canvas)/Legacy/Text", 100)]
+    [UGUIHelpURL("Text")]
     public class Text : MaskableGraphic, ILayoutElement
     {
         [SerializeField] private FontData m_FontData = FontData.defaultFontData;
@@ -18,14 +18,17 @@ namespace UnityEngine.UI
         private Font m_LastTrackedFont;
 #endif
 
+        /// <summary>Serialized backing field for <see cref="text"/>.</summary>
         [TextArea(3, 10)][SerializeField] protected string m_Text = String.Empty;
 
         private TextGenerator m_TextCache;
         private TextGenerator m_TextCacheForLayout;
 
         // We use this flag instead of Unregistering/Registering the callback to avoid allocation.
+        /// <summary>Internal flag to suppress font texture rebuild callbacks during certain operations.</summary>
         [NonSerialized] protected bool m_DisableFontTextureRebuiltCallback = false;
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a Text to a GameObject.</summary>
         protected Text()
         {
         }
@@ -33,7 +36,6 @@ namespace UnityEngine.UI
         /// <summary>
         /// The cached TextGenerator used when generating visible Text.
         /// </summary>
-
         public TextGenerator cachedTextGenerator
         {
             get { return m_TextCache ?? (m_TextCache = (m_Text.Length != 0 ? new TextGenerator(m_Text.Length) : new TextGenerator())); }
@@ -222,7 +224,6 @@ namespace UnityEngine.UI
         /// <summary>
         /// Whether this Text will support rich text.
         /// </summary>
-
         public bool supportRichText
         {
             get
@@ -242,7 +243,6 @@ namespace UnityEngine.UI
         /// <summary>
         /// Should the text be allowed to auto resized.
         /// </summary>
-
         public bool resizeTextForBestFit
         {
             get
@@ -517,7 +517,6 @@ namespace UnityEngine.UI
         /// <summary>
         /// Font style used by the Text's text.
         /// </summary>
-
         public FontStyle fontStyle
         {
             get
@@ -558,6 +557,7 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>Called when it becomes enabled. Registers for font texture rebuild callbacks.</summary>
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -565,12 +565,14 @@ namespace UnityEngine.UI
             FontUpdateTracker.TrackText(this);
         }
 
+        /// <summary>Called when it becomes disabled. Unregisters from font texture rebuild callbacks.</summary>
         protected override void OnDisable()
         {
             FontUpdateTracker.UntrackText(this);
             base.OnDisable();
         }
 
+        /// <summary>Forces an immediate geometry rebuild for this Text component.</summary>
         protected override void UpdateGeometry()
         {
             if (font != null)
@@ -635,6 +637,8 @@ namespace UnityEngine.UI
         /// <summary>
         /// Convenience function to determine the vector offset of the anchor.
         /// </summary>
+        /// <param name="anchor">The text anchor to convert.</param>
+        /// <returns>A Vector2 pivot in the [0,1] range for the given anchor.</returns>
         static public Vector2 GetTextAnchorPivot(TextAnchor anchor)
         {
             switch (anchor)
@@ -653,6 +657,12 @@ namespace UnityEngine.UI
         }
 
         readonly UIVertex[] m_TempVerts = new UIVertex[4];
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// Populates the mesh with text geometry from the TextGenerator.
+        /// </remarks>
+        /// <param name="toFill">The <see cref="VertexHelper"/> to populate.</param>
         protected override void OnPopulateMesh(VertexHelper toFill)
         {
             if (font == null)
@@ -711,9 +721,12 @@ namespace UnityEngine.UI
             m_DisableFontTextureRebuiltCallback = false;
         }
 
+        /// <summary>Called by the layout system to calculate the minimum, maximum and preferred horizontal sizes.</summary>
         public virtual void CalculateLayoutInputHorizontal() {}
+        /// <summary>Called by the layout system to calculate the minimum, maximum and preferred vertical sizes.</summary>
         public virtual void CalculateLayoutInputVertical() {}
 
+        /// <inheritdoc/>
         public virtual float minWidth
         {
             get { return 0; }
@@ -722,6 +735,7 @@ namespace UnityEngine.UI
         /// <inheritdoc/>
         public virtual float maxWidth { get { return LayoutUtility.DefaultMaxSize; } }
 
+        /// <summary>Preferred width needed to display the text without wrapping.</summary>
         public virtual float preferredWidth
         {
             get
@@ -731,8 +745,10 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <inheritdoc/>
         public virtual float flexibleWidth { get { return -1; } }
 
+        /// <inheritdoc/>
         public virtual float minHeight
         {
             get { return 0; }
@@ -741,6 +757,7 @@ namespace UnityEngine.UI
         /// <inheritdoc/>
         public virtual float maxHeight { get { return LayoutUtility.DefaultMaxSize; } }
 
+        /// <summary>Preferred height needed to display the full text at the current width.</summary>
         public virtual float preferredHeight
         {
             get
@@ -750,8 +767,10 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <inheritdoc/>
         public virtual float flexibleHeight { get { return -1; } }
 
+        /// <inheritdoc/>
         public virtual int layoutPriority { get { return 0; } }
 
 #if UNITY_EDITOR

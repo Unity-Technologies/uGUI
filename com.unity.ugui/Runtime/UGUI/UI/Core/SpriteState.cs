@@ -2,10 +2,10 @@ using System;
 
 namespace UnityEngine.UI
 {
-    [Serializable]
     /// <summary>
     /// Structure that stores the state of a sprite transition on a Selectable.
     /// </summary>
+    [Serializable]
     public struct SpriteState : IEquatable<SpriteState>
     {
         [SerializeField]
@@ -40,6 +40,9 @@ namespace UnityEngine.UI
         /// </summary>
         public Sprite disabledSprite    { get { return m_DisabledSprite; } set { m_DisabledSprite = value; } }
 
+        /// <summary>Returns true if the given <see cref="SpriteState"/> has the same sprite references as this one.</summary>
+        /// <param name="other">The SpriteState to compare.</param>
+        /// <returns>True if all sprite fields are equal.</returns>
         public bool Equals(SpriteState other)
         {
             return highlightedSprite == other.highlightedSprite &&

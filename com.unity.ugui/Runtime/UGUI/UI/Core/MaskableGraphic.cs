@@ -9,9 +9,11 @@ namespace UnityEngine.UI
     /// </summary>
     public abstract class MaskableGraphic : Graphic, IClippable, IMaskable, IMaterialModifier
     {
+        /// <summary>Flag indicating if the stencil value needs to be recalculated.</summary>
         [NonSerialized]
         protected bool m_ShouldRecalculateStencil = true;
 
+        /// <summary>The stencil-modified material used when this graphic is masked.</summary>
         [NonSerialized]
         protected Material m_MaskMaterial;
 
@@ -29,6 +31,7 @@ namespace UnityEngine.UI
 
         private bool m_IsMaskingGraphic = false;
 
+        /// <summary>A <see cref="UnityEngine.Events.UnityEvent{T0}"/> fired when the graphic's cull state changes.</summary>
         [Serializable]
         public class CullStateChangedEvent : UnityEvent<bool> {}
 
@@ -40,7 +43,7 @@ namespace UnityEngine.UI
         /// Callback issued when culling changes.
         /// </summary>
         /// <remarks>
-        /// Called whene the culling state of this MaskableGraphic either becomes culled or visible. You can use this to control other elements of your UI as culling happens.
+        /// Called when the culling state of this MaskableGraphic either becomes culled or visible. You can use this to control other elements of your UI as culling happens.
         /// </remarks>
         public CullStateChangedEvent onCullStateChanged
         {
@@ -83,12 +86,15 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>The stencil reference value calculated for the current masking depth.</summary>
         [NonSerialized]
         protected int m_StencilValue;
 
         /// <summary>
         /// See IMaterialModifier.GetModifiedMaterial
         /// </summary>
+        /// <param name="baseMaterial">The original material to modify.</param>
+        /// <returns>The material with stencil settings applied.</returns>
         public virtual Material GetModifiedMaterial(Material baseMaterial)
         {
             var toUse = baseMaterial;
@@ -119,9 +125,7 @@ namespace UnityEngine.UI
             return toUse;
         }
 
-        /// <summary>
-        /// See IClippable.Cull
-        /// </summary>
+        /// <inheritdoc/>
         public virtual void Cull(Rect clipRect, bool validRect)
         {
             var cull = !validRect || !clipRect.Overlaps(rootCanvasRect, true);
@@ -139,9 +143,7 @@ namespace UnityEngine.UI
             }
         }
 
-        /// <summary>
-        /// See IClippable.SetClipRect
-        /// </summary>
+        /// <inheritdoc/>
         public virtual void SetClipRect(Rect clipRect, bool validRect)
         {
             if (validRect)
@@ -150,11 +152,13 @@ namespace UnityEngine.UI
                 canvasRenderer.DisableRectClipping();
         }
 
+        /// <inheritdoc/>
         public virtual void SetClipSoftness(Vector2 clipSoftness)
         {
             canvasRenderer.clippingSoftness = clipSoftness;
         }
 
+        /// <summary>Called when it becomes enabled. Marks this to recalculate the stencil and update the material.</summary>
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -168,6 +172,7 @@ namespace UnityEngine.UI
             }
         }
 
+        /// <summary>Called when it becomes disabled. Resets the mask material and unregisters from clippers.</summary>
         protected override void OnDisable()
         {
             base.OnDisable();
@@ -194,6 +199,8 @@ namespace UnityEngine.UI
 
 #endif
 
+        /// <inheritdoc/>
+        /// <remarks>Sets flags to recalculate stencil and update the material.</remarks>
         protected override void OnTransformParentChanged()
         {
             base.OnTransformParentChanged();
@@ -206,6 +213,8 @@ namespace UnityEngine.UI
             SetMaterialDirty();
         }
 
+        /// <inheritdoc/>
+        /// <remarks>Sets flags to recalculate stencil and update the material.</remarks>
         protected override void OnCanvasHierarchyChanged()
         {
             base.OnCanvasHierarchyChanged();
