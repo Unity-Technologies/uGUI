@@ -428,10 +428,10 @@ namespace TMPro.EditorUtilities
             if (Selection.activeObject != fontAsset)
                 Selection.activeObject = fontAsset;
 
-            if (fontAsset.LoadFontFace() != FontEngineError.Success)
+            if (fontAsset.LoadFontFace(out FontFaceHandle faceHandle) != FontEngineError.Success)
                 return;
 
-            fontAsset.faceInfo = FontEngine.GetFaceInfo();
+            fontAsset.faceInfo = FontEngine.GetFaceInfo(faceHandle);
             TextResourceManager.RebuildFontAssetCache();
             TextEventManager.ON_FONT_PROPERTY_CHANGED(true, fontAsset);
 

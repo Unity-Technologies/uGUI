@@ -142,7 +142,7 @@ namespace TMPro
             FontEngine.InitializeFontEngine();
 
             // Load Font Face
-            if (FontEngine.LoadFontFace(font, 90) != FontEngineError.Success)
+            if (FontEngine.LoadFontFace(font, 90, 0, out FontFaceHandle faceHandle) != FontEngineError.Success)
             {
                 Debug.LogWarning("Unable to load font face for [" + font.name + "]. Make sure \"Include Font Data\" is enabled in the Font Import Settings.", font);
                 return;
@@ -153,7 +153,7 @@ namespace TMPro
             AssetDatabase.CreateAsset(fontAsset, newAssetFilePathWithName);
 
             fontAsset.version = "1.1.0";
-            fontAsset.faceInfo = FontEngine.GetFaceInfo();
+            fontAsset.faceInfo = FontEngine.GetFaceInfo(faceHandle);
 
             // Set font reference and GUID
             fontAsset.sourceFontFile = font;
