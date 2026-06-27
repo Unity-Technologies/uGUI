@@ -41,10 +41,11 @@ namespace UnityEditor.UI
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
-            EditorGUIUtility.labelWidth = 130;
             EditorGUILayout.PropertyField(m_Padding, true);
             EditorGUILayout.PropertyField(m_Spacing, true);
             EditorGUILayout.PropertyField(m_ChildAlignment, true);
+            if (EditorGUIUtility.labelWidth < 130f)
+                EditorGUIUtility.labelWidth = 130;
             EditorGUILayout.PropertyField(m_ReverseArrangement, true);
             EditorGUIUtility.labelWidth = 0;
 
