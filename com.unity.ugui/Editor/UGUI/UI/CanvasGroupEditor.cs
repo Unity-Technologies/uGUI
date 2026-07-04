@@ -22,18 +22,10 @@ namespace UnityEditor.UI
 
             var alphaProp = serializedObject.FindProperty("m_Alpha");
 
-            var alphaField = new Slider("Alpha", 0f, 1f)
-            {
-                value = alphaProp.floatValue
-            };
+            var alphaField = new Slider("Alpha", 0f, 1f);
             alphaField.tooltip = "Controls the transparency of the CanvasGroup. 0 = fully transparent, 1 = fully opaque.";
             alphaField.showInputField = true;
-            alphaField.RegisterValueChangedCallback(evt =>
-            {
-                serializedObject.Update();
-                alphaProp.floatValue = evt.newValue;
-                serializedObject.ApplyModifiedProperties();
-            });
+            alphaField.BindProperty(alphaProp);
             root.Add(alphaField);
 
             root.Add(new PropertyField(serializedObject.FindProperty("m_Interactable"), "Interactable")
