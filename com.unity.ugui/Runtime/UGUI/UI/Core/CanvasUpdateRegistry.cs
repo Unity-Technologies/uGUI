@@ -1,4 +1,5 @@
 using System;
+using Unity.Profiling;
 using UnityEngine.UI.Collections;
 
 namespace UnityEngine.UI
@@ -87,12 +88,33 @@ namespace UnityEngine.UI
         }
 #endif
 
+#if UNITY_INCLUDE_TESTS
+        // Tests that query these markers via ProfilerRecorder must call this
+        // before StartNew — constructing a ProfilerMarker is what registers its
+        // handle with the native profiler, and C#'s beforefieldinit can otherwise
+        // defer that registration past the recorder's lookup.
+        internal static void WarmProfilerMarkers()
+        {
+            _ = m_CanvasUpdateMarkers.Length;
+            _ = m_LayoutSortMarker.GetHashCode();
+            _ = m_CullingUpdateMarker.GetHashCode();
+        }
+#endif
+
         private bool m_PerformingLayoutUpdate;
         private bool m_PerformingGraphicUpdate;
 
-        // This list matches the CanvasUpdate enum above. Keep in sync
-        private readonly string[] m_CanvasUpdateProfilerStrings = new string[] { "CanvasUpdate.Prelayout", "CanvasUpdate.Layout", "CanvasUpdate.PostLayout", "CanvasUpdate.PreRender", "CanvasUpdate.LatePreRender" };
-        private const string m_CullingUpdateProfilerString = "ClipperRegistry.Cull";
+        // This array matches the CanvasUpdate enum above. Keep in sync.
+        private static readonly ProfilerMarker[] m_CanvasUpdateMarkers = new ProfilerMarker[]
+        {
+            new ProfilerMarker("CanvasUpdate.Prelayout"),
+            new ProfilerMarker("CanvasUpdate.Layout"),
+            new ProfilerMarker("CanvasUpdate.PostLayout"),
+            new ProfilerMarker("CanvasUpdate.PreRender"),
+            new ProfilerMarker("CanvasUpdate.LatePreRender"),
+        };
+        private static readonly ProfilerMarker m_LayoutSortMarker        = new ProfilerMarker("CanvasUpdateRegistry.LayoutSort");
+        private static readonly ProfilerMarker m_CullingUpdateMarker     = new ProfilerMarker("ClipperRegistry.Cull");
 
         private readonly IndexedSet<ICanvasElement> m_LayoutRebuildQueue = new IndexedSet<ICanvasElement>();
         private readonly IndexedSet<ICanvasElement> m_GraphicRebuildQueue = new IndexedSet<ICanvasElement>();
@@ -174,30 +196,32 @@ namespace UnityEngine.UI
         private void PerformUpdate()
         {
             UISystemProfilerApi.BeginSample(UISystemProfilerApi.SampleType.Layout);
+
             CleanInvalidItems();
 
             m_PerformingLayoutUpdate = true;
 
-            m_LayoutRebuildQueue.Sort(s_SortLayoutFunction);
+            using (m_LayoutSortMarker.Auto())
+                m_LayoutRebuildQueue.Sort(s_SortLayoutFunction);
 
             for (int i = 0; i <= (int)CanvasUpdate.PostLayout; i++)
             {
-                UnityEngine.Profiling.Profiler.BeginSample(m_CanvasUpdateProfilerStrings[i]);
-
-                for (int j = 0; j < m_LayoutRebuildQueue.Count; j++)
+                using (m_CanvasUpdateMarkers[i].Auto())
                 {
-                    var rebuild = m_LayoutRebuildQueue[j];
-                    try
+                    for (int j = 0; j < m_LayoutRebuildQueue.Count; j++)
                     {
-                        if (ObjectValidForUpdate(rebuild))
-                            rebuild.Rebuild((CanvasUpdate)i);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogException(e, rebuild.transform);
+                        var rebuild = m_LayoutRebuildQueue[j];
+                        try
+                        {
+                            if (ObjectValidForUpdate(rebuild))
+                                rebuild.Rebuild((CanvasUpdate)i);
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogException(e, rebuild.transform);
+                        }
                     }
                 }
-                UnityEngine.Profiling.Profiler.EndSample();
             }
 
             for (int i = 0; i < m_LayoutRebuildQueue.Count; ++i)
@@ -209,29 +233,29 @@ namespace UnityEngine.UI
             UISystemProfilerApi.BeginSample(UISystemProfilerApi.SampleType.Render);
 
             // now layout is complete do culling...
-            UnityEngine.Profiling.Profiler.BeginSample(m_CullingUpdateProfilerString);
-            ClipperRegistry.instance.Cull();
-            UnityEngine.Profiling.Profiler.EndSample();
+            using (m_CullingUpdateMarker.Auto())
+                ClipperRegistry.instance.Cull();
 
             m_PerformingGraphicUpdate = true;
 
             for (var i = (int)CanvasUpdate.PreRender; i < (int)CanvasUpdate.MaxUpdateValue; i++)
             {
-                UnityEngine.Profiling.Profiler.BeginSample(m_CanvasUpdateProfilerStrings[i]);
-                for (var k = 0; k < m_GraphicRebuildQueue.Count; k++)
+                using (m_CanvasUpdateMarkers[i].Auto())
                 {
-                    try
+                    for (var k = 0; k < m_GraphicRebuildQueue.Count; k++)
                     {
-                        var element = m_GraphicRebuildQueue[k];
-                        if (ObjectValidForUpdate(element))
-                            element.Rebuild((CanvasUpdate)i);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogException(e, m_GraphicRebuildQueue[k].transform);
+                        try
+                        {
+                            var element = m_GraphicRebuildQueue[k];
+                            if (ObjectValidForUpdate(element))
+                                element.Rebuild((CanvasUpdate)i);
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogException(e, m_GraphicRebuildQueue[k].transform);
+                        }
                     }
                 }
-                UnityEngine.Profiling.Profiler.EndSample();
             }
 
             for (int i = 0; i < m_GraphicRebuildQueue.Count; ++i)

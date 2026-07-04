@@ -4,7 +4,7 @@ The text for UI elements and text meshes can incorporate multiple font styles an
 
 ## Markup format
 
-The markup system is inspired by HTML but isn't intended to be strictly compatible with standard HTML. The basic idea is that a section of text can be enclosed inside a pair of matching tags:-
+The markup system is inspired by HTML but isn't intended to be strictly compatible with standard HTML. The basic idea is that a section of text can be enclosed inside a pair of matching tags:
 
 `We are <b>not</b> amused.`
 
@@ -14,7 +14,7 @@ You place the _opening_ tag at the beginning of the section. The text inside the
 
 You place another tag at the end of the section. This is the _closing_ tag. It has the same name as the opening tag, but the name is prefixed with a slash `/` character.  Every opening tag must have a corresponding closing tag. If you don't _close_ an opening tag, it is rendered as regular text.
 
-The tags are not displayed to the user directly but are interpreted as instructions for styling the text they enclose. The `b` tag used in the example above applies boldface to the word "not", so the text appears ons creen as:-
+The tags are not displayed to the user directly but are interpreted as instructions for styling the text they enclose. The `b` tag used in the example above applies boldface to the word "not", so the text appears on screen as:
 
 We are **not** amused
 
@@ -48,7 +48,7 @@ We are **absolutely _definitely_ not** amused
 
 ### Tag parameters
 
-Some tags have a simple all-or-nothing effect on the text but others might allow for variations. For example, the **color** tag needs to know which color to apply. Information like this is added to tags by the use of **parameters**:-
+Some tags have a simple all-or-nothing effect on the text but others might allow for variations. For example, the **color** tag needs to know which color to apply. Information like this is added to tags by the use of **parameters**:
 
 `We are <color=green>green</color> with envy`
 

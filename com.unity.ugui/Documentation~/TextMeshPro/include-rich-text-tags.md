@@ -32,7 +32,7 @@
 |[`<strikethrough>`](RichTextStrikethroughUnderline.md)  | Draws a line slightly above the baseline so it crosses out the text.  ||
 |[`<style>`](RichTextStyle.md)|Applies a custom style to the text.||
 |[`<sub>`](RichTextSubSuper.md)|Converts the text to subscript.||
-|[`<sup>`](RichTextSubSuper.md)|Converts the test to superscript.||
+|[`<sup>`](RichTextSubSuper.md)|Converts the text to superscript.||
 |[`<u>`](RichTextStrikethroughUnderline.md)|Draws a line slightly below the baseline to underline the text.||
 |[`<uppercase>`](RichTextLetterCase.md)|Converts text to uppercase before rendering.|Functionally identical to `<allcaps>`.|
 |[`<voffset>`](RichTextVOffset.md)|Gives the baseline a vertical offset.||

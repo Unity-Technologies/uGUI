@@ -3,6 +3,7 @@ using System;
 using System.Reflection;
 #endif
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
@@ -89,6 +90,17 @@ namespace UnityEngine.UI
         /// <summary>Shared working mesh used during mesh generation to avoid per-frame allocations.</summary>
         protected static Mesh s_Mesh;
         private static readonly VertexHelper s_VertexHelper = new VertexHelper();
+
+#if UNITY_INCLUDE_TESTS
+        internal static void WarmProfilerMarkers()
+        {
+            _ = s_OnPopulateMeshMarker.GetHashCode();
+            _ = s_ModifyMeshMarker.GetHashCode();
+        }
+#endif
+
+        private static readonly ProfilerMarker s_OnPopulateMeshMarker   = new ProfilerMarker("Graphic.OnPopulateMesh");
+        private static readonly ProfilerMarker s_ModifyMeshMarker       = new ProfilerMarker("Graphic.ModifyMesh");
 
 #if UNITY_EDITOR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
@@ -326,7 +338,7 @@ namespace UnityEngine.UI
             CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
 
 #if PACKAGE_POLYSPATIAL
-            // [AVPB-860] When vertices are dirtied, mark the component itself 
+            // [AVPB-860] When vertices are dirtied, mark the component itself
             // dirty as well so that ObjectDispatcher picks it up
             MarkDirty();
 #endif
@@ -737,15 +749,24 @@ namespace UnityEngine.UI
         private void DoMeshGeneration()
         {
             if (rectTransform != null && rectTransform.rect.width >= 0 && rectTransform.rect.height >= 0)
-                OnPopulateMesh(s_VertexHelper);
+            {
+                using (s_OnPopulateMeshMarker.Auto(this))
+                    OnPopulateMesh(s_VertexHelper);
+            }
             else
                 s_VertexHelper.Clear(); // clear the vertex helper so invalid graphics dont draw.
 
             var components = ListPool<Component>.Get();
             GetComponents(typeof(IMeshModifier), components);
 
-            for (var i = 0; i < components.Count; i++)
-                ((IMeshModifier)components[i]).ModifyMesh(s_VertexHelper);
+            if (components.Count > 0)
+            {
+                using (s_ModifyMeshMarker.Auto())
+                {
+                    for (var i = 0; i < components.Count; i++)
+                        ((IMeshModifier)components[i]).ModifyMesh(s_VertexHelper);
+                }
+            }
 
             ListPool<Component>.Release(components);
 
@@ -900,7 +921,7 @@ namespace UnityEngine.UI
                         {
                             if (group.ignoreParentGroups)
                                 ignoreParentGroups = true;
-    
+
                             raycastValid = filter.IsRaycastLocationValid(sp, eventCamera);
                             if (!raycastValid)
                                 break;

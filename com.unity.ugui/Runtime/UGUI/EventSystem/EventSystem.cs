@@ -302,20 +302,30 @@ namespace UnityEngine.EventSystems
         }
 
         /// <summary>
-        /// Is the pointer with the given ID over an EventSystem object?
+        /// Checks whether the left mouse button is over an EventSystem object.
         /// </summary>
+        /// <remarks>
+        /// Equivalent to calling <see cref="IsPointerOverGameObject(int)"/> with a <c>pointerId</c> of <c>-1</c>.
+        /// </remarks>
+        /// <returns>Returns <c>true</c> if the left mouse button is over an EventSystem object. Otherwise, returns <c>false</c>.</returns>
         public bool IsPointerOverGameObject()
         {
             return IsPointerOverGameObject(PointerInputModule.kMouseLeftId);
         }
 
         /// <summary>
-        /// Is the pointer with the given ID over an EventSystem object?
+        /// Checks whether the pointer with the specified ID is over an EventSystem object.
         /// </summary>
         /// <remarks>
-        /// If you use IsPointerOverGameObject() without a parameter, it points to the "left mouse button" (pointerId = -1); therefore when you use IsPointerOverGameObject for touch, you should consider passing a pointerId to it
-        /// Note that for touch, IsPointerOverGameObject should be used with ''OnMouseDown()'' or ''Input.GetMouseButtonDown(0)'' or ''Input.GetTouch(0).phase == TouchPhase.Began''.
+        /// > [!NOTE]
+        /// > If you use `IsPointerOverGameObject()` without a `pointerId`, it defaults to
+        /// > the left mouse button (`pointerId` = -1). For touch input, consider passing a
+        /// > touch ID (such as <c>Input.GetTouch(0).fingerId</c>) to this method when checking
+        /// > during events like <c>Input.GetMouseButtonDown(0)</c> or 
+        /// > <c>Input.GetTouch(0).phase == TouchPhase.Began</c>.
         /// </remarks>
+        /// <param name="pointerId">The ID of the pointer to check.</param>
+        /// <returns>Returns <c>true</c> if the pointer is over an EventSystem object. Otherwise, returns <c>false</c>.</returns>
         /// <example>
         /// <code>
         /// <![CDATA[
