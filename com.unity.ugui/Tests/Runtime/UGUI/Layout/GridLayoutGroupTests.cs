@@ -149,6 +149,14 @@ class GridLayoutGroupTests : IPrebuildSetup
         element9.enabled = true;
         element9.ignoreLayout = true;
 
+        // Assign a max to every child. GridLayoutGroup derives its own size from cellSize and
+        // ignores child layout properties.
+        foreach (var childLayoutElement in groupGO.GetComponentsInChildren<LayoutElement>())
+        {
+            childLayoutElement.maxWidth = 1000;
+            childLayoutElement.maxHeight = 1000;
+        }
+
         if (!Directory.Exists("Assets/Resources/"))
             Directory.CreateDirectory("Assets/Resources/");
 
@@ -192,6 +200,8 @@ class GridLayoutGroupTests : IPrebuildSetup
         Assert.AreEqual(100, m_LayoutGroup.preferredHeight, "Expected layout group preferred height to match but it did not");
         Assert.AreEqual(-1, m_LayoutGroup.flexibleWidth, "Expected layout group flexiblle width to match but it did not");
         Assert.AreEqual(-1, m_LayoutGroup.flexibleHeight, "Expected layout group flexiblle height to match but it did not");
+        Assert.AreEqual(LayoutUtility.DefaultMaxSize, m_LayoutGroup.maxWidth, "Expected flexible grid max width to be unbounded");
+        Assert.AreEqual(LayoutUtility.DefaultMaxSize, m_LayoutGroup.maxHeight, "Expected flexible grid max height to be unbounded");
 
         Vector2[] expectedPositions =
         {
@@ -403,6 +413,8 @@ class GridLayoutGroupTests : IPrebuildSetup
         Assert.AreEqual(250, m_LayoutGroup.preferredHeight, "Expected layout group preferred height to match but it did not");
         Assert.AreEqual(-1, m_LayoutGroup.flexibleWidth, "Expected layout group flexiblle width to match but it did not");
         Assert.AreEqual(-1, m_LayoutGroup.flexibleHeight, "Expected layout group flexiblle height to match but it did not");
+        Assert.AreEqual(190, m_LayoutGroup.maxWidth, "Expected fixed grid max width to match min/preferred");
+        Assert.AreEqual(250, m_LayoutGroup.maxHeight, "Expected fixed grid max height to match min/preferred");
 
         Vector2[] expectedPositions =
         {
@@ -448,6 +460,8 @@ class GridLayoutGroupTests : IPrebuildSetup
         Assert.AreEqual(100, m_LayoutGroup.preferredHeight, "Expected layout group preferred height to match but it did not");
         Assert.AreEqual(-1, m_LayoutGroup.flexibleWidth, "Expected layout group flexiblle width to match but it did not");
         Assert.AreEqual(-1, m_LayoutGroup.flexibleHeight, "Expected layout group flexiblle height to match but it did not");
+        Assert.AreEqual(490, m_LayoutGroup.maxWidth, "Expected fixed grid max width to match min/preferred");
+        Assert.AreEqual(100, m_LayoutGroup.maxHeight, "Expected fixed grid max height to match min/preferred");
 
         Vector2[] expectedPositions =
         {
@@ -471,5 +485,33 @@ class GridLayoutGroupTests : IPrebuildSetup
             Assert.AreEqual(expectedPositions[i], rectTransform.anchoredPosition, $"Expected Element { i + 1 } position to match but it did not");
             Assert.AreEqual(expectedSize, rectTransform.sizeDelta, $"Expected Element { i + 1 } size to match but it did not");
         }
+    }
+
+    [Test]
+    public void TestFlexibleCalculateLayout_MaxIsDefaultMaxSize()
+    {
+        m_LayoutGroup.constraint = GridLayoutGroup.Constraint.Flexible;
+        LayoutRebuilder.ForceRebuildLayoutImmediate(m_LayoutGroup.GetComponent<RectTransform>());
+
+        // In Flexible mode the grid can grow unbounded.
+        Assert.AreEqual(LayoutUtility.DefaultMaxSize, m_LayoutGroup.maxWidth, "Expected flexible grid max width to be unbounded");
+        Assert.AreEqual(LayoutUtility.DefaultMaxSize, m_LayoutGroup.maxHeight, "Expected flexible grid max height to be unbounded");
+    }
+
+    [Test]
+    public void TestFixedColumnCount_MinMaxPreferredAreEqual()
+    {
+        m_LayoutGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        m_LayoutGroup.constraintCount = 2;
+        LayoutRebuilder.ForceRebuildLayoutImmediate(m_LayoutGroup.GetComponent<RectTransform>());
+
+        // A fixed constraint produces an exact size, so min, max, and preferred all match.
+        Assert.AreEqual(190, m_LayoutGroup.maxWidth, "Expected fixed grid max width to match min/preferred");
+        Assert.AreEqual(m_LayoutGroup.minWidth, m_LayoutGroup.maxWidth, "Expected fixed grid min width to equal max width");
+        Assert.AreEqual(m_LayoutGroup.preferredWidth, m_LayoutGroup.maxWidth, "Expected fixed grid preferred width to equal max width");
+
+        Assert.AreEqual(200, m_LayoutGroup.maxHeight, "Expected fixed grid max height to match min/preferred");
+        Assert.AreEqual(m_LayoutGroup.minHeight, m_LayoutGroup.maxHeight, "Expected fixed grid min height to equal max height");
+        Assert.AreEqual(m_LayoutGroup.preferredHeight, m_LayoutGroup.maxHeight, "Expected fixed grid preferred height to equal max height");
     }
 }

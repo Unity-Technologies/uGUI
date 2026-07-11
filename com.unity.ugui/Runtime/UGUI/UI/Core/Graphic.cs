@@ -3,6 +3,7 @@ using System;
 using System.Reflection;
 #endif
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Profiling;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -89,7 +90,8 @@ namespace UnityEngine.UI
         protected static Texture2D s_WhiteTexture = null;
         /// <summary>Shared working mesh used during mesh generation to avoid per-frame allocations.</summary>
         protected static Mesh s_Mesh;
-        private static readonly VertexHelper s_VertexHelper = new VertexHelper();
+        // Allocator.Domain: auto-freed on domain unload, so this static never leaks.
+        private static readonly VertexHelper s_VertexHelper = new VertexHelper(Allocator.Domain);
 
 #if UNITY_INCLUDE_TESTS
         internal static void WarmProfilerMarkers()

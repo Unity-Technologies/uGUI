@@ -36,7 +36,7 @@ namespace UnityEditor.UI.Tests
             m_Editor = Editor.CreateEditor(m_LayoutElement);
             m_Root = m_Editor.CreateInspectorGUI();
 
-            m_Window = EditorWindow.GetWindow<EditorWindow>();
+            m_Window = EditorWindow.CreateWindow<EditorWindow>();
             m_Window.rootVisualElement.Add(m_Root);
             m_Window.Show();
         }

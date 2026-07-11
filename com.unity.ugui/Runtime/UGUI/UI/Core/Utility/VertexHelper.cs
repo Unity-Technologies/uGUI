@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine.Pool;
+using Unity.Collections;
+using UnityEngine.Rendering;
 
 namespace UnityEngine.UI
 {
@@ -41,66 +42,181 @@ namespace UnityEngine.UI
     /// </example>
     public class VertexHelper : IDisposable
     {
-        private List<Vector3> m_Positions;
-        private List<Color32> m_Colors;
-        private List<Vector4> m_Uv0S;
-        private List<Vector4> m_Uv1S;
-        private List<Vector4> m_Uv2S;
-        private List<Vector4> m_Uv3S;
-        private List<Vector3> m_Normals;
-        private List<Vector4> m_Tangents;
-        private List<Vector4> m_PrevPositions;
-        private List<int> m_Indices;
+        // Single interleaved AoS storage. UIVertex's field order matches the GPU vertex
+        // layout below (Position, Normal, Tangent, Color, TexCoord0-3, TexCoord4 for
+        // prevPosition), so one mesh.SetVertexBufferData<UIVertex> call uploads the lot.
+        NativeArray<UIVertex> m_Verts;
+        NativeArray<ushort>   m_Indices;
 
-        private static readonly Vector4 s_DefaultTangent = new Vector4(1.0f, 0.0f, 0.0f, -1.0f);
-        private static readonly Vector3 s_DefaultNormal = Vector3.back;
+        int m_VertCount;
+        int m_VertCapacity;
+        int m_IndexCount;
+        int m_IndexCapacity;
 
-        private bool m_ListsInitalized = false;
+        Allocator m_Allocator;
 
-        /// <summary>Creates a new empty VertexHelper.</summary>
-        public VertexHelper()
-        {}
+        const int k_InitialVertCapacity  = 64;
+        const int k_InitialIndexCapacity = 96;
+        const int k_MaxVertCount = 65000;
 
-        /// <summary>Creates a new VertexHelper populated with data from an existing mesh.</summary>
-        /// <param name="m">The mesh to read vertex data from.</param>
-        public VertexHelper(Mesh m)
+        static readonly Vector4 s_DefaultTangent = new Vector4(1.0f, 0.0f, 0.0f, -1.0f);
+        static readonly Vector3 s_DefaultNormal = Vector3.back;
+
+        /// <summary>
+        /// Construct an empty VertexHelper backed by persistent native storage.
+        /// </summary>
+        public VertexHelper() : this(Allocator.Persistent) { }
+
+        internal VertexHelper(Allocator allocator)
         {
-            InitializeListIfRequired();
-
-            m_Positions.AddRange(m.vertices);
-            m_Colors.AddRange(m.colors32);
-            List<Vector4> tempUVList = new List<Vector4>();
-            m.GetUVs(0, tempUVList);
-            m_Uv0S.AddRange(tempUVList);
-            m.GetUVs(1, tempUVList);
-            m_Uv1S.AddRange(tempUVList);
-            m.GetUVs(2, tempUVList);
-            m_Uv2S.AddRange(tempUVList);
-            m.GetUVs(3, tempUVList);
-            m_Uv3S.AddRange(tempUVList);
-            m_Normals.AddRange(m.normals);
-            m_Tangents.AddRange(m.tangents);
-            m_Indices.AddRange(m.GetIndices(0));
-            m.GetUVs(4, tempUVList);
-            m_PrevPositions.AddRange(tempUVList);
+            m_Allocator = allocator;
         }
 
-        private void InitializeListIfRequired()
+        /// <summary>
+        /// Construct a VertexHelper seeded with the contents of an existing Mesh.
+        /// </summary>
+        /// <param name="m">Mesh whose vertices, colors, UV channels (0-4), normals, tangents, and submesh 0 indices are copied into the helper.</param>
+        public VertexHelper(Mesh m) : this(Allocator.Persistent)
         {
-            if (!m_ListsInitalized)
+            // Cold path — only used by user code constructing VertexHelper from an existing Mesh.
+            // Read every present channel through the Mesh.MeshData API: each copy lands directly
+            // in a NativeArray with no managed array allocations, and UVs avoid the slow
+            // Mesh.GetUVs(int, List<Vector4>) marshalling path. Absent channels fall back to the
+            // UI defaults below.
+            using var meshDataArray = Mesh.AcquireReadOnlyMeshData(m);
+            Mesh.MeshData data = meshDataArray[0];
+
+            int vertexCount = data.vertexCount;
+            int indexCount = data.subMeshCount > 0 ? data.GetSubMesh(0).indexCount : 0;
+            InitializeIfRequired(vertexCount, indexCount);
+
+            using var positions = new NativeArray<Vector3>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+            data.GetVertices(positions);
+
+            bool hasNormals = data.HasVertexAttribute(VertexAttribute.Normal);
+            using var normals = hasNormals ? new NativeArray<Vector3>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory) : default;
+            if (hasNormals)
+                data.GetNormals(normals);
+
+            bool hasTangents = data.HasVertexAttribute(VertexAttribute.Tangent);
+            using var tangents = hasTangents ? new NativeArray<Vector4>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory) : default;
+            if (hasTangents)
+                data.GetTangents(tangents);
+
+            bool hasColors = data.HasVertexAttribute(VertexAttribute.Color);
+            using var colors = hasColors ? new NativeArray<Color32>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory) : default;
+            if (hasColors)
+                data.GetColors(colors);
+
+            NativeArray<Vector4> ReadUVChannel(int channel, int vertexCount, Mesh.MeshData data)
             {
-                m_Positions = ListPool<Vector3>.Get();
-                m_Colors = ListPool<Color32>.Get();
-                m_Uv0S = ListPool<Vector4>.Get();
-                m_Uv1S = ListPool<Vector4>.Get();
-                m_Uv2S = ListPool<Vector4>.Get();
-                m_Uv3S = ListPool<Vector4>.Get();
-                m_Normals = ListPool<Vector3>.Get();
-                m_Tangents = ListPool<Vector4>.Get();
-                m_PrevPositions = ListPool<Vector4>.Get();
-                m_Indices = ListPool<int>.Get();
-                m_ListsInitalized = true;
+                if (!data.HasVertexAttribute(VertexAttribute.TexCoord0 + channel))
+                    return default;
+                var uvs = new NativeArray<Vector4>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+                data.GetUVs(channel, uvs);
+                return uvs;
             }
+
+            // uv0-3 land in TexCoord0-3; uv4 (prevPosition) lands in TexCoord4.
+            using var uv0 = ReadUVChannel(0, vertexCount, data);
+            using var uv1 = ReadUVChannel(1, vertexCount, data);
+            using var uv2 = ReadUVChannel(2, vertexCount, data);
+            using var uv3 = ReadUVChannel(3, vertexCount, data);
+            using var uv4 = ReadUVChannel(4, vertexCount, data);
+
+            for (int i = 0; i < vertexCount; i++)
+            {
+                m_Verts[i] = new UIVertex
+                {
+                    position     = positions[i],
+                    normal       = hasNormals  ? normals[i]  : s_DefaultNormal,
+                    tangent      = hasTangents ? tangents[i] : s_DefaultTangent,
+                    color        = hasColors   ? colors[i]   : (Color32)Color.white,
+                    uv0          = uv0.IsCreated ? uv0[i] : Vector4.zero,
+                    uv1          = uv1.IsCreated ? uv1[i] : Vector4.zero,
+                    uv2          = uv2.IsCreated ? uv2[i] : Vector4.zero,
+                    uv3          = uv3.IsCreated ? uv3[i] : Vector4.zero,
+                    prevPosition = uv4.IsCreated ? uv4[i] : Vector4.zero,
+                };
+            }
+            m_VertCount = vertexCount;
+
+            // Submesh 0 indices, read straight into the (already capacity-sized) index buffer.
+            if (indexCount > 0)
+            {
+                data.GetIndices(m_Indices, 0);
+                m_IndexCount = indexCount;
+            }
+        }
+
+        void InitializeIfRequired(int vertCapacityHint = k_InitialVertCapacity, int indexCapacityHint = k_InitialIndexCapacity)
+        {
+            // Only allocate on first use. For subsequent calls, defer to the Ensure* helpers
+            // so we never silently overwrite an existing NativeArray (which would leak native
+            // memory) and never reset m_*Capacity below the live array length (which would
+            // turn every AddVert/AddTriangle past the initial capacity into an O(N) reallocation).
+            if (!m_Verts.IsCreated)
+            {
+                m_VertCapacity = Math.Max(vertCapacityHint, k_InitialVertCapacity);
+                m_Verts = new NativeArray<UIVertex>(m_VertCapacity, m_Allocator, NativeArrayOptions.UninitializedMemory);
+            }
+            else if (vertCapacityHint > m_VertCapacity)
+            {
+                EnsureVertCapacity(vertCapacityHint);
+            }
+
+            if (!m_Indices.IsCreated)
+            {
+                m_IndexCapacity = Math.Max(indexCapacityHint, k_InitialIndexCapacity);
+                m_Indices = new NativeArray<ushort>(m_IndexCapacity, m_Allocator, NativeArrayOptions.UninitializedMemory);
+            }
+            else if (indexCapacityHint > m_IndexCapacity)
+            {
+                EnsureIndexCapacity(indexCapacityHint);
+            }
+        }
+
+        void EnsureVertCapacity(int needed)
+        {
+            if (needed <= m_VertCapacity) return;
+            var newCap = Mathf.NextPowerOfTwo(needed);
+            GrowNativeArray(ref m_Verts, newCap, m_VertCount);
+            m_VertCapacity = newCap;
+        }
+
+        void EnsureIndexCapacity(int needed)
+        {
+            if (needed <= m_IndexCapacity) return;
+            var newCap = Mathf.NextPowerOfTwo(needed);
+            GrowNativeArray(ref m_Indices, newCap, m_IndexCount);
+            m_IndexCapacity = newCap;
+        }
+
+        void GrowNativeArray<T>(ref NativeArray<T> arr, int newCapacity, int liveCount) where T : struct
+        {
+            var newArr = new NativeArray<T>(newCapacity, m_Allocator, NativeArrayOptions.UninitializedMemory);
+            if (liveCount > 0)
+                NativeArray<T>.Copy(arr, 0, newArr, 0, liveCount);
+            arr.Dispose();
+            arr = newArr;
+        }
+
+        internal int ReserveVerts(int count)
+        {
+            InitializeIfRequired();
+            int start = m_VertCount;
+            EnsureVertCapacity(start + count);
+            m_VertCount = start + count;
+            return start;
+        }
+
+        internal int ReserveIndices(int count)
+        {
+            InitializeIfRequired();
+            int start = m_IndexCount;
+            EnsureIndexCapacity(start + count);
+            m_IndexCount = start + count;
+            return start;
         }
 
         /// <summary>
@@ -108,32 +224,13 @@ namespace UnityEngine.UI
         /// </summary>
         public void Dispose()
         {
-            if (m_ListsInitalized)
-            {
-                ListPool<Vector3>.Release(m_Positions);
-                ListPool<Color32>.Release(m_Colors);
-                ListPool<Vector4>.Release(m_Uv0S);
-                ListPool<Vector4>.Release(m_Uv1S);
-                ListPool<Vector4>.Release(m_Uv2S);
-                ListPool<Vector4>.Release(m_Uv3S);
-                ListPool<Vector3>.Release(m_Normals);
-                ListPool<Vector4>.Release(m_Tangents);
-                ListPool<Vector4>.Release(m_PrevPositions);
-                ListPool<int>.Release(m_Indices);
+            if (m_Verts.IsCreated)   m_Verts.Dispose();
+            if (m_Indices.IsCreated) m_Indices.Dispose();
 
-                m_Positions = null;
-                m_Colors = null;
-                m_Uv0S = null;
-                m_Uv1S = null;
-                m_Uv2S = null;
-                m_Uv3S = null;
-                m_Normals = null;
-                m_Tangents = null;
-                m_PrevPositions = null;
-                m_Indices = null;
-
-                m_ListsInitalized = false;
-            }
+            m_VertCount = 0;
+            m_IndexCount = 0;
+            m_VertCapacity = 0;
+            m_IndexCapacity = 0;
         }
 
         /// <summary>
@@ -141,37 +238,19 @@ namespace UnityEngine.UI
         /// </summary>
         public void Clear()
         {
-            // Only clear if we have our lists created.
-            if (m_ListsInitalized)
-            {
-                m_Positions.Clear();
-                m_Colors.Clear();
-                m_Uv0S.Clear();
-                m_Uv1S.Clear();
-                m_Uv2S.Clear();
-                m_Uv3S.Clear();
-                m_Normals.Clear();
-                m_Tangents.Clear();
-                m_PrevPositions.Clear();
-                m_Indices.Clear();
-            }
+            m_VertCount = 0;
+            m_IndexCount = 0;
         }
 
         /// <summary>
         /// Current number of vertices in the buffer.
         /// </summary>
-        public int currentVertCount
-        {
-            get { return m_Positions != null ? m_Positions.Count : 0; }
-        }
+        public int currentVertCount => m_VertCount;
 
         /// <summary>
         /// Get the number of indices set on the VertexHelper.
         /// </summary>
-        public int currentIndexCount
-        {
-            get { return m_Indices != null ? m_Indices.Count : 0; }
-        }
+        public int currentIndexCount => m_IndexCount;
 
         /// <summary>
         /// Fill a UIVertex with data from index i of the stream.
@@ -180,17 +259,8 @@ namespace UnityEngine.UI
         /// <param name="i">Index to populate.</param>
         public void PopulateUIVertex(ref UIVertex vertex, int i)
         {
-            InitializeListIfRequired();
-
-            vertex.position = m_Positions[i];
-            vertex.color = m_Colors[i];
-            vertex.uv0 = m_Uv0S[i];
-            vertex.uv1 = m_Uv1S[i];
-            vertex.uv2 = m_Uv2S[i];
-            vertex.uv3 = m_Uv3S[i];
-            vertex.normal = m_Normals[i];
-            vertex.tangent = m_Tangents[i];
-            vertex.prevPosition = m_PrevPositions[i];
+            InitializeIfRequired();
+            vertex = m_Verts[i];
         }
 
         /// <summary>
@@ -200,18 +270,23 @@ namespace UnityEngine.UI
         /// <param name="i">the position in the current list to fill.</param>
         public void SetUIVertex(UIVertex vertex, int i)
         {
-            InitializeListIfRequired();
-
-            m_Positions[i] = vertex.position;
-            m_Colors[i] = vertex.color;
-            m_Uv0S[i] = vertex.uv0;
-            m_Uv1S[i] = vertex.uv1;
-            m_Uv2S[i] = vertex.uv2;
-            m_Uv3S[i] = vertex.uv3;
-            m_Normals[i] = vertex.normal;
-            m_Tangents[i] = vertex.tangent;
-            m_PrevPositions[i] = vertex.prevPosition;
+            InitializeIfRequired();
+            m_Verts[i] = vertex;
         }
+
+        // Cached single-stream layout — built once, reused for every FillMesh call.
+        static readonly VertexAttributeDescriptor[] s_VertexLayout =
+        {
+            new VertexAttributeDescriptor(VertexAttribute.Position,  VertexAttributeFormat.Float32, 3),
+            new VertexAttributeDescriptor(VertexAttribute.Normal,    VertexAttributeFormat.Float32, 3),
+            new VertexAttributeDescriptor(VertexAttribute.Tangent,   VertexAttributeFormat.Float32, 4),
+            new VertexAttributeDescriptor(VertexAttribute.Color,     VertexAttributeFormat.UNorm8,  4),
+            new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 4),
+            new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 4),
+            new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, 4),
+            new VertexAttributeDescriptor(VertexAttribute.TexCoord3, VertexAttributeFormat.Float32, 4),
+            new VertexAttributeDescriptor(VertexAttribute.TexCoord4, VertexAttributeFormat.Float32, 4),
+        };
 
         /// <summary>
         /// Fill the given mesh with the stream data.
@@ -219,23 +294,40 @@ namespace UnityEngine.UI
         /// <param name="mesh">The mesh to write the current vertex and index data into.</param>
         public void FillMesh(Mesh mesh)
         {
-            InitializeListIfRequired();
+            InitializeIfRequired();
 
-            mesh.Clear();
+            if (m_VertCount >= k_MaxVertCount)
+                throw new ArgumentException($"Mesh can not have more than {k_MaxVertCount} vertices");
 
-            if (m_Positions.Count >= 65000)
-                throw new ArgumentException("Mesh can not have more than 65000 vertices");
+            if (m_VertCount == 0 || m_IndexCount == 0)
+            {
+                mesh.Clear();
+                return;
+            }
 
-            mesh.SetVertices(m_Positions);
-            mesh.SetColors(m_Colors);
-            mesh.SetUVs(0, m_Uv0S);
-            mesh.SetUVs(1, m_Uv1S);
-            mesh.SetUVs(2, m_Uv2S);
-            mesh.SetUVs(3, m_Uv3S);
-            mesh.SetNormals(m_Normals);
-            mesh.SetTangents(m_Tangents);
-            mesh.SetUVs(4, m_PrevPositions);
-            mesh.SetTriangles(m_Indices, 0);
+            // Keep bounds + notify bypass for perf (we call RecalculateBounds explicitly,
+            // and UI meshes are consumed via CanvasRenderer.SetMesh — no listeners).
+            // Don't bypass index validation: FillMesh is public and bad indices crash the GPU.
+            const MeshUpdateFlags k_BypassFlags =
+                MeshUpdateFlags.DontRecalculateBounds
+                | MeshUpdateFlags.DontNotifyMeshUsers;
+
+            // Single-stream interleaved AoS layout matches UIVertex's field order. One
+            // SetVertexBufferData call uploads all 9 channels in one bulk memcpy.
+            mesh.SetVertexBufferParams(m_VertCount, s_VertexLayout);
+            mesh.SetIndexBufferParams(m_IndexCount, IndexFormat.UInt16);
+            mesh.SetVertexBufferData(m_Verts, 0, 0, m_VertCount, 0, k_BypassFlags);
+            mesh.SetIndexBufferData(m_Indices, 0, 0, m_IndexCount, k_BypassFlags);
+
+            mesh.subMeshCount = 1;
+            // Must set vertexCount on the descriptor explicitly: SetSubMesh only
+            // auto-derives it from the index data when DontRecalculateBounds is unset.
+            // Leaving it at the default (0) makes the draw call submit zero verts.
+            mesh.SetSubMesh(0, new SubMeshDescriptor(0, m_IndexCount, MeshTopology.Triangles)
+            {
+                firstVertex = 0,
+                vertexCount = m_VertCount,
+            }, k_BypassFlags);
             mesh.RecalculateBounds();
         }
 
@@ -253,17 +345,22 @@ namespace UnityEngine.UI
         /// <param name="prevPosition">Previous position of the vert (in the UV4 slot)</param>
         public void AddVert(Vector3 position, Color32 color, Vector4 uv0, Vector4 uv1, Vector4 uv2, Vector4 uv3, Vector3 normal, Vector4 tangent, Vector4 prevPosition)
         {
-            InitializeListIfRequired();
+            InitializeIfRequired();
+            EnsureVertCapacity(m_VertCount + 1);
 
-            m_Positions.Add(position);
-            m_Colors.Add(color);
-            m_Uv0S.Add(uv0);
-            m_Uv1S.Add(uv1);
-            m_Uv2S.Add(uv2);
-            m_Uv3S.Add(uv3);
-            m_Normals.Add(normal);
-            m_Tangents.Add(tangent);
-            m_PrevPositions.Add(prevPosition);
+            m_Verts[m_VertCount] = new UIVertex
+            {
+                position     = position,
+                normal       = normal,
+                tangent      = tangent,
+                color        = color,
+                uv0          = uv0,
+                uv1          = uv1,
+                uv2          = uv2,
+                uv3          = uv3,
+                prevPosition = prevPosition,
+            };
+            m_VertCount++;
         }
 
         /// <summary>
@@ -313,7 +410,9 @@ namespace UnityEngine.UI
         /// <param name="v">The vertex to add</param>
         public void AddVert(UIVertex v)
         {
-            AddVert(v.position, v.color, v.uv0, v.uv1, v.uv2, v.uv3, v.normal, v.tangent, v.prevPosition);
+            InitializeIfRequired();
+            EnsureVertCapacity(m_VertCount + 1);
+            m_Verts[m_VertCount++] = v;
         }
 
         /// <summary>
@@ -324,11 +423,13 @@ namespace UnityEngine.UI
         /// <param name="idx2">index 2</param>
         public void AddTriangle(int idx0, int idx1, int idx2)
         {
-            InitializeListIfRequired();
+            InitializeIfRequired();
+            EnsureIndexCapacity(m_IndexCount + 3);
 
-            m_Indices.Add(idx0);
-            m_Indices.Add(idx1);
-            m_Indices.Add(idx2);
+            m_Indices[m_IndexCount + 0] = (ushort)idx0;
+            m_Indices[m_IndexCount + 1] = (ushort)idx1;
+            m_Indices[m_IndexCount + 2] = (ushort)idx2;
+            m_IndexCount += 3;
         }
 
         /// <summary>
@@ -337,10 +438,15 @@ namespace UnityEngine.UI
         /// <param name="verts">4 Vertices representing the quad.</param>
         public void AddUIVertexQuad(UIVertex[] verts)
         {
-            int startIndex = currentVertCount;
+            int startIndex = m_VertCount;
 
-            for (int i = 0; i < 4; i++)
-                AddVert(verts[i].position, verts[i].color, verts[i].uv0, verts[i].uv1, verts[i].normal, verts[i].tangent);
+            InitializeIfRequired();
+            EnsureVertCapacity(startIndex + 4);
+            m_Verts[startIndex + 0] = verts[0];
+            m_Verts[startIndex + 1] = verts[1];
+            m_Verts[startIndex + 2] = verts[2];
+            m_Verts[startIndex + 3] = verts[3];
+            m_VertCount = startIndex + 4;
 
             AddTriangle(startIndex, startIndex + 1, startIndex + 2);
             AddTriangle(startIndex + 2, startIndex + 3, startIndex);
@@ -353,31 +459,50 @@ namespace UnityEngine.UI
         /// <param name="indices">The custom stream of indices to add to the helpers internal data.</param>
         public void AddUIVertexStream(List<UIVertex> verts, List<int> indices)
         {
-            InitializeListIfRequired();
+            InitializeIfRequired();
 
-            if (verts != null)
+            if (verts != null && verts.Count > 0)
             {
-                CanvasRenderer.AddUIVertexStream(verts, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Uv2S, m_Uv3S, m_Normals, m_Tangents, m_PrevPositions);
+                int addedVerts = verts.Count;
+                EnsureVertCapacity(addedVerts);
+
+                var backing = NoAllocHelpers.ExtractArrayFromList(verts);
+                NativeArray<UIVertex>.Copy(backing, 0, m_Verts, 0, addedVerts);
+                m_VertCount = addedVerts;
             }
 
-            if (indices != null)
+            if (indices != null && indices.Count > 0)
             {
-                m_Indices.AddRange(indices);
+                int addedIdx = indices.Count;
+                EnsureIndexCapacity(addedIdx);
+                var backing = NoAllocHelpers.ExtractArrayFromList(indices);
+                for (int i = 0; i < addedIdx; i++)
+                    m_Indices[i] = (ushort)backing[i];
+                m_IndexCount = addedIdx;
             }
         }
 
         /// <summary>
-        /// Add a list of triangles to the stream.
+        /// Add a list of triangles to the stream. Each group of 3 verts becomes one triangle.
         /// </summary>
         /// <param name="verts">Vertices to add. Length should be divisible by 3.</param>
         public void AddUIVertexTriangleStream(List<UIVertex> verts)
         {
-            if (verts == null)
-                return;
+            if (verts == null || verts.Count == 0) return;
 
-            InitializeListIfRequired();
+            InitializeIfRequired();
 
-            CanvasRenderer.SplitUIVertexStreams(verts, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Uv2S, m_Uv3S, m_Normals, m_Tangents, m_PrevPositions, m_Indices);
+            int addedVerts = verts.Count;
+            EnsureVertCapacity(addedVerts);
+
+            var backing = NoAllocHelpers.ExtractArrayFromList(verts);
+            NativeArray<UIVertex>.Copy(backing, 0, m_Verts, 0, addedVerts);
+            m_VertCount = addedVerts;
+
+            EnsureIndexCapacity(addedVerts);
+            for (int i = 0; i < addedVerts; i++)
+                m_Indices[i] = (ushort)i;
+            m_IndexCount = addedVerts;
         }
 
         /// <summary>
@@ -386,12 +511,16 @@ namespace UnityEngine.UI
         /// <param name="stream">The list to populate with the current vertex data in triangle-stream format.</param>
         public void GetUIVertexStream(List<UIVertex> stream)
         {
-            if (stream == null)
-                return;
+            if (stream == null) return;
 
-            InitializeListIfRequired();
+            InitializeIfRequired();
 
-            CanvasRenderer.CreateUIVertexStream(stream, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Uv2S, m_Uv3S, m_Normals, m_Tangents, m_PrevPositions, m_Indices);
+            // Expand index list back into a flat per-triangle vert stream.
+            NoAllocHelpers.EnsureListElemCount(stream, m_IndexCount);
+            if (m_IndexCount == 0) return;
+            var backing = NoAllocHelpers.ExtractArrayFromList(stream);
+            for (int i = 0; i < m_IndexCount; i++)
+                backing[i] = m_Verts[m_Indices[i]];
         }
     }
 }

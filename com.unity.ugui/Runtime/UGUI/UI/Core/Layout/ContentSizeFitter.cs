@@ -1,3 +1,4 @@
+using System;
 using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
@@ -130,7 +131,7 @@ namespace UnityEngine.UI
         {
             float min = LayoutUtility.GetMinSize(m_Rect, axis);
             float max = LayoutUtility.GetMaxSize(m_Rect, axis);
-            var size = Mathf.Clamp(m_Rect.rect.size[axis], min, max);
+            float size = Mathf.Max(min, Mathf.Min(max, m_Rect.rect.size[axis]));
 
             rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)axis, size);
         }
