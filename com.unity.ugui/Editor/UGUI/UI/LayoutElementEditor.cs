@@ -170,6 +170,11 @@ namespace UnityEditor.UI
         {
             var (row, labelElement) = CreateRow(label);
 
+            // State for clamping only the user's own edits (typing or dragging); binding-driven changes are left alone.
+            bool fieldHasFocus = false;
+            bool labelIsDragging = false;
+            int undoGroupAtEditStart = 0;
+
             bool initiallyEnabled = property.floatValue >= 0 && property.floatValue < LayoutUtility.DefaultMaxSize;
 
             // Enable/Disable the property for editing
@@ -198,10 +203,32 @@ namespace UnityEditor.UI
                     floatField.SetValueWithoutNotify(defaultEnabledValue);
             });
 
-            // Callback for float value - make sure to clamp to 0 or greater
+            floatField.RegisterCallback<FocusInEvent>(_ => { fieldHasFocus = true; undoGroupAtEditStart = Undo.GetCurrentGroup(); });
+            floatField.RegisterCallback<FocusOutEvent>(_ => fieldHasFocus = false);
+            labelElement.RegisterCallback<PointerCaptureEvent>(_ => { labelIsDragging = true; undoGroupAtEditStart = Undo.GetCurrentGroup(); });
+            labelElement.RegisterCallback<PointerCaptureOutEvent>(_ => labelIsDragging = false);
+
             floatField.RegisterValueChangedCallback(evt =>
             {
-                property.floatValue = Mathf.Max(0f, evt.newValue);
+                if (!fieldHasFocus && !labelIsDragging)
+                {
+                    bool enabled = evt.newValue >= 0f && evt.newValue < LayoutUtility.DefaultMaxSize;
+                    toggle.SetValueWithoutNotify(enabled);
+                    floatField.style.display = enabled ? DisplayStyle.Flex : DisplayStyle.None;
+                    return;
+                }
+
+                float clampedValue = Mathf.Max(0f, evt.newValue);
+                if (!Mathf.Approximately(clampedValue, evt.newValue))
+                {
+                    serializedObject.Update();
+                    property.floatValue = clampedValue;
+                    serializedObject.ApplyModifiedProperties();
+                    floatField.SetValueWithoutNotify(clampedValue);
+
+                    // Merge the rejected write and this correction into one undo step.
+                    Undo.CollapseUndoOperations(undoGroupAtEditStart);
+                }
             });
 
             return row;
