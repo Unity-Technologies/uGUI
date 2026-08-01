@@ -32,7 +32,7 @@ namespace TMPro
                         }
                         break;
                     case XcodeProjectType.Swift:
-                        file = Path.Combine(pathToBuiltProject, "UnityFramework/Features/Keyboard/Keyboard.mm");
+                        file = Path.Combine(pathToBuiltProject, "UnityAPI/Features/Keyboard/Keyboard.mm");
                         break;
                     default:
                         throw new Exception("Unsupported iOS Xcode project type. Will not be able to modify Keyboard.mm to disable emoji filtering.");
