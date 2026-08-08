@@ -95,7 +95,7 @@ namespace UnityEngine.UI
 
         /// <summary>Serialized backing field for <see cref="referenceResolution"/>.</summary>
         [Tooltip("The resolution the UI layout is designed for. If the screen resolution is larger, the UI will be scaled up, and if it's smaller, the UI will be scaled down. This is done in accordance with the Screen Match Mode.")]
-        [SerializeField] protected Vector2 m_ReferenceResolution = new Vector2(800, 600);
+        [SerializeField] protected Vector2 m_ReferenceResolution = new Vector2(1920, 1080);
 
         /// <summary>
         /// The resolution the UI layout is designed for.
