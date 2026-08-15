@@ -6,7 +6,7 @@ using UnityEngine.Pool;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
-using UnityEngine.UI.CoroutineTween;
+using UnityEngine.UI.Tweening;
 
 namespace TMPro
 {
@@ -362,9 +362,22 @@ namespace TMPro
         public float alphaFadeSpeed { get { return m_AlphaFadeSpeed; } set { m_AlphaFadeSpeed = value; } }
 
         private GameObject m_Dropdown;
+        private CanvasGroup m_DropdownCanvasGroup;
         private GameObject m_Blocker;
         private List<DropdownItem> m_Items = new List<DropdownItem>();
         private TweenRunner<FloatTween> m_AlphaTweenRunner;
+        private TweenRunner<FloatTween> alphaTweenRunner
+        {
+            get
+            {
+                if (m_AlphaTweenRunner == null)
+                {
+                    m_AlphaTweenRunner = new TweenRunner<FloatTween>();
+                    m_AlphaTweenRunner.Init(this);
+                }
+                return m_AlphaTweenRunner;
+            }
+        }
         private bool validTemplate = false;
         private Coroutine m_Coroutine = null;
 
@@ -476,10 +489,7 @@ namespace TMPro
 
         protected override void Start()
         {
-            m_AlphaTweenRunner = new TweenRunner<FloatTween>();
-            m_AlphaTweenRunner.Init(this);
             base.Start();
-
             RefreshShownValue();
         }
 
@@ -828,6 +838,7 @@ namespace TMPro
             m_Dropdown = CreateDropdownList(m_Template.gameObject);
             m_Dropdown.name = "Dropdown List";
             m_Dropdown.SetActive(true);
+            m_DropdownCanvasGroup = m_Dropdown.GetComponent<CanvasGroup>();
 
             // Make drop-down RectTransform have same values as original.
             RectTransform dropdownRectTransform = m_Dropdown.transform as RectTransform;
@@ -1177,8 +1188,7 @@ namespace TMPro
 
         private void AlphaFadeList(float duration, float alpha)
         {
-            CanvasGroup group = m_Dropdown.GetComponent<CanvasGroup>();
-            AlphaFadeList(duration, group.alpha, alpha);
+            AlphaFadeList(duration, m_DropdownCanvasGroup.alpha, alpha);
         }
 
         private void AlphaFadeList(float duration, float start, float end)
@@ -1187,9 +1197,9 @@ namespace TMPro
                 return;
 
             FloatTween tween = new FloatTween { duration = duration, startValue = start, targetValue = end };
-            tween.AddOnChangedCallback(SetAlpha);
+            tween.SetChangedCallback(SetAlpha);
             tween.ignoreTimeScale = true;
-            m_AlphaTweenRunner.StartTween(tween);
+            alphaTweenRunner.StartTween(tween);
         }
 
         private void SetAlpha(float alpha)
@@ -1197,8 +1207,7 @@ namespace TMPro
             if (!m_Dropdown)
                 return;
 
-            CanvasGroup group = m_Dropdown.GetComponent<CanvasGroup>();
-            group.alpha = alpha;
+            m_DropdownCanvasGroup.alpha = alpha;
         }
 
         /// <summary>
@@ -1244,10 +1253,10 @@ namespace TMPro
             if (m_Dropdown != null)
                 DestroyDropdownList(m_Dropdown);
 
-            if (m_AlphaTweenRunner != null)
-                m_AlphaTweenRunner.StopTween();
+            m_AlphaTweenRunner?.StopTween();
 
             m_Dropdown = null;
+            m_DropdownCanvasGroup = null;
             m_Coroutine = null;
         }
 

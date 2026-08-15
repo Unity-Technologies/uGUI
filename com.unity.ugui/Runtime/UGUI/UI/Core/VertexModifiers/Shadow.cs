@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Pool;
 
 namespace UnityEngine.UI
 {
@@ -153,13 +152,38 @@ namespace UnityEngine.UI
             if (!IsActive())
                 return;
 
-            var output = ListPool<UIVertex>.Get();
-            vh.GetUIVertexStream(output);
+            int vertCount = vh.currentVertCount;
+            int indexCount = vh.currentIndexCount;
+            if (vertCount == 0 || indexCount == 0)
+            {
+                // Without indices nothing draws; clear (matching the old stream path)
+                vh.Clear();
+                return;
+            }
 
-            ApplyShadow(output, effectColor, 0, output.Count, effectDistance.x, effectDistance.y);
-            vh.Clear();
-            vh.AddUIVertexTriangleStream(output);
-            ListPool<UIVertex>.Release(output);
+            int frontStart = vh.ReserveVerts(vertCount);
+
+            UIVertex vt = default;
+            for (int i = 0; i < vertCount; i++)
+            {
+                vh.PopulateUIVertex(ref vt, i);
+                vh.SetUIVertex(vt, frontStart + i);
+                vh.SetUIVertex(MakeShadowVert(vt, effectColor, effectDistance.x, effectDistance.y), i);
+            }
+
+            vh.AddShiftedIndices(0, indexCount, frontStart);
+        }
+
+        // Offset + recolor a copy of a vertex for use as a shadow/outline sample.
+        // Shared with the Outline subclass (same assembly).
+        private protected UIVertex MakeShadowVert(UIVertex source, Color32 color, float x, float y)
+        {
+            source.position.x += x;
+            source.position.y += y;
+            if (m_UseGraphicAlpha)
+                color.a = (byte)((color.a * source.color.a) / 255);
+            source.color = color;
+            return source;
         }
     }
 }

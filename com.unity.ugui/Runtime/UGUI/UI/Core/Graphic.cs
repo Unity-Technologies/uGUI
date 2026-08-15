@@ -8,7 +8,7 @@ using Unity.Profiling;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
-using UnityEngine.UI.CoroutineTween;
+using UnityEngine.UI.Tweening;
 using UnityEngine.Pool;
 
 namespace UnityEngine.UI
@@ -257,23 +257,28 @@ namespace UnityEngine.UI
         /// <summary>Cached UV array used by the legacy mesh generation path.</summary>
         [NonSerialized] protected Vector2[] m_CachedUvs;
         // Tween controls for the Graphic
-        [NonSerialized]
-        private readonly TweenRunner<ColorTween> m_ColorTweenRunner;
+        [NonSerialized] TweenRunner<ColorTween> m_ColorTweenRunner;
 
+        private TweenRunner<ColorTween> colorTweenRunner
+        {
+            get
+            {
+                if (m_ColorTweenRunner == null)
+                {
+                    m_ColorTweenRunner = new TweenRunner<ColorTween>();
+                    m_ColorTweenRunner.Init(this);
+                }
+                return m_ColorTweenRunner;
+            }
+        }
         /// <summary>Obsolete. The legacy mesh generation is no longer supported.</summary>
-		[Obsolete("useLegacyMeshGeneration is deprecated now that the legacy mesh generation is no longer supported.")]
+  		  [Obsolete("useLegacyMeshGeneration is deprecated now that the legacy mesh generation is no longer supported.")]
         protected bool useLegacyMeshGeneration { get; set; }
 
         // Called by Unity prior to deserialization, should not be called by users.
         /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a Graphic to a GameObject.</summary>
         protected Graphic()
         {
-            if (m_ColorTweenRunner == null)
-                m_ColorTweenRunner = new TweenRunner<ColorTween>();
-            m_ColorTweenRunner.Init(this);
-#pragma warning disable 618
-            useLegacyMeshGeneration = false;
-#pragma warning restore 618
         }
 
         /// <summary>
@@ -1041,7 +1046,7 @@ namespace UnityEngine.UI
             Color currentColor = canvasRenderer.GetColor();
             if (currentColor.Equals(targetColor))
             {
-                m_ColorTweenRunner.StopTween();
+                m_ColorTweenRunner?.StopTween();
                 return;
             }
 
@@ -1050,10 +1055,10 @@ namespace UnityEngine.UI
                 (useRGB ? ColorTween.ColorTweenMode.RGB : ColorTween.ColorTweenMode.Alpha));
 
             var colorTween = new ColorTween {duration = duration, startColor = canvasRenderer.GetColor(), targetColor = targetColor};
-            colorTween.AddOnChangedCallback(canvasRenderer.SetColor);
+            colorTween.SetChangedCallback(canvasRenderer.SetColor);
             colorTween.ignoreTimeScale = ignoreTimeScale;
             colorTween.tweenMode = mode;
-            m_ColorTweenRunner.StartTween(colorTween);
+            colorTweenRunner.StartTween(colorTween);
         }
 
         static private Color CreateColorFromAlpha(float alpha)

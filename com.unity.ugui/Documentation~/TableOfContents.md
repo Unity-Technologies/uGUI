@@ -5,6 +5,7 @@
   * [Visual Components](UIVisualComponents.md)
   * [Interaction Components](UIInteractionComponents.md)
   * [Animation Integration](UIAnimationIntegration.md)
+    * [Tweening](script-Tweening.md)
   * [Auto Layout](UIAutoLayout.md)
   * [Rich Text](StyledText.md)
   * [Events](EventSystem.md)

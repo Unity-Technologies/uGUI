@@ -1101,13 +1101,10 @@ namespace UnityEngine.UI
 
             var color32 = color;
             vh.Clear();
-            vh.AddVert(new Vector3(v.x, v.y), color32, new Vector2(uv.x, uv.y));
-            vh.AddVert(new Vector3(v.x, v.w), color32, new Vector2(uv.x, uv.w));
-            vh.AddVert(new Vector3(v.z, v.w), color32, new Vector2(uv.z, uv.w));
-            vh.AddVert(new Vector3(v.z, v.y), color32, new Vector2(uv.z, uv.y));
-
-            vh.AddTriangle(0, 1, 2);
-            vh.AddTriangle(2, 3, 0);
+            vh.AddQuad(
+                new Vector3(v.x, v.y), new Vector3(v.x, v.w), new Vector3(v.z, v.w), new Vector3(v.z, v.y),
+                color32,
+                new Vector2(uv.x, uv.y), new Vector2(uv.x, uv.w), new Vector2(uv.z, uv.w), new Vector2(uv.z, uv.y));
         }
 
         private void GenerateSprite(VertexHelper vh, bool lPreserveAspect)
@@ -1480,26 +1477,18 @@ namespace UnityEngine.UI
 
         static void AddQuad(VertexHelper vertexHelper, Vector3[] quadPositions, Color32 color, Vector3[] quadUVs)
         {
-            int startIndex = vertexHelper.currentVertCount;
-
-            for (int i = 0; i < 4; ++i)
-                vertexHelper.AddVert(quadPositions[i], color, quadUVs[i]);
-
-            vertexHelper.AddTriangle(startIndex, startIndex + 1, startIndex + 2);
-            vertexHelper.AddTriangle(startIndex + 2, startIndex + 3, startIndex);
+            vertexHelper.AddQuad(
+                quadPositions[0], quadPositions[1], quadPositions[2], quadPositions[3],
+                color,
+                quadUVs[0], quadUVs[1], quadUVs[2], quadUVs[3]);
         }
 
         static void AddQuad(VertexHelper vertexHelper, Vector2 posMin, Vector2 posMax, Color32 color, Vector2 uvMin, Vector2 uvMax)
         {
-            int startIndex = vertexHelper.currentVertCount;
-
-            vertexHelper.AddVert(new Vector3(posMin.x, posMin.y, 0), color, new Vector2(uvMin.x, uvMin.y));
-            vertexHelper.AddVert(new Vector3(posMin.x, posMax.y, 0), color, new Vector2(uvMin.x, uvMax.y));
-            vertexHelper.AddVert(new Vector3(posMax.x, posMax.y, 0), color, new Vector2(uvMax.x, uvMax.y));
-            vertexHelper.AddVert(new Vector3(posMax.x, posMin.y, 0), color, new Vector2(uvMax.x, uvMin.y));
-
-            vertexHelper.AddTriangle(startIndex, startIndex + 1, startIndex + 2);
-            vertexHelper.AddTriangle(startIndex + 2, startIndex + 3, startIndex);
+            vertexHelper.AddQuad(
+                new Vector3(posMin.x, posMin.y, 0), new Vector3(posMin.x, posMax.y, 0), new Vector3(posMax.x, posMax.y, 0), new Vector3(posMax.x, posMin.y, 0),
+                color,
+                new Vector2(uvMin.x, uvMin.y), new Vector2(uvMin.x, uvMax.y), new Vector2(uvMax.x, uvMax.y), new Vector2(uvMax.x, uvMin.y));
         }
 
         private Vector4 GetAdjustedBorders(Vector4 border, Rect adjustedRect)

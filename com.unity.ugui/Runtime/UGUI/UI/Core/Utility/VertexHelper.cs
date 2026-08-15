@@ -219,6 +219,42 @@ namespace UnityEngine.UI
             return start;
         }
 
+        // Append a quad (4 verts + 6 indices) in one call, writing straight into the
+        // native buffers. Matches the field defaults of AddVert(position, color, uv0).
+        internal void AddQuad(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, Color32 color, Vector4 p0uv0, Vector4 p1uv0, Vector4 p2uv0, Vector4 p3uv0)
+        {
+            InitializeIfRequired();
+
+            int v = m_VertCount;
+            EnsureVertCapacity(v + 4);
+            m_Verts[v + 0] = new UIVertex { position = p0, normal = s_DefaultNormal, tangent = s_DefaultTangent, color = color, uv0 = p0uv0 };
+            m_Verts[v + 1] = new UIVertex { position = p1, normal = s_DefaultNormal, tangent = s_DefaultTangent, color = color, uv0 = p1uv0 };
+            m_Verts[v + 2] = new UIVertex { position = p2, normal = s_DefaultNormal, tangent = s_DefaultTangent, color = color, uv0 = p2uv0 };
+            m_Verts[v + 3] = new UIVertex { position = p3, normal = s_DefaultNormal, tangent = s_DefaultTangent, color = color, uv0 = p3uv0 };
+            m_VertCount = v + 4;
+
+            int t = m_IndexCount;
+            EnsureIndexCapacity(t + 6);
+            m_Indices[t] = (ushort)(v);
+            m_Indices[t + 1] = (ushort)(v + 1);
+            m_Indices[t + 2] = (ushort)(v + 2);
+            m_Indices[t + 3] = (ushort)(v + 2);
+            m_Indices[t + 4] = (ushort)(v + 3);
+            m_Indices[t + 5] = (ushort)(v);
+            m_IndexCount = t + 6;
+        }
+
+        // Append `count` indices copied from [srcStart, srcStart+count), each shifted by
+        // vertexOffset. Caller must keep srcStart+count <= currentIndexCount: ReserveIndices
+        // grows/copies the live [0, currentIndexCount) range before we read it, so a source
+        // range inside it stays valid even when the append triggers a realloc.
+        internal void AddShiftedIndices(int srcStart, int count, int vertexOffset)
+        {
+            int dst = ReserveIndices(count);
+            for (int i = 0; i < count; i++)
+                m_Indices[dst + i] = (ushort)(m_Indices[srcStart + i] + vertexOffset);
+        }
+
         /// <summary>
         /// Cleanup allocated memory.
         /// </summary>

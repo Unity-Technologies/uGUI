@@ -1,5 +1,3 @@
-using UnityEngine.Pool;
-
 namespace UnityEngine.UI
 {
     /// <summary>
@@ -22,32 +20,40 @@ namespace UnityEngine.UI
             if (!IsActive())
                 return;
 
-            var verts = ListPool<UIVertex>.Get();
-            vh.GetUIVertexStream(verts);
+            int vertCount = vh.currentVertCount;
+            int indexCount = vh.currentIndexCount;
+            if (vertCount == 0 || indexCount == 0)
+            {
+                // Without indices nothing draws; clear (matching the old stream path)
+                vh.Clear();
+                return;
+            }
 
-            var neededCpacity = verts.Count * 5;
-            if (verts.Capacity < neededCpacity)
-                verts.Capacity = neededCpacity;
+            Color32 color = effectColor;
+            float x = effectDistance.x;
+            float y = effectDistance.y;
 
-            var start = 0;
-            var end = verts.Count;
-            ApplyShadowZeroAlloc(verts, effectColor, start, verts.Count, effectDistance.x, effectDistance.y);
+            int copyStart = vh.ReserveVerts(vertCount * 4);
+            int frontStart = copyStart + vertCount * 3;
 
-            start = end;
-            end = verts.Count;
-            ApplyShadowZeroAlloc(verts, effectColor, start, verts.Count, effectDistance.x, -effectDistance.y);
+            // One pass: read each original once into vt, emit the four offset copies and
+            // keep the original in front. Overwriting slot i last is safe — vt already
+            // holds the read, and MakeShadowVert takes vt by value.
+            UIVertex vt = default;
+            for (int i = 0; i < vertCount; i++)
+            {
+                vh.PopulateUIVertex(ref vt, i);
+                vh.SetUIVertex(vt, frontStart + i);
+                vh.SetUIVertex(MakeShadowVert(vt, color, x, -y), copyStart + i);
+                vh.SetUIVertex(MakeShadowVert(vt, color, -x, y), copyStart + vertCount + i);
+                vh.SetUIVertex(MakeShadowVert(vt, color, -x, -y), copyStart + vertCount * 2 + i);
+                vh.SetUIVertex(MakeShadowVert(vt, color, x, y), i);
+            }
 
-            start = end;
-            end = verts.Count;
-            ApplyShadowZeroAlloc(verts, effectColor, start, verts.Count, -effectDistance.x, effectDistance.y);
-
-            start = end;
-            end = verts.Count;
-            ApplyShadowZeroAlloc(verts, effectColor, start, verts.Count, -effectDistance.x, -effectDistance.y);
-
-            vh.Clear();
-            vh.AddUIVertexTriangleStream(verts);
-            ListPool<UIVertex>.Release(verts);
+            vh.AddShiftedIndices(0, indexCount, copyStart);
+            vh.AddShiftedIndices(0, indexCount, copyStart + vertCount);
+            vh.AddShiftedIndices(0, indexCount, copyStart + vertCount * 2);
+            vh.AddShiftedIndices(0, indexCount, frontStart);
         }
     }
 }
