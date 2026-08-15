@@ -26,6 +26,7 @@ namespace TMPro
 
 
     [Serializable][ExcludeFromPresetAttribute]
+    [TMPHelpURL("FontAssets")]
     public class TMP_FontAsset : TMP_Asset
     {
         /// <summary>

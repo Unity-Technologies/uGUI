@@ -9,6 +9,7 @@ namespace UnityEngine.UI
     [ExecuteAlways]
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
+    [UGUIHelpURL("ScrollRect")]
     /// <summary>
     /// A component for making a child RectTransform scroll.
     /// </summary>

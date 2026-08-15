@@ -13,6 +13,7 @@ namespace UnityEngine.UIElements
     /// A derived BaseRaycaster to raycast against UI Toolkit panel instances at runtime.
     /// </summary>
     [AddComponentMenu("UI Toolkit/Panel Raycaster (UI Toolkit)")]
+    [UGUIHelpURL("PanelRaycaster")]
     public class PanelRaycaster : BaseRaycaster, IRuntimePanelComponent
     {
         private BaseRuntimePanel m_Panel;

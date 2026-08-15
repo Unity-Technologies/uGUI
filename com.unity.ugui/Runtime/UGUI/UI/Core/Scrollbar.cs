@@ -8,6 +8,7 @@ namespace UnityEngine.UI
     [AddComponentMenu("UI (Canvas)/Scrollbar", 36)]
     [ExecuteAlways]
     [RequireComponent(typeof(RectTransform))]
+    [UGUIHelpURL("Scrollbar")]
     /// <summary>
     /// A standard scrollbar with a variable sized handle that can be dragged between 0 and 1.
     /// </summary>

@@ -14,6 +14,7 @@ namespace UnityEngine.UI
     /// </summary>
 
     [AddComponentMenu("UI (Canvas)/Legacy/Input Field", 103)]
+    [UGUIHelpURL("InputField")]
     public class InputField
         : Selectable,
         IUpdateSelectedHandler,

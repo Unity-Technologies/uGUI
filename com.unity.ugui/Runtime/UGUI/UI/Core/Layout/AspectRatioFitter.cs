@@ -6,6 +6,7 @@ namespace UnityEngine.UI
     [ExecuteAlways]
     [RequireComponent(typeof(RectTransform))]
     [DisallowMultipleComponent]
+    [UGUIHelpURL("AspectRatioFitter")]
     /// <summary>
     /// Resizes a RectTransform to fit a specified aspect ratio.
     /// </summary>

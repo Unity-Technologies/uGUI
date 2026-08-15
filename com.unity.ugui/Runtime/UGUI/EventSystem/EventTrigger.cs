@@ -6,6 +6,7 @@ using UnityEngine.Serialization;
 namespace UnityEngine.EventSystems
 {
     [AddComponentMenu("Event/Event Trigger")]
+    [UGUIHelpURL("EventTrigger")]
     /// <summary>
     /// Receives events from the EventSystem and calls registered functions for each event.
     /// </summary>

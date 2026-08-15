@@ -3,6 +3,7 @@ using UnityEngine.Pool;
 namespace UnityEngine.UI
 {
     [AddComponentMenu("UI (Canvas)/Effects/Outline", 81)]
+    [UGUIHelpURL("Outline")]
     /// <summary>
     /// Adds an outline to a graphic using IVertexModifier.
     /// </summary>

@@ -7,7 +7,7 @@ using UnityEngine.Serialization;
 
 namespace TMPro
 {
-    [HelpURL("https://docs.unity3d.com/Packages/com.unity.ugui@2.0/manual/TextMeshPro/Sprites.html")]
+    [TMPHelpURL("Sprites")]
     [ExcludeFromPresetAttribute]
     public class TMP_SpriteAsset : TMP_Asset
     {

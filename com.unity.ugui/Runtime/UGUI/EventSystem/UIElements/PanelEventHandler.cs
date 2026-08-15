@@ -11,6 +11,7 @@ namespace UnityEngine.UIElements
     /// Use this class to handle input and send events to UI Toolkit runtime panels.
     /// </summary>
     [AddComponentMenu("UI Toolkit/Panel Event Handler (UI Toolkit)")]
+    [UGUIHelpURL("PanelEventHandler")]
     public class PanelEventHandler : UIBehaviour, IPointerMoveHandler, IPointerUpHandler, IPointerDownHandler,
         ISubmitHandler, ICancelHandler, IMoveHandler, IScrollHandler, ISelectHandler, IDeselectHandler,
         IPointerExitHandler, IPointerEnterHandler, IRuntimePanelComponent, IPointerClickHandler

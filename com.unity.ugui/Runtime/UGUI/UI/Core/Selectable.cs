@@ -9,6 +9,7 @@ namespace UnityEngine.UI
     [ExecuteAlways]
     [SelectionBase]
     [DisallowMultipleComponent]
+    [UGUIHelpURL("Selectable")]
     /// <summary>
     /// Simple selectable object - derived from to create a selectable control.
     /// </summary>

@@ -14,6 +14,7 @@ namespace UnityEngine.UI
     /// </remarks>
     [AddComponentMenu("UI (Canvas)/Toggle", 30)]
     [RequireComponent(typeof(RectTransform))]
+    [UGUIHelpURL("Toggle")]
     public class Toggle : Selectable, IPointerClickHandler, ISubmitHandler, ICanvasElement
     {
         /// <summary>

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace TMPro
 {
-
+    [TMPHelpURL("StyleSheets")]
     [Serializable][ExcludeFromPresetAttribute]
     public class TMP_StyleSheet : ScriptableObject
     {

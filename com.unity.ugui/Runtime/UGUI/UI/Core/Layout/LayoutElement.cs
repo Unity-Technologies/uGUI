@@ -5,6 +5,7 @@ namespace UnityEngine.UI
     [AddComponentMenu("Layout/Layout Element", 140)]
     [RequireComponent(typeof(RectTransform))]
     [ExecuteAlways]
+    [UGUIHelpURL("LayoutElement")]
     /// <summary>
     /// Add this component to a GameObject to make it into a layout element or override values on an existing layout element.
     /// </summary>

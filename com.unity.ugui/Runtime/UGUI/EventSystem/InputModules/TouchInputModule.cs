@@ -6,6 +6,7 @@ namespace UnityEngine.EventSystems
 {
     [Obsolete("TouchInputModule is no longer required as Touch input is now handled in StandaloneInputModule.")]
     [AddComponentMenu("Event/Touch Input Module")]
+    [UGUIHelpURL("TouchInputModule")]
     public class TouchInputModule : PointerInputModule
     {
         protected TouchInputModule()

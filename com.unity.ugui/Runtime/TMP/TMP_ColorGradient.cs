@@ -11,6 +11,7 @@ namespace TMPro
         FourCornersGradient
     }
 
+    [TMPHelpURL("ColorGradients")]
     [System.Serializable][ExcludeFromPresetAttribute]
     public class TMP_ColorGradient : ScriptableObject
     {

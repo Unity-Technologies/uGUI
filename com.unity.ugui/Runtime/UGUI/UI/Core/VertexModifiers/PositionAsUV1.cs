@@ -3,6 +3,7 @@ using System.Linq;
 namespace UnityEngine.UI
 {
     [AddComponentMenu("UI (Canvas)/Effects/Position As UV1", 82)]
+    [UGUIHelpURL("PositionAsUV1")]
     /// <summary>
     /// An IVertexModifier which sets the raw vertex position into UV1 of the generated verts.
     /// </summary>

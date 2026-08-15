@@ -10,6 +10,7 @@ namespace UnityEngine.EventSystems
 {
     [AddComponentMenu("Event/Event System")]
     [DisallowMultipleComponent]
+    [UGUIHelpURL("EventSystem")]
     /// <summary>
     /// Handles input, raycasting, and sending events.
     /// </summary>
