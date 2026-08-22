@@ -1,6 +1,5 @@
 using System.Collections;
 using NUnit.Framework;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
@@ -190,6 +189,79 @@ namespace UnityEditor.UI.Tests
             Assert.That(PersistedValue(label), Is.EqualTo(0f),
                 $"A negative '{label}' produced while dragging should be clamped to 0.");
             Assert.That(field.value, Is.EqualTo(0f));
+        }
+
+        // When multiple objects with differing field values are selected, the row's enable toggle and field
+        // show the mixed-value indicator rather than a single object's value.
+        [UnityTest]
+        public IEnumerator MultiObject_DivergentField_ShowsMixedValue()
+        {
+            var goA = new GameObject("LayoutElementA", typeof(RectTransform));
+            var goB = new GameObject("LayoutElementB", typeof(RectTransform));
+            var layoutA = goA.AddComponent<LayoutElement>();
+            var layoutB = goB.AddComponent<LayoutElement>();
+
+            layoutA.minWidth = 100f; // enabled
+            layoutB.minWidth = -1f;  // disabled sentinel -> the two selections diverge
+
+            var editor = Editor.CreateEditor(new Object[] { layoutA, layoutB });
+            var root = editor.CreateInspectorGUI();
+            m_Window.rootVisualElement.Add(root);
+            yield return null;
+            yield return null;
+
+            var labelElement = root.Query<Label>().Where(l => l.text == "Min Width").First();
+            var row = labelElement.parent;
+            var toggle = row.Q<Toggle>();
+            var field = row.Q<FloatField>();
+
+            Assert.That(toggle.showMixedValue, Is.True,
+                "Multi-selecting LayoutElements with a divergent 'Min Width' should show the mixed-value indicator on the toggle.");
+            Assert.That(field.showMixedValue, Is.True,
+                "A divergent 'Min Width' should also display the mixed-value indicator on the field.");
+
+            root.RemoveFromHierarchy();
+            Object.DestroyImmediate(editor);
+            Object.DestroyImmediate(goA);
+            Object.DestroyImmediate(goB);
+        }
+
+        // When selected objects share the enabled/disabled state but hold different numbers (both enabled,
+        // 100 vs 200), the enable toggle controls something they agree on, so it must NOT be mixed - only the
+        // field, which shows the raw number, is mixed.
+        [UnityTest]
+        public IEnumerator MultiObject_SameEnabledStateDifferentValues_MixedOnFieldOnly()
+        {
+            var goA = new GameObject("LayoutElementA", typeof(RectTransform));
+            var goB = new GameObject("LayoutElementB", typeof(RectTransform));
+            var layoutA = goA.AddComponent<LayoutElement>();
+            var layoutB = goB.AddComponent<LayoutElement>();
+
+            layoutA.minWidth = 100f; // enabled
+            layoutB.minWidth = 200f; // enabled, different value -> only the number diverges
+
+            var editor = Editor.CreateEditor(new Object[] { layoutA, layoutB });
+            var root = editor.CreateInspectorGUI();
+            m_Window.rootVisualElement.Add(root);
+            yield return null;
+            yield return null;
+
+            var labelElement = root.Query<Label>().Where(l => l.text == "Min Width").First();
+            var row = labelElement.parent;
+            var toggle = row.Q<Toggle>();
+            var field = row.Q<FloatField>();
+
+            Assert.That(toggle.showMixedValue, Is.False,
+                "Objects that are all enabled should not show the toggle as mixed, even if their values differ.");
+            Assert.That(toggle.value, Is.True,
+                "The toggle should read enabled when every selected object is enabled.");
+            Assert.That(field.showMixedValue, Is.True,
+                "Differing 'Min Width' values should still show the mixed-value indicator on the field.");
+
+            root.RemoveFromHierarchy();
+            Object.DestroyImmediate(editor);
+            Object.DestroyImmediate(goA);
+            Object.DestroyImmediate(goB);
         }
     }
 }

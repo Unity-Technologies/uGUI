@@ -36,8 +36,10 @@ namespace TMPro
             var node = delegates.First;
             while (node != null)
             {
+                // Capture the next node before invoking, as the current node may be removed.
+                var next = node.Next;
                 node.Value();
-                node = node.Next;
+                node = next;
             }
         }
     }
@@ -74,8 +76,10 @@ namespace TMPro
             var node = delegates.First;
             while (node != null)
             {
+                // Capture the next node before invoking, as the current node may be removed.
+                var next = node.Next;
                 node.Value(a);
-                node = node.Next;
+                node = next;
             }
         }
     }
@@ -113,8 +117,10 @@ namespace TMPro
             var node = delegates.First;
             while (node != null)
             {
+                // Capture the next node before invoking, as the current node may be removed.
+                var next = node.Next;
                 node.Value(a, b);
-                node = node.Next;
+                node = next;
             }
         }
     }
@@ -153,8 +159,10 @@ namespace TMPro
             var node = delegates.First;
             while (node != null)
             {
-                node.Value(a, b, c);
-                node = node.Next;
+                // Capture the next node before invoking, as the current node may be removed.
+                var next = node.Next;
+                node.Value(a,b,c);
+                node = next;
             }
         }
     }
