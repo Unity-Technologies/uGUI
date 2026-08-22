@@ -175,21 +175,25 @@ namespace UnityEditor.UI
             bool labelIsDragging = false;
             int undoGroupAtEditStart = 0;
 
-            bool initiallyEnabled = property.floatValue >= 0 && property.floatValue < LayoutUtility.DefaultMaxSize;
-
             // Enable/Disable the property for editing
-            var toggle = new UnityEngine.UIElements.Toggle { value = initiallyEnabled };
+            var toggle = new UnityEngine.UIElements.Toggle();
             toggle.style.marginRight = k_ToggleMarginRight;
             row.Add(toggle);
 
             // Float property area
             var floatField = new FloatField();
             floatField.style.flexGrow = 1f;
-            floatField.style.display  = initiallyEnabled ? DisplayStyle.Flex : DisplayStyle.None;
             floatField.BindProperty(property);
             row.Add(floatField);
 
             floatField.SetupDragger(labelElement, () => floatField.style.display == DisplayStyle.Flex);
+
+            // Initialise the row's toggle, visibility and mixed-value state from the property.
+            ApplyState(property, property.floatValue, toggle, floatField);
+
+            // Re-sync the row when the property changes outside this field (multi-selection, another
+            // Inspector, undo/redo, script) - including binding updates that raise no change event.
+            floatField.TrackPropertyValue(property, prop => ApplyState(prop, prop.floatValue, toggle, floatField));
 
             // Toggle callback - set the value to default value
             toggle.RegisterValueChangedCallback(evt =>
@@ -198,6 +202,8 @@ namespace UnityEditor.UI
                 property.floatValue = evt.newValue ? defaultEnabledValue : defaultDisabledValue;
                 serializedObject.ApplyModifiedProperties();
 
+                toggle.showMixedValue = false;
+                floatField.showMixedValue = false;
                 floatField.style.display = evt.newValue ? DisplayStyle.Flex : DisplayStyle.None;
                 if (evt.newValue)
                     floatField.SetValueWithoutNotify(defaultEnabledValue);
@@ -212,9 +218,8 @@ namespace UnityEditor.UI
             {
                 if (!fieldHasFocus && !labelIsDragging)
                 {
-                    bool enabled = evt.newValue >= 0f && evt.newValue < LayoutUtility.DefaultMaxSize;
-                    toggle.SetValueWithoutNotify(enabled);
-                    floatField.style.display = enabled ? DisplayStyle.Flex : DisplayStyle.None;
+                    // Change came from the binding, not user input; mirror it onto the row without clamping.
+                    ApplyState(property, evt.newValue, toggle, floatField);
                     return;
                 }
 
@@ -232,6 +237,44 @@ namespace UnityEditor.UI
             });
 
             return row;
+        }
+
+        private static void ApplyState(SerializedProperty property, float value, UnityEngine.UIElements.Toggle toggle, FloatField floatField)
+        {
+            bool valuesDiffer = property.hasMultipleDifferentValues;
+            bool enabled = value >= 0f && value < LayoutUtility.DefaultMaxSize;
+            bool enabledMixed = valuesDiffer && EnabledStateIsMixed(property);
+
+            toggle.showMixedValue = enabledMixed;
+            toggle.SetValueWithoutNotify(enabled);
+
+            floatField.showMixedValue = valuesDiffer;
+            floatField.style.display = (enabled || enabledMixed) ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        private static bool EnabledStateIsMixed(SerializedProperty property)
+        {
+            string propertyPath = property.propertyPath;
+            bool firstEnabled = false;
+            bool haveFirst = false;
+            foreach (var target in property.serializedObject.targetObjects)
+            {
+                using (var targetObject = new SerializedObject(target))
+                {
+                    float fieldValue = targetObject.FindProperty(propertyPath).floatValue;
+                    bool enabled = fieldValue >= 0f && fieldValue < LayoutUtility.DefaultMaxSize;
+                    if (!haveFirst)
+                    {
+                        firstEnabled = enabled;
+                        haveFirst = true;
+                    }
+                    else if (enabled != firstEnabled)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

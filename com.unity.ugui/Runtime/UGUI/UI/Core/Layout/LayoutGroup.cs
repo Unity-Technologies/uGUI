@@ -432,6 +432,19 @@ namespace UnityEngine.UI
             SetDirty();
         }
 
+        /// <summary>
+        /// Registers this layout group's RectTransform and its descendants with the Undo system so the layout
+        /// applied when the group is added or reset can be reverted in a single undo.
+        /// </summary>
+        protected override void Reset()
+        {
+            base.Reset();
+
+            var rectsInChildren = GetComponentsInChildren<RectTransform>(true);
+            foreach (var rect in rectsInChildren)
+                UnityEditor.Undo.RegisterCompleteObjectUndo(rect, "Reset Layout Group Rects in Children");
+        }
+
     #endif
     }
 }

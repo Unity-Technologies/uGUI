@@ -717,6 +717,8 @@ namespace TMPro
         {
             //Debug.Log("***** OnValidate() called on object ID " + GetEntityId() + ". *****", this);
 
+            base.OnValidate();
+
             if (m_isAwake == false)
                 return;
 
@@ -2595,6 +2597,9 @@ namespace TMPro
                     m_currentFontAsset = m_textInfo.characterInfo[m_characterCount].fontAsset;
                     m_currentMaterial = m_textInfo.characterInfo[m_characterCount].material;
                     m_currentMaterialIndex = m_textInfo.characterInfo[m_characterCount].materialReferenceIndex;
+
+                    // Re-read fontFace before measuring adjustedScale, as a different fallback font may be used.
+                    fontFace = m_currentFontAsset.m_FaceInfo;
 
                     // Special handling if replaced character was a line feed where in this case we have to use the scale of the previous character.
                     float adjustedScale;

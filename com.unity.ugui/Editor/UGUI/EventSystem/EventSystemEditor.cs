@@ -22,7 +22,7 @@ namespace UnityEditor.EventSystems
             {
                 EditorGUILayout.HelpBox(L10n.Tr(
                     "This EventSystem will be used to drive UI Toolkit input.\nYou can use the Panel Input Configuration component " +
-                    "to configure how UI Toolkit will interact with this EventSystem."), MessageType.Info);
+                    "to configure how UI Toolkit will interact with this EventSystem.", null), MessageType.Info);
             }
 
             if (eventSystem.GetComponent<BaseInputModule>() != null)

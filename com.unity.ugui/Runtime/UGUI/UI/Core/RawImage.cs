@@ -1,4 +1,5 @@
 using UnityEngine.Serialization;
+using System.Runtime.CompilerServices;
 
 namespace UnityEngine.UI
 {
@@ -45,11 +46,19 @@ namespace UnityEngine.UI
                 // If m_Texture is set as a non-matching type from native side this will ensure that dependent code will be able to null-check.
                 // Proposed fix involved safe-casting to Texture2D, but RawImage must support any Texture subclass.
                 // We can't safe-cast m_Texture to Texture directly, as the managed runtime assumes it's already a Texture and does nothing.
-                // Instead, cast to a System.Object and check that.
-                object objReference = m_Texture;
-                return objReference as Texture;
+                // Copying into a System.Object local isn't enough either — see CheckedCastOrNull.
+                return CheckedCastOrNull<Texture>(m_Texture);
+
             }
         }
+
+        // Forces a real runtime type check on a value whose declared type already matches T.
+        // Written inline the check vanishes: Roslyn elides `m_Texture as Texture` outright, and via an
+        // `object` local the CoreCLR JIT still tracks the field's declared type in and folds the isinst
+        // away. Behind a call it can't inline, the argument is only ever `object`, so the check survives.
+        // NoInlining is load-bearing, not stylistic.
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        static T CheckedCastOrNull<T>(object obj) where T : class => obj as T;
 
         /// <summary>
         /// The RawImage's texture to be used.
