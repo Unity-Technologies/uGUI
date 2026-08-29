@@ -1691,6 +1691,76 @@ namespace TMPro
         private static ProfilerMarker k_ParseTextMarker = new ProfilerMarker("TMP Parse Text");
         private static ProfilerMarker k_InsertNewLineMarker = new ProfilerMarker("TMP.InsertNewLine");
 
+        #if UNITY_EDITOR
+
+        private bool ExistsCyclicalLinkedTextReferencesInChildren(TMP_Text text)
+        {
+            var iter1 = text;
+            var iter2 = text;
+
+            while (iter2 != null && iter2.m_linkedTextComponent != null)
+            {
+                if (iter1 == this || iter2 == this || iter2.m_linkedTextComponent == null)
+                {
+                    m_linkedTextComponent = null;
+                    break;
+                }
+
+                iter1 = iter1.m_linkedTextComponent;
+                iter2 = iter2.m_linkedTextComponent.m_linkedTextComponent;
+
+                if (iter1 == iter2)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool ExistsCyclicalLinkedTextReferencesInParent(TMP_Text text)
+        {
+            var iter1 = text;
+            var iter2 = text;
+
+            while (iter2 != null && iter2.parentLinkedComponent != null)
+            {
+                if (iter1 == this || iter2 == this || iter2.parentLinkedComponent == null)
+                {
+                    parentLinkedComponent = null;
+                    break;
+                }
+
+                iter1 = iter1.parentLinkedComponent;
+                iter2 = iter2.parentLinkedComponent.parentLinkedComponent;
+
+                if (iter1 == iter2)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <inheritdoc />
+        protected override void OnValidate()
+        {
+            // it is possible for cyclical references to exist if the user has copy-pasted a TMP_Text that
+            // has its overflow mode set to "linked". this needs to be prevented
+
+            if (ExistsCyclicalLinkedTextReferencesInChildren(m_linkedTextComponent))
+            {
+                m_linkedTextComponent = null;
+            }
+            if (ExistsCyclicalLinkedTextReferencesInParent(parentLinkedComponent))
+            {
+                parentLinkedComponent = null;
+            }
+        }
+
+        #endif
+
         /// <summary>
         /// Method which derived classes need to override to load Font Assets.
         /// </summary>
