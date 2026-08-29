@@ -79,6 +79,7 @@
     * [Line Metrics](TextMeshPro/FontAssetsLineMetrics)
     * [Signed Distance Fields](TextMeshPro/FontAssetsSDF)
     * [Dynamic Fonts](TextMeshPro/FontAssetsDynamicFonts)
+    * [Font Subsetting](TextMeshPro/FontAssetsSubsetting)
     * [Fallback font assets](TextMeshPro/FontAssetsFallback)
     * [Color emojis](TextMeshPro/ColorEmojis)
   * [Rich Text Tags](TextMeshPro/RichText)

@@ -18,6 +18,7 @@ namespace TMPro
             TMP_FontAsset.SetAtlasTextureIsReadable +=  FontEngineEditorUtilities.SetAtlasTextureIsReadable;
             TMP_FontAsset.GetSourceFontRef += TMP_EditorResourceManager.GetSourceFontRef;
             TMP_FontAsset.SetSourceFontGUID += TMP_EditorResourceManager.SetSourceFontGUID;
+            TMP_FontAsset.ResolveDynamicSourceFont += TMP_FontSubsetter.ResolveDynamicSourceFont;
 
             // Callback to handle clearing dynamic font asset data when closing the Editor
             EditorApplication.quitting += () =>

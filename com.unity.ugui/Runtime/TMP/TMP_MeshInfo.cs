@@ -48,6 +48,61 @@ namespace TMPro
 
 
         /// <summary>
+        /// Pre-allocates vertex attributes without an associated mesh. Used by the Advanced Text Generator.
+        /// </summary>
+        /// <param name="size">The number of quads (4 vertices each) to allocate.</param>
+        internal TMP_MeshInfo(int size)
+        {
+            this.mesh = null;
+
+            // Limit the mesh to less than 65535 vertices which is the limit for Unity's Mesh.
+            size = Mathf.Min(size, TMP_Math.MAX_QUADS_PER_MESH);
+
+            int sizeX4 = size * 4;
+            int sizeX6 = size * 6;
+
+            this.vertexCount = 0;
+
+            this.vertices = new Vector3[sizeX4];
+            this.uvs0 = new Vector4[sizeX4];
+            this.uvs2 = new Vector2[sizeX4];
+            this.colors32 = new Color32[sizeX4];
+
+            this.normals = new Vector3[sizeX4];
+            this.tangents = new Vector4[sizeX4];
+
+            this.triangles = new int[sizeX6];
+
+            int index_X6 = 0;
+            int index_X4 = 0;
+            while (index_X4 / 4 < size)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    this.vertices[index_X4 + i] = Vector3.zero;
+                    this.uvs0[index_X4 + i] = Vector2.zero;
+                    this.uvs2[index_X4 + i] = Vector2.zero;
+                    this.colors32[index_X4 + i] = s_DefaultColor;
+                    this.normals[index_X4 + i] = s_DefaultNormal;
+                    this.tangents[index_X4 + i] = s_DefaultTangent;
+                }
+
+                this.triangles[index_X6 + 0] = index_X4 + 0;
+                this.triangles[index_X6 + 1] = index_X4 + 1;
+                this.triangles[index_X6 + 2] = index_X4 + 2;
+                this.triangles[index_X6 + 3] = index_X4 + 2;
+                this.triangles[index_X6 + 4] = index_X4 + 3;
+                this.triangles[index_X6 + 5] = index_X4 + 0;
+
+                index_X4 += 4;
+                index_X6 += 6;
+            }
+
+            this.material = null;
+        }
+
+
+        /// <summary>
         /// Pre-allocates vertex attributes for a mesh.
         /// </summary>
         /// <param name="mesh">The mesh to initialize; will be cleared if not null.</param>

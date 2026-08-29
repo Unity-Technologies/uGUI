@@ -7,6 +7,7 @@ Properties appear in the following groups:
 | **[Face Info](#face-info)** | Manage the font's line metrics. |
 | **[Generation Settings](#generation-settings)** | View the values that the font asset generates. |
 | **[Atlas & Material](#atlas-material)** | View the subassets that the font asset generates. |
+| **[Font Subsetting](#font-subsetting)** | Subset the source font so builds include only the characters you select. |
 | **[Font Weights](#font-weights)** | Control the appearance of bold and italicized text. |
 | **[Fallback Font Assets](#fallback-font-assets)** | Manage the list of font assets to use as fallback for missing characters. |
 | **[Character Table](#character-table)** | Manage the characters included in the font asset. |
@@ -87,6 +88,20 @@ This section lists the subassets that the [Font Asset Creator](FontAssetsCreator
 |:--|:--|
 |**Font Atlas**|The font texture atlas created when you generated the font asset.|
 |**Font Material**|The font material created when you generated the font asset.|
+
+### Font Subsetting
+
+Subset the source font so builds include only the characters you select. This section is displayed only for dynamic font assets whose source font is a font file in the project. For more information, refer to [Optimize font files with font subsetting](FontAssetsSubsetting.md).
+
+| **Property** | **Description** |
+|:--|:--|
+|**Active Subset**|Number of code points in the applied subset. Displayed only when a subset is active.|
+|**Preset**|Predefined character set that fills the **Characters** field. The presets match the [Font Asset Creator](FontAssetsCreator.md) character sets. Choose from **ASCII**, **Extended ASCII**, **ASCII Lowercase**, **ASCII Uppercase**, **Numbers + Symbols**, **From Baked Atlas** (a snapshot of the characters baked into the atlas), or **Custom** (the characters you enter yourself).|
+|**Characters**|Characters to keep in the subset. All other glyphs are removed from the font data included in builds. Displayed only when **Preset** is set to **From Baked Atlas** or **Custom**.|
+|**Missing Characters**|Code points that the source font doesn't contain; they're left out of the subset. Format and control characters are listed by code point only, because they have no visual form.|
+|**Font File Size**|Size of the original font file and the size of the subset font data. While you edit the character set, the subset size is a preview of what **Update Subset** produces.|
+|**Update Subset**|Apply the characters in the **Characters** field as the subset.|
+|**Remove Subset**|Remove the applied subset so builds include the full font file.|
 
 ### Font Weights
 

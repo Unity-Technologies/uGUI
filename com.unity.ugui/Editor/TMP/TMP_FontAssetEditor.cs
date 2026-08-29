@@ -2,11 +2,14 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditorInternal;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
 using JetBrains.Annotations;
 using UnityEngine.TextCore;
 using UnityEngine.TextCore.LowLevel;
 using UnityEditor.TextCore.LowLevel;
 using System;
+using UnicodeRanges = UnityEditor.TextCore.Text.UnicodeRanges;
 
 
 namespace TMPro.EditorUtilities
@@ -50,6 +53,7 @@ namespace TMPro.EditorUtilities
             public static bool faceInfoPanel = true;
             public static bool generationSettingsPanel = true;
             public static bool fontAtlasInfoPanel = true;
+            public static bool fontSubsettingPanel = false;
             public static bool fontWeightPanel = true;
             public static bool fallbackFontAssetPanel = true;
             public static bool glyphTablePanel = false;
@@ -367,6 +371,266 @@ namespace TMPro.EditorUtilities
         }
 
 
+        enum SubsetPreset
+        {
+            Ascii,
+            ExtendedAscii,
+            AsciiLowercase,
+            AsciiUppercase,
+            NumbersAndSymbols,
+            FromBakedAtlas,
+            Custom,
+        }
+
+        static readonly GUIContent[] k_SubsetPresetLabels =
+        {
+            new GUIContent("ASCII"),
+            new GUIContent("Extended ASCII"),
+            new GUIContent("ASCII Lowercase"),
+            new GUIContent("ASCII Uppercase"),
+            new GUIContent("Numbers + Symbols"),
+            new GUIContent("From Baked Atlas"),
+            new GUIContent("Custom"),
+        };
+
+        // The Font Asset Creator character sets, as canonical hex ranges.
+        static readonly string[] k_SubsetPresetRanges =
+        {
+            "20-7e,a0,200b,2026,25a1",
+            "20-7e,a0-ff,2000-206f,20ac,2122,25a1",
+            "20-40,5b-7e,a0",
+            "20-60,7b-7e,a0",
+            "20-40,5b-60,7b-7e,a0",
+            null,
+            null,
+        };
+
+        const int k_SubsetInputMaxLength = 4096;
+        const int k_MissingCodePointsListedMax = 512;
+        const float k_SubsetCharactersAreaHeight = 48; // three wrapped lines; taller content scrolls
+        const float k_MissingCodePointsMaxHeight = 150; // list hugs its content, then scrolls
+
+        string m_SubsetCharactersInput;
+        Vector2 m_SubsetCharactersScroll;
+        SubsetPreset m_SubsetPreset = SubsetPreset.Custom;
+        bool m_SubsetSectionInitialized;
+        // Probing the cmap and previewing the subset size load the source font, so cache per input rather than per repaint.
+        string m_MissingCodePointsFor;
+        string m_MissingCodePoints;
+        string m_MissingCodePointsDisplay;
+        int m_MissingCodePointsCount;
+        bool m_MissingCodePointsFoldout;
+        Vector2 m_MissingCodePointsScroll;
+        long m_SubsetSizePreview;
+
+        void DrawFontSubsettingSection()
+        {
+            if (m_fontAsset == null || targets.Length > 1 || m_fontAsset.atlasPopulationMode != AtlasPopulationMode.Dynamic)
+                return;
+
+            bool hasImporter = TMP_FontSubsetter.TryGetSourceFontImporter(m_fontAsset, out string fontPath);
+            bool active = TMP_FontSubsetter.TryGetActiveRecipe(m_fontAsset, out var activeRecipe);
+
+            Rect rect = EditorGUILayout.GetControlRect(false, 24);
+            if (GUI.Button(rect, new GUIContent("<b>Font Subsetting</b>", "Subsets the source font so only the selected characters ship in builds."), TMP_UIStyleManager.sectionHeader))
+                UI_PanelState.fontSubsettingPanel = !UI_PanelState.fontSubsettingPanel;
+
+            GUI.Label(rect, active ? "Active" : (UI_PanelState.fontSubsettingPanel ? "" : s_UiStateLabel[1]), TMP_UIStyleManager.rightLabel);
+
+            if (!UI_PanelState.fontSubsettingPanel)
+                return;
+
+            EditorGUI.indentLevel = 1;
+
+            if (!hasImporter)
+            {
+                EditorGUILayout.HelpBox(TMP_FontSubsetter.NoSourceFontImporterMessage, MessageType.Info);
+                EditorGUI.indentLevel = 0;
+                EditorGUILayout.Space();
+                return;
+            }
+
+            if (!m_SubsetSectionInitialized)
+            {
+                m_SubsetSectionInitialized = true;
+                if (active)
+                {
+                    int presetIndex = Array.IndexOf(k_SubsetPresetRanges, activeRecipe.characters);
+                    m_SubsetPreset = presetIndex >= 0 ? (SubsetPreset)presetIndex : SubsetPreset.Custom;
+                    if (m_SubsetPreset == SubsetPreset.Custom)
+                        m_SubsetCharactersInput = UnicodeRanges.ToCharacters(activeRecipe.characters, k_SubsetInputMaxLength) ?? string.Empty;
+                }
+            }
+
+            if (active)
+                EditorGUILayout.LabelField(new GUIContent("Active Subset"), new GUIContent($"{UnicodeRanges.CountCodePoints(activeRecipe.characters)} code points", activeRecipe.characters));
+
+            EditorGUI.BeginChangeCheck();
+            m_SubsetPreset = (SubsetPreset)EditorGUILayout.Popup(new GUIContent("Preset"), (int)m_SubsetPreset, k_SubsetPresetLabels);
+            if (EditorGUI.EndChangeCheck() && m_SubsetPreset == SubsetPreset.FromBakedAtlas)
+            {
+                string presetCharacters = CharactersFromBakedAtlas(m_fontAsset);
+                if (presetCharacters != null)
+                {
+                    m_SubsetCharactersInput = presetCharacters;
+                    m_SubsetCharactersScroll = Vector2.zero;
+                }
+                else
+                {
+                    m_SubsetPreset = SubsetPreset.Custom;
+                    Debug.LogWarning($"The baked atlas has more characters than the Characters field can hold ({k_SubsetInputMaxLength}).", m_fontAsset);
+                }
+            }
+
+            string presetRanges = k_SubsetPresetRanges[(int)m_SubsetPreset];
+            if (presetRanges == null)
+            {
+                EditorGUILayout.LabelField(new GUIContent("Characters", "Characters to keep in the subset. All other glyphs are removed from the font data embedded in builds."));
+                // Line breaks are not subset characters, so keep Return from inserting one.
+                var evt = Event.current;
+                if (evt.type == EventType.KeyDown && (evt.character == '\n' || evt.character == '\r'))
+                    evt.character = '\0';
+                EditorGUI.BeginChangeCheck();
+                m_SubsetCharactersScroll = EditorGUILayout.BeginScrollView(m_SubsetCharactersScroll, GUILayout.Height(k_SubsetCharactersAreaHeight));
+                m_SubsetCharactersInput = EditorGUILayout.TextArea(m_SubsetCharactersInput, EditorStyles.textArea, GUILayout.ExpandHeight(true));
+                EditorGUILayout.EndScrollView();
+                if (EditorGUI.EndChangeCheck())
+                {
+                    m_SubsetCharactersInput = m_SubsetCharactersInput.Replace("\n", string.Empty).Replace("\r", string.Empty);
+                    m_SubsetPreset = SubsetPreset.Custom;
+                }
+            }
+
+            string ranges = presetRanges ?? UnicodeRanges.FromCharacters(m_SubsetCharactersInput);
+
+            if (ranges != m_MissingCodePointsFor)
+            {
+                m_MissingCodePointsFor = ranges;
+                int sourceFaceIndex = active ? activeRecipe.faceIndex : m_fontAsset.faceInfo.faceIndex;
+                m_MissingCodePoints = TMP_FontSubsetter.GetMissingCodePoints(m_fontAsset, ranges, sourceFaceIndex);
+                m_MissingCodePointsCount = UnicodeRanges.CountCodePoints(m_MissingCodePoints);
+                m_MissingCodePointsDisplay = FormatMissingCodePoints(m_MissingCodePoints, k_MissingCodePointsListedMax);
+                // The applied sub-asset already carries the real size, so only preview pending input.
+                m_SubsetSizePreview = active && ranges == activeRecipe.characters
+                    ? 0
+                    : TMP_FontSubsetter.GetSubsetSizePreview(m_fontAsset, ranges, sourceFaceIndex);
+            }
+
+            if (m_MissingCodePointsCount > 0)
+            {
+                m_MissingCodePointsFoldout = EditorGUILayout.Foldout(m_MissingCodePointsFoldout,
+                    new GUIContent($"Missing Characters ({m_MissingCodePointsCount})", "Code points the source font has no glyph for. They are left out of the subset."), true);
+                if (m_MissingCodePointsFoldout)
+                {
+                    using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+                    {
+                        m_MissingCodePointsScroll = EditorGUILayout.BeginScrollView(m_MissingCodePointsScroll, GUILayout.MaxHeight(k_MissingCodePointsMaxHeight));
+                        Rect textRect = GUILayoutUtility.GetRect(new GUIContent(m_MissingCodePointsDisplay), EditorStyles.wordWrappedLabel);
+                        EditorGUI.SelectableLabel(textRect, m_MissingCodePointsDisplay, EditorStyles.wordWrappedLabel);
+                        EditorGUILayout.EndScrollView();
+                    }
+                }
+            }
+
+            DrawSubsetSizeLine(active, fontPath);
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                GUILayout.FlexibleSpace();
+                using (new EditorGUI.DisabledScope(string.IsNullOrEmpty(ranges)))
+                {
+                    if (GUILayout.Button("Update Subset", GUILayout.Width(120)))
+                    {
+                        if (!TMP_FontSubsetter.ApplySubset(m_fontAsset, ranges, out string error))
+                            Debug.LogError($"Font subsetting failed: {error}", m_fontAsset);
+                        m_MissingCodePointsFor = null;
+                        GUIUtility.ExitGUI();
+                    }
+                }
+                using (new EditorGUI.DisabledScope(!active))
+                {
+                    if (GUILayout.Button("Remove Subset", GUILayout.Width(120)))
+                    {
+                        TMP_FontSubsetter.RemoveSubset(m_fontAsset);
+                        m_SubsetSectionInitialized = false;
+                        m_MissingCodePointsFor = null;
+                        GUIUtility.ExitGUI();
+                    }
+                }
+            }
+
+            EditorGUILayout.Space();
+            EditorGUI.indentLevel = 0;
+        }
+
+        // Returns null when the baked character set exceeds the Characters field limit.
+        static string CharactersFromBakedAtlas(TMP_FontAsset fontAsset)
+        {
+            var codePoints = new SortedSet<uint>();
+            foreach (var character in fontAsset.characterTable)
+            {
+                if (character != null)
+                    codePoints.Add(character.unicode);
+            }
+
+            var ranges = UnicodeRanges.FromCodePoints(codePoints);
+            return UnicodeRanges.ToCharacters(ranges, k_SubsetInputMaxLength);
+        }
+
+        static string FormatMissingCodePoints(string missingRanges, int maxEntries)
+        {
+            var builder = new StringBuilder();
+            int count = 0;
+            foreach (uint c in UnicodeRanges.EnumerateCodePoints(missingRanges))
+            {
+                if (count == maxEntries)
+                {
+                    builder.Append($"\n… (+{UnicodeRanges.CountCodePoints(missingRanges) - maxEntries} more)");
+                    break;
+                }
+                if (count > 0)
+                    builder.Append('\n');
+
+                var category = CharUnicodeInfo.GetUnicodeCategory((int)c);
+                bool renderable = category != UnicodeCategory.Format
+                    && category != UnicodeCategory.Control
+                    && category != UnicodeCategory.LineSeparator
+                    && category != UnicodeCategory.ParagraphSeparator;
+                builder.Append($"ID: {c}\tHex: {c:X}\t");
+                builder.Append(renderable ? $"Char [{char.ConvertFromUtf32((int)c)}]" : "Char []");
+                count++;
+            }
+            return builder.ToString();
+        }
+
+        void DrawSubsetSizeLine(bool active, string fontPath)
+        {
+            var fontFile = new System.IO.FileInfo(fontPath);
+            if (!fontFile.Exists)
+                return;
+
+            long originalSize = fontFile.Length;
+            bool preview = m_SubsetSizePreview > 0;
+            long subsetSize = preview ? m_SubsetSizePreview : (active ? GetSubsetFontDataSize() : 0);
+            string sizeText = subsetSize > 0
+                ? $"{EditorUtility.FormatBytes(originalSize)} → {EditorUtility.FormatBytes(subsetSize)} (-{(1f - (float)subsetSize / originalSize) * 100f:0.#} %)"
+                : $"{EditorUtility.FormatBytes(originalSize)} (no subset applied)";
+            if (preview)
+                sizeText += " · preview";
+
+            EditorGUILayout.LabelField("Font File Size", sizeText);
+        }
+
+        long GetSubsetFontDataSize()
+        {
+            var subsetFont = m_fontAsset.sourceFontFile;
+            if (subsetFont == null || !TMP_FontSubsetter.IsSubsetActive(m_fontAsset))
+                return 0;
+
+            using var subsetFontObject = new SerializedObject(subsetFont);
+            return subsetFontObject.FindProperty("m_FontData")?.arraySize ?? 0;
+        }
+
         public override void OnInspectorGUI()
         {
             //Debug.Log("OnInspectorGUI Called.");
@@ -680,6 +944,11 @@ namespace TMPro.EditorUtilities
                 GUI.enabled = true;
                 EditorGUILayout.Space();
             }
+            #endregion
+
+            // FONT SUBSETTING PANEL
+            #region Font Subsetting
+            DrawFontSubsettingSection();
             #endregion
 
             string evt_cmd = Event.current.commandName; // Get Current Event CommandName to check for Undo Events

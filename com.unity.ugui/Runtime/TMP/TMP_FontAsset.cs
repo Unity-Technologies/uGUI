@@ -27,7 +27,7 @@ namespace TMPro
 
     [Serializable][ExcludeFromPreset]
     [TMPHelpURL("FontAssets")]
-    public class TMP_FontAsset : TMP_Asset
+    public partial class TMP_FontAsset : TMP_Asset
     {
 #if UNITY_EDITOR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
@@ -80,7 +80,7 @@ namespace TMPro
                 if (m_AtlasPopulationMode == AtlasPopulationMode.Static || m_AtlasPopulationMode == AtlasPopulationMode.DynamicOS)
                     m_SourceFontFile = null;
                 else
-                    m_SourceFontFile = m_SourceFontFile_EditorRef;
+                    m_SourceFontFile = ResolveDynamicSourceFont?.Invoke(this) ?? m_SourceFontFile_EditorRef;
             }
         }
         internal Font m_SourceFontFile_EditorRef;
@@ -123,7 +123,7 @@ namespace TMPro
                 if (m_AtlasPopulationMode == AtlasPopulationMode.Static || m_AtlasPopulationMode == AtlasPopulationMode.DynamicOS)
                     m_SourceFontFile = null;
                 else if (m_AtlasPopulationMode == AtlasPopulationMode.Dynamic)
-                    m_SourceFontFile = m_SourceFontFile_EditorRef;
+                    m_SourceFontFile = ResolveDynamicSourceFont?.Invoke(this) ?? m_SourceFontFile_EditorRef;
                 #endif
             }
         }
@@ -703,6 +703,11 @@ namespace TMPro
         internal static Action<TMP_FontAsset> RegisterResourceForReimport;
         internal static Action<Texture2D, bool> SetAtlasTextureIsReadable;
         internal static Func<string, Font> GetSourceFontRef;
+
+#if UNITY_EDITOR
+        // Returns the font m_SourceFontFile should target in Dynamic mode: an active subset sub-asset, else the editor ref.
+        internal static Func<TMP_FontAsset, Font> ResolveDynamicSourceFont;
+#endif
         internal static Func<Font, string> SetSourceFontGUID;
         #endif
 
@@ -766,6 +771,8 @@ namespace TMPro
             DestroyAtlasTextures();
 
             DestroyImmediate(m_Material);
+
+            DestroyNativeFontAsset();
         }
 
         #if UNITY_EDITOR
@@ -1212,7 +1219,7 @@ namespace TMPro
                 // Font Asset should have a valid reference to a font in the Editor.
                 #if UNITY_EDITOR
                 if (m_SourceFontFile == null)
-                    m_SourceFontFile = SourceFont_EditorRef;
+                    m_SourceFontFile = ResolveDynamicSourceFont?.Invoke(this) ?? SourceFont_EditorRef;
                 #endif
 
                 // Try loading the font face from source font object

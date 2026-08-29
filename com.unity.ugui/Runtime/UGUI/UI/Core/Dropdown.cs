@@ -1173,6 +1173,12 @@ namespace UnityEngine.UI
             if (selectedIndex < 0)
                 return;
 
+            // Log from the item-selection path rather than Set() so that only user
+            // interactions are reported, not programmatic value changes. Only the
+            // Dropdown's name is reported; option values can contain PII.
+            if (selectedIndex != m_Value && UI.Insights.Enabled())
+                UI.Insights.LogEventWithComponent(UI.InsightID.Dropdown_Selection, this);
+
             value = selectedIndex;
             Hide();
         }

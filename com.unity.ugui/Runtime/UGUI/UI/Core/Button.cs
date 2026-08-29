@@ -67,6 +67,10 @@ namespace UnityEngine.UI
                 return;
 
             UISystemProfilerApi.AddMarker("Button.onClick", this);
+            //Only log insights if this button has an event on click
+            if ((m_OnClick.GetCallsCount() > 0 ||  m_OnClick.GetPersistentEventCount() > 0) && UI.Insights.Enabled())
+                Insights.LogEventWithComponent(UI.InsightID.Button_Clicked, this);
+
             m_OnClick.Invoke();
         }
 

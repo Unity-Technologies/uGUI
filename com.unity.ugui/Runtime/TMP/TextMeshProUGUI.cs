@@ -920,6 +920,8 @@ namespace TMPro
             if (m_mesh != null)
                 DestroyImmediate(m_mesh);
 
+            ReleaseAdvancedTextResources();
+
             // Clean up mask material
             if (m_MaskMaterial != null)
             {
@@ -2461,6 +2463,17 @@ namespace TMPro
                 if (checkPaddingRequired)
                     UpdateMeshPadding();
 
+                // The Advanced Text Generator handles parsing and auto-sizing natively.
+                if (isAdvancedTextEnabled)
+                {
+                    m_havePropertiesChanged = false;
+                    m_isLayoutDirty = false;
+                    m_ignoreActiveState = false;
+
+                    GenerateTextMesh();
+                    return;
+                }
+
                 // Reparse the text as input may have changed or been truncated.
                 ParseInputText();
                 TMP_FontAsset.UpdateFontAssetsInUpdateQueue();
@@ -2495,12 +2508,198 @@ namespace TMPro
         }
 
 
+        // Generation and mesh upload path used when the Advanced Text Generator is enabled.
+        void GenerateAdvancedTextMesh()
+        {
+            var generator = TMP_AdvancedTextGenerator.GetTextGenerator(this, textInfo);
+            var outcome = generator.GenerateText();
+            FetchStateFromAdvancedGenerator(generator);
+
+            switch (outcome)
+            {
+                case GenerationOutcome.NoFontAsset:
+                    // No usable native font asset (e.g. static font asset): render nothing rather
+                    // than keeping the mesh from a previous generation on screen.
+                    ClearMesh();
+                    return;
+                case GenerationOutcome.EmptyText:
+                    ClearMesh();
+                    m_preferredWidth = 0;
+                    m_preferredHeight = 0;
+                    TMPro_EventManager.ON_TEXT_CHANGED(this);
+                    return;
+            }
+
+            m_previousLossyScaleY = this.transform.lossyScale.y;
+
+            k_GenerateTextPhaseIIIMarker.Begin();
+
+            if (m_renderMode == TextRenderFlags.Render && IsActive())
+            {
+                int materialCount = m_textInfo.materialCount;
+
+                // Resize SubTextObject array if necessary
+                if (materialCount > m_subTextObjects.Length)
+                    TMP_TextInfo.Resize(ref m_subTextObjects, Mathf.NextPowerOfTwo(materialCount + 1));
+
+                // Iterate through the material references to set the mesh buffer allocations
+                for (int i = 0; i < materialCount; i++)
+                {
+                    // Add new sub text object for each material reference
+                    if (i > 0)
+                    {
+                        var materialReference = generator.GetMaterialReference(i);
+
+                        if (m_subTextObjects[i] == null)
+                            m_subTextObjects[i] = TMP_SubMeshUI.AddSubTextObject(this, materialReference);
+
+                        // Make sure the pivots are synchronized
+                        if (m_rectTransform.pivot != m_subTextObjects[i].rectTransform.pivot)
+                            m_subTextObjects[i].rectTransform.pivot = m_rectTransform.pivot;
+
+                        // Check if the material has changed.
+                        if (m_subTextObjects[i].sharedMaterial == null || m_subTextObjects[i].sharedMaterial.GetEntityId() != materialReference.material.GetEntityId())
+                        {
+                            m_subTextObjects[i].sharedMaterial = materialReference.material;
+                            m_subTextObjects[i].fontAsset = materialReference.fontAsset;
+                            m_subTextObjects[i].spriteAsset = materialReference.spriteAsset;
+                        }
+                    }
+
+                    m_textInfo.meshInfo[i].mesh = i == 0 ? m_mesh : m_subTextObjects[i].mesh;
+                }
+
+                // Clean up unused SubMeshes
+                for (int i = materialCount; i < m_subTextObjects.Length && m_subTextObjects[i] != null; i++)
+                {
+                    if (i < m_textInfo.meshInfo.Length)
+                        m_subTextObjects[i].canvasRenderer.SetMesh(null);
+                }
+
+                // Event to allow users to modify the content of the text info before the text is rendered.
+                OnPreRenderText?.Invoke(m_textInfo);
+
+                // Must ensure the Canvas support the additional vertex attributes used by TMP.
+                if (m_canvas.additionalShaderChannels != (AdditionalCanvasShaderChannels)25)
+                    m_canvas.additionalShaderChannels |= (AdditionalCanvasShaderChannels)25;
+
+                // Sort the geometry of the text object if needed.
+                if (m_geometrySortingOrder != VertexSortingOrder.Normal)
+                    m_textInfo.meshInfo[0].SortGeometry(VertexSortingOrder.Reverse);
+
+                // Upload Mesh Data. Unlike the legacy path, topology is uploaded here as the
+                // Advanced Text Generator does not allocate mesh buffers during parsing.
+                m_mesh.Clear();
+                m_mesh.MarkDynamic();
+                m_mesh.vertices = m_textInfo.meshInfo[0].vertices;
+                m_mesh.triangles = m_textInfo.meshInfo[0].triangles;
+                m_mesh.SetUVs(0, m_textInfo.meshInfo[0].uvs0);
+                m_mesh.uv2 = m_textInfo.meshInfo[0].uvs2;
+                m_mesh.normals = m_textInfo.meshInfo[0].normals;
+                m_mesh.tangents = m_textInfo.meshInfo[0].tangents;
+                m_mesh.colors32 = m_textInfo.meshInfo[0].colors32;
+
+                m_mesh.RecalculateBounds();
+
+                m_canvasRenderer.SetMesh(m_mesh);
+
+                // Cache CanvasRenderer color of the parent text object.
+                Color parentBaseColor = m_canvasRenderer.GetColor();
+
+                bool isCullTransparentMeshEnabled = m_canvasRenderer.cullTransparentMesh;
+
+                for (int i = 1; i < materialCount; i++)
+                {
+                    // Clear unused vertices
+                    m_textInfo.meshInfo[i].ClearUnusedVertices();
+
+                    if (m_subTextObjects[i] == null) continue;
+
+                    // Sort the geometry of the sub-text objects if needed.
+                    if (m_geometrySortingOrder != VertexSortingOrder.Normal)
+                        m_textInfo.meshInfo[i].SortGeometry(VertexSortingOrder.Reverse);
+
+                    m_subTextObjects[i].mesh.Clear();
+                    m_subTextObjects[i].mesh.vertices = m_textInfo.meshInfo[i].vertices;
+                    m_subTextObjects[i].mesh.triangles = m_textInfo.meshInfo[i].triangles;
+                    m_subTextObjects[i].mesh.SetUVs(0, m_textInfo.meshInfo[i].uvs0);
+                    m_subTextObjects[i].mesh.uv2 = m_textInfo.meshInfo[i].uvs2;
+                    m_subTextObjects[i].mesh.normals = m_textInfo.meshInfo[i].normals;
+                    m_subTextObjects[i].mesh.tangents = m_textInfo.meshInfo[i].tangents;
+                    m_subTextObjects[i].mesh.colors32 = m_textInfo.meshInfo[i].colors32;
+
+                    m_subTextObjects[i].mesh.RecalculateBounds();
+
+                    m_subTextObjects[i].canvasRenderer.SetMesh(m_subTextObjects[i].mesh);
+
+                    // Set CanvasRenderer color to match the parent text object.
+                    m_subTextObjects[i].canvasRenderer.SetColor(parentBaseColor);
+
+                    // Make sure Cull Transparent Mesh of the sub objects matches the parent
+                    m_subTextObjects[i].canvasRenderer.cullTransparentMesh = isCullTransparentMeshEnabled;
+
+                    // Sync RaycastTarget property with parent text object
+                    m_subTextObjects[i].raycastTarget = this.raycastTarget;
+
+                    // Sync Maskable property with parent text object (if needed)
+                    if (m_subTextObjects[i].maskable != this.maskable)
+                    {
+                        m_subTextObjects[i].maskable = this.maskable;
+                        m_subTextObjects[i].RecalculateClipping();
+                    }
+                }
+            }
+
+            // Update culling if it has to be delayed due to text layout being dirty.
+            if (m_ShouldUpdateCulling)
+                UpdateCulling();
+
+            // Event indicating the text has been regenerated.
+            TMPro_EventManager.ON_TEXT_CHANGED(this);
+
+            k_GenerateTextPhaseIIIMarker.End();
+        }
+
+        internal override float GetCharacterScaleFactor()
+        {
+            float scaleFactor = -1;
+            float lossyScale = this.transform.lossyScale.y;
+
+            if (m_canvas == null) m_canvas = this.canvas;
+            if (m_canvas == null) return 1;
+
+            bool isCameraAssigned = m_canvas.worldCamera == null ? false : true;
+            RenderMode canvasRenderMode = m_canvas.renderMode;
+            float canvasScaleFactor = m_canvas.scaleFactor;
+            switch (canvasRenderMode)
+            {
+                case RenderMode.ScreenSpaceOverlay:
+                    scaleFactor = Mathf.Abs(lossyScale) / canvasScaleFactor;
+                    break;
+                case RenderMode.ScreenSpaceCamera:
+                    scaleFactor = isCameraAssigned ? Mathf.Abs(lossyScale) : 1;
+                    break;
+                case RenderMode.WorldSpace:
+                    scaleFactor = Mathf.Abs(lossyScale);
+                    break;
+            }
+            return scaleFactor;
+        }
+
         /// <summary>
         /// This is the main function that is responsible for creating / displaying the text.
         /// </summary>
         protected virtual void GenerateTextMesh()
         {
             k_GenerateTextMarker.Begin();
+
+            if (isAdvancedTextEnabled)
+            {
+                GenerateAdvancedTextMesh();
+                m_IsAutoSizePointSizeSet = true;
+                k_GenerateTextMarker.End();
+                return;
+            }
 
             // Early exit if no font asset was assigned. This should not be needed since LiberationSans SDF will be assigned by default.
             if (m_fontAsset == null || m_fontAsset.characterLookupTable == null)

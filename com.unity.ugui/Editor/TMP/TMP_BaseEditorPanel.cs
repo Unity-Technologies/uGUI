@@ -60,6 +60,7 @@ namespace TMPro.EditorUtilities
         static readonly GUIContent k_EscapeCharactersLabel = new GUIContent("Parse Escape Characters", "Whether to display strings such as \"\\n\" as is or replace them by the character they represent.");
         static readonly GUIContent k_VisibleDescenderLabel = new GUIContent("Visible Descender", "Compute descender values from visible characters only. Used to adjust layout behavior when hiding and revealing characters dynamically.");
         static readonly GUIContent k_EmojiFallbackSupportLabel = new GUIContent("Emoji Fallback Support", "When text contains Emojis, try using and displaying those from the potential Text Assets assigned in the TMP Settings Emoji Fallback Text Assets.");
+        static readonly GUIContent k_EnableAdvancedTextLabel = new GUIContent("Advanced Text Generator (Experimental)", "Generate text using the Advanced Text Generator. Enables complex script shaping and bidirectional text. Some TMP features are not supported yet. Requires a dynamic font asset.");
         static readonly GUIContent k_SpriteAssetLabel = new GUIContent("Sprite Asset", "The Sprite Asset used when NOT specifically referencing one using <sprite=\"Sprite Asset Name\">.");
         static readonly GUIContent k_StyleSheetAssetLabel = new GUIContent("Style Sheet Asset", "The Style Sheet Asset used by this text object.");
 
@@ -169,6 +170,11 @@ namespace TMPro.EditorUtilities
 
         protected SerializedProperty m_EmojiFallbackSupportProp;
 
+        /// <summary>
+        /// Represents the serialized <see cref="TMP_Text.enableAdvancedText"/> property of the inspected text component.
+        /// </summary>
+        protected SerializedProperty m_EnableAdvancedTextProp;
+
         protected SerializedProperty m_SpriteAssetProp;
 
         protected SerializedProperty m_StyleSheetAssetProp;
@@ -250,6 +256,7 @@ namespace TMPro.EditorUtilities
             m_IsTextObjectScaleStaticProp = serializedObject.FindProperty("m_IsTextObjectScaleStatic");
 
             m_EmojiFallbackSupportProp = serializedObject.FindProperty("m_EmojiFallbackSupport");
+            m_EnableAdvancedTextProp = serializedObject.FindProperty("m_EnableAdvancedText");
 
             m_SpriteAssetProp = serializedObject.FindProperty("m_spriteAsset");
 
@@ -1192,6 +1199,21 @@ namespace TMPro.EditorUtilities
             EditorGUI.BeginChangeCheck();
 
             EditorGUILayout.PropertyField(m_EmojiFallbackSupportProp, k_EmojiFallbackSupportLabel);
+            if (EditorGUI.EndChangeCheck())
+                m_HavePropertiesChanged = true;
+        }
+
+        /// <summary>
+        /// Draws the inspector control that toggles <see cref="TMP_Text.enableAdvancedText"/> on the inspected text component.
+        /// </summary>
+        protected void DrawAdvancedText()
+        {
+            EditorGUI.BeginChangeCheck();
+
+            using (new EditorGUI.DisabledScope(TMP_Settings.useAdvancedText))
+                EditorGUILayout.PropertyField(m_EnableAdvancedTextProp, k_EnableAdvancedTextLabel);
+            if (TMP_Settings.useAdvancedText)
+                EditorGUILayout.HelpBox("Overridden by the \"Use Advanced Text\" option in the TMP Settings.", MessageType.None);
             if (EditorGUI.EndChangeCheck())
                 m_HavePropertiesChanged = true;
         }

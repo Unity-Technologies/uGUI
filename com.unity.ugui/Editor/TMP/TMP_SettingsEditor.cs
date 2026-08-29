@@ -12,6 +12,9 @@ namespace TMPro.EditorUtilities
     {
         internal class Styles
         {
+            public static readonly GUIContent advancedTextLabel = new GUIContent("Advanced Text Generator");
+            public static readonly GUIContent useAdvancedTextLabel = new GUIContent("Use Advanced Text", "Makes all text components use the Advanced Text Generator.");
+
             public static readonly GUIContent defaultFontAssetLabel = new GUIContent("Default Font Asset", "The Font Asset that will be assigned by default to newly created text objects when no Font Asset is specified.");
             public static readonly GUIContent defaultFontAssetPathLabel = new GUIContent("Path:        Resources/", "The relative path to a Resources folder where the Font Assets and Material Presets are located.\nExample \"Fonts & Materials/\"");
 
@@ -69,6 +72,7 @@ namespace TMPro.EditorUtilities
             public static readonly GUIContent koreanSpecificRules = new GUIContent("Korean Language Options");
         }
 
+        SerializedProperty m_PropUseAdvancedText;
         SerializedProperty m_PropFontAsset;
         SerializedProperty m_PropDefaultFontAssetPath;
         SerializedProperty m_PropDefaultFontSize;
@@ -123,6 +127,7 @@ namespace TMPro.EditorUtilities
             if (target == null)
                 return;
 
+            m_PropUseAdvancedText = serializedObject.FindProperty("m_UseAdvancedText");
             m_PropFontAsset = serializedObject.FindProperty("m_defaultFontAsset");
             m_PropDefaultFontAssetPath = serializedObject.FindProperty("m_defaultFontAssetPath");
             m_PropDefaultFontSize = serializedObject.FindProperty("m_defaultFontSize");
@@ -218,6 +223,16 @@ namespace TMPro.EditorUtilities
 
             // TextMeshPro Font Info Panel
             EditorGUI.indentLevel = 0;
+
+            // ADVANCED TEXT GENERATOR
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            GUILayout.Label(Styles.advancedTextLabel, EditorStyles.boldLabel);
+            EditorGUI.indentLevel = 1;
+            EditorGUILayout.PropertyField(m_PropUseAdvancedText, Styles.useAdvancedTextLabel);
+            EditorGUI.indentLevel = 0;
+
+            EditorGUILayout.Space();
+            EditorGUILayout.EndVertical();
 
             // FONT ASSET
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);

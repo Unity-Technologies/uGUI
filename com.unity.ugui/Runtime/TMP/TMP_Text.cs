@@ -997,6 +997,20 @@ namespace TMPro
         [SerializeField]
         private bool m_EmojiFallbackSupport = true;
 
+        /// <summary>
+        /// Determines if text generation for this component is served by the Advanced Text Generator (experimental).
+        /// Requires a font asset with a dynamic atlas population mode.
+        /// </summary>
+        public bool enableAdvancedText
+        {
+            get { return m_EnableAdvancedText; }
+            set { if (m_EnableAdvancedText == value) return; m_EnableAdvancedText = value; m_havePropertiesChanged = true; SetVerticesDirty(); SetLayoutDirty(); }
+        }
+        [SerializeField]
+        private bool m_EnableAdvancedText;
+
+        internal bool isAdvancedTextEnabled => m_EnableAdvancedText || TMP_Settings.useAdvancedText;
+
 
         /// <summary>
         /// Enables or Disables parsing of CTRL characters in input text.
@@ -1971,6 +1985,66 @@ namespace TMPro
         /// </summary>
         /// <returns>The local corners of the Text Container or RectTransform.</returns>
         protected virtual Vector3[] GetTextContainerLocalCorners() { return null; }
+
+        // Component state read by the Advanced Text Generator that has no public accessor.
+        internal float materialPadding
+        {
+            get { return m_padding; }
+        }
+
+        internal int activeTextStyleHashCode
+        {
+            get { return m_TextStyleHashCode == 0 ? TMP_Style.NormalStyle.hashCode : m_TextStyleHashCode; }
+        }
+
+        internal Vector3[] GetTextContainerLocalCornersInternal()
+        {
+            return GetTextContainerLocalCorners();
+        }
+
+        internal virtual float GetCharacterScaleFactor() { return 1.0f; }
+
+        internal virtual bool GetConvertToLinearSpace() { return false; }
+
+        // Native resources used when generation is served by the Advanced Text Generator.
+        internal IntPtr m_TextGenerationInfo = IntPtr.Zero;
+        internal NativeTextBuffer m_ATGTextBuffer;
+
+        // Synchronizes to SetText() methods
+        internal bool TryGetSetTextSource(out ReadOnlySpan<uint> sourceText)
+        {
+            if (m_inputSource == TextInputSources.SetText || m_inputSource == TextInputSources.SetTextArray)
+            {
+                sourceText = m_TextBackingArray.AsSpan(0, m_TextBackingArray.Count);
+                return true;
+            }
+
+            sourceText = default;
+            return false;
+        }
+
+        internal void ReleaseAdvancedTextResources()
+        {
+            if (m_TextGenerationInfo != IntPtr.Zero)
+            {
+                UnityEngine.TextCore.Text.TextGenerationInfo.Destroy(m_TextGenerationInfo);
+                m_TextGenerationInfo = IntPtr.Zero;
+            }
+
+            m_ATGTextBuffer.Dispose();
+        }
+
+        internal void FetchStateFromAdvancedGenerator(TMP_AdvancedTextGenerator generator)
+        {
+            m_isTextTruncated = generator.m_isTextTruncated;
+        }
+
+        Vector2 AddMarginsToPreferredSize(Vector2 size)
+        {
+            size.x += (m_margin.x > 0 ? m_margin.x : 0) + (m_margin.z > 0 ? m_margin.z : 0);
+            size.y += (m_margin.y > 0 ? m_margin.y : 0) + (m_margin.w > 0 ? m_margin.w : 0);
+            return size;
+        }
 
 
         // PUBLIC FUNCTIONS
@@ -3835,6 +3909,9 @@ namespace TMPro
         /// <returns>A <see cref="Vector2"/> whose x is preferred width and y is preferred height in local units before RectTransform scale.</returns>
         public Vector2 GetPreferredValues()
         {
+            if (isAdvancedTextEnabled)
+                return AddMarginsToPreferredSize(TMP_AdvancedTextGenerator.MeasureText(this, -1, -1));
+
             // CALCULATE PREFERRED WIDTH
             m_isPreferredWidthDirty = true;
             float preferredWidth = GetPreferredWidth();
@@ -3857,6 +3934,9 @@ namespace TMPro
         /// <returns>Preferred width and height that fit the supplied margin box given current font, rich text, and wrapping settings.</returns>
         public Vector2 GetPreferredValues(float width, float height)
         {
+            if (isAdvancedTextEnabled)
+                return AddMarginsToPreferredSize(TMP_AdvancedTextGenerator.MeasureText(this, width, height));
+
             // Reparse input text
             m_isCalculatingPreferredValues = true;
             ParseInputText();
@@ -3880,6 +3960,9 @@ namespace TMPro
         /// <returns>Preferred width and height for <paramref name="text"/> using current font, size, and spacing without mutating visible string unless it already matched.</returns>
         public Vector2 GetPreferredValues(string text)
         {
+            if (isAdvancedTextEnabled)
+                return AddMarginsToPreferredSize(TMP_AdvancedTextGenerator.MeasureText(this, -1, -1, text));
+
             m_isCalculatingPreferredValues = true;
 
             SetTextInternal(text);
@@ -3906,6 +3989,9 @@ namespace TMPro
         /// <returns>Preferred width and height tuple describing how large the text wants to be inside the supplied box.</returns>
         public Vector2 GetPreferredValues(string text, float width, float height)
         {
+            if (isAdvancedTextEnabled)
+                return AddMarginsToPreferredSize(TMP_AdvancedTextGenerator.MeasureText(this, width, height, text));
+
             m_isCalculatingPreferredValues = true;
 
             SetTextInternal(text);
@@ -3934,6 +4020,13 @@ namespace TMPro
             // Return cached preferred height if already computed
             if (!m_isPreferredWidthDirty)
                 return m_preferredWidth;
+
+            if (isAdvancedTextEnabled)
+            {
+                m_preferredWidth = AddMarginsToPreferredSize(TMP_AdvancedTextGenerator.MeasureText(this, -1, -1)).x;
+                m_isPreferredWidthDirty = false;
+                return m_preferredWidth;
+            }
 
             float fontSize = m_enableAutoSizing ? m_fontSizeMax : m_fontSize;
 
@@ -4008,6 +4101,14 @@ namespace TMPro
             // Return cached preferred height if already computed
             if (!m_isPreferredHeightDirty)
                 return m_preferredHeight;
+
+            if (isAdvancedTextEnabled)
+            {
+                float width = m_marginWidth != 0 ? m_marginWidth : -1;
+                m_preferredHeight = AddMarginsToPreferredSize(TMP_AdvancedTextGenerator.MeasureText(this, width, -1)).y;
+                m_isPreferredHeightDirty = false;
+                return m_preferredHeight;
+            }
 
             float fontSize = m_enableAutoSizing ? m_fontSizeMax : m_fontSize;
 

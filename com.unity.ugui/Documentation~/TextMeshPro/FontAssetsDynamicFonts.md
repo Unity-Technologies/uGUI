@@ -11,7 +11,7 @@ This makes dynamic fonts assets more flexible, but that flexibility comes at a c
 * Dynamic font assets maintain a link to the original font file used to create them. That means:
 
     * During development, you must keep the font file in the project. You cannot delete it as you can the source fonts of static font assets.
-    * Source fonts of any dynamic font assets in your game are included in builds, which can increase build size.
+    * Source fonts of any dynamic font assets in your game are included in builds, which can increase build size. To limit this, refer to [Reduce build size with font subsetting](#reduce-build-size-with-font-subsetting).
 
 
 This has several uses, for example:
@@ -49,4 +49,8 @@ These are reset to include only the characters/glyphs used by TextMesh Pro text 
 
 If the Asset is currently unused, TextMesh Pro resizes the atlas texture to 0 x 0 pixels.
 
-**NOTE:** Resetting a static font Asset leaves the atlas texture as-is, but empties the character-, glyph-, and glyph adjustment tables. 
+**NOTE:** Resetting a static font Asset leaves the atlas texture as-is, but empties the character-, glyph-, and glyph adjustment tables.
+
+## Reduce build size with font subsetting
+
+The source font of a dynamic font asset is included in builds in full, even if your project uses only a few of its characters. To include only the characters your project needs, subset the source font in the font asset's Inspector window. For more information, refer to [Optimize font files with font subsetting](FontAssetsSubsetting.md).

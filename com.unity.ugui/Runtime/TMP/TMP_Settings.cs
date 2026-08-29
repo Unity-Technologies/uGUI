@@ -89,6 +89,28 @@ namespace TMPro
         private List<OTL_FeatureTag> m_ActiveFontFeatures = new List<OTL_FeatureTag> { 0 };
 
         /// <summary>
+        /// Makes all text components use the Advanced Text Generator.
+        /// </summary>
+        public static bool useAdvancedText
+        {
+            get
+            {
+                var settings = instance;
+                return settings != null && settings.m_UseAdvancedText;
+            }
+            set
+            {
+                var settings = instance;
+                if (settings == null || settings.m_UseAdvancedText == value)
+                    return;
+                settings.m_UseAdvancedText = value;
+                TMPro_EventManager.ON_TMP_SETTINGS_CHANGED();
+            }
+        }
+        [SerializeField]
+        private bool m_UseAdvancedText;
+
+        /// <summary>
         /// Controls if Extra Padding is enabled on newly created text objects by default.
         /// </summary>
         public static bool enableExtraPadding

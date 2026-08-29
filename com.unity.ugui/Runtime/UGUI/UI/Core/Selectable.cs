@@ -440,7 +440,7 @@ namespace UnityEngine.UI
         }
 
         private readonly List<CanvasGroup> m_CanvasGroupCache = new List<CanvasGroup>();
-		
+
         /// <summary>Called when a parent CanvasGroup changes. Re-evaluates the interactable state.</summary>
         protected override void OnCanvasGroupChanged()
         {
@@ -559,6 +559,10 @@ namespace UnityEngine.UI
             else
 #endif
             DoStateTransition(currentSelectionState, false);
+
+#if PACKAGE_POLYSPATIAL
+            MarkDirty();
+#endif
         }
 
         /// <summary>Called when it becomes disabled. Unregisters from the global selectable list and clears pointer state.</summary>
