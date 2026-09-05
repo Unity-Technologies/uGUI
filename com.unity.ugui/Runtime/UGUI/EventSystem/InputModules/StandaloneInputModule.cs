@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine.Pool;
-using UnityEngine.Serialization;
 
 namespace UnityEngine.EventSystems
 {
@@ -32,19 +30,6 @@ namespace UnityEngine.EventSystems
         {
         }
 
-        [Obsolete("Mode is no longer needed on input module as it handles both mouse and keyboard simultaneously.", true)]
-        public enum InputMode
-        {
-            Mouse,
-            Buttons
-        }
-
-        [Obsolete("Mode is no longer needed on input module as it handles both mouse and keyboard simultaneously.", true)]
-        public InputMode inputMode
-        {
-            get { return InputMode.Mouse; }
-        }
-
         [SerializeField]
         private string m_HorizontalAxis = "Horizontal";
 
@@ -71,31 +56,6 @@ namespace UnityEngine.EventSystems
 
         [SerializeField]
         private float m_RepeatDelay = 0.5f;
-
-        [SerializeField]
-        [FormerlySerializedAs("m_AllowActivationOnMobileDevice")]
-        [HideInInspector]
-        private bool m_ForceModuleActive;
-
-        [Obsolete("allowActivationOnMobileDevice has been deprecated. Use forceModuleActive instead (UnityUpgradable) -> forceModuleActive", true)]
-        public bool allowActivationOnMobileDevice
-        {
-            get { return m_ForceModuleActive; }
-            set { m_ForceModuleActive = value; }
-        }
-
-        /// <summary>
-        /// Force this module to be active.
-        /// </summary>
-        /// <remarks>
-        /// If there is no module active with higher priority (ordered in the inspector) this module will be forced active even if valid enabling conditions are not met.
-        /// </remarks>
-        [Obsolete("forceModuleActive has been deprecated. There is no need to force the module awake as StandaloneInputModule works for all platforms", true)]
-        public bool forceModuleActive
-        {
-            get { return m_ForceModuleActive; }
-            set { m_ForceModuleActive = value; }
-        }
 
         /// <summary>
         /// Number of keyboard / controller inputs allowed per second.
@@ -248,7 +208,7 @@ namespace UnityEngine.EventSystems
             if (!base.ShouldActivateModule())
                 return false;
 
-            var shouldActivate = m_ForceModuleActive;
+            var shouldActivate = false;
             shouldActivate |= input.GetButtonDown(m_SubmitButton);
             shouldActivate |= input.GetButtonDown(m_CancelButton);
             shouldActivate |= !Mathf.Approximately(input.GetAxisRaw(m_HorizontalAxis), 0.0f);
@@ -555,12 +515,6 @@ namespace UnityEngine.EventSystems
         protected void ProcessMouseEvent()
         {
             ProcessMouseEvent(0);
-        }
-
-        [Obsolete("This method is no longer checked, overriding it with return true does nothing!", true)]
-        protected virtual bool ForceAutoSelect()
-        {
-            return false;
         }
 
         /// <summary>

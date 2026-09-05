@@ -473,18 +473,11 @@ namespace TMPro
         // Legacy fields no longer used since version 1.1.0 release of TMP_FontAssets.
         // ================================================================================
 
-        /// <summary>
-        /// The general information about the font.
-        /// This property and FaceInfo_Legacy type are no longer used in version 1.1.0 of the font asset.
-        /// </summary>
-		[Obsolete("The fontInfo property and underlying type is now obsolete. Please use the faceInfo property and FaceInfo type instead.", true)]
-        public FaceInfo_Legacy fontInfo
-        {
-            get { return m_fontInfo; }
-        }
-
+#pragma warning disable 0618
+#pragma warning disable 0414
         [SerializeField]
         private FaceInfo_Legacy m_fontInfo = null;
+#pragma warning restore 0414
 
         [SerializeField]
         internal List<TMP_Glyph> m_glyphInfoList;
@@ -492,9 +485,9 @@ namespace TMPro
         [SerializeField]
         [FormerlySerializedAs("m_kerningInfo")]
         internal KerningTable m_KerningTable = new KerningTable();
+#pragma warning restore 0618
 
         [SerializeField]
-        #pragma warning disable 0649
         private List<TMP_FontAsset> fallbackFontAssets;
 
         /// <summary>
@@ -1021,9 +1014,11 @@ namespace TMPro
 
         internal void InitializeGlyphPaidAdjustmentRecordsLookupDictionary()
         {
+#pragma warning disable 0618
             // Upgrade Glyph Adjustment Table to the new Font Feature table and Glyph Pair Adjustment Records
             if (m_KerningTable != null && m_KerningTable.kerningPairs != null && m_KerningTable.kerningPairs.Count > 0)
                 UpgradeGlyphAdjustmentTableToFontFeatureTable();
+#pragma warning restore 0618
 
             // Read Font Features which will include kerning data.
             if (m_FontFeatureTable.m_GlyphPairAdjustmentRecordLookup == null)
@@ -3678,7 +3673,8 @@ namespace TMPro
             }
         }
 
-        #if UNITY_EDITOR
+#pragma warning disable 0618
+#if UNITY_EDITOR
         /// <summary>
         /// Internal method used to upgrade font asset to support Dynamic SDF.
         /// </summary>
@@ -3877,6 +3873,6 @@ namespace TMPro
             RegisterResourceForUpdate?.Invoke(this);
             #endif
         }
-
+#pragma warning restore 0618
     }
 }

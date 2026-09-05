@@ -3,8 +3,8 @@
 A derived [Raycaster](Raycasters.md) to raycast against UI Toolkit panel instances at runtime.
 
 During the Start method of the EventSystem, a PanelRaycaster is automatically added to the scene for each
-active UI Document in the scene. To disable this behavior, call
-EventSystem.SetUITookitEventSystemOverride before the Start method
+active UI Document in the scene. To disable this behavior, set
+[PanelInputConfiguration.autoCreatePanelComponents](https://docs.unity3d.com/Manual/ui-systems/world-space-panel-input-configuration.html) to false before the Start method
 executes.
 
 You can use the Sort Order of the Panel Settings asset referenced by each document to configure

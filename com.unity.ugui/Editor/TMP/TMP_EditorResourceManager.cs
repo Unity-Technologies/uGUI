@@ -54,6 +54,23 @@ namespace TMPro
             {
                 Canvas.willRenderCanvases -= s_Instance.OnPreRenderCanvases;
                 Canvas.willRenderCanvases += s_Instance.OnPreRenderCanvases;
+
+                // The rendering callbacks are wired in the constructor, which does not re-run for this
+                // deliberately-retained singleton, so re-establish them here alongside the canvas
+                // callback; otherwise resource saving stops after a reload. The constructor picks one
+                // callback based on RenderPipelineManager.currentPipeline, but the pipeline is disposed
+                // during unload and only recreated on the next rendered frame, so that check cannot
+                // distinguish the pipelines here. Re-subscribe both instead: only the callback matching
+                // the active pipeline is ever invoked, so the extra subscription is inert.
+                Camera.onPostRender -= s_Instance.OnCameraPostRender;
+                Camera.onPostRender += s_Instance.OnCameraPostRender;
+                #if UNITY_2023_3_OR_NEWER
+                    RenderPipelineManager.endContextRendering -= s_Instance.OnEndOfFrame;
+                    RenderPipelineManager.endContextRendering += s_Instance.OnEndOfFrame;
+                #else
+                    RenderPipelineManager.endFrameRendering -= s_Instance.OnEndOfFrame;
+                    RenderPipelineManager.endFrameRendering += s_Instance.OnEndOfFrame;
+                #endif
                 // s_Instance = null;  // Shoudn't need to be reset as this is an Editor singleton.
             }
         }

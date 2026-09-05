@@ -36,10 +36,10 @@ namespace UnityEditor.UI
 
             public Styles()
             {
-                matchContent = EditorGUIUtility.TrTextContent("Match");
-                widthContent = EditorGUIUtility.TrTextContent("Width");
-                heightContent = EditorGUIUtility.TrTextContent("Height");
-                uiScaleModeContent = EditorGUIUtility.TrTextContent("UI Scale Mode");
+                matchContent = L10n.TextContent("Match", null, null, null);
+                widthContent = L10n.TextContent("Width", null, null, null);
+                heightContent = L10n.TextContent("Height", null, null, null);
+                uiScaleModeContent = L10n.TextContent("UI Scale Mode", null, null, null);
 
                 leftAlignedLabel = new GUIStyle(EditorStyles.label);
                 rightAlignedLabel = new GUIStyle(EditorStyles.label);

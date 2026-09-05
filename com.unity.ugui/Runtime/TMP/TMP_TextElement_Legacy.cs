@@ -10,6 +10,7 @@ namespace TMPro
     /// Base class for all text elements like characters (glyphs) and sprites.
     /// </summary>
     [Serializable]
+    [Obsolete("TMP_TextElement_Legacy is an obsolete class and no longer maintained. Only kept for upgrading old assets.")]
     public class TMP_TextElement_Legacy
     {
         public int id;

@@ -14,6 +14,7 @@ namespace TMPro
     /// Class that contains the basic information about the font.
     /// </summary>
     [Serializable]
+    [Obsolete("FaceInfo_Legacy is an obsolete class and no longer maintained. Only kept for upgrading legacy assets.")]
     public class FaceInfo_Legacy
     {
         public string Name;
@@ -49,6 +50,7 @@ namespace TMPro
 
     // Class which contains the Glyph Info / Character definition for each character contained in the font asset.
     [Serializable]
+    [Obsolete("TMP_Glyph is an obsolete class and no longer maintained. Only kept for upgrading old assets.")]
     public class TMP_Glyph : TMP_TextElement_Legacy
     {
         /// <summary>
@@ -132,7 +134,7 @@ namespace TMPro
         public TMP_FontAsset italicTypeface;
     }
 
-
+    [Obsolete("KerningPairKey is an obsolete struct and no longer maintained. It will be removed in upcoming versions.", true)]
     public struct KerningPairKey
     {
         public uint ascii_Left;
@@ -151,6 +153,7 @@ namespace TMPro
     /// Positional adjustments of a glyph
     /// </summary>
     [Serializable]
+    [Obsolete("GlyphValueRecord_Legacy is an obsolete struct and no longer maintained. Only kept for upgrading old assets.")]
     public struct GlyphValueRecord_Legacy
     {
         public float xPlacement;
@@ -179,6 +182,7 @@ namespace TMPro
     }
 
     [Serializable]
+    [Obsolete("KerningPair is an obsolete class and no longer maintained. Only kept for upgrading old assets.")]
     public class KerningPair
     {
         /// <summary>
@@ -272,6 +276,7 @@ namespace TMPro
     }
 
     [Serializable]
+    [Obsolete("KerningTable is an obsolete class and no longer maintained. Only kept for upgrading old assets.")]
     public class KerningTable
     {
         public List<KerningPair> kerningPairs;
@@ -365,7 +370,7 @@ namespace TMPro
         }
     }
 
-
+    [Obsolete("TMP_FontUtilities is an obsolete class and no longer maintained. It will be removed in upcoming versions.", true)]
     public static class TMP_FontUtilities
     {
         private static List<EntityId> k_searchedFontAssets;

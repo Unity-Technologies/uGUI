@@ -3,6 +3,7 @@ using UnityEngine.TextCore;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Serialization;
+using System;
 
 
 namespace TMPro
@@ -63,6 +64,7 @@ namespace TMPro
         internal Dictionary<uint, TMP_SpriteGlyph> m_SpriteGlyphLookup;
 
         // List which contains the SpriteInfo for the sprites contained in the sprite sheet.
+        [Obsolete("Do not use TMP_SpriteAsset.spriteInfoList as it's obsolete and no longer maintained. Only kept for internal use to upgrade legacy assets.")]
         public List<TMP_Sprite> spriteInfoList;
 
         /// <summary>
@@ -532,6 +534,7 @@ namespace TMPro
             m_SpriteCharacterTable.Clear();
             m_GlyphTable.Clear();
 
+#pragma warning disable 0618
             for (int i = 0; i < spriteInfoList.Count; i++)
             {
                 TMP_Sprite oldSprite = spriteInfoList[i];
@@ -555,6 +558,7 @@ namespace TMPro
 
                 m_SpriteCharacterTable.Add(spriteCharacter);
             }
+#pragma warning restore 0618
 
             // Clear legacy glyph info list.
             //spriteInfoList.Clear();

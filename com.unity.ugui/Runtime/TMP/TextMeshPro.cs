@@ -93,18 +93,6 @@ namespace TMPro
         }
 
 
-        /// <summary>
-        /// Returns a reference to the Text Container
-        /// </summary>
-        [Obsolete("The TextContainer is now obsolete. Use the RectTransform instead.", true)]
-        public TextContainer textContainer
-        {
-            get
-            {
-                return null;
-            }
-        }
-
 
         /// <summary>
         /// Returns a reference to the Transform

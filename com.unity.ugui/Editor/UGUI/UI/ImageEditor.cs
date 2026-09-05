@@ -39,41 +39,41 @@ namespace UnityEditor.UI
 
         private class Styles
         {
-            public static GUIContent text = EditorGUIUtility.TrTextContent("Fill Origin");
+            public static GUIContent text = L10n.TextContent("Fill Origin", null, null, null);
             public static GUIContent[] OriginHorizontalStyle =
             {
-                EditorGUIUtility.TrTextContent("Left"),
-                EditorGUIUtility.TrTextContent("Right")
+                L10n.TextContent("Left", null, null, null),
+                L10n.TextContent("Right", null, null, null)
             };
 
             public static GUIContent[] OriginVerticalStyle =
             {
-                EditorGUIUtility.TrTextContent("Bottom"),
-                EditorGUIUtility.TrTextContent("Top")
+                L10n.TextContent("Bottom", null, null, null),
+                L10n.TextContent("Top", null, null, null)
             };
 
             public static GUIContent[] Origin90Style =
             {
-                EditorGUIUtility.TrTextContent("BottomLeft"),
-                EditorGUIUtility.TrTextContent("TopLeft"),
-                EditorGUIUtility.TrTextContent("TopRight"),
-                EditorGUIUtility.TrTextContent("BottomRight")
+                L10n.TextContent("BottomLeft", null, null, null),
+                L10n.TextContent("TopLeft", null, null, null),
+                L10n.TextContent("TopRight", null, null, null),
+                L10n.TextContent("BottomRight", null, null, null)
             };
 
             public static GUIContent[] Origin180Style =
             {
-                EditorGUIUtility.TrTextContent("Bottom"),
-                EditorGUIUtility.TrTextContent("Left"),
-                EditorGUIUtility.TrTextContent("Top"),
-                EditorGUIUtility.TrTextContent("Right")
+                L10n.TextContent("Bottom", null, null, null),
+                L10n.TextContent("Left", null, null, null),
+                L10n.TextContent("Top", null, null, null),
+                L10n.TextContent("Right", null, null, null)
             };
 
             public static GUIContent[] Origin360Style =
             {
-                EditorGUIUtility.TrTextContent("Bottom"),
-                EditorGUIUtility.TrTextContent("Right"),
-                EditorGUIUtility.TrTextContent("Top"),
-                EditorGUIUtility.TrTextContent("Left")
+                L10n.TextContent("Bottom", null, null, null),
+                L10n.TextContent("Right", null, null, null),
+                L10n.TextContent("Top", null, null, null),
+                L10n.TextContent("Left", null, null, null)
             };
         }
 
@@ -81,9 +81,9 @@ namespace UnityEditor.UI
         {
             base.OnEnable();
 
-            m_SpriteContent = EditorGUIUtility.TrTextContent("Source Image");
-            m_SpriteTypeContent     = EditorGUIUtility.TrTextContent("Image Type");
-            m_ClockwiseContent      = EditorGUIUtility.TrTextContent("Clockwise");
+            m_SpriteContent = L10n.TextContent("Source Image", null, null, null);
+            m_SpriteTypeContent     = L10n.TextContent("Image Type", null, null, null);
+            m_ClockwiseContent      = L10n.TextContent("Clockwise", null, null, null);
 
             m_Sprite                = serializedObject.FindProperty("m_Sprite");
             m_Type                  = serializedObject.FindProperty("m_Type");

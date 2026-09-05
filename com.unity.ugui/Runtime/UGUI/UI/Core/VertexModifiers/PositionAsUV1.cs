@@ -1,4 +1,4 @@
-using System.Linq;
+using System;
 
 namespace UnityEngine.UI
 {
@@ -7,6 +7,7 @@ namespace UnityEngine.UI
     /// </summary>
     [AddComponentMenu("UI (Canvas)/Effects/Position As UV1", 82)]
     [UGUIHelpURL("PositionAsUV1")]
+    [Obsolete("PositionAsUV1 is marked as obsolete and will be removed in future releases.")]
     public class PositionAsUV1 : BaseMeshEffect
     {
         /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a PositionAsUV1 effect to a GameObject.</summary>

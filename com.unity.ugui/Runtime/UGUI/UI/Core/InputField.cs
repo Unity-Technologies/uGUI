@@ -753,10 +753,6 @@ namespace UnityEngine.UI
         /// </example>
         public SubmitEvent onSubmit { get { return m_OnSubmit; } set { SetPropertyUtility.SetClass(ref m_OnSubmit, value); } }
 
-        /// <summary>Obsolete. Please use <see cref="onValueChanged"/> instead.</summary>
-        [Obsolete("onValueChange has been renamed to onValueChanged", true)]
-        public OnChangeEvent onValueChange { get { return onValueChanged; } set { onValueChanged = value; } }
-
         /// <summary>
         /// Accessor to the OnChangeEvent.
         /// </summary>
@@ -774,7 +770,7 @@ namespace UnityEngine.UI
         ///     public void Start()
         ///     {
         ///         //Adds a listener to the main input field and invokes a method when the value changes.
-        ///         mainInputField.onValueChange.AddListener(delegate {ValueChangeCheck(); });
+        ///         mainInputField.onValueChanged.AddListener(delegate {ValueChangeCheck(); });
         ///     }
         ///
         ///     // Invoked when the value of the text field changes.
@@ -1434,13 +1430,6 @@ namespace UnityEngine.UI
             return !s_IsQuestDevice && m_TouchKeyboardAllowsInPlaceEditing != TouchScreenKeyboard.isInPlaceEditingAllowed;
         }
 
-        RangeInt GetInternalSelection()
-        {
-            var selectionStart = Mathf.Min(caretSelectPositionInternal, caretPositionInternal);
-            var selectionLength = Mathf.Abs(caretSelectPositionInternal - caretPositionInternal);
-            return new RangeInt(selectionStart, selectionLength);
-        }
-
         /// <summary>
         /// Converts a visual text position (which includes the IME composition string) to a raw position
         /// (relative to m_Text only). The composition string is visually inserted at compositionRawStart
@@ -1766,32 +1755,6 @@ namespace UnityEngine.UI
 
                 OnDeselect(null);
             }
-        }
-
-        /// <summary>Obsolete. Please use <see cref="RectTransformUtility.ScreenPointToLocalPointInRectangle"/> instead.</summary>
-        /// <param name="screen">The screen-space point to convert.</param>
-        /// <returns>The point in the text component's local space.</returns>
-        [Obsolete("This function is no longer used. Please use RectTransformUtility.ScreenPointToLocalPointInRectangle() instead.", true)]
-        public Vector2 ScreenToLocal(Vector2 screen)
-        {
-            var theCanvas = m_TextComponent.canvas;
-            if (theCanvas == null)
-                return screen;
-
-            Vector3 pos = Vector3.zero;
-            if (theCanvas.renderMode == RenderMode.ScreenSpaceOverlay)
-            {
-                pos = m_TextComponent.transform.InverseTransformPoint(screen);
-            }
-            else if (theCanvas.worldCamera != null)
-            {
-                Ray mouseRay = theCanvas.worldCamera.ScreenPointToRay(screen);
-                float dist;
-                Plane plane = new Plane(m_TextComponent.transform.forward, m_TextComponent.transform.position);
-                plane.Raycast(mouseRay, out dist);
-                pos = m_TextComponent.transform.InverseTransformPoint(mouseRay.GetPoint(dist));
-            }
-            return new Vector2(pos.x, pos.y);
         }
 
         private int GetUnclampedCharacterLineFromPosition(Vector2 pos, TextGenerator generator)
@@ -2769,17 +2732,6 @@ namespace UnityEngine.UI
                 MarkGeometryAsDirty();
                 m_PreventFontCallback = false;
             }
-        }
-
-        private bool IsSelectionVisible()
-        {
-            if (m_DrawStart > caretPositionInternal || m_DrawStart > caretSelectPositionInternal)
-                return false;
-
-            if (m_DrawEnd < caretPositionInternal || m_DrawEnd < caretSelectPositionInternal)
-                return false;
-
-            return true;
         }
 
         private static int GetLineStartPosition(TextGenerator gen, int line)

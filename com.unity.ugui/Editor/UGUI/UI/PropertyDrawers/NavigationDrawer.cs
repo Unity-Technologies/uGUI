@@ -29,7 +29,7 @@ namespace UnityEditor.UI
 
             public Styles()
             {
-                navigationContent = EditorGUIUtility.TrTextContent(kNavigation);
+                navigationContent = L10n.TextContent(kNavigation, null, null, null);
             }
         }
 

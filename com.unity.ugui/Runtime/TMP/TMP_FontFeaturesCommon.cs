@@ -73,14 +73,6 @@ namespace TMPro
             m_YAdvance = yAdvance;
         }
 
-        internal TMP_GlyphValueRecord(GlyphValueRecord_Legacy valueRecord)
-        {
-            m_XPlacement = valueRecord.xPlacement;
-            m_YPlacement = valueRecord.yPlacement;
-            m_XAdvance = valueRecord.xAdvance;
-            m_YAdvance = valueRecord.yAdvance;
-        }
-
         internal TMP_GlyphValueRecord(GlyphValueRecord valueRecord)
         {
             m_XPlacement = valueRecord.xPlacement;

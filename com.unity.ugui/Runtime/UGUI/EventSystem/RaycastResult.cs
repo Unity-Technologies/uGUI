@@ -122,20 +122,9 @@ namespace UnityEngine.EventSystems
         /// <seealso cref="UnityEngine.UIElements.EventSystemUIToolkitInteroperabilityBridge"/>
         public IPanelComponent panelComponent;
 
-        /// <summary>
-        /// The UIToolkit Document that was intersected by this raycast, if any.
-        /// </summary>
-        /// <remarks>This is only useful in the context of EventSystem UI Toolkit interoperability.</remarks>
-        /// <seealso cref="UnityEngine.UIElements.EventSystemUIToolkitInteroperabilityBridge"/>
-        [Obsolete("RaycastResult.document is obsolete. Use RaycastResult.panelComponent instead.", true)]
-        public UIDocument document
-        {
-            get => panelComponent as UIDocument;
-            set => panelComponent = value;
-        }
-
         //This is a visualElement but we rely on the getter being stripped to not pulling the type.
         internal IEventHandler m_element;
+
         /// <summary>
         /// The UIToolkit Visual Element that was intersected by this raycast, if any.
         /// </summary>

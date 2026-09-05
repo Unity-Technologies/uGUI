@@ -778,24 +778,6 @@ namespace TMPro
             set { if (m_TextWrappingMode == value) return; m_havePropertiesChanged = true; m_TextWrappingMode = value; SetVerticesDirty(); SetLayoutDirty(); }
         }
 
-
-        /// <summary>
-        /// Controls whether or not word wrapping is applied. When disabled, the text will be displayed on a single line.
-        /// </summary>
-        [Obsolete("The enableWordWrapping property is now obsolete. Please use the textWrappingMode property instead.", true)]
-        public bool enableWordWrapping
-        {
-            get { return m_TextWrappingMode == TextWrappingModes.Normal || textWrappingMode == TextWrappingModes.PreserveWhitespace; }
-            set
-            {
-                TextWrappingModes mode = (TextWrappingModes)(value ? 1 : 0);
-
-                if (m_TextWrappingMode == mode)
-                    return;
-
-                m_havePropertiesChanged = true; m_TextWrappingMode = mode; SetVerticesDirty(); SetLayoutDirty();
-            }
-        }
         [SerializeField] [FormerlySerializedAs("m_enableWordWrapping")]
         protected TextWrappingModes m_TextWrappingMode;
         protected bool m_isCharacterWrappingEnabled = false;
@@ -907,39 +889,6 @@ namespace TMPro
         //[SerializeField]
         protected bool m_isTextTruncated;
 
-
-        /// <summary>
-        /// Determines if kerning is enabled or disabled.
-        /// </summary>
-        [Obsolete("The \"enableKerning\" property has been deprecated. Use the \"fontFeatures\" property to control what features are enabled on the text component.", true)]
-        public bool enableKerning
-        {
-            get { return m_ActiveFontFeatures.Contains(OTL_FeatureTag.kern); }
-            set
-            {
-                if (m_ActiveFontFeatures.Contains(OTL_FeatureTag.kern))
-                {
-                    if (value)
-                        return;
-
-                    m_ActiveFontFeatures.Remove(OTL_FeatureTag.kern);
-                    m_enableKerning = false;
-                }
-                else
-                {
-                    if (!value)
-                        return;
-
-                    m_ActiveFontFeatures.Add(OTL_FeatureTag.kern);
-                    m_enableKerning = true;
-
-                }
-
-                m_havePropertiesChanged = true;
-                SetVerticesDirty();
-                SetLayoutDirty();
-            }
-        }
         [SerializeField]
         protected bool m_enableKerning;
         protected int m_LastBaseGlyphIndex;
@@ -2696,31 +2645,6 @@ namespace TMPro
         /// </summary>
         /// <param name="sourceText">String containing the text.</param>
         public void SetText(string sourceText)
-        {
-            int srcLength = sourceText == null ? 0 : sourceText.Length;
-
-            PopulateTextBackingArray(sourceText, 0, srcLength);
-
-            m_text = sourceText;
-
-            // Set input source
-            m_inputSource = TextInputSources.TextString;
-
-            PopulateTextProcessingArray();
-
-            m_havePropertiesChanged = true;
-
-            SetVerticesDirty();
-            SetLayoutDirty();
-        }
-
-        /// <summary>
-        /// This function is the same as using the text property to set the text.
-        /// </summary>
-        /// <param name="sourceText">String containing the text.</param>
-        /// <param name="syncTextInputBox">This optional parameter no longer provides any functionality as this function now simple sets the .text property which is reflected in the Text Input Box.</param>
-        [Obsolete("Use the SetText(string) function instead.", true)]
-        public void SetText(string sourceText, bool syncTextInputBox = true)
         {
             int srcLength = sourceText == null ? 0 : sourceText.Length;
 

@@ -26,12 +26,6 @@ namespace UnityEngine.EventSystems
         /// </summary>
         public abstract Camera eventCamera { get; }
 
-        [Obsolete("Please use sortOrderPriority and renderOrderPriority", true)]
-        public virtual int priority
-        {
-            get { return 0; }
-        }
-
         /// <summary>
         /// Priority of the raycaster based upon sort order.
         /// </summary>

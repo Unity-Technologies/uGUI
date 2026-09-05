@@ -23,7 +23,7 @@ namespace UnityEditor.UI
         SerializedProperty m_AnimTriggerProperty;
         SerializedProperty m_NavigationProperty;
 
-        GUIContent m_VisualizeNavigation = EditorGUIUtility.TrTextContent("Visualize", "Show navigation flows between selectable UI elements.");
+        GUIContent m_VisualizeNavigation = L10n.TextContent("Visualize", "Show navigation flows between selectable UI elements.", null, null);
 
         AnimBool m_ShowColorTint       = new AnimBool();
         AnimBool m_ShowSpriteTrasition = new AnimBool();
@@ -253,54 +253,6 @@ namespace UnityEditor.UI
             var defaultName = target.gameObject.name;
             var message = string.Format("Create a new animator for the game object '{0}':", defaultName);
             return EditorUtility.SaveFilePanelInProject("New Animation Contoller", defaultName, "controller", message);
-        }
-
-        private static void SetUpCurves(AnimationClip highlightedClip, AnimationClip pressedClip, string animationPath)
-        {
-            string[] channels = { "m_LocalScale.x", "m_LocalScale.y", "m_LocalScale.z" };
-
-            var highlightedKeys = new[] { new Keyframe(0f, 1f), new Keyframe(0.5f, 1.1f), new Keyframe(1f, 1f) };
-            var highlightedCurve = new AnimationCurve(highlightedKeys);
-            foreach (var channel in channels)
-                AnimationUtility.SetEditorCurve(highlightedClip, EditorCurveBinding.FloatCurve(animationPath, typeof(Transform), channel), highlightedCurve);
-
-            var pressedKeys = new[] { new Keyframe(0f, 1.15f) };
-            var pressedCurve = new AnimationCurve(pressedKeys);
-            foreach (var channel in channels)
-                AnimationUtility.SetEditorCurve(pressedClip, EditorCurveBinding.FloatCurve(animationPath, typeof(Transform), channel), pressedCurve);
-        }
-
-        private static string BuildAnimationPath(Selectable target)
-        {
-            // if no target don't hook up any curves.
-            var highlight = target.targetGraphic;
-            if (highlight == null)
-                return string.Empty;
-
-            var startGo = highlight.gameObject;
-            var toFindGo = target.gameObject;
-
-            var pathComponents = new Stack<string>();
-            while (toFindGo != startGo)
-            {
-                pathComponents.Push(startGo.name);
-
-                // didn't exist in hierarchy!
-                if (startGo.transform.parent == null)
-                    return string.Empty;
-
-                startGo = startGo.transform.parent.gameObject;
-            }
-
-            // calculate path
-            var animPath = new StringBuilder();
-            if (pathComponents.Count > 0)
-                animPath.Append(pathComponents.Pop());
-
-            while (pathComponents.Count > 0)
-                animPath.Append("/").Append(pathComponents.Pop());
-
-            return animPath.ToString();
         }
 
         private static AnimationClip GenerateTriggerableTransition(string name, Animations.AnimatorController controller)

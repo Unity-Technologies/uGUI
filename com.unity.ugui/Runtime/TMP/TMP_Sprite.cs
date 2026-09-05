@@ -9,6 +9,7 @@ namespace TMPro
 
     // Class which contains the Sprite Info for each sprite contained in the sprite asset.
     [Serializable]
+    [Obsolete("TMP_Sprite is an obsolete class and no longer maintained. Only kept for upgrading old assets.")]
     public class TMP_Sprite : TMP_TextElement_Legacy
     {
         //public int fileID;

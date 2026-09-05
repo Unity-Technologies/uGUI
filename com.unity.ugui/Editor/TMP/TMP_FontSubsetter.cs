@@ -32,6 +32,23 @@ namespace TMPro
             return true;
         }
 
+        // Same as ApplySubset but keeps the baked glyph table and atlas (valid since the subsetter retains glyph ids).
+        internal static bool ApplySubsetKeepingBakedData(TMP_FontAsset fontAsset, string ranges, out string error)
+        {
+            if (!FontSubsetterManager.TryGenerateSubsetFont(fontAsset, fontAsset.SourceFont_EditorRef, ranges,
+                fontAsset.faceInfo.faceIndex, FontSubsetterManager.HintingFlags(fontAsset.atlasRenderMode),
+                out Font subsetFont, out error))
+                return false;
+
+            fontAsset.m_FaceInfo.faceIndex = 0;
+            fontAsset.sourceFontFile = subsetFont;
+            fontAsset.UpdateSourceFontFile();
+            fontAsset.ReadFontAssetDefinition();
+            EditorUtility.SetDirty(fontAsset);
+            AssetDatabase.SaveAssetIfDirty(fontAsset);
+            return true;
+        }
+
         internal static void RemoveSubset(TMP_FontAsset fontAsset)
         {
             int faceIndex = fontAsset.faceInfo.faceIndex;

@@ -253,8 +253,10 @@ namespace UnityEngine.UI
         [NonSerialized] protected UnityAction m_OnDirtyMaterialCallback;
 
         /// <summary>Cached mesh used by the legacy mesh generation path.</summary>
+        [Obsolete("m_CachedMesh is obsolete now that legacy mesh generation is no longer supported.", true)]
         [NonSerialized] protected Mesh m_CachedMesh;
         /// <summary>Cached UV array used by the legacy mesh generation path.</summary>
+        [Obsolete("m_CachedUvs is obsolete now that legacy mesh generation is no longer supported.", true)]
         [NonSerialized] protected Vector2[] m_CachedUvs;
         // Tween controls for the Graphic
         [NonSerialized] TweenRunner<ColorTween> m_ColorTweenRunner;
@@ -272,7 +274,7 @@ namespace UnityEngine.UI
             }
         }
         /// <summary>Obsolete. The legacy mesh generation is no longer supported.</summary>
-  		  [Obsolete("useLegacyMeshGeneration is deprecated now that the legacy mesh generation is no longer supported.")]
+		[Obsolete("useLegacyMeshGeneration is deprecated now that the legacy mesh generation is no longer supported.", true)]
         protected bool useLegacyMeshGeneration { get; set; }
 
         // Called by Unity prior to deserialization, should not be called by users.
@@ -636,9 +638,6 @@ namespace UnityEngine.UI
 #endif
             GraphicRegistry.UnregisterGraphicForCanvas(canvas, this);
             CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
-            if (m_CachedMesh)
-                Destroy(m_CachedMesh);
-            m_CachedMesh = null;
 
             base.OnDestroy();
         }
@@ -741,16 +740,7 @@ namespace UnityEngine.UI
         /// </summary>
         protected virtual void UpdateGeometry()
         {
-#pragma warning disable 618
-            if (useLegacyMeshGeneration)
-#pragma warning restore 618
-            {
-                Debug.LogError("Legacy mesh generation is no longer supported.", this);
-            }
-            else
-            {
-                DoMeshGeneration();
-            }
+            DoMeshGeneration();
         }
 
         private void DoMeshGeneration()
@@ -793,15 +783,6 @@ namespace UnityEngine.UI
                 }
                 return s_Mesh;
             }
-        }
-
-        /// <summary>Obsolete legacy mesh population callback. Override <see cref="OnPopulateMesh(VertexHelper)"/> instead.</summary>
-        /// <param name="m">The mesh to populate.</param>
-        [Obsolete("Use OnPopulateMesh(VertexHelper vh) instead.", true)]
-        protected virtual void OnPopulateMesh(Mesh m)
-        {
-            OnPopulateMesh(s_VertexHelper);
-            s_VertexHelper.FillMesh(m);
         }
 
         /// <summary>

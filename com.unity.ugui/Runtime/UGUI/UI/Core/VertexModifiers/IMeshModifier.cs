@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace UnityEngine.UI
 {
     /// <summary>
@@ -9,11 +6,6 @@ namespace UnityEngine.UI
     /// </summary>
     public interface IMeshModifier
     {
-        /// <summary>Obsolete. Please use <see cref="ModifyMesh(VertexHelper)"/> instead.</summary>
-        /// <param name="mesh">The <see cref="Mesh"/> to modify.</param>
-        [Obsolete("Use IMeshModifier.ModifyMesh(VertexHelper verts) instead", true)]
-        void ModifyMesh(Mesh mesh);
-
         /// <summary>
         /// Callback used for modifying the mesh. Place any custom mesh processing in this function.
         /// </summary>

@@ -39,7 +39,7 @@ namespace UnityEditor.Events
         {
             if (m_Title == null)
             {
-                m_Title = EditorGUIUtility.TrTextContent("Layout Properties");
+                m_Title = L10n.TextContent("Layout Properties", null, null, null);
             }
             return m_Title;
         }

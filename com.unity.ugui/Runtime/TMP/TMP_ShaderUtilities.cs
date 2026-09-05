@@ -136,10 +136,6 @@ namespace TMPro
 
         private static readonly float m_clamp = 1.0f;
 
-        [Obsolete("You no longer need to check if isInitialized is true. This class is now automatically initialized.", true)]
-        public static bool isInitialized = false;
-
-
         /// <summary>
         /// Returns a reference to the mobile distance field shader.
         /// </summary>
@@ -178,14 +174,6 @@ namespace TMPro
             k_ShaderRef_MobileBitmap = default;
         }
 #endif
-
-        /// <summary>
-        /// Obsolete. Calling this method is no longer required.
-        /// </summary>
-        [Obsolete("Calling this method is no longer required.", true)]
-        public static void GetShaderPropertyIDs()
-        {
-        }
 
         // Scale Ratios to ensure property ranges are optimum in Material Editor
         public static void UpdateShaderRatios(Material mat)

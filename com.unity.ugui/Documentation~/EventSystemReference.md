@@ -7,5 +7,4 @@ This section provides details about the following parts of the event system:
 - [Physics Raycaster](script-PhysicsRaycaster.md)
 - [Physics2D Raycaster](script-Physics2DRaycaster.md)
 - [Standalone Input Module](script-StandaloneInputModule.md)
-- [Touch Input Module](script-TouchInputModule.md)
 - [Event Trigger](script-EventTrigger.md)

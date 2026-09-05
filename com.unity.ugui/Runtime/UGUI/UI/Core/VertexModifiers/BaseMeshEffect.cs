@@ -87,20 +87,6 @@ namespace UnityEngine.UI
 #endif
 
         /// <summary>
-        /// Function that is called when the Graphic is populating the mesh.
-        /// </summary>
-        /// <param name="mesh">The generated mesh of the Graphic element that needs modification.</param>
-		[Obsolete("Use IMeshModifier.ModifyMesh(VertexHelper verts) instead", true)]
-        public virtual void ModifyMesh(Mesh mesh)
-        {
-            using (var vh = new VertexHelper(mesh))
-            {
-                ModifyMesh(vh);
-                vh.FillMesh(mesh);
-            }
-        }
-
-        /// <summary>
         /// Called when the associated <see cref="Graphic"/> populates its mesh. Override to apply custom vertex modifications.
         /// </summary>
         /// <param name="vh">The <see cref="VertexHelper"/> containing the mesh data to modify.</param>

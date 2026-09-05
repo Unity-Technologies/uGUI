@@ -75,10 +75,6 @@ namespace UnityEngine.UI
         /// <returns>True if the mask is active and has a valid graphic.</returns>
         public virtual bool MaskEnabled() { return IsActive() && graphic != null; }
 
-        /// <summary>Obsolete. No longer called or used.</summary>
-        [Obsolete("Not used anymore.", true)]
-        public virtual void OnSiblingGraphicEnabledDisabled() {}
-
         /// <summary>Called when it becomes enabled. Notifies clippable children and triggers a material update.</summary>
         protected override void OnEnable()
         {

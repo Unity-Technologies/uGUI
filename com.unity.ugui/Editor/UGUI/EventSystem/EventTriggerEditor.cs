@@ -17,7 +17,7 @@ namespace UnityEditor.EventSystems
         protected virtual void OnEnable()
         {
             m_DelegatesProperty = serializedObject.FindProperty("m_Delegates");
-            m_AddButonContent = EditorGUIUtility.TrTextContent("Add New Event Type");
+            m_AddButonContent = L10n.TextContent("Add New Event Type", null, null, null);
             m_EventIDName = new GUIContent("");
             // Have to create a copy since otherwise the tooltip will be overwritten.
             m_IconToolbarMinus = new GUIContent(EditorGUIUtility.IconContent("Toolbar Minus"));

@@ -129,19 +129,6 @@ namespace UnityEngine.EventSystems
         public Vector2 pressPosition { get; set; }
 
         /// <summary>
-        /// World-space position where a ray cast into the screen hits something
-        /// </summary>
-
-        [Obsolete("Use either pointerCurrentRaycast.worldPosition or pointerPressRaycast.worldPosition", true)]
-        public Vector3 worldPosition { get; set; }
-
-        /// <summary>
-        /// World-space normal where a ray cast into the screen hits something
-        /// </summary>
-        [Obsolete("Use either pointerCurrentRaycast.worldNormal or pointerPressRaycast.worldNormal", true)]
-        public Vector3 worldNormal { get; set; }
-
-        /// <summary>
         /// The last time a click event was sent. Used for double click
         /// </summary>
         public float clickTime { get; set; }

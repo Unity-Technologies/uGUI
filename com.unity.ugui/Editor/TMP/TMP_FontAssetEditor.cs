@@ -423,6 +423,23 @@ namespace TMPro.EditorUtilities
         Vector2 m_MissingCodePointsScroll;
         long m_SubsetSizePreview;
 
+        void DrawStaticMigrationSection()
+        {
+            if (targets.Length != 1 || !TMP_Settings.useAdvancedText || m_AtlasPopulationMode_prop.intValue != (int)AtlasPopulationMode.Static)
+                return;
+
+            EditorGUILayout.HelpBox(UnityEditor.TextCore.Text.FontAssetStaticMigrator.StaticNotSupportedMessage, MessageType.Warning, true);
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("Open Font Asset Migration Window", GUILayout.Width(220)))
+                    UnityEditor.TextCore.Text.FontAssetMigrationWindow.ShowWindow(m_fontAsset);
+            }
+
+            EditorGUILayout.Space();
+        }
+
         void DrawFontSubsettingSection()
         {
             if (m_fontAsset == null || targets.Length > 1 || m_fontAsset.atlasPopulationMode != AtlasPopulationMode.Dynamic)
@@ -638,6 +655,8 @@ namespace TMPro.EditorUtilities
             Event currentEvent = Event.current;
 
             serializedObject.Update();
+
+            DrawStaticMigrationSection();
 
             Rect rect = EditorGUILayout.GetControlRect(false, 24);
             float labelWidth = EditorGUIUtility.labelWidth;

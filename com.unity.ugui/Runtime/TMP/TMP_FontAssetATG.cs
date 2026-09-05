@@ -8,6 +8,13 @@ namespace TMPro
     // Native font asset bridge used when text generation is served by the Advanced Text Generator (ATG).
     public partial class TMP_FontAsset
     {
+#if UNITY_EDITOR
+        // The console link opens the migration window scoped to TMP font assets.
+        const string k_ConvertStaticSuffix = " Convert it in the <a openfontassetmigration=\"TMPro.TMP_FontAssetMigrationProvider\">Font Asset Migration window</a>.";
+#else
+        const string k_ConvertStaticSuffix = " Convert it in the Font Asset Migration window. See https://docs.unity3d.com/Packages/com.unity.ugui@latest/index.html?subfolder=/manual/TextMeshPro/FontAssetsMigration.html for migration guidance.";
+#endif
+
         IntPtr m_NativeFontAsset = IntPtr.Zero;
 
         internal IntPtr nativeFontAsset
@@ -26,7 +33,7 @@ namespace TMPro
 
             if (atlasPopulationMode == AtlasPopulationMode.Static && characterTable.Count > 0)
             {
-                Debug.LogWarning($"The Advanced Text Generator cannot use static font asset {name}.", this);
+                Debug.LogWarning($"The Advanced Text Generator cannot use static font asset {name}.{k_ConvertStaticSuffix}", this);
                 return;
             }
 
@@ -91,7 +98,7 @@ namespace TMPro
 
                 if (fallback.atlasPopulationMode == AtlasPopulationMode.Static && fallback.characterTable.Count > 0)
                 {
-                    Debug.LogWarning($"The Advanced Text Generator cannot use static font asset {fallback.name} as fallback.", fallback);
+                    Debug.LogWarning($"The Advanced Text Generator cannot use static font asset {fallback.name} as fallback.{k_ConvertStaticSuffix}", fallback);
                     continue;
                 }
 

@@ -412,8 +412,10 @@ namespace UnityEngine.UI
         }
 
         /// <summary>Coroutine that repeatedly scrolls toward the pointer position while the button is held down.</summary>
+        /// <remarks>Obsolete. Please use <see cref="ClickRepeat(Vector2, Camera)"/> instead.</remarks>
         /// <param name="eventData">The pointer event data for the held press.</param>
         /// <returns>An enumerator for the coroutine.</returns>
+        [Obsolete("Use ClickRepeat(Vector2 screenPosition, Camera camera) instead")]
         protected IEnumerator ClickRepeat(PointerEventData eventData)
         {
             return ClickRepeat(eventData.pointerPressRaycast.screenPosition, eventData.enterEventCamera);

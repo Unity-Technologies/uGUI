@@ -23,11 +23,11 @@ namespace UnityEditor.UI
 
         protected virtual void OnEnable()
         {
-            m_PaddingContent = EditorGUIUtility.TrTextContent("Padding");
-            m_LeftContent = EditorGUIUtility.TrTextContent("Left");
-            m_RightContent = EditorGUIUtility.TrTextContent("Right");
-            m_TopContent = EditorGUIUtility.TrTextContent("Top");
-            m_BottomContent = EditorGUIUtility.TrTextContent("Bottom");
+            m_PaddingContent = L10n.TextContent("Padding", null, null, null);
+            m_LeftContent = L10n.TextContent("Left", null, null, null);
+            m_RightContent = L10n.TextContent("Right", null, null, null);
+            m_TopContent = L10n.TextContent("Top", null, null, null);
+            m_BottomContent = L10n.TextContent("Bottom", null, null, null);
             m_Padding = serializedObject.FindProperty("m_Padding");
             m_Softness = serializedObject.FindProperty("m_Softness");
         }

@@ -1213,7 +1213,7 @@ namespace TMPro.EditorUtilities
             using (new EditorGUI.DisabledScope(TMP_Settings.useAdvancedText))
                 EditorGUILayout.PropertyField(m_EnableAdvancedTextProp, k_EnableAdvancedTextLabel);
             if (TMP_Settings.useAdvancedText)
-                EditorGUILayout.HelpBox("Overridden by the \"Use Advanced Text\" option in the TMP Settings.", MessageType.None);
+                EditorGUILayout.HelpBox("Overridden by the \"Use Advanced Text\" option in Project Settings > TextMesh Pro.", MessageType.Info);
             if (EditorGUI.EndChangeCheck())
                 m_HavePropertiesChanged = true;
         }

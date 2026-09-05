@@ -624,13 +624,6 @@ namespace UnityEngine.UI
         private bool m_Tracked = false;
 
         /// <summary>
-        /// Obsolete. You should use UI.Image.alphaHitTestMinimumThreshold instead.
-        /// The alpha threshold specifies the minimum alpha a pixel must have for the event to considered a "hit" on the Image.
-        /// </summary>
-        [Obsolete("eventAlphaThreshold has been deprecated. Use eventMinimumAlphaThreshold instead (UnityUpgradable) -> alphaHitTestMinimumThreshold", true)]
-        public float eventAlphaThreshold { get { return 1 - alphaHitTestMinimumThreshold; } set { alphaHitTestMinimumThreshold = 1 - value; } }
-
-        /// <summary>
         /// The alpha threshold specifies the minimum alpha a pixel must have for the event to considered a "hit" on the Image.
         /// </summary>
         /// <remarks>

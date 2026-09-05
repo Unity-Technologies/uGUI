@@ -40,12 +40,12 @@ namespace UnityEditor.UI
 
         protected virtual void OnEnable()
         {
-            m_CorrectButtonContent = EditorGUIUtility.TrTextContent("Set Native Size", "Sets the size to match the content.");
-            m_PaddingContent = EditorGUIUtility.TrTextContent("Raycast Padding");
-            m_LeftContent = EditorGUIUtility.TrTextContent("Left");
-            m_RightContent = EditorGUIUtility.TrTextContent("Right");
-            m_TopContent = EditorGUIUtility.TrTextContent("Top");
-            m_BottomContent = EditorGUIUtility.TrTextContent("Bottom");
+            m_CorrectButtonContent = L10n.TextContent("Set Native Size", "Sets the size to match the content.", null, null);
+            m_PaddingContent = L10n.TextContent("Raycast Padding", null, null, null);
+            m_LeftContent = L10n.TextContent("Left", null, null, null);
+            m_RightContent = L10n.TextContent("Right", null, null, null);
+            m_TopContent = L10n.TextContent("Top", null, null, null);
+            m_BottomContent = L10n.TextContent("Bottom", null, null, null);
 
             m_Script = serializedObject.FindProperty("m_Script");
             m_Color = serializedObject.FindProperty("m_Color");

@@ -1,7 +1,41 @@
 # Changelog
 
 ## [2.7.0] - 2026-07-27
-The changelog for version 2.7.0 will remain under active development throughout the alpha phase of 6000.7.
+
+### Deprecated
+- Marked the PositionAsUV1, TMP_TextElement_Legacy, FaceInfo_Legacy, TMP_Glyph, TMP_Sprite, KerningPair and KerningTable classes as deprecated (with a warning).
+- Marked the GlyphValueRecord_Legacy struct as deprecated (with a warning).
+- Marked the EventHandle enum as deprecated (with a warning).
+- Marked TMP_SpriteAsset.spriteInfoList as deprecated (with a warning).
+- Marked Scrollbar.ClickRepeat(PointerEventData eventData) deprecated (with a warning).
+- Marked the TMP_FontUtilities class as obsolete (with an error).
+- Marked the KerningPairKey struct as obsolete (with an error).
+- Marked the EventSystem.SetUITookitEventSystemOverride method as obsolete (with an error).
+- Marked the Graphic.m_CachedMesh, Graphic.m_CachedUvs and Graphic.useLegacyMeshGeneration members as obsolete (with an error).
+
+### Removed
+- BaseMeshEffect.ModifyMesh(Mesh mesh).
+- BaseRaycaster.priority property.
+- EventSystem.lastSelectedGameObject property.
+- Graphic.OnPopulateMesh(Mesh m).
+- Image.eventAlphaThreshold property.
+- InputField.onValueChange property.
+- InputField.ScreenToLocal(Vector2 screen).
+- IGraphicEnabledDisabled interface.
+- IMeshModifier.ModifyMesh(Mesh mesh).
+- Mask.OnSiblingGraphicEnabledDisabled().
+- PointerEventData.worldPosition and PointerEventData.worldNormal properties.
+- RaycastResult.document property.
+- Selectable.allSelectables property.
+- ShaderUtilities.isInitialized and ShaderUtilities.GetShaderPropertyIDs().
+- StandaloneInputModule.InputMode enum.
+- StandaloneInputModule.inputMode, StandaloneInputModule.allowActivationOnMobileDevice and StandaloneInputModule.forceModuleActive properties.
+- StandaloneInputModule.ForceAutoSelect().
+- TextMeshPro.textContainer property.
+- TMP_FontAsset.fontInfo property.
+- TMP_Text.enableWordWrapping and TMP_Text.enableKerning properties.
+- TMP_Text.SetText(string sourceText, bool syncTextInputBox = true).
+- TouchInputModule class.
 
 ## [2.6.0] - 2026-03-30
 
