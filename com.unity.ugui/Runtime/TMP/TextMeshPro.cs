@@ -2621,6 +2621,9 @@ namespace TMPro
                     m_currentMaterial = m_textInfo.characterInfo[m_characterCount].material;
                     m_currentMaterialIndex = m_textInfo.characterInfo[m_characterCount].materialReferenceIndex;
 
+                    // Re-read fontFace before measuring adjustedScale, as a different fallback font may be used.
+                    fontFace = m_currentFontAsset.m_FaceInfo;
+
                     // Special handling if replaced character was a line feed where in this case we have to use the scale of the previous character.
                     float adjustedScale;
                     if (isInjectedCharacter && m_TextProcessingArray[i].unicode == 0x0A && m_characterCount != m_firstCharacterOfLine)

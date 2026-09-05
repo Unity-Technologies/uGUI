@@ -541,6 +541,10 @@ namespace UnityEngine.UI
             else
 #endif
             DoStateTransition(currentSelectionState, false);
+
+#if PACKAGE_POLYSPATIAL
+            MarkDirty();
+#endif
         }
 
         // Remove from the list.

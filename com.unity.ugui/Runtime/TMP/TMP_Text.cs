@@ -6140,6 +6140,10 @@ namespace TMPro
 
             if (character != null)
                 m_Ellipsis = new SpecialCharacter(character, 0);
+            else
+                // No reachable ellipsis glyph. Clear any previously cached ellipsis so the
+                // overflow setup falls back to Truncate instead of using a stale glyph.
+                m_Ellipsis = default;
         }
 
 
