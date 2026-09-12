@@ -478,5 +478,12 @@ namespace UnityEngine.UI
         {
             return instance.m_PerformingGraphicUpdate;
         }
+
+        // Returns whether the given element currently has a layout rebuild queued for the next canvas
+        // update. Only enabled entries are considered, so a pooled/disabled entry does not read as pending.
+        internal bool IsElementPendingLayoutRebuild(ICanvasElement element)
+        {
+            return m_LayoutRebuildQueue.ContainsEnabled(element);
+        }
     }
 }

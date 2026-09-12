@@ -1,6 +1,12 @@
 # Changelog
 
+## [7.0.0] - 2026-09-09
+uGUI 7.x is shipped alongside Unity 7.x as a [core package](https://docs.unity3d.com/Manual/pack-core.html).
+
+The changelog for version 7.0.0 will remain under active development throughout the pre-release phases of Unity 7000.0.
+
 ## [2.7.0] - 2026-07-27
+uGUI 2.7 is shipped alongside Unity 6000.7 as a [core package](https://docs.unity3d.com/Manual/pack-core.html).
 
 ### Deprecated
 - Marked the PositionAsUV1, TMP_TextElement_Legacy, FaceInfo_Legacy, TMP_Glyph, TMP_Sprite, KerningPair and KerningTable classes as deprecated (with a warning).
@@ -38,6 +44,7 @@
 - TouchInputModule class.
 
 ## [2.6.0] - 2026-03-30
+uGUI 2.6 is shipped alongside Unity 6000.6 as a [core package](https://docs.unity3d.com/Manual/pack-core.html).
 
 ### Added
 - New Maximum Width and Height properties added to ILayoutElement.
@@ -51,6 +58,7 @@
 - New SafeArea component that insets a RectTransform to respect the device's safe area. Supports per-edge control over which sides are inset, a configurable reference orientation so that edge assignments remain stable across device rotations, and a balance mode that symmetrically mirrors the inset on the opposite edge to keep the UI centered.
 
 ## [2.5.0] - 2026-02-27
+uGUI 2.5 is shipped alongside Unity 6000.5 as a [core package](https://docs.unity3d.com/Manual/pack-core.html).
 
 ### Added
 - New RaycastReceiver component that serves as an intractable area which is not rendered.

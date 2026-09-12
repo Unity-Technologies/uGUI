@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine.EventSystems;
 using UnityEngine.Pool;
 
@@ -141,6 +142,149 @@ namespace UnityEngine.UI
         public abstract void SetLayoutHorizontal();
         /// <summary>Called by the layout system. Override in subclasses to perform the vertical layout.</summary>
         public abstract void SetLayoutVertical();
+
+        /// <summary>
+        /// Checks whether this layout group has a layout rebuild queued.
+        /// </summary>
+        /// <remarks>
+        /// The group reports on its layout root, so a nested group returns true whenever an ancestor layout is
+        /// queued. A disabled component or an inactive GameObject always returns false. This covers layout only,
+        /// not pending graphic rebuilds. A false result doesn't mean the geometry is final, because a script can
+        /// mark the group dirty again later in the same frame.
+        /// </remarks>
+        /// <returns>True if a layout rebuild is queued, otherwise false.</returns>
+        /// <example>
+        /// <code>
+        /// <![CDATA[
+        /// using UnityEngine;
+        /// using UnityEngine.UI; // Required when using UI elements.
+        ///
+        /// public class PanelHeightReporterExample : MonoBehaviour
+        /// {
+        ///     public VerticalLayoutGroup layoutGroup;
+        ///
+        ///     // Logs the panel height, but only when the layout is up to date.
+        ///     public void LogPanelHeight()
+        ///     {
+        ///         // A queued rebuild means the current height is stale.
+        ///         if (layoutGroup.IsLayoutPending())
+        ///             return;
+        ///
+        ///         RectTransform panel = layoutGroup.GetComponent<RectTransform>();
+        ///         Debug.Log("Panel height is " + panel.rect.height + ".");
+        ///     }
+        /// }
+        /// ]]>
+        /// </code>
+        /// </example>
+        public bool IsLayoutPending()
+        {
+            if (!IsActive())
+                return false;
+            return LayoutRebuilder.IsLayoutRebuildPending(rectTransform);
+        }
+
+        /// <summary>
+        /// Waits until this layout group has no layout rebuild queued.
+        /// </summary>
+        /// <remarks>
+        /// The awaitable completes immediately when nothing is queued, and otherwise waits one frame at a time,
+        /// so it can span several frames if a rebuild marks the layout dirty again. Disabling the component or
+        /// deactivating its GameObject completes the wait, because an inactive group queues no rebuild.
+        /// Destroying the component throws <see cref="System.OperationCanceledException"/>, as does canceling
+        /// <paramref name="cancellationToken"/>.
+        /// </remarks>
+        /// <param name="cancellationToken">The token that cancels the wait. Unity combines it with this component's <see cref="MonoBehaviour.destroyCancellationToken"/>.</param>
+        /// <returns>An awaitable that completes when no layout rebuild is queued.</returns>
+        /// <example>
+        /// <code>
+        /// <![CDATA[
+        /// using UnityEngine;
+        /// using UnityEngine.UI; // Required when using UI elements.
+        ///
+        /// public class RowSpawnerExample : MonoBehaviour
+        /// {
+        ///     public VerticalLayoutGroup layoutGroup;
+        ///     public RectTransform rowPrefab;
+        ///
+        ///     // Adds a row and reports the panel height once the layout accounts for it.
+        ///     public async Awaitable AddRowAsync()
+        ///     {
+        ///         Instantiate(rowPrefab, layoutGroup.transform);
+        ///
+        ///         // The new row does not affect the panel size until the queued rebuild runs.
+        ///         await layoutGroup.WaitForLayoutAsync();
+        ///
+        ///         RectTransform panel = layoutGroup.GetComponent<RectTransform>();
+        ///         Debug.Log("Panel height is now " + panel.rect.height + ".");
+        ///     }
+        /// }
+        /// ]]>
+        /// </code>
+        /// </example>
+        public async Awaitable WaitForLayoutAsync(CancellationToken cancellationToken = default)
+        {
+            using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken, cancellationToken);
+            linkedSource.Token.ThrowIfCancellationRequested();
+
+            while (IsLayoutPending())
+                await Awaitable.NextFrameAsync(linkedSource.Token);
+        }
+
+        /// <summary>
+        /// Marks this layout group for rebuild and waits until the rebuild runs.
+        /// </summary>
+        /// <remarks>
+        /// Unity queues the rebuild for the next canvas update, and the awaitable completes once it runs.
+        /// Calling this from a layout callback such as <see cref="SetLayoutHorizontal"/> or
+        /// <see cref="SetLayoutVertical"/> defers the mark until the current pass finishes, because the layout
+        /// system rejects a mark for an element it is already rebuilding. The wait spans an extra frame in
+        /// that case.
+        /// Cancellation matches <see cref="WaitForLayoutAsync"/>, except that an already canceled token throws
+        /// before marking the group, so the layout stays untouched.
+        /// </remarks>
+        /// <param name="cancellationToken">The token that cancels the wait for the rebuild.</param>
+        /// <returns>An awaitable that completes when the rebuild has run.</returns>
+        /// <example>
+        /// <code>
+        /// <![CDATA[
+        /// using UnityEngine;
+        /// using UnityEngine.UI; // Required when using UI elements.
+        ///
+        /// public class RowResizerExample : MonoBehaviour
+        /// {
+        ///     public VerticalLayoutGroup layoutGroup;
+        ///     public LayoutElement row;
+        ///
+        ///     // Applies a new row height and reports the panel height after the rebuild.
+        ///     public async Awaitable SetRowHeightAsync(float height)
+        ///     {
+        ///         row.preferredHeight = height;
+        ///
+        ///         // Queues a rebuild and waits for it to run, so the height read below is current.
+        ///         await layoutGroup.MarkAndWaitForLayoutRebuildAsync();
+        ///
+        ///         RectTransform panel = layoutGroup.GetComponent<RectTransform>();
+        ///         Debug.Log("Panel height is now " + panel.rect.height + ".");
+        ///     }
+        /// }
+        /// ]]>
+        /// </code>
+        /// </example>
+        public async Awaitable MarkAndWaitForLayoutRebuildAsync(CancellationToken cancellationToken = default)
+        {
+            // Checked before marking, so a canceled token never leaves the layout dirtied.
+            cancellationToken.ThrowIfCancellationRequested();
+
+            using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken, cancellationToken);
+
+            // Check if Rebuilding is underway. If it is, wait a frame before marking for rebuild.
+            if (CanvasUpdateRegistry.IsRebuildingLayout())
+                await Awaitable.NextFrameAsync(linkedSource.Token);
+
+            LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
+            await WaitForLayoutAsync(cancellationToken);
+        }
 
         // Implementation
 
