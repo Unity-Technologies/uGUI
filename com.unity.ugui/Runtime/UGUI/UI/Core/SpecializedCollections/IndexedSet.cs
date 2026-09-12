@@ -116,6 +116,12 @@ namespace UnityEngine.UI.Collections
             return m_Dictionary.ContainsKey(item);
         }
 
+        //Returns true only if the item is present AND currently enabled (not a disabled/pooled entry).
+        public bool ContainsEnabled(T item)
+        {
+            return m_Dictionary.TryGetValue(item, out int index) && index < m_EnabledObjectCount;
+        }
+
         public void CopyTo(T[] array, int arrayIndex)
         {
             m_List.CopyTo(array, arrayIndex);

@@ -261,6 +261,90 @@ namespace UnityEngine.UI
             return false;
         }
 
+        /// <summary>
+        /// Checks whether a layout rebuild is queued for an element.
+        /// </summary>
+        /// <remarks>
+        /// Unity resolves the element to the layout root that owns its rebuild, so a child of a layout group
+        /// reports true whenever an ancestor layout is queued. An element that takes part in no layout always
+        /// reports false. A false result doesn't mean the geometry is final, because a script can mark the
+        /// element dirty again later in the same frame.
+        /// </remarks>
+        /// <param name="transform">The element to query.</param>
+        /// <returns>True if a layout rebuild is queued for the element's layout root, otherwise false.</returns>
+        /// <example>
+        /// <code>
+        /// <![CDATA[
+        /// using UnityEngine;
+        /// using UnityEngine.UI; // Required when using UI elements.
+        ///
+        /// public class TooltipPositionerExample : MonoBehaviour
+        /// {
+        ///     public RectTransform tooltip;
+        ///
+        ///     // Places the tooltip above its target, once the tooltip's own layout has settled.
+        ///     public void PositionAbove(RectTransform target)
+        ///     {
+        ///         // A queued rebuild means the tooltip size is not final, so wait for a later frame.
+        ///         if (LayoutRebuilder.IsLayoutRebuildPending(tooltip))
+        ///             return;
+        ///
+        ///         float offset = (tooltip.rect.height + target.rect.height) * 0.5f;
+        ///         tooltip.position = target.position + new Vector3(0f, offset, 0f);
+        ///     }
+        /// }
+        /// ]]>
+        /// </code>
+        /// </example>
+        public static bool IsLayoutRebuildPending(Transform transform)
+        {
+            var layoutRoot = GetLayoutRoot(transform) as RectTransform;
+            if (layoutRoot == null)
+                return false;
+
+            using var _ = s_Rebuilders.Get(out var rebuilder);
+            rebuilder.Initialize(layoutRoot);
+            return CanvasUpdateRegistry.instance.IsElementPendingLayoutRebuild(rebuilder);
+        }
+
+        // Read-only counterpart to the up-walk in MarkLayoutForRebuild. Returns the layout root that owns
+        // rebuilds for 'rect', or null if 'rect' takes part in no layout.
+        private static Transform GetLayoutRoot(Transform transform)
+        {
+            // We will skip non-RectTransform Transforms. Prevents invalid parents from being used.
+            var rect = transform as RectTransform;
+            if (rect == null || rect.gameObject == null)
+                return null;
+
+            using var _ = ListPool<Component>.Get(out var comps);
+            bool validLayoutGroup = true;
+            RectTransform layoutRoot = rect;
+            var parent = layoutRoot.parent as RectTransform;
+            while (validLayoutGroup && !(parent == null || parent.gameObject == null))
+            {
+                validLayoutGroup = false;
+                parent.GetComponents(typeof(ILayoutGroup), comps);
+
+                for (int i = 0; i < comps.Count; ++i)
+                {
+                    var curr = comps[i];
+                    if (curr != null && curr is Behaviour behaviour && behaviour.isActiveAndEnabled)
+                    {
+                        validLayoutGroup = true;
+                        layoutRoot = parent;
+                        break;
+                    }
+                }
+
+                parent = parent.parent as RectTransform;
+            }
+
+            if (layoutRoot == rect && !ValidController(layoutRoot, comps))
+                return null;
+
+            return layoutRoot;
+        }
+
         private static void MarkLayoutRootForRebuild(RectTransform controller)
         {
             if (controller == null)
