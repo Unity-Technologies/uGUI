@@ -1,6 +1,7 @@
 # Changelog
 
 ## [2.6.0] - 2026-03-30
+uGUI 2.6 is shipped alongside Unity 6000.6 as a [core package](https://docs.unity3d.com/Manual/pack-core.html).
 
 ### Added
 - New Maximum Width and Height properties added to ILayoutElement.
@@ -14,6 +15,7 @@
 - New SafeArea component that insets a RectTransform to respect the device's safe area. Supports per-edge control over which sides are inset, a configurable reference orientation so that edge assignments remain stable across device rotations, and a balance mode that symmetrically mirrors the inset on the opposite edge to keep the UI centered.
 
 ## [2.5.0] - 2026-02-27
+uGUI 2.5 is shipped alongside Unity 6000.5 as a [core package](https://docs.unity3d.com/Manual/pack-core.html).
 
 ### Added
 - New RaycastReceiver component that serves as an intractable area which is not rendered.
