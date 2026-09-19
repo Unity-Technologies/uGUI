@@ -24,11 +24,13 @@ namespace UnityEngine.UIElements
         /// The camera used by this Raycaster to convert screen coordinates to Rays.
         /// If empty, Camera.main is going to be used.
         /// </summary>
-        public new Camera camera
+#pragma warning disable 108
+        public Camera camera
         {
             get => m_EventCamera;
             set => m_EventCamera = value;
         }
+#pragma warning restore 108
 
         private static PhysicsDocumentPicker worldPicker = new();
 
