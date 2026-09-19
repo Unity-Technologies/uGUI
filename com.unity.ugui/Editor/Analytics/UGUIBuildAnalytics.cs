@@ -1,6 +1,7 @@
 using System;
 using TMPro;
 using UnityEditor.Build;
+using UnityEditor.Build.Content;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -9,7 +10,7 @@ using UnityEngine.UI;
 
 namespace UnityEditor.UI.Analytics
 {
-    internal class UGUIBuildAnalytics : IPreprocessBuildWithReport, IProcessSceneWithReport, IPostprocessBuildWithReport
+    internal class UGUIBuildAnalytics : AssetPostprocessor, IPreprocessBuildWithReport, IPostprocessBuildWithReport
     {
         static UGUIBuildEvent buildEvent;
 
@@ -27,7 +28,7 @@ namespace UnityEditor.UI.Analytics
             UGUIAnalytics.Send(buildEvent);
         }
 
-        public void OnProcessScene(Scene scene, BuildReport report)
+        public void OnProcessScene(Scene scene, SceneImportContext sceneContext)
         {
             //Not currently used in AssetBundle builds
             if (buildEvent == null) { return;  }

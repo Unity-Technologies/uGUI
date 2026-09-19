@@ -1671,6 +1671,8 @@ namespace TMPro
                 #endregion
 
                 m_textInfo.characterInfo[m_totalCharacterCount].alternativeGlyph = null;
+                int clusterStringIndex  = textProcessingArray[i].stringIndex;
+                int clusterStringLength = textProcessingArray[i].length;
 
                 if (character.elementType == TextElementType.Character)
                 {
@@ -1680,7 +1682,6 @@ namespace TMPro
                         m_currentFontAsset = character.textAsset as TMP_FontAsset;
                         //m_currentMaterialIndex = MaterialReference.AddMaterialReference(m_currentFontAsset.material, m_currentFontAsset, ref m_materialReferences, m_materialReferenceIndexLookup);
                     }
-
                     #region VARIATION SELECTOR
                     if (nextCharacter >= 0xFE00 && nextCharacter <= 0xFE0F || nextCharacter >= 0xE0100 && nextCharacter <= 0xE01EF)
                     {
@@ -1697,6 +1698,8 @@ namespace TMPro
 
                         textProcessingArray[i + 1].unicode = 0x1A;
                         i += 1;
+                        clusterStringLength = Mathf.Max(clusterStringLength,
+                            textProcessingArray[i].stringIndex + textProcessingArray[i].length - clusterStringIndex);
                     }
                     #endregion
 
@@ -1757,11 +1760,12 @@ namespace TMPro
                                 if (m_currentFontAsset.TryAddGlyphInternal(ligatureGlyphID, out Glyph glyph))
                                 {
                                     m_textInfo.characterInfo[m_totalCharacterCount].alternativeGlyph = glyph;
-                                    textProcessingArray[i].length = spanLen;
 
                                     // Collapse the entire consumed span into the ligature.
                                     for (int c = 1; c < spanLen; c++)
                                     {
+                                        clusterStringLength = Mathf.Max(clusterStringLength,
+                                            textProcessingArray[i + c].stringIndex + textProcessingArray[i + c].length - clusterStringIndex);
                                         textProcessingArray[i + c].unicode = 0x1A; // mark as consumed
                                     }
 
@@ -1780,8 +1784,9 @@ namespace TMPro
                 m_textInfo.characterInfo[m_totalCharacterCount].textElement = character;
                 m_textInfo.characterInfo[m_totalCharacterCount].isUsingAlternateTypeface = isUsingAlternativeTypeface;
                 m_textInfo.characterInfo[m_totalCharacterCount].character = (char)unicode;
-                m_textInfo.characterInfo[m_totalCharacterCount].index = textProcessingArray[i].stringIndex;
-                m_textInfo.characterInfo[m_totalCharacterCount].stringLength = textProcessingArray[i].length;
+                m_textInfo.characterInfo[m_totalCharacterCount].index = clusterStringIndex;
+                m_textInfo.characterInfo[m_totalCharacterCount].stringLength = clusterStringLength;
+
                 m_textInfo.characterInfo[m_totalCharacterCount].fontAsset = m_currentFontAsset;
 
                 // Special handling if the character is a sprite.
