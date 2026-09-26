@@ -339,6 +339,7 @@ namespace TMPro
         private bool m_IsTextComponentUpdateRequired = false;
 
         private bool m_HasTextBeenRemoved = false;
+
         private float m_PointerDownClickStartTime;
         private float m_KeyDownStartTime;
         private float m_DoubleClickDelay = 0.5f;
@@ -965,6 +966,10 @@ namespace TMPro
                 pos = 0;
             else if (pos > text.Length)
                 pos = text.Length;
+
+            if (pos > 0 && pos < text.Length &&
+                char.IsHighSurrogate(text[pos - 1]) && char.IsLowSurrogate(text[pos]))
+                pos--;
         }
 
         protected void ClampCaretPos(ref int pos)
