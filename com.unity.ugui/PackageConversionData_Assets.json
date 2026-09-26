@@ -13,82 +13,82 @@
 		{
             "referencedResource": "Anton SDF.asset",
             "target": "guid: f76ef802b8b940c46a31f9027f2b0158",
-            "replacement": "guid: 8a89fa14b10d46a99122fd4f73fca9a2"
+            "replacement": "guid: a30eb7d7297c4f53ae3971c23a57648a"
         },
         {
             "referencedResource": "Bangers SDF.asset",
             "target": "guid: 808aa8f1ab804104aa7d0c337a6c1481",
-            "replacement": "guid: 125cb55b44b24c4393181402bc6200e6"
+            "replacement": "guid: 30afef9ccb1742ae8a959853cb4b3522"
         },
         {
             "referencedResource": "Electronic Highway Sign SDF.asset",
             "target": "guid: 163292f6f226d954593d45b079f8aae0",
-            "replacement": "guid: dc36b3fdc14f47ebb36fd484a67e268a"
+            "replacement": "guid: 08cd128db64c4445b3422f1b7afdf77f"
         },
         {
             "referencedResource": "Oswald Bold SDF.asset",
             "target": "guid: 09641b029dfa78843902b548a9de7553",
-            "replacement": "guid: 0161d805a3764c089bef00bfe00793f5"
+            "replacement": "guid: 90347108ce5f4fcab194986cf2cb96e2"
         },
         {
             "referencedResource": "Roboto-Bold SDF.asset",
             "target": "guid: d62a573c923f5cb47b8ff65261033b90",
-            "replacement": "guid: 5302535af1044152a457ed104f1f4b91"
+            "replacement": "guid: 01e62767a5fa417d9a212a53e293fed7"
         },
 		{
             "referencedResource": "LiberationSans SDF.asset",
             "target": "guid: 715b80e429c437e40867928a4e1fc975",
-            "replacement": "guid: 8f586378b4e144a9851e7b34d9b748ee"
+            "replacement": "guid: 1e3843b942b74aabb3c0a44e7a6f5190"
         },
         {
             "referencedResource": "TMP_Bitmap.shader",
             "target": "guid: edfcf888cd11d9245b91d2883049a57e",
-            "replacement": "guid: 128e987d567d4e2c824d754223b3f3b0"
+            "replacement": "guid: 95ccbecb7cf14cc2bbd06888665ae1cc"
         },
         {
             "referencedResource": "TMP_Bitmap-Mobile.shader",
             "target": "guid: d1cf17907700cb647aa3ea423ba38f2e",
-            "replacement": "guid: 1e3b057af24249748ff873be7fafee47"
+            "replacement": "guid: 8e65cc65e85c4c1f80405a3bcc6b004b"
         },
         {
             "referencedResource": "TMP_SDF.shader",
             "target": "guid: dca26082f9cb439469295791d9f76fe5",
-            "replacement": "guid: 68e6db2ebdc24f95958faec2be5558d6"
+            "replacement": "guid: abcf10cc92e843dd8530c741953ac8fd"
         },
         {
             "referencedResource": "TMP_SDF Overlay.shader",
             "target": "guid: 4a7755d6b5b67874f89c85f56f95fe97",
-            "replacement": "guid: dd89cf5b9246416f84610a006f916af7"
+            "replacement": "guid: 90037dd8d748477399c1be07e85eb288"
         },
         {
             "referencedResource": "TMP_SDF-Mobile.shader",
             "target": "guid: cafd18099dfc0114896e0a8b277b81b6",
-            "replacement": "guid: fe393ace9b354375a9cb14cdbbc28be4"
+            "replacement": "guid: f99637934d35413090e376899561717a"
         },
         {
             "referencedResource": "TMP_SDF-Mobile Masking.shader",
             "target": "guid: afc255f7c2be52e41973a3d10a2e632d",
-            "replacement": "guid: bc1ede39bf3643ee8e493720e4259791"
+            "replacement": "guid: 7d48a8a963564c8babfa426684695bb8"
         },
         {
             "referencedResource": "TMP_SDF-Mobile Overlay.shader",
             "target": "guid: 9ecb3fe313cb5f7478141eba4a2d54ed",
-            "replacement": "guid: a02a7d8c237544f1962732b55a9aebf1"
+            "replacement": "guid: 2dbab6ddeacf4399a9d621920215cec0"
         },
         {
             "referencedResource": "TMP_SDF-Surface.shader",
             "target": "guid: 8e6b9842dbb1a5a4887378afab854e63",
-            "replacement": "guid: f7ada0af4f174f0694ca6a487b8f543d"
+            "replacement": "guid: e52e3e4586c740459b3c308050ec4b37"
         },
         {
             "referencedResource": "TMP_SDF-Surface-Mobile.shader",
             "target": "guid: 3c2ea7753c1425145a74d106ec1cd852",
-            "replacement": "guid: 85187c2149c549c5b33f0cdb02836b17"
+            "replacement": "guid: 69b418e16fcc46d1adf1e7f05a1d8c83"
         },
         {
             "referencedResource": "TMP_Sprite.shader",
             "target": "guid: 3a1c68c8292caf046bd21158886c5e40",
-            "replacement": "guid: cf81c85f95fe47e1a27f6ae460cf182c"
+            "replacement": "guid: c13dbb07723c428a869261a1220bd4a2"
         },
         {
             "referencedResource": "TMP_ColorGradient.cs",
@@ -113,17 +113,17 @@
 		{
             "referencedResource": "TMP Settings.asset",
             "target": "guid: 69ed5bac41eebaa4c97e9d2a4168c54f",
-            "replacement": "guid: 3f5b5dff67a942289a9defa416b206f3"
+            "replacement": "guid: 0104df30113748678d4d2f9079d0d107"
         },
 		{
             "referencedResource": "LineBreaking Following Characters.txt",
             "target": "guid: 312ba5b9e90627940866e19549a788cf",
-            "replacement": "guid: fade42e8bc714b018fac513c043d323b"
+            "replacement": "guid: f9c3ed6360364e31ad36b07d8d103935"
         },
         {
             "referencedResource": "LineBreaking Leading Characters.txt",
             "target": "guid: 8d713940fcbede142ae4a33ea0062b33",
-            "replacement": "guid: d82c1b31c7e74239bff1220585707d2b"
+            "replacement": "guid: 1ce440b697c143ed893c2799594c0117"
         },
         {
             "referencedResource": "TMP_StyleSheet.cs",
@@ -138,7 +138,7 @@
 		{
             "referencedResource": "TMP Default Style Sheet.asset",
             "target": "guid: 54d1085f9a2fdea4587fcfc7dddcd4bc",
-            "replacement": "guid: f952c082cb03451daed3ee968ac6c63e"
+            "replacement": "guid: 3d542e6ba22240c89850a127d1deb9e3"
         },
 		{
             "referencedResource": "TMP_SpriteAsset.cs",
@@ -153,12 +153,12 @@
 		{
             "referencedResource": "Default Sprite Asset.asset",
             "target": "guid: 273ca6c80b4b5d746b5e548f532bffd8",
-            "replacement": "guid: fbef3c704dce48f08a44612d6c856c8d"
+            "replacement": "guid: 43da6d30dfea4a0aa0eb692dbeddbbcc"
         },
         {
             "referencedResource": "Default Sprite Asset.png",
             "target": "guid: 5b32c2d36abe44540bed74c1f787033b",
-            "replacement": "guid: a0fc465d6cf04254a2938578735e2383"
+            "replacement": "guid: 716a5f40975d4fa1a15929895023fb89"
         },
 		{
             "referencedResource": "EmojiOne.asset",
@@ -173,12 +173,12 @@
 		{
             "referencedResource": "DropCap Numbers.asset",
             "target": "guid: c4fd2a959a50b584b92dedfefec1ffda",
-            "replacement": "guid: 14aa93acbb234d16aaef0e8b46814db6"
+            "replacement": "guid: 23ec35b91bd043d1b158ec6068159429"
         },     
         {
             "referencedResource": "DropCap Numbers.psd",
             "target": "guid: 28b41fef228d6814f90e541deaf9f262",
-            "replacement": "guid: fd09957580ac4326916010f1f260975b"
+            "replacement": "guid: 54de17c6f16044d3a7cf66af75c2542d"
         }
     ]
 }

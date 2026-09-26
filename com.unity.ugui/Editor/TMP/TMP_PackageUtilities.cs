@@ -652,11 +652,13 @@ namespace TMPro
         {
             public string assetFilePath;
             public string assetMetaFilePath;
+            public string assetGuid;
 
-            public AssetFileRecord(string filePath, string metaFilePath)
+            public AssetFileRecord(string filePath, string metaFilePath, string guid)
             {
                 this.assetFilePath = filePath;
                 this.assetMetaFilePath = metaFilePath;
+                this.assetGuid = guid;
             }
         }
 
@@ -676,6 +678,8 @@ namespace TMPro
         private static string m_ScanningCurrentFileName;
 
         private static AssetConversionData m_ConversionData;
+        private static readonly List<AssetConversionRecord> m_ActiveRecords = new List<AssetConversionRecord>();
+        const string k_GuidPrefix = "guid: ";
 
         private static List<AssetModificationRecord> m_ModifiedAssetList = new List<AssetModificationRecord>();
 
@@ -697,7 +701,7 @@ namespace TMPro
                 GUILayout.BeginVertical(EditorStyles.helpBox);
                 {
                     GUILayout.Label("Scan Project Files", EditorStyles.boldLabel);
-                    GUILayout.Label("Press the <i>Scan Project Files</i> button to begin scanning your project for files & resources that were created with a previous version of TextMesh Pro.", TMP_UIStyleManager.label);
+                    GUILayout.Label("Press the <i>Scan Project Files</i> button to scan your project for references to resources from a previous version of TextMesh Pro, including the TMP Essential Resources and Examples & Extras imported into <i>Assets/TextMesh Pro</i> by earlier Unity versions. References to resources you removed are redirected to the ones shipped with the package and its Examples & Extras sample; resources still in your project, such as a customized TMP Settings, style sheet or line breaking file, keep being referenced. Remove the old content you no longer want first, and import the sample if your project uses its content.", TMP_UIStyleManager.label);
                     GUILayout.Space(10f);
                     GUILayout.Label("Project folder to be scanned. Example \"Assets/TextMesh Pro\"");
                     m_ProjectFolderToScan = EditorGUILayout.TextField("Folder Path:      Assets/", m_ProjectFolderToScan);
@@ -827,6 +831,16 @@ namespace TMPro
             if (m_ConversionData == null)
                 m_ConversionData = JsonUtility.FromJson<AssetConversionData>(File.ReadAllText(packageFullPath + "/PackageConversionData.json"));
 
+            // A legacy asset still present in the project may be a customized copy, so references to it are left alone.
+            m_ActiveRecords.Clear();
+            foreach (AssetConversionRecord record in m_ConversionData.assetRecords)
+            {
+                if (record.target.StartsWith(k_GuidPrefix) && !string.IsNullOrEmpty(AssetDatabase.GUIDToAssetPath(record.target.Substring(k_GuidPrefix.Length))))
+                    continue;
+
+                m_ActiveRecords.Add(record);
+            }
+
             // Get list of GUIDs for assets that might contain references to previous GUIDs that require updating.
             string searchFolder = string.IsNullOrEmpty(m_ProjectFolderToScan) ? "Assets" : ("Assets/" + m_ProjectFolderToScan);
             string[] guids = AssetDatabase.FindAssets("t:Object", new string[] { searchFolder }).Distinct().ToArray();
@@ -854,7 +868,7 @@ namespace TMPro
 
                 string assetMetaFilePath = AssetDatabase.GetTextMetaFilePathFromAssetPath(assetFilePath);
 
-                projectFilesToScan.Add(new AssetFileRecord(assetFilePath, assetMetaFilePath));
+                projectFilesToScan.Add(new AssetFileRecord(assetFilePath, assetMetaFilePath, guid));
 
                 yield return null;
             }
@@ -918,7 +932,10 @@ namespace TMPro
             string assetMetaFile = File.ReadAllText(m_ProjectPath + "/" + fileRecord.assetMetaFilePath);
             bool hasMetaFileChanges = false;
 
-            foreach (AssetConversionRecord record in m_ConversionData.assetRecords)
+            // The meta file's own guid line is the asset's identity, only references to other assets are remapped.
+            string ownGuid = "guid: " + fileRecord.assetGuid;
+
+            foreach (AssetConversionRecord record in m_ActiveRecords)
             {
                 if (assetDataFile.Contains(record.target))
                 {
@@ -928,7 +945,7 @@ namespace TMPro
                 }
 
                 //// Check meta file
-                if (assetMetaFile.Contains(record.target))
+                if (record.target != ownGuid && assetMetaFile.Contains(record.target))
                 {
                     hasMetaFileChanges = true;
 
@@ -1016,84 +1033,6 @@ namespace TMPro
             }
 
             return true;
-        }
-    }
-
-    public class TMP_PackageUtilities : Editor
-    {
-        /// <summary>
-        /// Imports the TextMesh Pro essential resources into the project.
-        /// </summary>
-        [MenuItem("Window/TextMeshPro/Import TMP Essential Resources", false, 2050)]
-        public static void ImportProjectResourcesMenu()
-        {
-            ImportEssentialResources();
-        }
-
-
-        /// <summary>
-        /// Imports the TextMesh Pro examples and extras content into the project.
-        /// </summary>
-        [MenuItem("Window/TextMeshPro/Import TMP Examples and Extras", false, 2051)]
-        public static void ImportExamplesContentMenu()
-        {
-            ImportExamplesAndExtras();
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        private static void ImportExamplesAndExtras()
-        {
-            string packageFullPath = TMP_EditorUtility.packageFullPath;
-
-            UnityEditor.AssetPackage.Package.Import(packageFullPath + "/Package Resources/TMP Examples & Extras.unitypackage", true);
-        }
-
-        private static string k_SettingsFilePath;
-        private static byte[] k_SettingsBackup;
-
-        /// <summary>
-        ///
-        /// </summary>
-        private static void ImportEssentialResources()
-        {
-            // Check if the TMP Settings asset is already present in the project.
-            string[] settings = AssetDatabase.FindAssets("t:TMP_Settings");
-
-            if (settings.Length > 0)
-            {
-                // Save assets just in case the TMP Setting were modified before import.
-                AssetDatabase.SaveAssets();
-
-                // Copy existing TMP Settings asset to a byte[]
-                k_SettingsFilePath = AssetDatabase.GUIDToAssetPath(settings[0]);
-                k_SettingsBackup = File.ReadAllBytes(k_SettingsFilePath);
-
-                RegisterResourceImportCallback();
-            }
-
-            string packageFullPath = TMP_EditorUtility.packageFullPath;
-
-            UnityEditor.AssetPackage.Package.Import(packageFullPath + "/Package Resources/TMP Essential Resources.unitypackage", true);
-        }
-
-        internal static void RegisterResourceImportCallback()
-        {
-            AssetDatabase.importPackageCompleted += ImportCallback;
-        }
-
-        private static void ImportCallback(string packageName)
-        {
-            // Restore backup of TMP Settings from byte[]
-            File.WriteAllBytes(k_SettingsFilePath, k_SettingsBackup);
-            AssetDatabase.Refresh();
-
-            TMP_Settings.instance.SetAssetVersion();
-            EditorUtility.SetDirty(TMP_Settings.instance);
-            AssetDatabase.SaveAssetIfDirty(TMP_Settings.instance);
-
-            AssetDatabase.importPackageCompleted -= ImportCallback;
         }
     }
 }

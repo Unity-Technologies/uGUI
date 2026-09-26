@@ -6,7 +6,7 @@ The font you specify replaces the default font until you insert a closing `<font
 
 You can also use the `material` attribute to switch between different materials for a single font.
 
-You must place the font and material assets in the directory that is specified in the **TextMesh Settings > Default Font Asset > Path** field. The default path is `Assets/TextMesh Pro/Resources/Fonts & Materials`. If you don't have it in your project, select **Window > TextMeshPro > Import TMP Essential Resources** to add it. For more information, refer to [Importing required resources into projects](index.md).
+You must place the font and material assets in the directory that is specified in the **TextMesh Settings > Default Font Asset > Path** field. The default path is `Fonts & Materials`, resolved inside a `Resources` folder of your project, for example `Assets/TextMesh Pro/Resources/Fonts & Materials`. Create the folder if your project does not have it yet.
 
 To revert to the default font:
 * Close all open font tags using  `</font>` tag

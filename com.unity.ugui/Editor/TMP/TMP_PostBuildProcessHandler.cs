@@ -34,9 +34,7 @@ namespace TMPro
                     throw new Exception("Unsupported iOS Xcode project type. Will not be able to configure emoji filtering.");
             }
 
-            // Try loading the TMP Settings
-            var settings = Resources.Load<TMP_Settings>("TMP Settings");
-            var enableEmojis = settings != null && TMP_Settings.enableEmojiSupport;
+            var enableEmojis = TMP_Settings.enableEmojiSupport;
 
             var pbxProjectPath = FindUnityPbxProjectPath(pathToBuiltProject);
             if (pbxProjectPath == null)

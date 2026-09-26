@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using UnityEditorInternal;
+using Object = UnityEngine.Object;
 
 #pragma warning disable 0414 // Disabled a few warnings for not yet implemented features.
 
@@ -459,48 +461,160 @@ namespace TMPro.EditorUtilities
         }
     }
 
-    class TMP_ResourceImporterProvider : SettingsProvider
+    class TMP_SettingsProvider : SettingsProvider
     {
-        TMP_PackageResourceImporter m_ResourceImporter;
+        const string k_SettingsFolder = "Assets/TextMesh Pro/Resources";
+        const string k_SettingsPath = k_SettingsFolder + "/TMP Settings.asset";
 
-        public TMP_ResourceImporterProvider()
-            : base("Project/TextMesh Pro", SettingsScope.Project)
+        class Styles
         {
+            public static readonly GUIContent settingsAssetHeader = new GUIContent("Settings Asset");
+            public static readonly GUIContent activeSettings = new GUIContent("Active Settings", "The TMP Settings asset TextMesh Pro currently uses in this project.");
+            public static readonly GUIContent createSettings = new GUIContent("Create TMP Settings", "Copies the built-in settings into Assets/TextMesh Pro/Resources so they can be customized for this project.");
+            public static readonly GUIContent playerBuildsHeader = new GUIContent("Player Builds");
+            public static readonly GUIContent includeBuiltInSettingsInBuilds = new GUIContent("Include Default Settings in Builds", "Include the built-in TMP Settings, and with them the default font asset and shaders, in player builds while the project has no TMP Settings asset of its own. Turn off for projects that do not use TextMesh Pro.");
+
+            public const string k_BuiltInInfo = "This project uses the TMP Settings shipped with the package. Create a project-specific asset to customize TextMesh Pro.";
+            public const string k_OptOutWarning = "Player builds will not include the default TMP Settings, font asset and shaders. TextMesh Pro text will not render in players until a TMP Settings asset is created.";
+            public const string k_DuplicatesError = "Several TMP Settings assets were found. Only one is supported and the first one is used. Remove the others:";
+
+            public const float k_LabelWidth = 260f;
+            public const float k_Margin = 10f;
         }
 
-        public override void OnGUI(string searchContext)
-        {
-            // Lazy creation that supports domain reload
-            if (m_ResourceImporter == null)
-                m_ResourceImporter = new TMP_PackageResourceImporter(logErrors: false);
+        List<TMP_Settings> m_UserSettings = new List<TMP_Settings>();
+        TMP_Settings m_BuiltInSettings;
+        Editor m_Editor;
 
-            m_ResourceImporter.OnGUI();
+        public TMP_SettingsProvider()
+            : base("Project/TextMesh Pro", SettingsScope.Project)
+        {
+            label = "TextMesh Pro";
+            keywords = GetSearchKeywordsFromGUIContentProperties<TMP_SettingsEditor.Styles>().Concat(GetSearchKeywordsFromGUIContentProperties<Styles>());
+        }
+
+        public override void OnActivate(string searchContext, UnityEngine.UIElements.VisualElement rootElement)
+        {
+            Refresh();
         }
 
         public override void OnDeactivate()
         {
-            if (m_ResourceImporter != null)
-                m_ResourceImporter.OnDestroy();
+            DestroyEditor();
         }
 
-        static UnityEngine.Object GetTMPSettings()
+        void Refresh()
         {
-            return Resources.Load<TMP_Settings>("TMP Settings");
+            TMP_Settings.FindSettingsInEditor(out m_UserSettings, out m_BuiltInSettings, logErrors: false);
+
+            var target = m_UserSettings.Count > 0 ? m_UserSettings[0] : null;
+            if (m_Editor != null && (target == null || m_Editor.target != target))
+                DestroyEditor();
+            if (m_Editor == null && target != null)
+                m_Editor = Editor.CreateEditor(target);
         }
 
-        [SettingsProviderGroup]
-        static SettingsProvider[] CreateTMPSettingsProvider()
+        void DestroyEditor()
         {
-            var providers = new List<SettingsProvider> { new TMP_ResourceImporterProvider() };
+            if (m_Editor != null)
+                Object.DestroyImmediate(m_Editor);
+            m_Editor = null;
+        }
 
-            if (GetTMPSettings() != null)
+        public override void OnGUI(string searchContext)
+        {
+            // Embedded editor lost its asset, or a project asset appeared while showing the built-in state.
+            if (m_Editor != null ? m_Editor.target == null : !TMP_Settings.instance.isBuiltInSettings)
+                Refresh();
+
+            float labelWidth = EditorGUIUtility.labelWidth;
+            EditorGUIUtility.labelWidth = Styles.k_LabelWidth;
+
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Space(Styles.k_Margin);
+            EditorGUILayout.BeginVertical();
+
+            if (m_UserSettings.Count == 0)
+                DrawBuiltInState();
+            else
+                DrawProjectState();
+
+            EditorGUILayout.EndVertical();
+            GUILayout.Space(Styles.k_Margin);
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUIUtility.labelWidth = labelWidth;
+        }
+
+        void DrawBuiltInState()
+        {
+            GUILayout.Label(Styles.settingsAssetHeader, EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox(Styles.k_BuiltInInfo, MessageType.Info);
+
+            using (new EditorGUI.DisabledScope(true))
+                EditorGUILayout.ObjectField(Styles.activeSettings, m_BuiltInSettings, typeof(TMP_Settings), false);
+
+            EditorGUILayout.Space();
+            if (GUILayout.Button(Styles.createSettings, GUILayout.Width(200)))
+                CreateSettings();
+
+            EditorGUILayout.Space(16);
+            GUILayout.Label(Styles.playerBuildsHeader, EditorStyles.boldLabel);
+
+            var projectSettings = TMP_EditorProjectSettings.instance;
+            EditorGUI.BeginChangeCheck();
+            bool include = EditorGUILayout.Toggle(Styles.includeBuiltInSettingsInBuilds, projectSettings.includeBuiltInSettingsInBuilds);
+            if (EditorGUI.EndChangeCheck())
+                projectSettings.includeBuiltInSettingsInBuilds = include;
+
+            if (!include)
+                EditorGUILayout.HelpBox(Styles.k_OptOutWarning, MessageType.Warning);
+        }
+
+        void DrawProjectState()
+        {
+            if (m_UserSettings.Count > 1)
             {
-                var provider = new AssetSettingsProvider("Project/TextMesh Pro/Settings", GetTMPSettings);
-                provider.PopulateSearchKeywordsFromGUIContentProperties<TMP_SettingsEditor.Styles>();
-                providers.Add(provider);
+                var message = Styles.k_DuplicatesError;
+                foreach (var settings in m_UserSettings)
+                    message += "\n  " + AssetDatabase.GetAssetPath(settings);
+                EditorGUILayout.HelpBox(message, MessageType.Error);
+                EditorGUILayout.Space();
             }
 
-            return providers.ToArray();
+            using (new EditorGUI.DisabledScope(true))
+                EditorGUILayout.ObjectField(Styles.activeSettings, m_UserSettings[0], typeof(TMP_Settings), false);
+
+            EditorGUILayout.Space();
+
+            if (m_Editor != null)
+                m_Editor.OnInspectorGUI();
+        }
+
+        void CreateSettings()
+        {
+            var settings = m_BuiltInSettings != null ? Object.Instantiate(m_BuiltInSettings) : ScriptableObject.CreateInstance<TMP_Settings>();
+            settings.name = "TMP Settings";
+            settings.ClearBuiltInFlag();
+
+            if (!AssetDatabase.IsValidFolder(k_SettingsFolder))
+            {
+                System.IO.Directory.CreateDirectory(k_SettingsFolder);
+                AssetDatabase.Refresh();
+            }
+
+            AssetDatabase.CreateAsset(settings, k_SettingsPath);
+            AssetDatabase.SaveAssets();
+            TMP_Settings.ResetStaticSettings();
+
+            EditorGUIUtility.PingObject(settings);
+            Refresh();
+        }
+
+        [SettingsProvider]
+        static SettingsProvider CreateTMPSettingsProvider()
+        {
+            return new TMP_SettingsProvider();
         }
     }
 }

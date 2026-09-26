@@ -8,7 +8,7 @@ For example, you can display lines that indicate font metrics such as the line h
 _The TextMesh Pro debug tool set to show character bounding boxes and font metrics_
 
 >[NOTE!]
->The debug tool is part of the TextMesh Pro Examples & Extras package. You can install the package from the menu (select **Window > TextMesh Pro > Import TMP Examples and Extras**) or the [TextMesh Pro settings](Settings.md).
+>The debug tool is part of the TextMesh Pro Examples & Extras sample. You can import the sample from the **Package Manager** window (select the **uGUI** package, then the **Samples** tab).
 
 To use the debug tool:
 

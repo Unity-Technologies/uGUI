@@ -4602,17 +4602,13 @@ namespace TMPro
                     bool shouldSaveSoftLineBreak = false;
                     uint nextChar = m_characterCount + 1 < totalCharacterCount ? m_textInfo.characterInfo[m_characterCount + 1].character : 0u;
 
-                    if ((isWhiteSpace || charCode == 0x200B || charCode == 0x2D || charCode == 0xAD) && (!m_isNonBreakingSpace || ignoreNonBreakingSpace) && charCode != 0xA0 && charCode != 0x2007 && charCode != 0x2011 && charCode != 0x202F && charCode != 0x2060)
+                    if ((isWhiteSpace || charCode == 0x200B || (charCode == 0x2D && (m_characterCount <= 0 || !char.IsWhiteSpace(m_textInfo.characterInfo[m_characterCount - 1].character) || m_textInfo.characterInfo[m_characterCount - 1].lineNumber != m_lineNumber)) || charCode == 0xAD) && (!m_isNonBreakingSpace || ignoreNonBreakingSpace) && charCode != 0xA0 && charCode != 0x2007 && charCode != 0x2011 && charCode != 0x202F && charCode != 0x2060)
                     {
-                        // Case 1391990 - Text after hyphen breaks when the hyphen is connected to the text
-                        if (!(charCode == 0x2D && m_characterCount > 0 && char.IsWhiteSpace(m_textInfo.characterInfo[m_characterCount - 1].character) && m_textInfo.characterInfo[m_characterCount - 1].lineNumber == m_lineNumber))
-                        {
-                            isFirstWordOfLine = false;
-                            shouldSaveHardLineBreak = true;
+                        isFirstWordOfLine = false;
+                        shouldSaveHardLineBreak = true;
 
-                            // Reset soft line breaking point since we now have a valid hard break point.
-                            m_SavedSoftLineBreakState.previous_WordBreak = -1;
-                        }
+                        // Reset soft line breaking point since we now have a valid hard break point.
+                        m_SavedSoftLineBreakState.previous_WordBreak = -1;
                     }
                     // Handling for East Asian scripts
                     else if (m_isNonBreakingSpace == false && (TMP_TextParsingUtilities.IsHangul(charCode) && TMP_Settings.useModernHangulLineBreakingRules == false || TMP_TextParsingUtilities.IsCJK(charCode)))

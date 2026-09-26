@@ -4,13 +4,9 @@
 This User Guide was designed to provide first time users of TextMesh Pro with a basic overview of the features and functionality of the tool.
 
 #### **Installation**
-The TextMesh Pro UPM package is already included with the Unity Editor and as such does not require installation. TextMesh Pro "TMP" does however require adding resources to your project which are essential for using TextMesh Pro. 
+The TextMesh Pro UPM package is already included with the Unity Editor and as such does not require installation. The resources TextMesh Pro needs, such as the default font asset, materials and shaders, ship with the package.
 
-To import the "*TMP Essential Resources*", please use the "*Window -> TextMeshPro -> Import TMP Essential Resources*" menu option. These resources will be added at the root of your project in the "*TextMesh Pro*" folder.
-
-The TextMesh Pro package also includes additional resources and examples that will make discovering and learning about TextMesh Pro's powerful features easier. It is strongly recommended that first time users import these additional resources. 
-
-To import the "*TMP Examples & Extras*", please use the "*Window -> TextMeshPro -> Import TMP Examples & Extras*" menu option. These resources will also be added in the same "*TextMesh Pro*" folder inside your project. 
+The TextMesh Pro package also includes additional resources and examples that will make discovering and learning about TextMesh Pro's powerful features easier. To import them, open the **Package Manager** window, select the **uGUI** package, and import the **Examples & Extras** sample from the **Samples** tab.
 
 
 #### **Quick Start**

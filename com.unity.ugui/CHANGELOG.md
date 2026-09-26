@@ -5,6 +5,14 @@ uGUI 7.x is shipped alongside Unity 7.x as a [core package](https://docs.unity3d
 
 The changelog for version 7.0.0 will remain under active development throughout the pre-release phases of Unity 7000.0.
 
+### Changed
+- TextMesh Pro no longer requires importing the TMP Essential Resources. The default font asset, materials, shaders, style sheet and TMP Settings now ship with the package and work out of the box. A project-specific TMP Settings asset can be created from **Project Settings > TextMesh Pro**; only one TMP Settings asset per project is supported. Projects that do not use TextMesh Pro can turn off **Include Default Settings In Builds** on that page to keep the default settings, font asset and shaders out of player builds.
+- Moved the TMP Examples & Extras to a package sample, available from the Package Manager window.
+- The **Window > TextMeshPro > Project Files GUID Remapping Tool** now also redirects references to the TMP Essential Resources and Examples & Extras imported by earlier Unity versions to the resources shipped with the package and its sample. Legacy resources still present in the project, such as a customized TMP Settings asset, keep being referenced.
+
+### Removed
+- Removed the TMP Essential Resources and TMP Examples & Extras importer windows and the **Window > TextMeshPro > Import ...** menu items, along with the `TMP_PackageResourceImporter`, `TMP_PackageResourceImporterWindow` and `TMP_PackageUtilities` classes.
+
 ## [2.7.0] - 2026-07-27
 uGUI 2.7 is shipped alongside Unity 6000.7 as a [core package](https://docs.unity3d.com/Manual/pack-core.html).
 

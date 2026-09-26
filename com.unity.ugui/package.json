@@ -17,5 +17,12 @@
   "dependencies": {
     "com.unity.modules.ui": "1.0.0",
     "com.unity.modules.imgui": "1.0.0"
-  }
+  },
+  "samples": [
+    {
+      "displayName": "Examples & Extras",
+      "description": "Additional resources and example scenes that make discovering and learning TextMesh Pro's features easier. If your project already contains the TMP Examples & Extras imported by an earlier Unity version, this sample adds a second copy; the existing one keeps working and can be removed.",
+      "path": "Samples~/Examples & Extras"
+    }
+  ]
 }

@@ -18,26 +18,14 @@ TextMesh Pro provides better control over text formatting and layout than to Uni
 
 The TextMesh Pro package is included in the Unity Editor. You do not need to install it.
 
-To use TextMesh Pro, you must import the TMP Essential Resources package (see the next section).
+### Customizing the TMP Settings
 
-You can also import the TMP Examples & Extras package to help you learn TextMesh Pro.
+By default, TextMesh Pro uses the TMP Settings shipped with the package. To customize them for your project, open **Edit > Project Settings > TextMesh Pro** and select **Create TMP Settings**. This adds a **TMP Settings** asset to the **Assets/TextMesh Pro/Resources** folder of your project, which then replaces the built-in settings. A project can only have one TMP Settings asset.
 
-### Importing required resources into projects
-
-To use TextMesh Pro in your projects, you need to import the **TMP Essential Resources**.
-
-- From the menu, select **Window > TextMeshPro > Import TMP Essential Resources**
-
-This adds the essential resources to the **TextMesh Pro** folder in the Project.
+If your project does not use TextMesh Pro, disable **Include Default Settings In Builds** on the same page. Player builds then leave out the default TMP Settings, font asset and shaders.
 
 ### Importing examples and additional resources
 
 TextMesh Pro also includes additional resources and examples to help you learn about various features.
 
-You can import these into your projects as well.
-
-- From the menu, select **Window > TextMeshPro > Import TMP Examples & Extras**
-
-This adds the examples and additional resources to the **TextMesh Pro > Examples & Extras** folder in the Project.
-
-Installing the TMP Examples & Extras is not mandatory, but is strongly recommended for first-time TextMesh Pro users.
+To import them, open the **Package Manager** window, select the **uGUI** package, and import the **Examples & Extras** sample from the **Samples** tab.

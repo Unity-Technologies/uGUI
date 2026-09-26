@@ -3,317 +3,317 @@
         {
             "referencedResource": "Blue to Purple - Vertical.asset",
             "target": "guid: 1e643bbd7e13d46418da3774e72bef60",
-            "replacement": "guid: 479a66fa4b094512a62b0a8e553ad95a"
+            "replacement": "guid: 739dcee66b93450ebc8eff4d93fb67ca"
         },
         {
             "referencedResource": "Dark to Light Green - Vertical.asset",
             "target": "guid: 90c9133b254e2184b8084dea4f392337",
-            "replacement": "guid: 4c86a3366cd840348ebe8dc438570ee4"
+            "replacement": "guid: 86e49b3abbfe407498227b6aa0cae23c"
         },
         {
             "referencedResource": "Light to Dark Green - Vertical.asset",
             "target": "guid: 33c745f0979f3984182a138bcc6e57ec",
-            "replacement": "guid: 5cf8ae092ca54931b443bec5148f3c59"
+            "replacement": "guid: 34e96e7e340b4cec8e55ba7bc6115fe0"
         },
         {
             "referencedResource": "Yellow to Orange - Vertical.asset",
             "target": "guid: e002cb2a36d9e4a439a062867fa24e1e",
-            "replacement": "guid: 69a525efa7e6472eab268f6ea605f06e"
+            "replacement": "guid: 5a2fc6eee13248d2b7678faa19842e9e"
         },
         {
             "referencedResource": "Crate - Surface Shader Scene.mat",
             "target": "guid: e177c46c2a091564d88df2c2ca9dcf97",
-            "replacement": "guid: e6b9b44320f4448d9d5e0ee634259966"
+            "replacement": "guid: 49fef94b11674525a1b269a9bda81f8c"
         },
         {
             "referencedResource": "Ground - Logo Scene.mat",
             "target": "guid: 504ae362e57fc464b847f1e9fd0e4035",
-            "replacement": "guid: c719e38f25a9480abd2480ab621a2949"
+            "replacement": "guid: d49c5f0235214b8ca876e13d74ae3f7c"
         },
         {
             "referencedResource": "Ground - Surface Shader Scene.mat",
             "target": "guid: 9ed9aa864ec2d7f4dad266b9534c6d85",
-            "replacement": "guid: aadd5a709a48466c887296bb5b1b8110"
+            "replacement": "guid: e1125e0ef94b4865a5939c812747a9d1"
         },
         {
             "referencedResource": "Small Crate_diffuse.mat",
             "target": "guid: 92f161029a6d3c54a92d9d283352a135",
-            "replacement": "guid: 22262639920f43d6be32430e4e58350d"
+            "replacement": "guid: d57046d19181418383896461349619b6"
         },
         {
             "referencedResource": "Text Popup.prefab",
             "target": "guid: c879e892866c8db4f8930b25672233ac",
-            "replacement": "guid: b06f0e6c1dfa4356ac918da1bb32c603"
+            "replacement": "guid: 7a76bf5958a14cb9ae342cec8d702a0f"
         },
         {
             "referencedResource": "TextMeshPro - Prefab 1.prefab",
             "target": "guid: a6a60659abb4d9d4b934feebd3dcc952",
-            "replacement": "guid: a6e39ced0ea046bcb636c3f0b2e2a745"
+            "replacement": "guid: 80b21d0180074cdd92e530ca5229548e"
         },
         {
             "referencedResource": "TextMeshPro - Prefab 2.prefab",
             "target": "guid: 1b190e3e0ab4c8e4881656b9160c59c2",
-            "replacement": "guid: fdad9d952ae84cafb74c63f2e694d042"
+            "replacement": "guid: 04c0d7b3ca72477a9856655dc116336a"
         },
         {
             "referencedResource": "Anton SDF.asset",
             "target": "guid: f76ef802b8b940c46a31f9027f2b0158",
-            "replacement": "guid: 8a89fa14b10d46a99122fd4f73fca9a2"
+            "replacement": "guid: a30eb7d7297c4f53ae3971c23a57648a"
         },
         {
             "referencedResource": "Anton SDF - Drop Shadow.mat",
             "target": "guid: 250a1a103b3b4914c9707e6a423446d6",
-            "replacement": "guid: 749b9069dc4742c5bfa5c74644049926"
+            "replacement": "guid: 078f605b782148a1a7dd4b9eb63fe46c"
         },
         {
             "referencedResource": "Anton SDF - Outline.mat",
             "target": "guid: e077dc203e948b740859c1c0ca8b9691",
-            "replacement": "guid: a00013af81304728b2be1f4309ee2433"
+            "replacement": "guid: bbbb9b1c61c04a9a947378de8efa6d9d"
         },
         {
             "referencedResource": "Bangers SDF.asset",
             "target": "guid: 808aa8f1ab804104aa7d0c337a6c1481",
-            "replacement": "guid: 125cb55b44b24c4393181402bc6200e6"
+            "replacement": "guid: 30afef9ccb1742ae8a959853cb4b3522"
         },
         {
             "referencedResource": "Bangers SDF - Drop Shadow.mat",
             "target": "guid: c26f698d4eee19e4a8b8f42cd299bab5",
-            "replacement": "guid: f2dcf029949142e28b974630369c8b4e"
+            "replacement": "guid: 5dfdf5567f7d4a8db56a2c55576397c7"
         },
         {
             "referencedResource": "Bangers SDF - Outline.mat",
             "target": "guid: db7f2cfbf23d6d54ca4e74a9abd55326",
-            "replacement": "guid: f629c6e43dba4bf38cb74d8860150664"
+            "replacement": "guid: 1c88456a24e8491bbadc4252d144ef02"
         },
         {
             "referencedResource": "Bangers SDF Glow.mat",
             "target": "guid: 7dd7006c58d8a3148a73aa211d8c13d0",
-            "replacement": "guid: d75b8f41e959450c84ac6e967084d3e1"
+            "replacement": "guid: 21d2d4f2b9fe4a4594c37d2a6c6d4251"
         },
         {
             "referencedResource": "Bangers SDF Logo.mat",
             "target": "guid: 4fb51aa7001a2244395ddf6a15d37389",
-            "replacement": "guid: f4e195ac1e204eff960149d1cb34e18c"
+            "replacement": "guid: 86e49f97418b437aac1a90a5928697af"
         },
         {
             "referencedResource": "Electronic Highway Sign SDF.asset",
             "target": "guid: 163292f6f226d954593d45b079f8aae0",
-            "replacement": "guid: dc36b3fdc14f47ebb36fd484a67e268a"
+            "replacement": "guid: 08cd128db64c4445b3422f1b7afdf77f"
         },
         {
             "referencedResource": "LiberationSans SDF - Drop Shadow.mat",
             "target": "guid: 33db60c37b63f08448ded4b385e74e38",
-            "replacement": "guid: e73a58f6e2794ae7b1b7e50b7fb811b0"
+            "replacement": "guid: ca5c41f7c6b74198bd3bc55bcd079729"
         },
         {
             "referencedResource": "LiberationSans SDF - Metalic Green.mat",
             "target": "guid: 4f9843c79516ed1468b9b5a4f32e67e3",
-            "replacement": "guid: 8b29aaa3eec7468097ff07adfcf29ac9"
+            "replacement": "guid: 791ccdabd309482ea0baeb51277a8379"
         },
         {
             "referencedResource": "LiberationSans SDF - Outline.mat",
             "target": "guid: 83a1b0fe6c3dbac44b66f09c82e1d509",
-            "replacement": "guid: 79459efec17a4d00a321bdcc27bbc385"
+            "replacement": "guid: fea3af43564c4034826b01bc15df576e"
         },
         {
             "referencedResource": "LiberationSans SDF - Overlay.mat",
             "target": "guid: 55eb086ae18c76e4bb6cc7106d0dd6e2",
-            "replacement": "guid: 9ad269c99dcf42b7aedefd83dd5a7b9d"
+            "replacement": "guid: 81c9d9da232040d592fa6280ea14e437"
         },
         {
             "referencedResource": "LiberationSans SDF - Soft Mask.mat",
             "target": "guid: 74e06d99c1657fc4abd33f20685ea9ff",
-            "replacement": "guid: 42df1c7856584b6b8db9a509b6b10074"
+            "replacement": "guid: 8d9dfeab86d44b268223c5f5c7263d4f"
         },
         {
             "referencedResource": "Oswald Bold SDF.asset",
             "target": "guid: 09641b029dfa78843902b548a9de7553",
-            "replacement": "guid: 0161d805a3764c089bef00bfe00793f5"
+            "replacement": "guid: 90347108ce5f4fcab194986cf2cb96e2"
         },
         {
             "referencedResource": "Roboto-Bold SDF.asset",
             "target": "guid: d62a573c923f5cb47b8ff65261033b90",
-            "replacement": "guid: 5302535af1044152a457ed104f1f4b91"
+            "replacement": "guid: 01e62767a5fa417d9a212a53e293fed7"
         },
         {
             "referencedResource": "Roboto-Bold SDF - Drop Shadow.mat",
             "target": "guid: 102e7c5c5e3b1f3468518cb166967d77",
-            "replacement": "guid: b246c4190f4e46ec9352fe15a7b09ce0"
+            "replacement": "guid: 16c0f8d13ca747979273b94f389bc8ce"
         },
         {
             "referencedResource": "Roboto-Bold SDF - Surface.mat",
             "target": "guid: e2da38ead8f8238449c54a1ef49e080f",
-            "replacement": "guid: e6b276ec991f467aa14ef1f3cc665993"
+            "replacement": "guid: 40b3d01e23e34630a6b8177ea22e7af7"
         },
         {
             "referencedResource": "DropCap Numbers.asset",
             "target": "guid: c4fd2a959a50b584b92dedfefec1ffda",
-            "replacement": "guid: 14aa93acbb234d16aaef0e8b46814db6"
+            "replacement": "guid: 23ec35b91bd043d1b158ec6068159429"
         },
         {
             "referencedResource": "Benchmark01.cs",
             "target": "guid: c5fb1b5c24460f745be29cc0eb06a58c",
-            "replacement": "guid: f970ea55f9f84bf79b05dab180b8c125"
+            "replacement": "guid: 6d7c85db96674216a762bd582fb6d79f"
         },
         {
             "referencedResource": "Benchmark01_UGUI.cs",
             "target": "guid: 5e6abf300e36c0a4eb43969c3f2172f8",
-            "replacement": "guid: 8ef7be1c625941f7ba8ed7cc71718c0d"
+            "replacement": "guid: 61a0588590894629ab80131c9882c0cc"
         },
         {
             "referencedResource": "Benchmark02.cs",
             "target": "guid: 3467f4170568a484d8b57e2051a27363",
-            "replacement": "guid: e8538afcddc14efbb5d9e94b7ae50197"
+            "replacement": "guid: e9a217068df446c4b4c44d3ebe1bbbc0"
         },
         {
             "referencedResource": "Benchmark03.cs",
             "target": "guid: e6e9d20624a23da4c8b2b6fb7608bb9a",
-            "replacement": "guid: a73109742c8d47ac822895a473300c29"
+            "replacement": "guid: 5a42e46ddde74dfe8c9b6965f5db9224"
         },
         {
             "referencedResource": "Benchmark04.cs",
             "target": "guid: 481dd67bdedc3104ea2156ed49f3acd5",
-            "replacement": "guid: dc20866c0d5e413ab7559440e15333ae"
+            "replacement": "guid: 0c4ed8c2579e4b67ba70075b5b74ff4c"
         },
         {
             "referencedResource": "CameraController.cs",
             "target": "guid: a9f0e07aefca0cc459134ff9df622278",
-            "replacement": "guid: 2d687537154440a3913a9a3c7977978c"
+            "replacement": "guid: 28b2a5f7d6c84e56ab061b3380152cb8"
         },
         {
             "referencedResource": "ChatController.cs",
             "target": "guid: eba5a4db2591a5844aea5f6f3ad8548e",
-            "replacement": "guid: 53d91f98a2664f5cb9af11de72ac54ec"
+            "replacement": "guid: 28771a4864394e39882399d814a1b903"
         },
         {
             "referencedResource": "EnvMapAnimator.cs",
             "target": "guid: 7e69f3f28c520ce4d9ab9964b2895b1a",
-            "replacement": "guid: a4b6f99e8bc54541bbd149b014ff441c"
+            "replacement": "guid: 5085522f05ba4a19884e22661214c621"
         },
         {
             "referencedResource": "ObjectSpin.cs",
             "target": "guid: 5e7872ff51989434dabf7807265ada3c",
-            "replacement": "guid: 4f19c7f94c794c5097d8bd11e39c750d"
+            "replacement": "guid: d00d9b912c6f44e7a1ead097941ecd3a"
         },
         {
             "referencedResource": "ShaderPropAnimator.cs",
             "target": "guid: c56cf968fb6a5b6488e709242718845d",
-            "replacement": "guid: 2787a46a4dc848c1b4b7b9307b614bfd"
+            "replacement": "guid: 0a9adb81e97d4806aac690a23f0712b4"
         },
         {
             "referencedResource": "SimpleScript.cs",
             "target": "guid: c64808ff5137c9044a583750e5b0468a",
-            "replacement": "guid: 9eff140b25d64601aabc6ba32245d099"
+            "replacement": "guid: 323469d7e1494342b7567b3c0cdf858a"
         },
         {
             "referencedResource": "SkewTextExample.cs",
             "target": "guid: 48d40dfeb33b717488f55ddbf676643a",
-            "replacement": "guid: d412675cfb3441efa3bf8dcd9b7624dc"
+            "replacement": "guid: b795026802ed4030a5742f7181bb660f"
         },
         {
             "referencedResource": "TeleType.cs",
             "target": "guid: 9094c5c777af3f14489e8947748e86e6",
-            "replacement": "guid: e32c266ee6204b21a427753cb0694c81"
+            "replacement": "guid: e673e75c4571475f8895ff13ad71935f"
         },
         {
             "referencedResource": "TextConsoleSimulator.cs",
             "target": "guid: 45757dcc8f119454dac6365e8fd15e8b",
-            "replacement": "guid: 43bcd35a1c0c40ccb6d472893fe2093f"
+            "replacement": "guid: 9353cca21e1b4a18a4a7fe6ca102a1ad"
         },
         {
             "referencedResource": "TextMeshProFloatingText.cs",
             "target": "guid: dd0e4b969aa70504382a89d2f208ae6c",
-            "replacement": "guid: a4d4c76e63944cba8c7d00f56334b98c"
+            "replacement": "guid: 72262fbea055491d918e8594dce872d3"
         },
         {
             "referencedResource": "TextMeshSpawner.cs",
             "target": "guid: 385939aed18e82d41894437798c30ed8",
-            "replacement": "guid: 76c11bbcfddf44e0ba17d6c2751c8d84"
+            "replacement": "guid: 0749eead97a84ba28fe42205d1285816"
         },
         {
             "referencedResource": "TMP_ExampleScript_01.cs",
             "target": "guid: 36bafabb5572c6347923b971425ab3be",
-            "replacement": "guid: 6f2c5b59b6874405865e2616e4ec276a"
+            "replacement": "guid: 7778a02bd8804490a662e0ea8f293393"
         },
         {
             "referencedResource": "TMP_FrameRateCounter.cs",
             "target": "guid: c0357609254b68d4881cab18f04dd4dc",
-            "replacement": "guid: 686ec78b56aa445795335fbadafcfaa4"
+            "replacement": "guid: fa326b3c540d41c2b4a4b7b2e2f82e7c"
         },
         {
             "referencedResource": "TMP_TextEventCheck.cs",
             "target": "guid: ba181bda76b7f6047ba2188e94bf0894",
-            "replacement": "guid: d736ce056cf444ca96e424f4d9c42b76"
+            "replacement": "guid: 835e882277d34c4f876d873c01da4a6a"
         },
         {
             "referencedResource": "TMP_TextEventHandler.cs",
             "target": "guid: 48a2fdbd95acd794caf78a85a0b6926a",
-            "replacement": "guid: 1312ae25639a4bae8e25ae223209cc50"
+            "replacement": "guid: 7c059f168169478fa301ea82750fae0e"
         },
         {
             "referencedResource": "TMP_TextInfoDebugTool.cs",
             "target": "guid: 5eeee4467ee5b6a4884a1ec94812d93e",
-            "replacement": "guid: 21256c5b62f346f18640dad779911e20"
+            "replacement": "guid: 39c31caa077749dd8a729376b10a2ec5"
         },
         {
             "referencedResource": "TMP_TextSelector_A.cs",
             "target": "guid: 68baf2864c88f4a43a50f16709de8717",
-            "replacement": "guid: 103e0a6a1d404693b9fb1a5173e0e979"
+            "replacement": "guid: 3a84f420be3b468b92fa3f03825dcd86"
         },
         {
             "referencedResource": "TMP_TextSelector_B.cs",
             "target": "guid: f499ff45b9a3d0840a0df48d01b2877b",
-            "replacement": "guid: a05dcd8be7ec4ccbb35c26219884aa37"
+            "replacement": "guid: 3a81843e8f8041ad9eb6bb7e2827eb6b"
         },
         {
             "referencedResource": "TMP_UiFrameRateCounter.cs",
             "target": "guid: dc33b7a34d20d5e4e8d54b6867ce81e3",
-            "replacement": "guid: 24b0dc2d1d494adbbec1f4db26b4cf83"
+            "replacement": "guid: a38b8c3e1fc64ba7828edca694dd9f7c"
         },
         {
             "referencedResource": "TMPro_InstructionOverlay.cs",
             "target": "guid: 53b866620ba77504eaf52cab7dbd95c9",
-            "replacement": "guid: c3c1afeda5e545e0b19add5373896d2e"
+            "replacement": "guid: 3fafd64d343d4416bbbff313f494be7e"
         },
         {
             "referencedResource": "VertexColorCycler.cs",
             "target": "guid: c8d54cdd5913d4e4bb7b655d7d16835b",
-            "replacement": "guid: 91b8ba3d52e041fab2d0e0f169855539"
+            "replacement": "guid: 150600dfd7d94aefb889a16a9a01e3dc"
         },
         {
             "referencedResource": "VertexJitter.cs",
             "target": "guid: e4769cb37968ea948a763a9a89f9e583",
-            "replacement": "guid: 2ed57967c52645d390a89dcf8f61ba73"
+            "replacement": "guid: 0df1939587ea4b948bdd3a92bb8de380"
         },
         {
             "referencedResource": "VertexShakeA.cs",
             "target": "guid: eaa12d191e718c945ac55da73fa469db",
-            "replacement": "guid: f7cfa58e417a46ea8889989684c2522e"
+            "replacement": "guid: 18f788fef557492d9ebaa3c814bf0f01"
         },
         {
             "referencedResource": "VertexShakeB.cs",
             "target": "guid: 32c83a5d3ba42b84aa26386eac47566b",
-            "replacement": "guid: e4e0d9ccee5f4950be8979268c9014e0"
+            "replacement": "guid: 55a0c05c24df4fb5a684e8a3af0e9e15"
         },
         {
             "referencedResource": "VertexZoom.cs",
             "target": "guid: 5305493000edc7d4ea4302757dc19a99",
-            "replacement": "guid: 52ec835d14bd486f900952b77698b7eb"
+            "replacement": "guid: 1937dabacb9d468fafaebfc38751f0a4"
         },
         {
             "referencedResource": "WarpTextExample.cs",
             "target": "guid: f3eef864a10f51045a7530e2afe7c179",
-            "replacement": "guid: 790744c462254b7ba8038e6ed28b3db2"
+            "replacement": "guid: 32038d569e7149a5871ff17a10b225b1"
         },
         {
             "referencedResource": "DropCap Numbers.psd",
             "target": "guid: 28b41fef228d6814f90e541deaf9f262",
-            "replacement": "guid: fd09957580ac4326916010f1f260975b"
+            "replacement": "guid: 54de17c6f16044d3a7cf66af75c2542d"
         },
         {
             "referencedResource": "Brushed Metal 3.jpg",
             "target": "guid: c30270e41dccf9441ab56d94261bdcfa",
-            "replacement": "guid: f88677df267a41d6be1e7a6133e7d227"
+            "replacement": "guid: db4f34b095894587bc849b1aa826cd1e"
         },
         {
             "referencedResource": "Engraved Wall.jpg",
@@ -328,12 +328,12 @@
         {
             "referencedResource": "Floor Cement.jpg",
             "target": "guid: ac5a0a5373b36e049bb7f98f88dbc244",
-            "replacement": "guid: 283f897e4925411ebbaa758b4cb13fc2"
+            "replacement": "guid: e3c637683f954551aa1e40fdb34318ad"
         },
         {
             "referencedResource": "Floor Tiles 1 - diffuse.jpg",
             "target": "guid: 7bbfb8818476e4641ba3e75f5225eb69",
-            "replacement": "guid: 85ac55597b97403c82fc6601a93cf241"
+            "replacement": "guid: d7bf9750abc54eb596399d3e1fe00c6c"
         },
         {
             "referencedResource": "Floor Tiles 1 - normal.jpg",
@@ -343,27 +343,27 @@
         {
             "referencedResource": "Fruit Jelly (B&W).jpg",
             "target": "guid: 74d8c208a0193e14ca6916bea88a2c52",
-            "replacement": "guid: 1cdc5b506b1a4a33a53c30669ced1f51"
+            "replacement": "guid: a017c3821faf4b9eab30174235fe03b4"
         },
         {
             "referencedResource": "Gradient Diagonal (Color).jpg",
             "target": "guid: 2421a4955e71725448211e6bfbc7d7fb",
-            "replacement": "guid: 2ce5c55e85304b819a1826ecbc839aa5"
+            "replacement": "guid: 5a17c345d7ee4b08aa1c0df42623386d"
         },
         {
             "referencedResource": "Gradient Horizontal (Color).jpg",
             "target": "guid: 0bbb43aff4f7811419ffceb1b16cf3d6",
-            "replacement": "guid: 6eb184de103d4b3f812b38561065192f"
+            "replacement": "guid: c05d088f08b445a6853df5b200a3a5ec"
         },
         {
             "referencedResource": "Gradient Vertical (Color).jpg",
             "target": "guid: 3359915af07779e4e9a966df9eed764f",
-            "replacement": "guid: 03d0538de6e24c0f819bfc9ce084dfa9"
+            "replacement": "guid: 8c0b849ad11b4a32887342101e225147"
         },
         {
             "referencedResource": "Mask Zig-n-Zag.psd",
             "target": "guid: 04eb87e72b3c1c648ba47a869ee00505",
-            "replacement": "guid: bb8dfcd263ad4eb383a33d74a720be6f"
+            "replacement": "guid: 353f8e99587246348c0edabca450c132"
         },
         {
             "referencedResource": "Sand Normal Map.jpg",
@@ -373,12 +373,12 @@
         {
             "referencedResource": "Small Crate_diffuse.jpg",
             "target": "guid: 64734c9bc6df32149a0c9cb0b18693e1",
-            "replacement": "guid: 602cb87b6a29443b8636370ea0751574"
+            "replacement": "guid: 1ddc2a24048042e99cba6959160bc9ff"
         },
         {
             "referencedResource": "Small Crate_normal.jpg",
             "target": "guid: 81b50d9cb6f3104448ec54c00a80101a",
-            "replacement": "guid: 8878a782f4334ecbbcf683b3ac780966"
+            "replacement": "guid: 41db360cbfe14a2086581758696d3107"
         },
         {
             "referencedResource": "Stainless 03.png",
@@ -388,124 +388,124 @@
         {
             "referencedResource": "Text Overflow - Linked Text Image 1.png",
             "target": "guid: 1fd8c568b1fcdbe43be65c1619cf3293",
-            "replacement": "guid: 4ccf43d26c4748c792174516f4a8fcef"
+            "replacement": "guid: 9ab22309e1e14318a499dbfe24db3825"
         },
         {
             "referencedResource": "Text Overflow - Linked Text UI Screenshot.png",
             "target": "guid: 7983d2ec0427c114a916ae3c4769dc10",
-            "replacement": "guid: c76d18757a194d618355f05f815cb0a1"
+            "replacement": "guid: c419e195a73d4d99a13c7298ab20c1e1"
         },
         {
             "referencedResource": "Wipe Pattern - Circle.psd",
             "target": "guid: 6f5e9497d22a7a84193ec825e2eb41ac",
-            "replacement": "guid: 10c49fcd9c64421db7c0133e61e55f97"
+            "replacement": "guid: 4b12a7723d544d6fa93d7f693e161da0"
         },
         {
             "referencedResource": "Wipe Pattern - Diagonal.psd",
             "target": "guid: 8ee4d366b96418044aa9f94b3e2de645",
-            "replacement": "guid: ed5290d8df18488780e2996b9b882f01"
+            "replacement": "guid: 852f72a1d1574d9686ccc42bddc8d94a"
         },
         {
             "referencedResource": "Wipe Pattern - Radial Double.psd",
             "target": "guid: 3e0e22da7c9570b498205179ef58ef38",
-            "replacement": "guid: 7631f4eff8f74ed38eb3eb9db17134e1"
+            "replacement": "guid: e5e9741d61714700868ada6b0d39a7b4"
         },
         {
             "referencedResource": "Wipe Pattern - Radial Quad.psd",
             "target": "guid: 05ffd580f33f74644a6025ec196860af",
-            "replacement": "guid: 2b5e9ae96c5644d8bae932f8b4ca68a2"
+            "replacement": "guid: 2bc2672346ba46e889393e07e0dab969"
         },
         {
             "referencedResource": "LiberationSans SDF.asset",
             "target": "guid: 715b80e429c437e40867928a4e1fc975",
-            "replacement": "guid: 8f586378b4e144a9851e7b34d9b748ee"
+            "replacement": "guid: 1e3843b942b74aabb3c0a44e7a6f5190"
         },
         {
             "referencedResource": "LineBreaking Following Characters.txt",
             "target": "guid: 312ba5b9e90627940866e19549a788cf",
-            "replacement": "guid: fade42e8bc714b018fac513c043d323b"
+            "replacement": "guid: f9c3ed6360364e31ad36b07d8d103935"
         },
         {
             "referencedResource": "LineBreaking Leading Characters.txt",
             "target": "guid: 8d713940fcbede142ae4a33ea0062b33",
-            "replacement": "guid: d82c1b31c7e74239bff1220585707d2b"
+            "replacement": "guid: 1ce440b697c143ed893c2799594c0117"
         },
         {
             "referencedResource": "TMP_Bitmap.shader",
             "target": "guid: edfcf888cd11d9245b91d2883049a57e",
-            "replacement": "guid: 128e987d567d4e2c824d754223b3f3b0"
+            "replacement": "guid: 95ccbecb7cf14cc2bbd06888665ae1cc"
         },
         {
             "referencedResource": "TMP_Bitmap-Mobile.shader",
             "target": "guid: d1cf17907700cb647aa3ea423ba38f2e",
-            "replacement": "guid: 1e3b057af24249748ff873be7fafee47"
+            "replacement": "guid: 8e65cc65e85c4c1f80405a3bcc6b004b"
         },
         {
             "referencedResource": "TMP_SDF.shader",
             "target": "guid: dca26082f9cb439469295791d9f76fe5",
-            "replacement": "guid: 68e6db2ebdc24f95958faec2be5558d6"
+            "replacement": "guid: abcf10cc92e843dd8530c741953ac8fd"
         },
         {
             "referencedResource": "TMP_SDF Overlay.shader",
             "target": "guid: 4a7755d6b5b67874f89c85f56f95fe97",
-            "replacement": "guid: dd89cf5b9246416f84610a006f916af7"
+            "replacement": "guid: 90037dd8d748477399c1be07e85eb288"
         },
         {
             "referencedResource": "TMP_SDF-Mobile.shader",
             "target": "guid: cafd18099dfc0114896e0a8b277b81b6",
-            "replacement": "guid: fe393ace9b354375a9cb14cdbbc28be4"
+            "replacement": "guid: f99637934d35413090e376899561717a"
         },
         {
             "referencedResource": "TMP_SDF-Mobile Masking.shader",
             "target": "guid: afc255f7c2be52e41973a3d10a2e632d",
-            "replacement": "guid: bc1ede39bf3643ee8e493720e4259791"
+            "replacement": "guid: 7d48a8a963564c8babfa426684695bb8"
         },
         {
             "referencedResource": "TMP_SDF-Mobile Overlay.shader",
             "target": "guid: 9ecb3fe313cb5f7478141eba4a2d54ed",
-            "replacement": "guid: a02a7d8c237544f1962732b55a9aebf1"
+            "replacement": "guid: 2dbab6ddeacf4399a9d621920215cec0"
         },
         {
             "referencedResource": "TMP_SDF-Surface.shader",
             "target": "guid: 8e6b9842dbb1a5a4887378afab854e63",
-            "replacement": "guid: f7ada0af4f174f0694ca6a487b8f543d"
+            "replacement": "guid: e52e3e4586c740459b3c308050ec4b37"
         },
         {
             "referencedResource": "TMP_SDF-Surface-Mobile.shader",
             "target": "guid: 3c2ea7753c1425145a74d106ec1cd852",
-            "replacement": "guid: 85187c2149c549c5b33f0cdb02836b17"
+            "replacement": "guid: 69b418e16fcc46d1adf1e7f05a1d8c83"
         },
         {
             "referencedResource": "TMP_Sprite.shader",
             "target": "guid: 3a1c68c8292caf046bd21158886c5e40",
-            "replacement": "guid: cf81c85f95fe47e1a27f6ae460cf182c"
+            "replacement": "guid: c13dbb07723c428a869261a1220bd4a2"
         },
         {
             "referencedResource": "Default Sprite Asset.asset",
             "target": "guid: 273ca6c80b4b5d746b5e548f532bffd8",
-            "replacement": "guid: fbef3c704dce48f08a44612d6c856c8d"
+            "replacement": "guid: 43da6d30dfea4a0aa0eb692dbeddbbcc"
         },
         {
             "referencedResource": "EmojiOne.asset",
             "target": "guid: 9a952e2781ef26940ae089f1053ef4ef",
-            "replacement": "guid: c41005c129ba4d66911b75229fd70b45"
+            "replacement": "guid: 43da6d30dfea4a0aa0eb692dbeddbbcc"
         },
         {
             "referencedResource": "TMP Default Style Sheet.asset",
             "target": "guid: 54d1085f9a2fdea4587fcfc7dddcd4bc",
-            "replacement": "guid: f952c082cb03451daed3ee968ac6c63e"
+            "replacement": "guid: 3d542e6ba22240c89850a127d1deb9e3"
         },
         {
             "referencedResource": "TMP Settings.asset",
             "target": "guid: 69ed5bac41eebaa4c97e9d2a4168c54f",
-            "replacement": "guid: 3f5b5dff67a942289a9defa416b206f3"
+            "replacement": "guid: 0104df30113748678d4d2f9079d0d107"
         },
         {
             "referencedResource": "TextContainer.cs",
             "target": "guid: 3b34fc186f40e8043b977d4fa70db8c5",
             "replacement": "guid: 32d40088a6124c578ad6b428df586e2e"
         },
-		{
+        {
             "referencedResource": "TextContainer.cs",
             "target": "fileID: 311004786, guid: 89f0137620f6af44b9ba852b4190e64e",
             "replacement": "fileID: 11500000, guid: 32d40088a6124c578ad6b428df586e2e"
@@ -515,7 +515,7 @@
             "target": "guid: 1a1578b9753d2604f98d608cb4239e2f",
             "replacement": "guid: 9541d86e2fd84c1d9990edf0852d74ab"
         },
-		{
+        {
             "referencedResource": "TextMeshPro.cs",
             "target": "fileID: -806885394, guid: 89f0137620f6af44b9ba852b4190e64e",
             "replacement": "fileID: 11500000, guid: 9541d86e2fd84c1d9990edf0852d74ab"
@@ -525,7 +525,7 @@
             "target": "guid: 496f2e385b0c62542b5c739ccfafd8da",
             "replacement": "guid: f4688fdb7df04437aeb418b961361dc5"
         },
-		{
+        {
             "referencedResource": "TextMeshProUGUI.cs",
             "target": "fileID: 1453722849, guid: 89f0137620f6af44b9ba852b4190e64e",
             "replacement": "fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5"
@@ -535,7 +535,7 @@
             "target": "guid: e2c4405608b405a4680436e183e53c45",
             "replacement": "guid: 3bda1886f58f4e0ab1139400b160c3ee"
         },
-		{
+        {
             "referencedResource": "TMP_Asset.cs",
             "target": "fileID: -659140726, guid: 89f0137620f6af44b9ba852b4190e64e",
             "replacement": "fileID: 11500000, guid: 3bda1886f58f4e0ab1139400b160c3ee"
@@ -545,7 +545,7 @@
             "target": "guid: e90e18dd4a044ff4394833216e6bf4d2",
             "replacement": "guid: 54d21f6ece3b46479f0c328f8c6007e0"
         },
-		{
+        {
             "referencedResource": "TMP_ColorGradient.cs",
             "target": "fileID: 2108210716, guid: 89f0137620f6af44b9ba852b4190e64e",
             "replacement": "fileID: 11500000, guid: 54d21f6ece3b46479f0c328f8c6007e0"
@@ -555,7 +555,7 @@
             "target": "guid: 44cb1d34ddab9d449a05fc3747876be1",
             "replacement": "guid: 7b743370ac3e4ec2a1668f5455a8ef8a"
         },
-		{
+        {
             "referencedResource": "TMP_Dropdown.cs",
             "target": "fileID: 1148083418, guid: 89f0137620f6af44b9ba852b4190e64e",
             "replacement": "fileID: 11500000, guid: 7b743370ac3e4ec2a1668f5455a8ef8a"
@@ -565,7 +565,7 @@
             "target": "guid: 74dfce233ddb29b4294c3e23c1d3650d",
             "replacement": "guid: 71c1514a6bd24e1e882cebbe1904ce04"
         },
-		{
+        {
             "referencedResource": "TMP_FontAsset.cs",
             "target": "fileID: -667331979, guid: 89f0137620f6af44b9ba852b4190e64e",
             "replacement": "fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04"
@@ -575,7 +575,7 @@
             "target": "guid: 7b85855a3deaa2e44ac6741a6bbc85f6",
             "replacement": "guid: 2da0c512f12947e489f739169773d7ca"
         },
-		{
+        {
             "referencedResource": "TMP_InputField.cs",
             "target": "fileID: -1620774994, guid: 89f0137620f6af44b9ba852b4190e64e",
             "replacement": "fileID: 11500000, guid: 2da0c512f12947e489f739169773d7ca"
@@ -585,7 +585,7 @@
             "target": "guid: aafc3c7b9e915d64e8ec3d2c88b3a231",
             "replacement": "guid: 2705215ac5b84b70bacc50632be6e391"
         },
-		{
+        {
             "referencedResource": "TMP_Settings.cs",
             "target": "fileID: -395462249, guid: 89f0137620f6af44b9ba852b4190e64e",
             "replacement": "fileID: 11500000, guid: 2705215ac5b84b70bacc50632be6e391"
@@ -595,7 +595,7 @@
             "target": "guid: 90940d439ca0ef746af0b48419b92d2e",
             "replacement": "guid: 84a92b25f83d49b9bc132d206b370281"
         },
-		{
+        {
             "referencedResource": "TMP_SpriteAsset.cs",
             "target": "fileID: 2019389346, guid: 89f0137620f6af44b9ba852b4190e64e",
             "replacement": "fileID: 11500000, guid: 84a92b25f83d49b9bc132d206b370281"
@@ -605,7 +605,7 @@
             "target": "guid: 13259b4ce497b194eb52a33d8eda0bdc",
             "replacement": "guid: ab2114bdc8544297b417dfefe9f1e410"
         },
-		{
+        {
             "referencedResource": "TMP_StyleSheet.cs",
             "target": "fileID: -1936749209, guid: 89f0137620f6af44b9ba852b4190e64e",
             "replacement": "fileID: 11500000, guid: ab2114bdc8544297b417dfefe9f1e410"
@@ -615,7 +615,7 @@
             "target": "guid: bd950677b2d06c74494b1c1118584fff",
             "replacement": "guid: 07994bfe8b0e4adb97d706de5dea48d5"
         },
-		{
+        {
             "referencedResource": "TMP_SubMesh.cs",
             "target": "fileID: 1330537494, guid: 89f0137620f6af44b9ba852b4190e64e",
             "replacement": "fileID: 11500000, guid: 07994bfe8b0e4adb97d706de5dea48d5"
@@ -625,7 +625,7 @@
             "target": "guid: a5378e1f14d974d419f811d6b0861f20",
             "replacement": "guid: 058cba836c1846c3aa1c5fd2e28aea77"
         },
-		{
+        {
             "referencedResource": "TMP_SubMeshUI.cs",
             "target": "fileID: 1908110080, guid: 89f0137620f6af44b9ba852b4190e64e",
             "replacement": "fileID: 11500000, guid: 058cba836c1846c3aa1c5fd2e28aea77"
@@ -635,7 +635,7 @@
             "target": "guid: 9ec8dc9c3fa2e5d41b939b5888d2f1e8",
             "replacement": "guid: 5143f58107604835ab1a5efa2d8818fd"
         },
-		{
+        {
             "referencedResource": "TMP_Text.cs",
             "target": "fileID: -1385168320, guid: 89f0137620f6af44b9ba852b4190e64e",
             "replacement": "fileID: 11500000, guid: 5143f58107604835ab1a5efa2d8818fd"
@@ -643,12 +643,877 @@
         {
             "referencedResource": "Default Sprite Asset.png",
             "target": "guid: 5b32c2d36abe44540bed74c1f787033b",
-            "replacement": "guid: a0fc465d6cf04254a2938578735e2383"
+            "replacement": "guid: 716a5f40975d4fa1a15929895023fb89"
         },
         {
             "referencedResource": "EmojiOne.png",
             "target": "guid: 6ec706981a919c3489f0b061a40054e2",
-            "replacement": "guid: dffef66376be4fa480fb02b19edbe903"
+            "replacement": "guid: 716a5f40975d4fa1a15929895023fb89"
+        },
+        {
+            "referencedResource": "01-  Single Line TextMesh Pro.unity",
+            "target": "guid: 2ac8cf212df6445e8aebbe3cb832e993",
+            "replacement": "guid: 24cb94178c4e4e89b5989b016755e273"
+        },
+        {
+            "referencedResource": "02 - Multi-line TextMesh Pro.unity",
+            "target": "guid: 251716609f634449bfe8ce75c0ed78fe",
+            "replacement": "guid: f9d19c4387a34917bc56c4a3949d3cfa"
+        },
+        {
+            "referencedResource": "03 - Line Justification.unity",
+            "target": "guid: 21a509e1d3cd49978623fa564adb6f02",
+            "replacement": "guid: dd15383d8a2d4e0e9ba201d4b89e81aa"
+        },
+        {
+            "referencedResource": "04 - Word Wrapping.unity",
+            "target": "guid: 8f7137eacd7042d5b17ef0efe5e744f5",
+            "replacement": "guid: 94a6de451d8b4f65997a910131a22837"
+        },
+        {
+            "referencedResource": "05 - Style Tags.unity",
+            "target": "guid: 70615243e2be4a81afaab9bf5d273d65",
+            "replacement": "guid: 87804d7566d44acfb1e14be98b49cb86"
+        },
+        {
+            "referencedResource": "06 - Extra Rich Text Examples.unity",
+            "target": "guid: 39a1fa96ad2a449b908fca29d4297a74",
+            "replacement": "guid: d903db9faa9948beafa2479ae54d74e9"
+        },
+        {
+            "referencedResource": "07 - Superscript & Subscript Example.unity",
+            "target": "guid: 03ec435d4b7140e9b2d87f79136d8374",
+            "replacement": "guid: 861bc1366674408b92a12a6f7b66b883"
+        },
+        {
+            "referencedResource": "08 - Improved Text Alignment.unity",
+            "target": "guid: 5fe2257128d9401fad0790f581dc8a6f",
+            "replacement": "guid: 8d4152e2779b442999112e314128d6de"
+        },
+        {
+            "referencedResource": "09 - Margin Tag Example.unity",
+            "target": "guid: 349f38d3606449708c7340d26740e1e2",
+            "replacement": "guid: f9797d6e07d048908dd9835b8ca764c4"
+        },
+        {
+            "referencedResource": "10 - Bullets & Numbered List Example.unity",
+            "target": "guid: c3f814e1d12c45568daf3dd9a86a0e61",
+            "replacement": "guid: 0611441c03e64ee78f8c9e12ab4316cb"
+        },
+        {
+            "referencedResource": "11 - The Style Tag.unity",
+            "target": "guid: 84ed36ad77dd4956b2ffe3769f759879",
+            "replacement": "guid: 2e5e1948267648e3b41218b6f7241e43"
+        },
+        {
+            "referencedResource": "12 - Link Example.unity",
+            "target": "guid: 9747140c28254be2adc582210dfb89b8",
+            "replacement": "guid: d9e99e54366848c481d7cb371134aa99"
+        },
+        {
+            "referencedResource": "12a - Text Interactions.unity",
+            "target": "guid: 08572ab7713642c8a60789750f0bce5c",
+            "replacement": "guid: 9863c685bcb148869f4e89f1cd633049"
+        },
+        {
+            "referencedResource": "13 - Soft Hyphenation.unity",
+            "target": "guid: 875684baf40f4d008ce806d03e2a81b2",
+            "replacement": "guid: f1366900077a4656b29d4621cd3210d4"
+        },
+        {
+            "referencedResource": "14 - Multi Font & Sprites.unity",
+            "target": "guid: 22a2fba786ad4c40ac0ba09f0b933100",
+            "replacement": "guid: 02407c9d8f24487694c4d273b87cf781"
+        },
+        {
+            "referencedResource": "15 - Inline Graphics & Sprites.unity",
+            "target": "guid: e76e6c0f81964cbda3fe0b7d26ed8060",
+            "replacement": "guid: b22a66ee39c34fbcbf5a90f9b52114b4"
+        },
+        {
+            "referencedResource": "16 - Linked text overflow mode example.unity",
+            "target": "guid: 9442cda25baa4a0bb544c4d095b00caa",
+            "replacement": "guid: 9962a24ba10644c5be9b2859dff12f13"
+        },
+        {
+            "referencedResource": "17 - Old Computer Terminal.unity",
+            "target": "guid: 3e2e4d7b0bed4cf9ab827e9f32448f69",
+            "replacement": "guid: a7a03375bfe7422fb67b9db987d90184"
+        },
+        {
+            "referencedResource": "18 - ScrollRect & Masking & Layout.unity",
+            "target": "guid: 03f9d74cec8e4b94a29d2dfd177c821b",
+            "replacement": "guid: b49285598d8a4f14beb366e66af1c32b"
+        },
+        {
+            "referencedResource": "19 - Masking Texture & Soft Mask.unity",
+            "target": "guid: 9abcd5bd764646568a6ea70d00f9264c",
+            "replacement": "guid: 318fc28d4b384f26bb95092cad63a458"
+        },
+        {
+            "referencedResource": "20 - Input Field with Scrollbar.unity",
+            "target": "guid: 337f92480dd24675aae9e79210fb1ad9",
+            "replacement": "guid: 0b335fc2cd0f41ba85ee946512c95edf"
+        },
+        {
+            "referencedResource": "21 - Script Example.unity",
+            "target": "guid: 50f52f9274434ecfb34dd87f0836f323",
+            "replacement": "guid: 6c3ed03657e2420ab7e2caf30e7d3512"
+        },
+        {
+            "referencedResource": "22 - Basic Scripting Example.unity",
+            "target": "guid: 6250f98e58fe4abbaada5d84b7ca846d",
+            "replacement": "guid: de4bf9e5fa68406db8935c6472b9ef38"
+        },
+        {
+            "referencedResource": "23 - Animating Vertex Attributes.unity",
+            "target": "guid: 54e994244b4b467e8583cf2da6dcc716",
+            "replacement": "guid: 4011309f09b446a58f97980accb925ff"
+        },
+        {
+            "referencedResource": "24 - Surface Shader Example URP.unity",
+            "target": "guid: 57694ed9d1cd1e340a4924c0f2eac8e3",
+            "replacement": "guid: 18203b4feea144fb96037a8d9126ce8d"
+        },
+        {
+            "referencedResource": "24 - Surface Shader Example.unity",
+            "target": "guid: 8c4969fd8ba94a68b07cf11f3e7a5137",
+            "replacement": "guid: efb3f0be77274f77a0a4dfe719b9adf2"
+        },
+        {
+            "referencedResource": "25 - Sunny Days Example.unity",
+            "target": "guid: f9b4c22e15cff344ba9fc6542a58dd07",
+            "replacement": "guid: bc544d943eb44ec9bb22b807f98311bd"
+        },
+        {
+            "referencedResource": "26 - Dropdown Placeholder Example.unity",
+            "target": "guid: 0851605490a599b46b6ac5cb681d93ea",
+            "replacement": "guid: c53449782b714971898a7883549729d6"
+        },
+        {
+            "referencedResource": "27 - Double Pass Shader Example.unity",
+            "target": "guid: 3b38a6ba32b869f48812e595baf39746",
+            "replacement": "guid: 78f58ac602104fcfb16bdeabf73fabe0"
+        },
+        {
+            "referencedResource": "28 - HDRP Shader Example.unity",
+            "target": "guid: eea2b7206368b444e84fbec4ec32b64a",
+            "replacement": "guid: ed7f7a0a10d24d07b7af73ac2b231d54"
+        },
+        {
+            "referencedResource": "Anton OFL.txt",
+            "target": "guid: 73a79399807f4e8388c2cbb5494681ca",
+            "replacement": "guid: dbac05cdf8974afbafbe05db8ee5985c"
+        },
+        {
+            "referencedResource": "Anton SDF - Drop Shadow.mat",
+            "target": "guid: 749b9069dc4742c5bfa5c74644049926",
+            "replacement": "guid: 078f605b782148a1a7dd4b9eb63fe46c"
+        },
+        {
+            "referencedResource": "Anton SDF - Outline.mat",
+            "target": "guid: a00013af81304728b2be1f4309ee2433",
+            "replacement": "guid: bbbb9b1c61c04a9a947378de8efa6d9d"
+        },
+        {
+            "referencedResource": "Anton SDF - Sunny Days.mat",
+            "target": "guid: 6522f30e342599e4e9dd4cc2cc03c830",
+            "replacement": "guid: eccc850cb16f4a7a9eda75614632991f"
+        },
+        {
+            "referencedResource": "Anton SDF.asset",
+            "target": "guid: 8a89fa14b10d46a99122fd4f73fca9a2",
+            "replacement": "guid: a30eb7d7297c4f53ae3971c23a57648a"
+        },
+        {
+            "referencedResource": "Anton.ttf",
+            "target": "guid: 997a43b767814dd0a7642ec9b78cba41",
+            "replacement": "guid: 3a7b228ca2e94106ae627b91c2680626"
+        },
+        {
+            "referencedResource": "Bangers - OFL.txt",
+            "target": "guid: efe0bf4ac872451e91612d1ae593f480",
+            "replacement": "guid: d841bc7f24d0468f91a1d712db0b55dd"
+        },
+        {
+            "referencedResource": "Bangers SDF - Drop Shadow - 2 Pass.mat",
+            "target": "guid: 947a44964e53bf0448ff698b2a2219c0",
+            "replacement": "guid: aac78d6dfe6941bdb976fe8ee09a5d3f"
+        },
+        {
+            "referencedResource": "Bangers SDF - Drop Shadow.mat",
+            "target": "guid: f2dcf029949142e28b974630369c8b4e",
+            "replacement": "guid: 5dfdf5567f7d4a8db56a2c55576397c7"
+        },
+        {
+            "referencedResource": "Bangers SDF - Outline.mat",
+            "target": "guid: f629c6e43dba4bf38cb74d8860150664",
+            "replacement": "guid: 1c88456a24e8491bbadc4252d144ef02"
+        },
+        {
+            "referencedResource": "Bangers SDF Glow.mat",
+            "target": "guid: d75b8f41e959450c84ac6e967084d3e1",
+            "replacement": "guid: 21d2d4f2b9fe4a4594c37d2a6c6d4251"
+        },
+        {
+            "referencedResource": "Bangers SDF Logo - URP.mat",
+            "target": "guid: 6751ce1a4611b3940812c13a6847d94f",
+            "replacement": "guid: d40bbe387d584e1ab8bbad2c87b5ad0e"
+        },
+        {
+            "referencedResource": "Bangers SDF Logo.mat",
+            "target": "guid: f4e195ac1e204eff960149d1cb34e18c",
+            "replacement": "guid: 86e49f97418b437aac1a90a5928697af"
+        },
+        {
+            "referencedResource": "Bangers SDF.asset",
+            "target": "guid: 125cb55b44b24c4393181402bc6200e6",
+            "replacement": "guid: 30afef9ccb1742ae8a959853cb4b3522"
+        },
+        {
+            "referencedResource": "Bangers.ttf",
+            "target": "guid: 5dd49b3eacc540408c98eee0de38e0f1",
+            "replacement": "guid: 641ef8497c554369b0d69037a14f35c7"
+        },
+        {
+            "referencedResource": "Benchmark (Floating Text).unity",
+            "target": "guid: 16177da2e3254cee91944756d5f8ddd3",
+            "replacement": "guid: c567b40549c4429e8d7c6086499f23d1"
+        },
+        {
+            "referencedResource": "Benchmark01.cs",
+            "target": "guid: f970ea55f9f84bf79b05dab180b8c125",
+            "replacement": "guid: 6d7c85db96674216a762bd582fb6d79f"
+        },
+        {
+            "referencedResource": "Benchmark01_UGUI.cs",
+            "target": "guid: 8ef7be1c625941f7ba8ed7cc71718c0d",
+            "replacement": "guid: 61a0588590894629ab80131c9882c0cc"
+        },
+        {
+            "referencedResource": "Benchmark02.cs",
+            "target": "guid: e8538afcddc14efbb5d9e94b7ae50197",
+            "replacement": "guid: e9a217068df446c4b4c44d3ebe1bbbc0"
+        },
+        {
+            "referencedResource": "Benchmark03.cs",
+            "target": "guid: a73109742c8d47ac822895a473300c29",
+            "replacement": "guid: 5a42e46ddde74dfe8c9b6965f5db9224"
+        },
+        {
+            "referencedResource": "Benchmark04.cs",
+            "target": "guid: dc20866c0d5e413ab7559440e15333ae",
+            "replacement": "guid: 0c4ed8c2579e4b67ba70075b5b74ff4c"
+        },
+        {
+            "referencedResource": "Blue to Purple - Vertical.asset",
+            "target": "guid: 479a66fa4b094512a62b0a8e553ad95a",
+            "replacement": "guid: 739dcee66b93450ebc8eff4d93fb67ca"
+        },
+        {
+            "referencedResource": "Brushed Metal 3.jpg",
+            "target": "guid: f88677df267a41d6be1e7a6133e7d227",
+            "replacement": "guid: db4f34b095894587bc849b1aa826cd1e"
+        },
+        {
+            "referencedResource": "CameraController.cs",
+            "target": "guid: 2d687537154440a3913a9a3c7977978c",
+            "replacement": "guid: 28b2a5f7d6c84e56ab061b3380152cb8"
+        },
+        {
+            "referencedResource": "ChatController.cs",
+            "target": "guid: 53d91f98a2664f5cb9af11de72ac54ec",
+            "replacement": "guid: 28771a4864394e39882399d814a1b903"
+        },
+        {
+            "referencedResource": "Crate - Surface Shader Scene.mat",
+            "target": "guid: e6b9b44320f4448d9d5e0ee634259966",
+            "replacement": "guid: 49fef94b11674525a1b269a9bda81f8c"
+        },
+        {
+            "referencedResource": "Crate - URP.mat",
+            "target": "guid: 3b5cc91c3bf8cf74391252247f52fb59",
+            "replacement": "guid: 3b767ce69f3a444d8f5c0c0ab20bd0ba"
+        },
+        {
+            "referencedResource": "Dark to Light Green - Vertical.asset",
+            "target": "guid: 4c86a3366cd840348ebe8dc438570ee4",
+            "replacement": "guid: 86e49b3abbfe407498227b6aa0cae23c"
+        },
+        {
+            "referencedResource": "Default Sprite Asset.asset",
+            "target": "guid: fbef3c704dce48f08a44612d6c856c8d",
+            "replacement": "guid: 43da6d30dfea4a0aa0eb692dbeddbbcc"
+        },
+        {
+            "referencedResource": "Default Sprites.png",
+            "target": "guid: a0fc465d6cf04254a2938578735e2383",
+            "replacement": "guid: 716a5f40975d4fa1a15929895023fb89"
+        },
+        {
+            "referencedResource": "DropCap Numbers.asset",
+            "target": "guid: 14aa93acbb234d16aaef0e8b46814db6",
+            "replacement": "guid: 23ec35b91bd043d1b158ec6068159429"
+        },
+        {
+            "referencedResource": "DropCap Numbers.psd",
+            "target": "guid: fd09957580ac4326916010f1f260975b",
+            "replacement": "guid: 54de17c6f16044d3a7cf66af75c2542d"
+        },
+        {
+            "referencedResource": "DropdownSample.cs",
+            "target": "guid: ac1eb05af6d391b4eb0f4c070a99f1d0",
+            "replacement": "guid: f175b7fb5a30434bae4283eeed07c903"
+        },
+        {
+            "referencedResource": "Electronic Highway Sign SDF.asset",
+            "target": "guid: dc36b3fdc14f47ebb36fd484a67e268a",
+            "replacement": "guid: 08cd128db64c4445b3422f1b7afdf77f"
+        },
+        {
+            "referencedResource": "Electronic Highway Sign.TTF",
+            "target": "guid: 8a2b9e2a607dd2143b58c44bc32410b4",
+            "replacement": "guid: 02dec5df1dc441a486e3a037e75729e8"
+        },
+        {
+            "referencedResource": "EnvMapAnimator.cs",
+            "target": "guid: a4b6f99e8bc54541bbd149b014ff441c",
+            "replacement": "guid: 5085522f05ba4a19884e22661214c621"
+        },
+        {
+            "referencedResource": "Floor Cement.jpg",
+            "target": "guid: 283f897e4925411ebbaa758b4cb13fc2",
+            "replacement": "guid: e3c637683f954551aa1e40fdb34318ad"
+        },
+        {
+            "referencedResource": "Floor Tiles 1 - diffuse.jpg",
+            "target": "guid: 85ac55597b97403c82fc6601a93cf241",
+            "replacement": "guid: d7bf9750abc54eb596399d3e1fe00c6c"
+        },
+        {
+            "referencedResource": "Fruit Jelly (B&W).jpg",
+            "target": "guid: 1cdc5b506b1a4a33a53c30669ced1f51",
+            "replacement": "guid: a017c3821faf4b9eab30174235fe03b4"
+        },
+        {
+            "referencedResource": "Gradient Diagonal (Color).jpg",
+            "target": "guid: 2ce5c55e85304b819a1826ecbc839aa5",
+            "replacement": "guid: 5a17c345d7ee4b08aa1c0df42623386d"
+        },
+        {
+            "referencedResource": "Gradient Horizontal (Color).jpg",
+            "target": "guid: 6eb184de103d4b3f812b38561065192f",
+            "replacement": "guid: c05d088f08b445a6853df5b200a3a5ec"
+        },
+        {
+            "referencedResource": "Gradient Vertical (Color).jpg",
+            "target": "guid: 03d0538de6e24c0f819bfc9ce084dfa9",
+            "replacement": "guid: 8c0b849ad11b4a32887342101e225147"
+        },
+        {
+            "referencedResource": "Ground - Logo Scene.mat",
+            "target": "guid: c719e38f25a9480abd2480ab621a2949",
+            "replacement": "guid: d49c5f0235214b8ca876e13d74ae3f7c"
+        },
+        {
+            "referencedResource": "Ground - Surface Shader Scene.mat",
+            "target": "guid: aadd5a709a48466c887296bb5b1b8110",
+            "replacement": "guid: e1125e0ef94b4865a5939c812747a9d1"
+        },
+        {
+            "referencedResource": "Ground - URP.mat",
+            "target": "guid: 71529b88994c1a341b22bc57c038674a",
+            "replacement": "guid: f7ff89fb554245538a337cc6359298b8"
+        },
+        {
+            "referencedResource": "LiberationSans - OFL.txt",
+            "target": "guid: 6e59c59b81ab47f9b6ec5781fa725d2c",
+            "replacement": "guid: cced3d5f5f7940fb9faa8a693ef4c3cf"
+        },
+        {
+            "referencedResource": "LiberationSans SDF - Drop Shadow.mat",
+            "target": "guid: e73a58f6e2794ae7b1b7e50b7fb811b0",
+            "replacement": "guid: ca5c41f7c6b74198bd3bc55bcd079729"
+        },
+        {
+            "referencedResource": "LiberationSans SDF - Fallback.asset",
+            "target": "guid: 2e498d1c8094910479dc3e1b768306a4",
+            "replacement": "guid: bb78ff062bb1453c8073f7fe2f93de3e"
+        },
+        {
+            "referencedResource": "LiberationSans SDF - Metalic Green.mat",
+            "target": "guid: 8b29aaa3eec7468097ff07adfcf29ac9",
+            "replacement": "guid: 791ccdabd309482ea0baeb51277a8379"
+        },
+        {
+            "referencedResource": "LiberationSans SDF - Outline.mat",
+            "target": "guid: 79459efec17a4d00a321bdcc27bbc385",
+            "replacement": "guid: fea3af43564c4034826b01bc15df576e"
+        },
+        {
+            "referencedResource": "LiberationSans SDF - Overlay.mat",
+            "target": "guid: 9ad269c99dcf42b7aedefd83dd5a7b9d",
+            "replacement": "guid: 81c9d9da232040d592fa6280ea14e437"
+        },
+        {
+            "referencedResource": "LiberationSans SDF - Soft Mask.mat",
+            "target": "guid: 42df1c7856584b6b8db9a509b6b10074",
+            "replacement": "guid: 8d9dfeab86d44b268223c5f5c7263d4f"
+        },
+        {
+            "referencedResource": "LiberationSans SDF.asset",
+            "target": "guid: 8f586378b4e144a9851e7b34d9b748ee",
+            "replacement": "guid: 1e3843b942b74aabb3c0a44e7a6f5190"
+        },
+        {
+            "referencedResource": "LiberationSans.ttf",
+            "target": "guid: e3265ab4bf004d28a9537516768c1c75",
+            "replacement": "guid: 35352f55545b42a2916562326f2e82e8"
+        },
+        {
+            "referencedResource": "Light to Dark Green - Vertical.asset",
+            "target": "guid: 5cf8ae092ca54931b443bec5148f3c59",
+            "replacement": "guid: 34e96e7e340b4cec8e55ba7bc6115fe0"
+        },
+        {
+            "referencedResource": "Mask Zig-n-Zag.psd",
+            "target": "guid: bb8dfcd263ad4eb383a33d74a720be6f",
+            "replacement": "guid: 353f8e99587246348c0edabca450c132"
+        },
+        {
+            "referencedResource": "ObjectSpin.cs",
+            "target": "guid: 4f19c7f94c794c5097d8bd11e39c750d",
+            "replacement": "guid: d00d9b912c6f44e7a1ead097941ecd3a"
+        },
+        {
+            "referencedResource": "Oswald Bold SDF.asset",
+            "target": "guid: 0161d805a3764c089bef00bfe00793f5",
+            "replacement": "guid: 90347108ce5f4fcab194986cf2cb96e2"
+        },
+        {
+            "referencedResource": "Oswald-Bold - OFL.txt",
+            "target": "guid: d2cf87a8a7a94aa8b80dff1c807c1178",
+            "replacement": "guid: a23a50b115b644e480ac12f2a969b9c6"
+        },
+        {
+            "referencedResource": "Oswald-Bold.ttf",
+            "target": "guid: c9f6d0e7bc8541498c9a4799ba184ede",
+            "replacement": "guid: 3087ebc4bfca4c89b39ffbd6e8ad884d"
+        },
+        {
+            "referencedResource": "Roboto-Bold - AFL.txt",
+            "target": "guid: f28c334d44214474d9702d3ad79ecb0a",
+            "replacement": "guid: 116bf1ba3f11457e9f278c68f86ba103"
+        },
+        {
+            "referencedResource": "Roboto-Bold - License.txt",
+            "target": "guid: f0303f887b8fa7243a51432c478ff2f3",
+            "replacement": "guid: 42ab6600d69d472c9311c15d998f057d"
+        },
+        {
+            "referencedResource": "Roboto-Bold SDF - Drop Shadow.mat",
+            "target": "guid: b246c4190f4e46ec9352fe15a7b09ce0",
+            "replacement": "guid: 16c0f8d13ca747979273b94f389bc8ce"
+        },
+        {
+            "referencedResource": "Roboto-Bold SDF - HDRP Unlit.mat",
+            "target": "guid: 2ddca8f46aa0838419d568affb0ca6b4",
+            "replacement": "guid: a80881e6e2784dfabec9314805cfb8c5"
+        },
+        {
+            "referencedResource": "Roboto-Bold SDF - Surface.mat",
+            "target": "guid: e6b276ec991f467aa14ef1f3cc665993",
+            "replacement": "guid: 40b3d01e23e34630a6b8177ea22e7af7"
+        },
+        {
+            "referencedResource": "Roboto-Bold SDF - URP.mat",
+            "target": "guid: 90722b8bd74d9aa49958562aff7bdf76",
+            "replacement": "guid: 3beefe2335af4504b821ab8cb6c51fb6"
+        },
+        {
+            "referencedResource": "Roboto-Bold SDF.asset",
+            "target": "guid: 5302535af1044152a457ed104f1f4b91",
+            "replacement": "guid: 01e62767a5fa417d9a212a53e293fed7"
+        },
+        {
+            "referencedResource": "Roboto-Bold.ttf",
+            "target": "guid: 4beb055f07aaff244873dec698d0363e",
+            "replacement": "guid: 896d592458b24ec6a6ad6cdf977275fd"
+        },
+        {
+            "referencedResource": "SDFFunctions.hlsl",
+            "target": "guid: 96de908384869cd409c75efa351d5edf",
+            "replacement": "guid: 56893bf6057144ccafc4bbdb5b699b49"
+        },
+        {
+            "referencedResource": "ShaderPropAnimator.cs",
+            "target": "guid: 2787a46a4dc848c1b4b7b9307b614bfd",
+            "replacement": "guid: 0a9adb81e97d4806aac690a23f0712b4"
+        },
+        {
+            "referencedResource": "SimpleScript.cs",
+            "target": "guid: 9eff140b25d64601aabc6ba32245d099",
+            "replacement": "guid: 323469d7e1494342b7567b3c0cdf858a"
+        },
+        {
+            "referencedResource": "SkewTextExample.cs",
+            "target": "guid: d412675cfb3441efa3bf8dcd9b7624dc",
+            "replacement": "guid: b795026802ed4030a5742f7181bb660f"
+        },
+        {
+            "referencedResource": "Sky and Fog Volume Profile.asset",
+            "target": "guid: 83ba2e375bed45f48bce43e5a5f7c88a",
+            "replacement": "guid: 4fb40538aa7347a8be9c37cc04efcfde"
+        },
+        {
+            "referencedResource": "Small Crate_diffuse.jpg",
+            "target": "guid: 602cb87b6a29443b8636370ea0751574",
+            "replacement": "guid: 1ddc2a24048042e99cba6959160bc9ff"
+        },
+        {
+            "referencedResource": "Small Crate_diffuse.mat",
+            "target": "guid: 22262639920f43d6be32430e4e58350d",
+            "replacement": "guid: d57046d19181418383896461349619b6"
+        },
+        {
+            "referencedResource": "Small Crate_normal.jpg",
+            "target": "guid: 8878a782f4334ecbbcf683b3ac780966",
+            "replacement": "guid: 41db360cbfe14a2086581758696d3107"
+        },
+        {
+            "referencedResource": "Sunny Days - Seamless.jpg",
+            "target": "guid: 17c350171f7a3ca479f830547c66d187",
+            "replacement": "guid: c9c7f99eeed44e65a19bb6e061444b0b"
+        },
+        {
+            "referencedResource": "TMP_Bitmap-Custom-Atlas.shader",
+            "target": "guid: 48bb5f55d8670e349b6e614913f9d910",
+            "replacement": "guid: 9b353cff71f94293aa3a1b84ec7726a8"
+        },
+        {
+            "referencedResource": "TMP_Bitmap-Mobile.shader",
+            "target": "guid: 1e3b057af24249748ff873be7fafee47",
+            "replacement": "guid: 8e65cc65e85c4c1f80405a3bcc6b004b"
+        },
+        {
+            "referencedResource": "TMP_Bitmap.shader",
+            "target": "guid: 128e987d567d4e2c824d754223b3f3b0",
+            "replacement": "guid: 95ccbecb7cf14cc2bbd06888665ae1cc"
+        },
+        {
+            "referencedResource": "TMP_DigitValidator.cs",
+            "target": "guid: 1a7eb92a01ed499a987bde9def05fbce",
+            "replacement": "guid: 8b8ed24381f2417e92c0706263fb870d"
+        },
+        {
+            "referencedResource": "TMP_ExampleScript_01.cs",
+            "target": "guid: 6f2c5b59b6874405865e2616e4ec276a",
+            "replacement": "guid: 7778a02bd8804490a662e0ea8f293393"
+        },
+        {
+            "referencedResource": "TMP_FrameRateCounter.cs",
+            "target": "guid: 686ec78b56aa445795335fbadafcfaa4",
+            "replacement": "guid: fa326b3c540d41c2b4a4b7b2e2f82e7c"
+        },
+        {
+            "referencedResource": "TMP_PhoneNumberValidator.cs",
+            "target": "guid: 83680ab1a69f4102ac67d1459fe76e1f",
+            "replacement": "guid: b206d985845740d0a28cde694e64f8dd"
+        },
+        {
+            "referencedResource": "TMP_SDF Overlay.shader",
+            "target": "guid: dd89cf5b9246416f84610a006f916af7",
+            "replacement": "guid: 90037dd8d748477399c1be07e85eb288"
+        },
+        {
+            "referencedResource": "TMP_SDF SSD SpaceWarp.shader",
+            "target": "guid: 5c6f31a5a80ebc04f8bcfdeed8327fe1",
+            "replacement": "guid: 0557482ffe6241d584b7ad91cfd7ad49"
+        },
+        {
+            "referencedResource": "TMP_SDF SSD.shader",
+            "target": "guid: 14eb328de4b8eb245bb7cea29e4ac00b",
+            "replacement": "guid: ab4ae7a015a441e79ffd42ca1c8ecf10"
+        },
+        {
+            "referencedResource": "TMP_SDF SpaceWarp.shader",
+            "target": "guid: b5ab6cb89ffa7004ca59c01dddd06493",
+            "replacement": "guid: 3cede5ba99c240c288e2fc02b961c7d4"
+        },
+        {
+            "referencedResource": "TMP_SDF-HDRP LIT.shadergraph",
+            "target": "guid: ca2ed216f98028c4dae6c5224a952b3c",
+            "replacement": "guid: 9b2782d4f28245a28a30830493625044"
+        },
+        {
+            "referencedResource": "TMP_SDF-HDRP UNLIT.shadergraph",
+            "target": "guid: f63d574838ccfb44f84acc05fed0af48",
+            "replacement": "guid: f22099489d7f4a14a13a8e2fdb12691c"
+        },
+        {
+            "referencedResource": "TMP_SDF-Mobile Masking.shader",
+            "target": "guid: bc1ede39bf3643ee8e493720e4259791",
+            "replacement": "guid: 7d48a8a963564c8babfa426684695bb8"
+        },
+        {
+            "referencedResource": "TMP_SDF-Mobile Overlay.shader",
+            "target": "guid: a02a7d8c237544f1962732b55a9aebf1",
+            "replacement": "guid: 2dbab6ddeacf4399a9d621920215cec0"
+        },
+        {
+            "referencedResource": "TMP_SDF-Mobile SSD SpaceWarp.shader",
+            "target": "guid: 2f52e8cb070aaf94289b130df84e2882",
+            "replacement": "guid: 3dbce2c8fcef47d6b790c168260e4ca4"
+        },
+        {
+            "referencedResource": "TMP_SDF-Mobile SSD.shader",
+            "target": "guid: c8d12adcee749c344b8117cf7c7eb912",
+            "replacement": "guid: 37f0765cde2f40f8bec87d141295c99c"
+        },
+        {
+            "referencedResource": "TMP_SDF-Mobile SpaceWarp.shader",
+            "target": "guid: 2ae3f84ba70f31a448850bf95ca45125",
+            "replacement": "guid: 082483ce6e2c49e58894bcef425c54ea"
+        },
+        {
+            "referencedResource": "TMP_SDF-Mobile-2-Pass.shader",
+            "target": "guid: 0178fcb869bafef4690d177d31d17db8",
+            "replacement": "guid: 92552ea265b64b9d80e770ea1d0dbd5b"
+        },
+        {
+            "referencedResource": "TMP_SDF-Mobile.shader",
+            "target": "guid: fe393ace9b354375a9cb14cdbbc28be4",
+            "replacement": "guid: f99637934d35413090e376899561717a"
+        },
+        {
+            "referencedResource": "TMP_SDF-Surface-Mobile.shader",
+            "target": "guid: 85187c2149c549c5b33f0cdb02836b17",
+            "replacement": "guid: 69b418e16fcc46d1adf1e7f05a1d8c83"
+        },
+        {
+            "referencedResource": "TMP_SDF-Surface.shader",
+            "target": "guid: f7ada0af4f174f0694ca6a487b8f543d",
+            "replacement": "guid: e52e3e4586c740459b3c308050ec4b37"
+        },
+        {
+            "referencedResource": "TMP_SDF-URP Lit.shadergraph",
+            "target": "guid: a3d800b099a06e0478fb790c5e79057a",
+            "replacement": "guid: e29e7355e8f14ae2a18b9218039b72e2"
+        },
+        {
+            "referencedResource": "TMP_SDF-URP Unlit.shadergraph",
+            "target": "guid: 124c112a6e8f1a54e8b0870e881b56d8",
+            "replacement": "guid: 3233e7968f094bc2b7cd2f93841bac91"
+        },
+        {
+            "referencedResource": "TMP_SDF.shader",
+            "target": "guid: 68e6db2ebdc24f95958faec2be5558d6",
+            "replacement": "guid: abcf10cc92e843dd8530c741953ac8fd"
+        },
+        {
+            "referencedResource": "TMP_Sprite.shader",
+            "target": "guid: cf81c85f95fe47e1a27f6ae460cf182c",
+            "replacement": "guid: c13dbb07723c428a869261a1220bd4a2"
+        },
+        {
+            "referencedResource": "TMP_TextEventCheck.cs",
+            "target": "guid: d736ce056cf444ca96e424f4d9c42b76",
+            "replacement": "guid: 835e882277d34c4f876d873c01da4a6a"
+        },
+        {
+            "referencedResource": "TMP_TextEventHandler.cs",
+            "target": "guid: 1312ae25639a4bae8e25ae223209cc50",
+            "replacement": "guid: 7c059f168169478fa301ea82750fae0e"
+        },
+        {
+            "referencedResource": "TMP_TextInfoDebugTool.cs",
+            "target": "guid: 21256c5b62f346f18640dad779911e20",
+            "replacement": "guid: 39c31caa077749dd8a729376b10a2ec5"
+        },
+        {
+            "referencedResource": "TMP_TextSelector_A.cs",
+            "target": "guid: 103e0a6a1d404693b9fb1a5173e0e979",
+            "replacement": "guid: 3a84f420be3b468b92fa3f03825dcd86"
+        },
+        {
+            "referencedResource": "TMP_TextSelector_B.cs",
+            "target": "guid: a05dcd8be7ec4ccbb35c26219884aa37",
+            "replacement": "guid: 3a81843e8f8041ad9eb6bb7e2827eb6b"
+        },
+        {
+            "referencedResource": "TMP_UiFrameRateCounter.cs",
+            "target": "guid: 24b0dc2d1d494adbbec1f4db26b4cf83",
+            "replacement": "guid: a38b8c3e1fc64ba7828edca694dd9f7c"
+        },
+        {
+            "referencedResource": "TMPro.cginc",
+            "target": "guid: 407bc68d299748449bbf7f48ee690f8d",
+            "replacement": "guid: 82c8db4c19744dd2949e9144023860bb"
+        },
+        {
+            "referencedResource": "TMPro_InstructionOverlay.cs",
+            "target": "guid: c3c1afeda5e545e0b19add5373896d2e",
+            "replacement": "guid: 3fafd64d343d4416bbbff313f494be7e"
+        },
+        {
+            "referencedResource": "TMPro_Mobile.cginc",
+            "target": "guid: c334973cef89a9840b0b0c507e0377ab",
+            "replacement": "guid: d477c6e2959e4af3868a24f3fb8034b8"
+        },
+        {
+            "referencedResource": "TMPro_Properties.cginc",
+            "target": "guid: 3997e2241185407d80309a82f9148466",
+            "replacement": "guid: 41de848a8090419eb81a7d732162553b"
+        },
+        {
+            "referencedResource": "TMPro_Surface.cginc",
+            "target": "guid: d930090c0cd643c7b55f19a38538c162",
+            "replacement": "guid: a296b22beaf24c7591b08225dfecf477"
+        },
+        {
+            "referencedResource": "TeleType.cs",
+            "target": "guid: e32c266ee6204b21a427753cb0694c81",
+            "replacement": "guid: e673e75c4571475f8895ff13ad71935f"
+        },
+        {
+            "referencedResource": "Text Overflow - Linked Text Image 1.png",
+            "target": "guid: 4ccf43d26c4748c792174516f4a8fcef",
+            "replacement": "guid: 9ab22309e1e14318a499dbfe24db3825"
+        },
+        {
+            "referencedResource": "Text Overflow - Linked Text UI Screenshot.png",
+            "target": "guid: c76d18757a194d618355f05f815cb0a1",
+            "replacement": "guid: c419e195a73d4d99a13c7298ab20c1e1"
+        },
+        {
+            "referencedResource": "Text Popup.prefab",
+            "target": "guid: b06f0e6c1dfa4356ac918da1bb32c603",
+            "replacement": "guid: 7a76bf5958a14cb9ae342cec8d702a0f"
+        },
+        {
+            "referencedResource": "TextConsoleSimulator.cs",
+            "target": "guid: 43bcd35a1c0c40ccb6d472893fe2093f",
+            "replacement": "guid: 9353cca21e1b4a18a4a7fe6ca102a1ad"
+        },
+        {
+            "referencedResource": "TextMeshPro - Prefab 1.prefab",
+            "target": "guid: a6e39ced0ea046bcb636c3f0b2e2a745",
+            "replacement": "guid: 80b21d0180074cdd92e530ca5229548e"
+        },
+        {
+            "referencedResource": "TextMeshPro - Prefab 2.prefab",
+            "target": "guid: fdad9d952ae84cafb74c63f2e694d042",
+            "replacement": "guid: 04c0d7b3ca72477a9856655dc116336a"
+        },
+        {
+            "referencedResource": "TextMeshProFloatingText.cs",
+            "target": "guid: a4d4c76e63944cba8c7d00f56334b98c",
+            "replacement": "guid: 72262fbea055491d918e8594dce872d3"
+        },
+        {
+            "referencedResource": "TextMeshSpawner.cs",
+            "target": "guid: 76c11bbcfddf44e0ba17d6c2751c8d84",
+            "replacement": "guid: 0749eead97a84ba28fe42205d1285816"
+        },
+        {
+            "referencedResource": "Unity - OFL.txt",
+            "target": "guid: 0251f66ebc602a944b35bccd13be2738",
+            "replacement": "guid: af07f469c02f4f0d976321025415fc00"
+        },
+        {
+            "referencedResource": "Unity SDF - HDRP LIT - Bloom.mat",
+            "target": "guid: 8d176c01131de8f46ad61094e29d79b2",
+            "replacement": "guid: a767cdb9b599465b801194a26a3fad5e"
+        },
+        {
+            "referencedResource": "Unity SDF - HDRP LIT - Outline.mat",
+            "target": "guid: 967f61bb1e3e28645a39e0cb647cc79e",
+            "replacement": "guid: 2e1776227acb49109effd589121bfd3d"
+        },
+        {
+            "referencedResource": "Unity SDF.asset",
+            "target": "guid: c9adb1f542a93ae489bacfeae21e8394",
+            "replacement": "guid: 70acaa4ee662460ba14e90214a515b14"
+        },
+        {
+            "referencedResource": "Unity.ttf",
+            "target": "guid: f4eec857a4fdf2f43be0e9f3d1a984e7",
+            "replacement": "guid: 81a19f03afcf4cd7b8acd86d1ac244c8"
+        },
+        {
+            "referencedResource": "VertexColorCycler.cs",
+            "target": "guid: 91b8ba3d52e041fab2d0e0f169855539",
+            "replacement": "guid: 150600dfd7d94aefb889a16a9a01e3dc"
+        },
+        {
+            "referencedResource": "VertexJitter.cs",
+            "target": "guid: 2ed57967c52645d390a89dcf8f61ba73",
+            "replacement": "guid: 0df1939587ea4b948bdd3a92bb8de380"
+        },
+        {
+            "referencedResource": "VertexShakeA.cs",
+            "target": "guid: f7cfa58e417a46ea8889989684c2522e",
+            "replacement": "guid: 18f788fef557492d9ebaa3c814bf0f01"
+        },
+        {
+            "referencedResource": "VertexShakeB.cs",
+            "target": "guid: e4e0d9ccee5f4950be8979268c9014e0",
+            "replacement": "guid: 55a0c05c24df4fb5a684e8a3af0e9e15"
+        },
+        {
+            "referencedResource": "VertexZoom.cs",
+            "target": "guid: 52ec835d14bd486f900952b77698b7eb",
+            "replacement": "guid: 1937dabacb9d468fafaebfc38751f0a4"
+        },
+        {
+            "referencedResource": "WarpTextExample.cs",
+            "target": "guid: 790744c462254b7ba8038e6ed28b3db2",
+            "replacement": "guid: 32038d569e7149a5871ff17a10b225b1"
+        },
+        {
+            "referencedResource": "Wipe Pattern - Circle.psd",
+            "target": "guid: 10c49fcd9c64421db7c0133e61e55f97",
+            "replacement": "guid: 4b12a7723d544d6fa93d7f693e161da0"
+        },
+        {
+            "referencedResource": "Wipe Pattern - Diagonal.psd",
+            "target": "guid: ed5290d8df18488780e2996b9b882f01",
+            "replacement": "guid: 852f72a1d1574d9686ccc42bddc8d94a"
+        },
+        {
+            "referencedResource": "Wipe Pattern - Radial Double.psd",
+            "target": "guid: 7631f4eff8f74ed38eb3eb9db17134e1",
+            "replacement": "guid: e5e9741d61714700868ada6b0d39a7b4"
+        },
+        {
+            "referencedResource": "Wipe Pattern - Radial Quad.psd",
+            "target": "guid: 2b5e9ae96c5644d8bae932f8b4ca68a2",
+            "replacement": "guid: 2bc2672346ba46e889393e07e0dab969"
+        },
+        {
+            "referencedResource": "Yellow to Orange - Vertical.asset",
+            "target": "guid: 69a525efa7e6472eab268f6ea605f06e",
+            "replacement": "guid: 5a2fc6eee13248d2b7678faa19842e9e"
+        },
+        {
+            "referencedResource": "TMP Settings.asset",
+            "target": "guid: 3f5b5dff67a942289a9defa416b206f3",
+            "replacement": "guid: 0104df30113748678d4d2f9079d0d107"
+        },
+        {
+            "referencedResource": "LineBreaking Leading Characters.txt",
+            "target": "guid: d82c1b31c7e74239bff1220585707d2b",
+            "replacement": "guid: 1ce440b697c143ed893c2799594c0117"
+        },
+        {
+            "referencedResource": "Default Style Sheet.asset",
+            "target": "guid: f952c082cb03451daed3ee968ac6c63e",
+            "replacement": "guid: 3d542e6ba22240c89850a127d1deb9e3"
+        },
+        {
+            "referencedResource": "LineBreaking Following Characters.txt",
+            "target": "guid: fade42e8bc714b018fac513c043d323b",
+            "replacement": "guid: f9c3ed6360364e31ad36b07d8d103935"
         }
     ]
 }

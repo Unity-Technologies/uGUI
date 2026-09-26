@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.TextCore;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 #pragma warning disable 0649 // Disabled warnings related to serialized fields not assigned in this script but used in the editor.
 
@@ -41,13 +40,16 @@ namespace TMPro
         }
 
         [SerializeField]
-        internal string assetVersion;
+        bool m_IsBuiltInSettings;
 
-        internal const string s_CurrentAssetVersion = "2";
+        /// <summary>
+        /// True for the TMP Settings asset shipped with the package, used when the project defines none.
+        /// </summary>
+        internal bool isBuiltInSettings => m_IsBuiltInSettings;
 
-        internal void SetAssetVersion()
+        internal void ClearBuiltInFlag()
         {
-            assetVersion = s_CurrentAssetVersion;
+            m_IsBuiltInSettings = false;
         }
 
         /// <summary>
@@ -476,114 +478,168 @@ namespace TMPro
         /// <summary>
         /// Get a singleton instance of the settings class.
         /// </summary>
+        /// <remarks>
+        /// Resolves to the TMP Settings asset of the project when it has one, otherwise to the TMP Settings shipped with the package.
+        /// </remarks>
         public static TMP_Settings instance
         {
             get
             {
-                if (isTMPSettingsNull)
+                if (s_Instance == null)
                 {
-                    s_Instance = Resources.Load<TMP_Settings>("TMP Settings");
-
-                    #if UNITY_EDITOR
-                    // Make sure TextMesh Pro UPM packages resources have been added to the user project
-                    if (isTMPSettingsNull && Time.frameCount != 0 || (!isTMPSettingsNull && s_Instance.assetVersion != s_CurrentAssetVersion))
-                    {
-						// It needs to open after loading the default Editor layout
-                        DelayShowPackageImporterWindow();
-                    }
-                    #endif
-
-                    // Convert use of the "enableKerning" property to the new "fontFeature" property.
-                    if (!isTMPSettingsNull && s_Instance.m_ActiveFontFeatures.Count == 1 && s_Instance.m_ActiveFontFeatures[0] == 0)
-                    {
-                        s_Instance.m_ActiveFontFeatures.Clear();
-
-                        if (s_Instance.m_enableKerning)
-                            s_Instance.m_ActiveFontFeatures.Add(OTL_FeatureTag.kern);
-                    }
+                    s_Instance = LoadSettings();
+                    s_Instance.MigrateKerningToFontFeatures();
                 }
 
                 return s_Instance;
             }
         }
 
-        internal static bool isTMPSettingsNull
+        // Convert use of the "enableKerning" property to the new "fontFeature" property.
+        void MigrateKerningToFontFeatures()
         {
-            get { return s_Instance == null; }
+            if (m_ActiveFontFeatures.Count != 1 || m_ActiveFontFeatures[0] != 0)
+                return;
+
+            m_ActiveFontFeatures.Clear();
+
+            if (m_enableKerning)
+                m_ActiveFontFeatures.Add(OTL_FeatureTag.kern);
         }
 
-#if UNITY_EDITOR
-        public static async void DelayShowPackageImporterWindow()
+        static TMP_Settings LoadSettings()
         {
-            await Task.Delay(TimeSpan.FromSeconds(1f));
-            TMP_PackageResourceImporterWindow.ShowPackageImporterWindow();
+            TMP_Settings settings = null;
+
+#if UNITY_EDITOR
+            settings = FindSettingsInEditor(out _, out _, logErrors: true);
+#endif
+            if (settings == null)
+                settings = Resources.Load<TMP_Settings>("TMP Settings");
+
+            if (settings == null)
+            {
+#if !UNITY_EDITOR
+                Debug.LogWarning("No TMP Settings asset could be loaded. Falling back to default settings without a default font asset.");
+#endif
+                settings = CreateInstance<TMP_Settings>();
+                settings.hideFlags = HideFlags.HideAndDontSave;
+            }
+
+            return settings;
+        }
+
+#if !UNITY_EDITOR
+        // Preloaded by TMP_SettingsBuildProcessor, so the active asset registers itself at player startup.
+        void OnEnable()
+        {
+            if (s_Instance != null)
+                return;
+
+            MigrateKerningToFontFeatures();
+            s_Instance = this;
         }
 #endif
 
+        internal static void ResetStaticSettings()
+        {
+            s_Instance = null;
+        }
+
+#if UNITY_EDITOR
+        internal const string k_BuiltInSettingsGUID = "0104df30113748678d4d2f9079d0d107";
+
+        /// <summary>
+        /// Returns the TMP Settings asset of the project, or the built-in one when the project has none.
+        /// </summary>
+        /// <param name="userSettings">Every non built-in TMP Settings asset found in the project, sorted by path. Only the first is used.</param>
+        /// <param name="builtInSettings">The TMP Settings asset shipped with the package.</param>
+        /// <param name="logErrors">Log an error when the project contains more than one TMP Settings asset.</param>
+        internal static TMP_Settings FindSettingsInEditor(out List<TMP_Settings> userSettings, out TMP_Settings builtInSettings, bool logErrors)
+        {
+            userSettings = new List<TMP_Settings>();
+            builtInSettings = null;
+
+            string[] guids = UnityEditor.AssetDatabase.FindAssets("t:TMP_Settings");
+            var paths = new List<string>(guids.Length);
+            foreach (string guid in guids)
+                paths.Add(UnityEditor.AssetDatabase.GUIDToAssetPath(guid));
+            paths.Sort(StringComparer.Ordinal);
+
+            foreach (string path in paths)
+            {
+                var settings = UnityEditor.AssetDatabase.LoadAssetAtPath<TMP_Settings>(path);
+                if (settings == null)
+                    continue;
+
+                if (settings.isBuiltInSettings)
+                    builtInSettings ??= settings;
+                else
+                    userSettings.Add(settings);
+            }
+
+            if (builtInSettings == null)
+                builtInSettings = UnityEditor.AssetDatabase.LoadAssetAtPath<TMP_Settings>(UnityEditor.AssetDatabase.GUIDToAssetPath(k_BuiltInSettingsGUID));
+
+            if (logErrors && userSettings.Count > 1)
+            {
+                var message = "Multiple TMP Settings assets found in the project. Only one is supported and only the first one is used. Remove the others:";
+                foreach (var settings in userSettings)
+                    message += "\n  " + UnityEditor.AssetDatabase.GetAssetPath(settings);
+                Debug.LogError(message);
+            }
+
+            return userSettings.Count > 0 ? userSettings[0] : builtInSettings;
+        }
+#endif
 
         /// <summary>
         /// Static Function to load the TMP Settings file.
         /// </summary>
-        /// <returns>The loaded <see cref="TMP_Settings"/> instance, or null if the asset is not present in a Resources folder.</returns>
+        /// <returns>The active <see cref="TMP_Settings"/> instance.</returns>
         public static TMP_Settings LoadDefaultSettings()
         {
-            if (s_Instance == null)
-            {
-                // Load settings from TMP_Settings file
-                TMP_Settings settings = Resources.Load<TMP_Settings>("TMP Settings");
-                if (settings != null)
-                    s_Instance = settings;
-            }
-
-            return s_Instance;
+            return instance;
         }
 
 
         /// <summary>
         /// Returns the singleton TMP Settings instance.
         /// </summary>
-        /// <returns>The active <see cref="TMP_Settings"/> asset, or null if it could not be loaded from Resources.</returns>
+        /// <returns>The active <see cref="TMP_Settings"/> asset.</returns>
         public static TMP_Settings GetSettings()
         {
-            if (TMP_Settings.instance == null) return null;
-
-            return TMP_Settings.instance;
+            return instance;
         }
 
 
         /// <summary>
         /// Returns the Font Asset defined in the TMP Settings file.
         /// </summary>
-        /// <returns>The configured <see cref="TMP_FontAsset"/>, or null if TMP Settings failed to load.</returns>
+        /// <returns>The configured <see cref="TMP_FontAsset"/>, or null if none is assigned.</returns>
         public static TMP_FontAsset GetFontAsset()
         {
-            if (TMP_Settings.instance == null) return null;
-
-            return TMP_Settings.instance.m_defaultFontAsset;
+            return instance.m_defaultFontAsset;
         }
 
 
         /// <summary>
         /// Returns the Sprite Asset defined in the TMP Settings file.
         /// </summary>
-        /// <returns>The configured <see cref="TMP_SpriteAsset"/>, or null if TMP Settings failed to load.</returns>
+        /// <returns>The configured <see cref="TMP_SpriteAsset"/>, or null if none is assigned.</returns>
         public static TMP_SpriteAsset GetSpriteAsset()
         {
-            if (TMP_Settings.instance == null) return null;
-
-            return TMP_Settings.instance.m_defaultSpriteAsset;
+            return instance.m_defaultSpriteAsset;
         }
 
 
         /// <summary>
         /// Returns the Style Sheet defined in the TMP Settings file.
         /// </summary>
-        /// <returns>The configured <see cref="TMP_StyleSheet"/>, or null if TMP Settings failed to load.</returns>
+        /// <returns>The configured <see cref="TMP_StyleSheet"/>, or null if none is assigned.</returns>
         public static TMP_StyleSheet GetStyleSheet()
         {
-            if (TMP_Settings.instance == null) return null;
-
-            return TMP_Settings.instance.m_defaultStyleSheet;
+            return instance.m_defaultStyleSheet;
         }
 
 
@@ -591,13 +647,13 @@ namespace TMPro
         {
             //Debug.Log("Loading Line Breaking Rules for Asian Languages.");
 
-            if (instance == null) return;
+            var settings = instance;
 
-            if (s_Instance.m_linebreakingRules == null)
-                s_Instance.m_linebreakingRules = new LineBreakingTable();
+            if (settings.m_linebreakingRules == null)
+                settings.m_linebreakingRules = new LineBreakingTable();
 
-            s_Instance.m_linebreakingRules.leadingCharacters = GetCharacters(s_Instance.m_leadingCharacters);
-            s_Instance.m_linebreakingRules.followingCharacters = GetCharacters(s_Instance.m_followingCharacters);
+            settings.m_linebreakingRules.leadingCharacters = GetCharacters(settings.m_leadingCharacters);
+            settings.m_linebreakingRules.followingCharacters = GetCharacters(settings.m_followingCharacters);
         }
 
 

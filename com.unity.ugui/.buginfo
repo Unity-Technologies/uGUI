@@ -11,3 +11,9 @@ ugui-framework:
       - ^*EventSystem.*$
       - ^*Vertex.*$
   area: uGUI Framework
+
+tmp-samples:
+  when:
+    path:
+      - ^Samples~/.*$
+  area: Text (TextMeshPro)
