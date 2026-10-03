@@ -2,7 +2,8 @@
     "name": "Unity.TextMeshPro.Editor.Tests",
     "references": [
         "Unity.TextMeshPro",
-        "Unity.TextMeshPro.Editor"
+        "Unity.TextMeshPro.Editor",
+        "Unity.TextMeshPro.Tests"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"

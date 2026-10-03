@@ -87,5 +87,31 @@ namespace TMPro
             Assert.IsTrue(m_TextComponentUGUI.isTextOverflowing, "Test fixture did not cause text to overflow. Tune rect/font/text to ensure overflow occurs and ellipsis insertion is triggered.");
             Assert.Greater(m_TextComponentUGUI.textInfo.characterCount, 16384, "Test fixture did not push enough characters into the mesh to exercise the 16383-quad cap. Tune rect/font/text to fit more characters.");
         }
+
+        [Test]
+        public void TextUGUI_GetPreferredValues_HyphenPrecededByWhitespaceAtNarrowWidth_Terminates()
+        {
+            // (UUM-152921) Measure read line numbers left over from the previous layout and looped forever on " -".
+            TextOverflowModes previousOverflowMode = m_TextComponentUGUI.overflowMode;
+            try
+            {
+                m_TextComponentUGUI.fontSize = 36;
+                m_TextComponentUGUI.textWrappingMode = TextWrappingModes.Normal;
+                m_TextComponentUGUI.overflowMode = TextOverflowModes.Overflow;
+                m_TextComponentUGUI.rectTransform.sizeDelta = new Vector2(25, 50);
+                m_TextComponentUGUI.text = "New Text";
+                m_TextComponentUGUI.ForceMeshUpdate(ignoreActiveState: true, forceTextReparsing: true);
+
+                m_TextComponentUGUI.text = "a -N";
+                Assert.Greater(m_TextComponentUGUI.GetPreferredValues(25, 0).y, 0);
+
+                m_TextComponentUGUI.ForceMeshUpdate(ignoreActiveState: true, forceTextReparsing: true);
+                Assert.Greater(m_TextComponentUGUI.textInfo.lineCount, 1);
+            }
+            finally
+            {
+                m_TextComponentUGUI.overflowMode = previousOverflowMode;
+            }
+        }
     }
 }

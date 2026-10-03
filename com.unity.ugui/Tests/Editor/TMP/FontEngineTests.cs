@@ -206,11 +206,12 @@ namespace TMPro
         [OneTimeSetUp]
         public void Setup()
         {
-            // These tests load font assets shipped with the TMP Essential Resources. Import them if
-            // the package folder is not already present (mirrors FontEngineTests).
-            string essentialResourcesPath = AssetDatabase.GUIDToAssetPath("f54d1bd14bd3ca042bd867b519fee8cc");
-            if (string.IsNullOrEmpty(essentialResourcesPath))
-                TMP_PackageResourceImporter.ImportResources(true, true, false);
+            // These tests load fonts from the TMP Essential Resources and Examples & Extras. Import
+            // whichever is missing; the prebuild step may already have imported the essentials alone.
+            bool importEssentials = string.IsNullOrEmpty(AssetDatabase.GUIDToAssetPath("f54d1bd14bd3ca042bd867b519fee8cc"));
+            bool importExamples = string.IsNullOrEmpty(AssetDatabase.GUIDToAssetPath("4beb055f07aaff244873dec698d0363e"));
+            if (importEssentials || importExamples)
+                TMP_PackageResourceImporter.ImportResources(importEssentials, importExamples, false);
 
             // If the font files these tests depend on still cannot be resolved (resources unavailable
             // in this environment), skip the whole fixture rather than failing — but log why so the
