@@ -517,6 +517,22 @@ namespace TMPro
             return null;
         }
 
+        internal static TMP_FontAsset CreateFontAssetFromFontReference(FontReference fontRef, int pointSize = 90)
+        {
+            TMP_FontAsset fontAsset = CreateFontAsset(fontRef.filePath, fontRef.faceIndex, pointSize, 9, GlyphRenderMode.SDFAA, 1024, 1024, AtlasPopulationMode.DynamicOS, true);
+            if (fontAsset == null)
+                return null;
+
+            fontAsset.name = fontRef.familyName + " SDF";
+            fontAsset.hideFlags = HideFlags.DontSave;
+            fontAsset.atlasTextures[0].hideFlags = HideFlags.DontSave;
+            fontAsset.material.hideFlags = HideFlags.DontSave;
+            fontAsset.isMultiAtlasTexturesEnabled = true;
+            fontAsset.InternalDynamicOS = true;
+
+            return fontAsset;
+        }
+
         /// <summary>
         /// Creates a new font asset instance from the font file at the given file path.
         /// </summary>
