@@ -87,7 +87,6 @@ SubShader {
 
 	Pass {
 		CGPROGRAM
-		#pragma enable_debug_symbols
 		#pragma vertex VertShader
 		#pragma fragment PixShader
 		#pragma shader_feature __ OUTLINE_ON
@@ -272,7 +271,6 @@ SubShader {
         Tags { "LightMode" = "XRMotionVectors" }
 		ZWrite On
 		CGPROGRAM
-		#pragma enable_debug_symbols
 		#pragma vertex VertShader
 		#pragma fragment PixShader
 		#pragma shader_feature __ OUTLINE_ON

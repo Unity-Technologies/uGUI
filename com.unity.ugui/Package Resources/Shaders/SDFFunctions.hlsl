@@ -22,7 +22,7 @@ float3 GetSpecular(float3 n, float3 l)
 	return _SpecularColor.rgb * spec * _SpecularPower;
 }
 
-void GetSurfaceNormal_float(texture2D atlas, float textureWidth, float textureHeight, float2 uv, bool isFront, out float3 nornmal)
+void GetSurfaceNormal_float(Texture2D atlas, float textureWidth, float textureHeight, float2 uv, bool isFront, out float3 nornmal)
 {
 	float3 delta = float3(1.0 / textureWidth, 1.0 / textureHeight, 0.0);
 

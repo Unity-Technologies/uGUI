@@ -200,6 +200,36 @@ namespace TMPro
             return null;
         }
 
+        /// <summary>
+        /// Internal function returning the text element character for the given unicode value from the operating system's fallback fonts.
+        /// Function searches the OS fallback font assets already created, then asks the operating system for a font containing the character.
+        /// </summary>
+        internal static TMP_Character GetCharacterFromOSFallbacks(uint unicode, TMP_FontAsset sourceFontAsset)
+        {
+            if (!TMP_Settings.useOSFontFallbacks)
+                return null;
+
+            List<TMP_FontAsset> builtFallbacks = TMP_Settings.osFallbackFontAssets;
+
+            for (int i = 0; i < builtFallbacks.Count; i++)
+            {
+                TMP_FontAsset builtFallback = builtFallbacks[i];
+
+                if (builtFallback == null || builtFallback == sourceFontAsset)
+                    continue;
+
+                TMP_Character builtCharacter = GetCharacterFromFontAsset(unicode, builtFallback, false, FontStyles.Normal, FontWeight.Regular, out _);
+
+                if (builtCharacter != null)
+                    return builtCharacter;
+            }
+
+            if (!TMP_Settings.TryAddOSFallbackFontAsset(unicode, out TMP_FontAsset osFontAsset))
+                return null;
+
+            return GetCharacterFromFontAsset(unicode, osFontAsset, false, FontStyles.Normal, FontWeight.Regular, out _);
+        }
+
 
         /// <summary>
         /// Returns the text element (character) for the given unicode value taking into consideration the requested font style and weight.

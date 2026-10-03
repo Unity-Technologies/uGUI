@@ -14,7 +14,7 @@ There are options to set the alignment of the text, settings for horizontal and 
 
 ![](images/UI_ImageInspector.png)
 
-An Image has a Rect Transform component and an **Image** component. A sprite can be applied to the Image component under the Target Graphic field, and its colour can be set in the Color field. A material can also be applied to the Image component. The Image Type field defines how the applied sprite will appear, the options are:
+An Image has a Rect Transform component and an Image component. You can apply a sprite to the Image component under the Source Image field, and set its colour in the Color field. You can also apply a material to the Image component. Use the Image Type field to define how the applied sprite displays; the options are:
 
 * **Simple** - Scales the whole sprite equally.
 
@@ -32,7 +32,7 @@ Images can be imported as **UI sprites** by selecting Sprite( 2D / UI) from the 
 
 ## Raw Image
 
-The Image component takes a sprite but **Raw Image** takes a texture (no borders etc). Raw Image should only be used if necessary otherwise Image will be suitable in the majority of cases.
+Use Raw Image for textures that aren't sprites, such as a render texture. Note that each one breaks sprite batching and adds a draw call.
 
 ## Mask
 

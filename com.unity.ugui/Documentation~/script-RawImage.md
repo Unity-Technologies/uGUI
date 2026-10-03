@@ -1,6 +1,6 @@
 # Raw Image
 
-The **Raw Image** control displays a non-interactive image to the user. You can use this for purposes such as decorations or icons, and you can change the image from a script to reflect changes in other controls. The control is similar to the [Image](script-Image.md) control, but offers more options for animating the image and accurately filling the control rectangle. However, the Image control requires its Texture to be a [Sprite](https://docs.unity3d.com/Manual/class-TextureImporter.html), while the Raw Image can accept any Texture.
+The Raw Image control displays a non-interactive image, such as a decoration or an icon. You can change the image from a script to reflect changes in other controls. The control is similar to the [Image](script-Image.md) control, but offers fewer options for animating the image and accurately filling the control rectangle. However, the Image control requires its Texture to be a [Sprite](https://docs.unity3d.com/Manual/class-TextureImporter.html), while the Raw Image can accept any Texture.
 
 ![A Raw Image control](images/RawImageCtrlExample.png)
 

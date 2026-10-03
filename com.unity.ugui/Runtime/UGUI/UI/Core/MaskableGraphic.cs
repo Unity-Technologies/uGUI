@@ -54,6 +54,9 @@ namespace UnityEngine.UI
         /// <summary>
         /// Does this graphic allow masking.
         /// </summary>
+        /// <remarks>
+        /// If you set this property from a script, call <see cref="RecalculateClipping"/> afterward to update the clipping. If you change the property in the Inspector, Unity automatically recalculates the clipping.
+        /// </remarks>
         public bool maskable
         {
             get { return m_Maskable; }

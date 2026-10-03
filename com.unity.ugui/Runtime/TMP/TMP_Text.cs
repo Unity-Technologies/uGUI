@@ -6568,6 +6568,19 @@ namespace TMPro
                 }
             }
 
+            // Search the operating system's fallback fonts.
+            character = TMP_FontAssetUtilities.GetCharacterFromOSFallbacks(unicode, fontAsset);
+
+            if (character != null)
+            {
+                isUsingAlternativeTypeface = false;
+
+                // Add character to font asset lookup cache
+                fontAsset.AddCharacterToLookupCache(unicode, character, FontStyles.Normal, FontWeight.Regular, false);
+
+                return character;
+            }
+
             return null;
         }
 

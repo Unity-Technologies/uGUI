@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.TextCore;
+using UnityEngine.TextCore.LowLevel;
 using System.Collections.Generic;
 
 #pragma warning disable 0649 // Disabled warnings related to serialized fields not assigned in this script but used in the editor.
@@ -203,6 +204,52 @@ namespace TMPro
         }
         [SerializeField]
         private TMP_FontAsset m_defaultFontAsset;
+
+        /// <summary>
+        /// Whether the search for a missing character may reach the fonts installed on the operating
+        /// system, after the assigned font assets and fallbacks have all been searched.
+        /// </summary>
+        public static bool useOSFontFallbacks
+        {
+            get { return instance.m_UseOSFontFallbacks; }
+            set { instance.m_UseOSFontFallbacks = value; }
+        }
+        [SerializeField]
+        private bool m_UseOSFontFallbacks = true;
+
+        internal static List<TMP_FontAsset> osFallbackFontAssets
+        {
+            get
+            {
+#if UNITY_EDITOR
+                return TMP_OSFallbackFontAssetStore.instance.fontAssets;
+#else
+                return s_OSFallbackFontAssets ??= new List<TMP_FontAsset>();
+#endif
+            }
+        }
+
+#if !UNITY_EDITOR
+        static List<TMP_FontAsset> s_OSFallbackFontAssets;
+#endif
+
+        /// <summary>
+        /// Asks the operating system for a font covering the given character and builds a font asset for it.
+        /// </summary>
+        internal static bool TryAddOSFallbackFontAsset(uint unicode, out TMP_FontAsset fontAsset)
+        {
+            fontAsset = null;
+
+            if (!UnityEngine.TextCore.Text.TextSettings.TryGetOSFallbackFontReference(unicode, out FontReference fontRef))
+                return false;
+
+            fontAsset = TMP_FontAsset.CreateFontAssetFromFontReference(fontRef);
+            if (fontAsset == null)
+                return false;
+
+            osFallbackFontAssets.Add(fontAsset);
+            return true;
+        }
 
         /// <summary>
         /// The relative path to a Resources folder in the project.
@@ -619,7 +666,7 @@ namespace TMPro
         /// <returns>The configured <see cref="TMP_FontAsset"/>, or null if none is assigned.</returns>
         public static TMP_FontAsset GetFontAsset()
         {
-            return instance.m_defaultFontAsset;
+            return defaultFontAsset;
         }
 
 

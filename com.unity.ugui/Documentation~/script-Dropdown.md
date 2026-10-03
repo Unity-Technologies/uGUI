@@ -36,7 +36,7 @@ The control shows the currently chosen option. Once clicked, it opens up the lis
 
 The list of options is specified in the Inspector or can be assigned from code. For each option a text string can be specified, and optionally an image as well, if the Dropdown is setup to support it.
 
-The button has a single event called _On Value Changed_ that responds when the user completes a click on one of the options in the list. It supports sending an integer number value that is the index of the selected option. 0 is the first option, 1 is the second, and so on.
+The button has a single event called _On Value Changed_ triggered when the user completes a click on one of the options in the list, sending the index of the selected option as an integer. 0 is the first option, 1 is the second, and so on.
 
 
 ### The template system
