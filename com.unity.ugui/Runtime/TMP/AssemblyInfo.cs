@@ -7,3 +7,4 @@
 [assembly: InternalsVisibleTo("Unity.FontEngine.Tests")]
 [assembly: InternalsVisibleTo("Unity.TextCore.Editor")]
 [assembly: InternalsVisibleTo("Unity.TextMeshPro.Editor")]
+[assembly: InternalsVisibleTo("Unity.TextMeshPro.Editor.Tests")]

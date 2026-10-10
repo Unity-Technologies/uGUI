@@ -479,10 +479,7 @@ namespace UnityEngine.UIElements
             public bool commandKey => (modifiers & EventModifiers.Command) != 0;
             public bool altKey => (modifiers & EventModifiers.Alt) != 0;
 
-            public bool actionKey =>
-                Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer
-                ? commandKey
-                : ctrlKey;
+            public bool actionKey => UIElementsUtility.isCommandActionKeyPlatform ? commandKey : ctrlKey;
 
             public Vector3 screenPosition { get; private set; }
             public Vector3 screenDelta { get; private set; }
