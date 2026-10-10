@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.TestTools;
 using NUnit.Framework;
 
 internal class CanvasRendererTests
@@ -108,6 +109,63 @@ internal class CanvasRendererTests
 
         Assert.True(string.IsNullOrEmpty(m_CanvasRenderer.GetSecondaryTextureName(0)));
         Assert.Null(m_CanvasRenderer.GetSecondaryTexture(0));
+    }
+
+    // UUM-154589
+    [Test]
+    public void SetSecondaryTexture_WithNoSlotsAllocated_IsIgnored()
+    {
+        LogAssert.Expect(LogType.Error, "Failed setting secondary texture. Index is out of bounds.");
+        m_CanvasRenderer.SetSecondaryTexture(0, k_MaskTexPropName, m_MaskTex);
+
+        Assert.AreEqual(0, m_CanvasRenderer.GetSecondaryTextureCount(), "SetSecondaryTexture with no slots allocated should not add a slot.");
+    }
+
+    // UUM-154589
+    [Test]
+    public void SetSecondaryTexture_WithIndexPastAllocatedSlots_IsIgnored()
+    {
+        m_CanvasRenderer.SetSecondaryTextureCount(2);
+
+        LogAssert.Expect(LogType.Error, "Failed setting secondary texture. Index is out of bounds.");
+        m_CanvasRenderer.SetSecondaryTexture(3, k_MaskTexPropName, m_MaskTex);
+
+        Assert.AreEqual(2, m_CanvasRenderer.GetSecondaryTextureCount(), "SetSecondaryTexture past the allocated slots should not change the slot count.");
+    }
+
+    [Test]
+    public void SetSecondaryTextureCount_WithNegativeCount_IsIgnored()
+    {
+        m_CanvasRenderer.SetSecondaryTextureCount(2);
+
+        LogAssert.Expect(LogType.Error, "Failed setting secondary texture count. Count cannot be negative.");
+        m_CanvasRenderer.SetSecondaryTextureCount(-1);
+
+        Assert.AreEqual(2, m_CanvasRenderer.GetSecondaryTextureCount(), "SetSecondaryTextureCount with a negative count should keep the current slot count.");
+    }
+
+    // UUM-154589
+    [Test]
+    public void MaterialCount_WithNegativeValue_IsIgnored()
+    {
+        m_CanvasRenderer.materialCount = 2;
+
+        LogAssert.Expect(LogType.Error, "Failed setting material count. Count cannot be negative.");
+        m_CanvasRenderer.materialCount = -1;
+
+        Assert.AreEqual(2, m_CanvasRenderer.materialCount, "A negative materialCount should keep the current count.");
+    }
+
+    // UUM-154589
+    [Test]
+    public void PopMaterialCount_WithNegativeValue_IsIgnored()
+    {
+        m_CanvasRenderer.popMaterialCount = 2;
+
+        LogAssert.Expect(LogType.Error, "Failed setting pop material count. Count cannot be negative.");
+        m_CanvasRenderer.popMaterialCount = -1;
+
+        Assert.AreEqual(2, m_CanvasRenderer.popMaterialCount, "A negative popMaterialCount should keep the current count.");
     }
 
     [TearDown]

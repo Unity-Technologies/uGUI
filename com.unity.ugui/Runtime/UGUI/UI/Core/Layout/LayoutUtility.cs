@@ -229,7 +229,7 @@ namespace UnityEngine.UI
                     continue;
                 float prop = property(layoutComp);
                 // If this layout property is set to a negative value, it means it should be ignored.
-                if (prop < 0)
+                if (prop < 0 || float.IsNaN(prop))
                     continue;
 
                 // If this layout component has higher priority than all previous ones,

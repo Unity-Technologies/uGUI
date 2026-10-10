@@ -3142,12 +3142,27 @@ namespace TMPro
                     {
                         int numberOfCharactersToRemove = m_TextComponent.textInfo.characterInfo[caretPositionInternal].stringLength;
 
-                        // Special handling for <CR><LF>
-                        if (m_TextComponent.textInfo.characterInfo[caretPositionInternal].character == '\r' && m_TextComponent.textInfo.characterInfo[caretPositionInternal + 1].character == '\n')
-                            numberOfCharactersToRemove += m_TextComponent.textInfo.characterInfo[caretPositionInternal + 1].stringLength;
-
                         // Adjust string position to skip any potential rich text tags.
                         int nextCharacterStringPosition = m_TextComponent.textInfo.characterInfo[caretPositionInternal].index;
+
+                        // Special handling for <CR><LF>
+                        if (m_TextComponent.textInfo.characterInfo[caretPositionInternal].character == '\r' && m_TextComponent.textInfo.characterInfo[caretPositionInternal + 1].character == '\n')
+                        {
+                            numberOfCharactersToRemove += m_TextComponent.textInfo.characterInfo[caretPositionInternal + 1].stringLength;
+                        }
+                        // A ligature spans all of its components but only its first component is removed.
+                        else if (IsLigature(m_TextComponent.textInfo.characterInfo[caretPositionInternal]))
+                        {
+                            int componentLength = GetFirstLigatureComponentLength(text, nextCharacterStringPosition, nextCharacterStringPosition + numberOfCharactersToRemove);
+
+                            if (componentLength < numberOfCharactersToRemove)
+                            {
+                                numberOfCharactersToRemove = componentLength;
+
+                                // The caret stays on the remaining components so the next key press needs their updated span.
+                                m_IsTextComponentUpdateRequired = true;
+                            }
+                        }
 
                         m_Text = text.Remove(nextCharacterStringPosition, numberOfCharactersToRemove);
 
@@ -3208,24 +3223,42 @@ namespace TMPro
                     if (caretPositionInternal > 0)
                     {
                         int caretPositionIndex = caretPositionInternal - 1;
+                        int removalStringIndex = m_TextComponent.textInfo.characterInfo[caretPositionIndex].index;
                         int numberOfCharactersToRemove = m_TextComponent.textInfo.characterInfo[caretPositionIndex].stringLength;
+                        bool isPartialRemoval = false;
 
                         // Special handling for <CR><LR>
                         if (caretPositionIndex > 0 && m_TextComponent.textInfo.characterInfo[caretPositionIndex].character == '\n' && m_TextComponent.textInfo.characterInfo[caretPositionIndex - 1].character == '\r')
                         {
                             numberOfCharactersToRemove += m_TextComponent.textInfo.characterInfo[caretPositionIndex - 1].stringLength;
                             caretPositionIndex -= 1;
+                            removalStringIndex = m_TextComponent.textInfo.characterInfo[caretPositionIndex].index;
+                        }
+                        // A ligature spans all of its components but only its last component is removed.
+                        else if (IsLigature(m_TextComponent.textInfo.characterInfo[caretPositionIndex]))
+                        {
+                            int componentLength = GetLastLigatureComponentLength(text, removalStringIndex, removalStringIndex + numberOfCharactersToRemove);
+
+                            if (componentLength < numberOfCharactersToRemove)
+                            {
+                                removalStringIndex += numberOfCharactersToRemove - componentLength;
+                                numberOfCharactersToRemove = componentLength;
+                                isPartialRemoval = true;
+
+                                // The caret stays on the remaining components so the next key press needs their updated span.
+                                m_IsTextComponentUpdateRequired = true;
+                            }
                         }
 
                         // Delete the previous character
-                        m_Text = text.Remove(m_TextComponent.textInfo.characterInfo[caretPositionIndex].index, numberOfCharactersToRemove);
+                        m_Text = text.Remove(removalStringIndex, numberOfCharactersToRemove);
 
                         // Get new adjusted string position
-                        stringSelectPositionInternal = stringPositionInternal = caretPositionInternal < 1
-                            ? m_TextComponent.textInfo.characterInfo[0].index
-                            : m_TextComponent.textInfo.characterInfo[caretPositionIndex].index;
+                        stringSelectPositionInternal = stringPositionInternal = removalStringIndex;
 
-                        caretSelectPositionInternal = caretPositionInternal = caretPositionIndex;
+                        // The remaining components still render before the caret, so the caret stays after them.
+                        if (!isPartialRemoval)
+                            caretSelectPositionInternal = caretPositionInternal = caretPositionIndex;
                     }
 
                     m_HasTextBeenRemoved = true;
@@ -3239,6 +3272,64 @@ namespace TMPro
             #if TMP_DEBUG_MODE
                 Debug.Log("Caret Position: " + caretPositionInternal + " Selection Position: " + caretSelectPositionInternal + "  String Position: " + stringPositionInternal + " String Select Position: " + stringSelectPositionInternal);
             #endif
+        }
+
+        static bool IsLigature(TMP_CharacterInfo characterInfo)
+        {
+            // Variation selector clusters also set alternativeGlyph but they hold a single component.
+            return characterInfo.elementType == TMP_TextElementType.Character && characterInfo.alternativeGlyph != null;
+        }
+
+        static uint GetCodePointBefore(string text, int position, int start, out int length)
+        {
+            length = position - 2 >= start && char.IsSurrogatePair(text[position - 2], text[position - 1]) ? 2 : 1;
+            return length == 2 ? (uint)char.ConvertToUtf32(text[position - 2], text[position - 1]) : text[position - 1];
+        }
+
+        static uint GetCodePointAt(string text, int position, int end, out int length)
+        {
+            length = position + 1 < end && char.IsSurrogatePair(text[position], text[position + 1]) ? 2 : 1;
+            return length == 2 ? (uint)char.ConvertToUtf32(text[position], text[position + 1]) : text[position];
+        }
+
+        /// <summary>
+        /// Returns the length of the last code point in the range, including the ZWJ and variation selectors that follow it.
+        /// </summary>
+        static int GetLastLigatureComponentLength(string text, int start, int end)
+        {
+            int position = end;
+
+            while (position > start)
+            {
+                uint codePoint = GetCodePointBefore(text, position, start, out int length);
+                position -= length;
+
+                if (!TMP_TextParsingUtilities.IsIgnorableForLigature(codePoint))
+                    break;
+            }
+
+            return end - position;
+        }
+
+        /// <summary>
+        /// Returns the length of the first code point in the range, including the ZWJ and variation selectors that follow it.
+        /// </summary>
+        static int GetFirstLigatureComponentLength(string text, int start, int end)
+        {
+            GetCodePointAt(text, start, end, out int position);
+            position += start;
+
+            while (position < end)
+            {
+                uint codePoint = GetCodePointAt(text, position, end, out int length);
+
+                if (!TMP_TextParsingUtilities.IsIgnorableForLigature(codePoint))
+                    break;
+
+                position += length;
+            }
+
+            return position - start;
         }
 
 

@@ -94,7 +94,7 @@ namespace UnityEngine.UI
             bool alongOtherAxis = (isVertical ^ (axis == 1));
 
             float totalMin = combinedPadding;
-            float totalMax = alongOtherAxis ? LayoutUtility.DefaultMaxSize : combinedPadding;
+            float totalMax = alongOtherAxis || rectChildren.Count == 0 ? LayoutUtility.DefaultMaxSize : combinedPadding;
             float totalPreferred = combinedPadding;
             float totalFlexible = 0;
 
@@ -109,7 +109,7 @@ namespace UnityEngine.UI
                 {
                     float scaleFactor = child.localScale[axis];
                     min *= scaleFactor;
-                    max *= scaleFactor;
+                    max = float.IsInfinity(max) ? max : max * scaleFactor;
                     preferred *= scaleFactor;
                     flexible *= scaleFactor;
                 }
