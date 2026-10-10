@@ -3,14 +3,14 @@ using UnityEngine.Pool;
 
 namespace UnityEngine.EventSystems
 {
-    [AddComponentMenu("Event/Standalone Input Module")]
-    [UGUIHelpURL("StandaloneInputModule")]
     /// <summary>
     /// A BaseInputModule designed for mouse / keyboard / controller input.
     /// </summary>
     /// <remarks>
     /// Input module for working with, mouse, keyboard, or controller.
     /// </remarks>
+    [AddComponentMenu("Event/Standalone Input Module")]
+    [UGUIHelpURL("StandaloneInputModule")]
     public class StandaloneInputModule : PointerInputModule
     {
         private float m_PrevActionTime;
@@ -26,6 +26,7 @@ namespace UnityEngine.EventSystems
 
         private const float doubleClickTime = 0.3f;
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a StandaloneInputModule to a GameObject.</summary>
         protected StandaloneInputModule()
         {
         }
@@ -123,6 +124,9 @@ namespace UnityEngine.EventSystems
 #endif
         }
 
+        /// <summary>
+        /// Updates the tracked mouse position, or releases any ongoing drag if the application has lost focus.
+        /// </summary>
         public override void UpdateModule()
         {
             if (!eventSystem.isFocused && ShouldIgnoreEventsOnNoFocus())
@@ -203,6 +207,10 @@ namespace UnityEngine.EventSystems
             m_InputPointerEvents[pointerEvent.pointerId] = pointerEvent;
         }
 
+        /// <inheritdoc/>
+        /// <summary>
+        /// Checks whether the module should be activated, based on the mouse, touch, button, and axis input of this frame.
+        /// </summary>
         public override bool ShouldActivateModule()
         {
             if (!base.ShouldActivateModule())
@@ -222,9 +230,7 @@ namespace UnityEngine.EventSystems
             return shouldActivate;
         }
 
-        /// <summary>
-        /// See BaseInputModule.
-        /// </summary>
+        /// <inheritdoc/>
         public override void ActivateModule()
         {
             if (!eventSystem.isFocused && ShouldIgnoreEventsOnNoFocus())
@@ -241,15 +247,16 @@ namespace UnityEngine.EventSystems
             eventSystem.SetSelectedGameObject(toSelect, GetBaseEventData());
         }
 
-        /// <summary>
-        /// See BaseInputModule.
-        /// </summary>
+        /// <inheritdoc/>
         public override void DeactivateModule()
         {
             base.DeactivateModule();
             ClearSelection();
         }
 
+        /// <summary>
+        /// Processes the touch, mouse, and navigation input of this frame, and sends the resulting events.
+        /// </summary>
         public override void Process()
         {
             if (!eventSystem.isFocused && ShouldIgnoreEventsOnNoFocus())
@@ -512,6 +519,9 @@ namespace UnityEngine.EventSystems
             return axisEventData.used;
         }
 
+        /// <summary>
+        /// Process all mouse events for the default mouse.
+        /// </summary>
         protected void ProcessMouseEvent()
         {
             ProcessMouseEvent(0);
@@ -520,6 +530,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Process all mouse events.
         /// </summary>
+        /// <param name="id">The ID of the mouse to process the events of.</param>
         protected void ProcessMouseEvent(int id)
         {
             var mouseData = GetMousePointerEventData(id);
@@ -545,6 +556,10 @@ namespace UnityEngine.EventSystems
             }
         }
 
+        /// <summary>
+        /// Send an update event to the current selected object.
+        /// </summary>
+        /// <returns>True if the selected object used the event.</returns>
         protected bool SendUpdateEventToSelectedObject()
         {
             if (eventSystem.currentSelectedGameObject == null)
@@ -556,8 +571,9 @@ namespace UnityEngine.EventSystems
         }
 
         /// <summary>
-        /// Calculate and process any mouse button state changes.
+        /// Process any mouse button state changes.
         /// </summary>
+        /// <param name="data">The event data of the mouse button to process.</param>
         protected void ProcessMousePress(MouseButtonEventData data)
         {
             var pointerEvent = data.buttonData;
@@ -632,6 +648,10 @@ namespace UnityEngine.EventSystems
             }
         }
 
+        /// <summary>
+        /// Returns the GameObject that is currently in focus.
+        /// </summary>
+        /// <returns>The last GameObject under the pointer, or `null` if the pointer is over nothing.</returns>
         protected GameObject GetCurrentFocusedGameObject()
         {
             return m_CurrentFocusedGameObject;

@@ -60,6 +60,10 @@ namespace UnityEngine.EventSystems
             }
         }
 
+        /// <summary>
+        /// Returns a multi-line string that lists the event camera and the priorities of this raycaster.
+        /// </summary>
+        /// <returns>The formatted description of the raycaster.</returns>
         public override string ToString()
         {
             return "Name: " + gameObject + "\n" +
@@ -68,24 +72,36 @@ namespace UnityEngine.EventSystems
                 "renderOrderPriority: " + renderOrderPriority;
         }
 
+        /// <summary>
+        /// Registers this raycaster so that the EventSystem raycasts with it.
+        /// </summary>
         protected override void OnEnable()
         {
             base.OnEnable();
             RaycasterManager.AddRaycaster(this);
         }
 
+        /// <summary>
+        /// Unregisters this raycaster so that the EventSystem stops raycasting with it.
+        /// </summary>
         protected override void OnDisable()
         {
             RaycasterManager.RemoveRaycasters(this);
             base.OnDisable();
         }
 
+        /// <summary>
+        /// Clears the cached root raycaster, because the canvas hierarchy might have changed which raycaster is the root one.
+        /// </summary>
         protected override void OnCanvasHierarchyChanged()
         {
             base.OnCanvasHierarchyChanged();
             m_RootRaycaster = null;
         }
 
+        /// <summary>
+        /// Clears the cached root raycaster, because the new parent might have a different root raycaster.
+        /// </summary>
         protected override void OnTransformParentChanged()
         {
             base.OnTransformParentChanged();

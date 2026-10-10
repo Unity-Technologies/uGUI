@@ -24,12 +24,18 @@ namespace UnityEngine.EventSystems
         RaycastHit2D[] m_Hits;
 #endif
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a Physics2DRaycaster to a GameObject.</summary>
+        /// <remarks>
+        /// Add a Physics2DRaycaster to a camera with the component menu or with <see cref="GameObject.AddComponent{T}"/>.
+        /// </remarks>
         protected Physics2DRaycaster()
         {}
 
         /// <summary>
         /// Raycast against 2D elements in the scene.
         /// </summary>
+        /// <param name="eventData">Current event data.</param>
+        /// <param name="resultAppendList">List of hit Objects.</param>
         public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
         {
 #if PACKAGE_PHYSICS2D
@@ -43,23 +49,18 @@ namespace UnityEngine.EventSystems
 
             if (maxRayIntersections == 0)
             {
-                if (ReflectionMethodsCache.Singleton.getRayIntersectionAll == null)
-                    return;
-                m_Hits = ReflectionMethodsCache.Singleton.getRayIntersectionAll(ray, distanceToClipPlane, finalEventMask);
+                m_Hits = Physics2D.GetRayIntersectionAll(ray, distanceToClipPlane, finalEventMask);
                 hitCount = m_Hits.Length;
             }
             else
             {
-                if (ReflectionMethodsCache.Singleton.getRayIntersectionAllNonAlloc == null)
-                    return;
-
                 if (m_LastMaxRayIntersections != m_MaxRayIntersections)
                 {
                     m_Hits = new RaycastHit2D[maxRayIntersections];
                     m_LastMaxRayIntersections = m_MaxRayIntersections;
                 }
 
-                hitCount = ReflectionMethodsCache.Singleton.getRayIntersectionAllNonAlloc(ray, m_Hits, distanceToClipPlane, finalEventMask);
+                hitCount = Physics2D.GetRayIntersectionNonAlloc(ray, m_Hits, distanceToClipPlane, finalEventMask);
             }
 
             if (hitCount != 0)
@@ -115,6 +116,8 @@ namespace UnityEngine.EventSystems
                     resultAppendList.Add(result);
                 }
             }
+#else
+            PhysicsModuleErrors.LogPhysics2DModuleNotPresent();
 #endif
         }
     }

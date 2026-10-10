@@ -1225,7 +1225,10 @@ namespace TMPro.EditorUtilities
             EditorGUILayout.PropertyField(m_SpriteAssetProp, k_SpriteAssetLabel, true);
 
             if (EditorGUI.EndChangeCheck())
+            {
+                TMP_ResourceManager.RebuildFontAssetCache();
                 m_HavePropertiesChanged = true;
+            }
 
             EditorGUILayout.Space();
         }

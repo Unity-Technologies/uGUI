@@ -8,9 +8,6 @@ using UnityEngine.UIElements;
 
 namespace UnityEngine.EventSystems
 {
-    [AddComponentMenu("Event/Event System")]
-    [DisallowMultipleComponent]
-    [UGUIHelpURL("EventSystem")]
     /// <summary>
     /// Handles input, raycasting, and sending events.
     /// </summary>
@@ -18,6 +15,9 @@ namespace UnityEngine.EventSystems
     /// The EventSystem is responsible for processing and handling events in a Unity scene. A scene should only contain one EventSystem. The EventSystem works in conjunction with a number of modules and mostly just holds state and delegates functionality to specific, overrideable components.
     /// When the EventSystem is started it searches for any BaseInputModules attached to the same GameObject and adds them to an internal list. On update each attached module receives an UpdateModules call, where the module can modify internal state. After each module has been Updated the active module has the Process call executed.This is where custom module processing can take place.
     /// </remarks>
+    [AddComponentMenu("Event/Event System")]
+    [DisallowMultipleComponent]
+    [UGUIHelpURL("EventSystem")]
     public class EventSystem : UIBehaviour
     {
         private static readonly List<EventSystem> m_EventSystems = new List<EventSystem>();
@@ -123,6 +123,7 @@ namespace UnityEngine.EventSystems
             get { return m_HasFocus; }
         }
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add an EventSystem to a GameObject.</summary>
         protected EventSystem()
         {}
 
@@ -388,6 +389,9 @@ namespace UnityEngine.EventSystems
         {
         }
 
+        /// <summary>
+        /// Registers this event system so that it can become the current one.
+        /// </summary>
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -399,6 +403,9 @@ namespace UnityEngine.EventSystems
 #endif
         }
 
+        /// <summary>
+        /// Deactivates the current input module and unregisters this event system.
+        /// </summary>
         protected override void OnDisable()
         {
 #if PACKAGE_UITOOLKIT
@@ -416,6 +423,9 @@ namespace UnityEngine.EventSystems
             base.OnDisable();
         }
 
+        /// <summary>
+        /// Initializes UI Toolkit interoperability.
+        /// </summary>
         protected override void Start()
         {
             base.Start();
@@ -435,6 +445,10 @@ namespace UnityEngine.EventSystems
             }
         }
 
+        /// <summary>
+        /// Records the focus state of the application and updates the input modules when focus is lost.
+        /// </summary>
+        /// <param name="hasFocus">Whether the application has focus.</param>
         protected virtual void OnApplicationFocus(bool hasFocus)
         {
             m_HasFocus = hasFocus;
@@ -442,6 +456,9 @@ namespace UnityEngine.EventSystems
                 TickModules();
         }
 
+        /// <summary>
+        /// Updates the attached input modules, selects the module to use, and processes the current one.
+        /// </summary>
         protected virtual void Update()
         {
 #if PACKAGE_UITOOLKIT
@@ -516,6 +533,10 @@ namespace UnityEngine.EventSystems
             m_CurrentInputModule = module;
         }
 
+        /// <summary>
+        /// Returns a multi-line string that lists the selected object and the state of the current input module.
+        /// </summary>
+        /// <returns>The formatted description of the event system state.</returns>
         public override string ToString()
         {
             var sb = new StringBuilder();

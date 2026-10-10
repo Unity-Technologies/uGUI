@@ -5,6 +5,9 @@ namespace UnityEngine.EventSystems
     /// </summary>
     public abstract class AbstractEventData
     {
+        /// <summary>
+        /// Whether the event has been used.
+        /// </summary>
         protected bool m_Used;
 
         /// <summary>
@@ -41,13 +44,18 @@ namespace UnityEngine.EventSystems
     public class BaseEventData : AbstractEventData
     {
         private readonly EventSystem m_EventSystem;
+
+        /// <summary>
+        /// Creates a new <see cref="BaseEventData"/> object bound to the given <see cref="EventSystem"/>.
+        /// </summary>
+        /// <param name="eventSystem">The <see cref="EventSystem"/> that sends this event.</param>
         public BaseEventData(EventSystem eventSystem)
         {
             m_EventSystem = eventSystem;
         }
 
         /// <summary>
-        /// >A reference to the BaseInputModule that sent this event.
+        /// A reference to the <see cref="BaseInputModule"/> that sent this event.
         /// </summary>
         public BaseInputModule currentInputModule
         {
@@ -55,7 +63,7 @@ namespace UnityEngine.EventSystems
         }
 
         /// <summary>
-        /// The object currently considered selected by the EventSystem.
+        /// The <see cref="GameObject"/> currently considered selected by the <see cref="EventSystem"/>.
         /// </summary>
         public GameObject selectedObject
         {

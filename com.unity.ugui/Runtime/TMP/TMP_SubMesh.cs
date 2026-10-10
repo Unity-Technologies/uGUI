@@ -291,6 +291,12 @@ namespace TMPro
             // Update _ClipRect values
             if (m_sharedMaterial != null)
                 m_sharedMaterial.SetVector(ShaderUtilities.ID_ClipRect, new Vector4(-32767, -32767, 32767, 32767));
+
+            if (m_TextComponent != null)
+            {
+                m_TextComponent.havePropertiesChanged = true;
+                m_TextComponent.SetVerticesDirty();
+            }
         }
 
 

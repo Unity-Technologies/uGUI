@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace UnityEngine.EventSystems
 {
-    [RequireComponent(typeof(EventSystem))]
     /// <summary>
     /// A base module that raises events and sends them to GameObjects.
     /// </summary>
@@ -34,8 +33,12 @@ namespace UnityEngine.EventSystems
     /// ]]>
     ///</code>
     /// </example>
+    [RequireComponent(typeof(EventSystem))]
     public abstract class BaseInputModule : UIBehaviour
     {
+        /// <summary>
+        /// The reusable list that raycast results are collected into.
+        /// </summary>
         [NonSerialized]
         protected List<RaycastResult> m_RaycastResultCache = new List<RaycastResult>();
 
@@ -55,6 +58,9 @@ namespace UnityEngine.EventSystems
         private EventSystem m_EventSystem;
         private BaseEventData m_BaseEventData;
 
+        /// <summary>
+        /// The BaseInput that replaces the default one, if any.
+        /// </summary>
         protected BaseInput m_InputOverride;
         private BaseInput m_DefaultInput;
 
@@ -101,11 +107,17 @@ namespace UnityEngine.EventSystems
             set { m_InputOverride = value; }
         }
 
+        /// <summary>
+        /// The <see cref="EventSystem"/> that this input module belongs to.
+        /// </summary>
         protected EventSystem eventSystem
         {
             get { return m_EventSystem; }
         }
 
+        /// <summary>
+        /// Caches the EventSystem on the same GameObject and adds this module to its list of modules.
+        /// </summary>
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -113,6 +125,9 @@ namespace UnityEngine.EventSystems
             m_EventSystem.UpdateModules();
         }
 
+        /// <summary>
+        /// Removes this module from the list of modules of the EventSystem.
+        /// </summary>
         protected override void OnDisable()
         {
             m_EventSystem.UpdateModules();
@@ -127,6 +142,8 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Return the first valid RaycastResult.
         /// </summary>
+        /// <param name="candidates">The raycast results to search, in priority order.</param>
+        /// <returns>The first result that hit a GameObject, or an empty RaycastResult if there is none.</returns>
         protected static RaycastResult FindFirstRaycast(List<RaycastResult> candidates)
         {
             var candidatesCount = candidates.Count;
@@ -145,6 +162,7 @@ namespace UnityEngine.EventSystems
         /// </summary>
         /// <param name="x">X movement.</param>
         /// <param name="y">Y movement.</param>
+        /// <returns>The move direction that best matches the movement, or `MoveDirection.None` if the movement is inside the dead zone.</returns>
         protected static MoveDirection DetermineMoveDirection(float x, float y)
         {
             return DetermineMoveDirection(x, y, 0.6f);
@@ -156,6 +174,7 @@ namespace UnityEngine.EventSystems
         /// <param name="x">X movement.</param>
         /// <param name="y">Y movement.</param>
         /// <param name="deadZone">Dead zone.</param>
+        /// <returns>The move direction that best matches the movement, or `MoveDirection.None` if the movement is inside the dead zone.</returns>
         protected static MoveDirection DetermineMoveDirection(float x, float y, float deadZone)
         {
             // if vector is too small... just return
@@ -212,10 +231,16 @@ namespace UnityEngine.EventSystems
             return null;
         }
 
-        // walk up the tree till a common root between the last entered and the current entered is found
-        // send exit events up to (but not including) the common root. Then send enter events up to
-        // (but not including) the common root.
-        // Send move events before exit, after enter, and on hovered objects when pointer data has changed.
+        /// <summary>
+        /// Sends pointer enter and exit events when moving from the currently entered GameObject to a new one.
+        /// </summary>
+        /// <remarks>
+        /// This method walks up the hierarchy until it finds a common root between the currently entered GameObject and the new one.
+        /// It sends exit events up to (but not including) the common root, and then sends enter events up to (but not including) the common root.
+        /// It also sends move events before the exit events, after the enter events, and on the hovered GameObjects when the pointer data changed.
+        /// </remarks>
+        /// <param name="currentPointerData">The pointer event data to send with each event, and to update with the new entered GameObject.</param>
+        /// <param name="newEnterTarget">The GameObject that the pointer entered, or `null` if the pointer is over nothing.</param>
         protected void HandlePointerExitAndEnter(PointerEventData currentPointerData, GameObject newEnterTarget)
         {
             // if we have no target / pointerEnter has been deleted
@@ -327,6 +352,7 @@ namespace UnityEngine.EventSystems
         /// <param name="x">X movement.</param>
         /// <param name="y">Y movement.</param>
         /// <param name="moveDeadZone">Move dead zone.</param>
+        /// <returns>The reusable axis event data of this module, updated with the given movement.</returns>
         protected virtual AxisEventData GetAxisEventData(float x, float y, float moveDeadZone)
         {
             if (m_AxisEventData == null)
@@ -341,6 +367,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Generate a BaseEventData that can be used by the EventSystem.
         /// </summary>
+        /// <returns>The reusable base event data of this module, reset to its default state.</returns>
         protected virtual BaseEventData GetBaseEventData()
         {
             if (m_BaseEventData == null)
@@ -353,8 +380,8 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// If the module is pointer based, then override this to return true if the pointer is over an event system object.
         /// </summary>
-        /// <param name="pointerId">Pointer ID</param>
-        /// <returns>Is the given pointer over an event system object?</returns>
+        /// <param name="pointerId">The ID of the pointer.</param>
+        /// <returns>True if the pointer is over an EventSystem object.</returns>
         public virtual bool IsPointerOverGameObject(int pointerId)
         {
             return false;
@@ -363,6 +390,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Should the module be activated.
         /// </summary>
+        /// <returns>True if the EventSystem can make this module the current one.</returns>
         public virtual bool ShouldActivateModule()
         {
             return enabled && gameObject.activeInHierarchy;
@@ -399,6 +427,7 @@ namespace UnityEngine.EventSystems
         /// Returns Id of the pointer following <see cref="UnityEngine.UIElements.PointerId"/> convention.
         /// </summary>
         /// <param name="sourcePointerData">PointerEventData whose pointerId will be converted to UI Toolkit pointer convention.</param>
+        /// <returns>The equivalent UI Toolkit pointer ID, or `-1` if the UI Toolkit isn't available.</returns>
         /// <seealso cref="UnityEngine.UIElements.IPointerEvent" />
         public virtual int ConvertUIToolkitPointerId(PointerEventData sourcePointerData)
         {
@@ -418,6 +447,8 @@ namespace UnityEngine.EventSystems
         /// Input Module implementations are free to apply a scaling factor to their PointerEventData's scrollDelta.
         /// This method can be used when a system needs to treat scaling-independent input values.
         /// </remarks>
+        /// <param name="scrollDelta">The scroll delta to convert.</param>
+        /// <returns>The number of scroll wheel ticks that the scroll delta corresponds to.</returns>
         public virtual Vector2 ConvertPointerEventScrollDeltaToTicks(Vector2 scrollDelta)
         {
             return scrollDelta / input.mouseScrollDeltaPerTick;

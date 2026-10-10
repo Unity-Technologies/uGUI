@@ -51,8 +51,7 @@ namespace UnityEngine.EventSystems
         /// input or testing without device input.
         /// </remarks>
         /// <param name="button">The mouse button index to check, where 0 is left, 1 is right, and 2 is middle.</param>
-        /// <returns>true if the user pressed the specified mouse button during this
-        /// frame; otherwise, false.</returns>
+        /// <returns>True if the user pressed the specified mouse button during this frame.</returns>
         /// <example>
         /// <para>Override to supply custom mouse button input (for example, for testing).
         /// The following example simulates a left click when the user presses <b>Space</b>.</para>
@@ -74,6 +73,8 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Interface to Input.GetMouseButtonUp. Can be overridden to provide custom input instead of using the Input class.
         /// </summary>
+        /// <param name="button">The mouse button index to check: `0` for the left button, `1` for the right button, and `2` for the middle button.</param>
+        /// <returns>True if the user released the specified mouse button during this frame.</returns>
         public virtual bool GetMouseButtonUp(int button)
         {
             return Input.GetMouseButtonUp(button);
@@ -82,6 +83,8 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Interface to Input.GetMouseButton. Can be overridden to provide custom input instead of using the Input class.
         /// </summary>
+        /// <param name="button">The mouse button index to check: `0` for the left button, `1` for the right button, and `2` for the middle button.</param>
+        /// <returns>True if the user is holding down the specified mouse button.</returns>
         public virtual bool GetMouseButton(int button)
         {
             return Input.GetMouseButton(button);
@@ -131,6 +134,7 @@ namespace UnityEngine.EventSystems
         /// Interface to Input.GetTouch. Can be overridden to provide custom input instead of using the Input class.
         /// </summary>
         /// <param name="index">Touch index to get</param>
+        /// <returns>The touch at the specified index.</returns>
         public virtual Touch GetTouch(int index)
         {
             return Input.GetTouch(index);
@@ -140,6 +144,7 @@ namespace UnityEngine.EventSystems
         /// Interface to Input.GetAxisRaw. Can be overridden to provide custom input instead of using the Input class.
         /// </summary>
         /// <param name="axisName">Axis name to check</param>
+        /// <returns>The value of the axis, with no smoothing filtering applied.</returns>
         public virtual float GetAxisRaw(string axisName)
         {
             return Input.GetAxisRaw(axisName);
@@ -149,6 +154,7 @@ namespace UnityEngine.EventSystems
         /// Interface to Input.GetButtonDown. Can be overridden to provide custom input instead of using the Input class.
         /// </summary>
         /// <param name="buttonName">Button name to get</param>
+        /// <returns>True if the user pressed the specified button during this frame.</returns>
         public virtual bool GetButtonDown(string buttonName)
         {
             return Input.GetButtonDown(buttonName);

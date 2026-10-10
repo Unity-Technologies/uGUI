@@ -358,7 +358,16 @@ namespace TMPro
         public TMP_SpriteAsset spriteAsset
         {
             get { return m_spriteAsset; }
-            set { m_spriteAsset = value; m_havePropertiesChanged = true; SetVerticesDirty(); SetLayoutDirty(); }
+            set
+            {
+                if (m_spriteAsset != value)
+                    TMP_ResourceManager.RebuildFontAssetCache();
+
+                m_spriteAsset = value;
+                m_havePropertiesChanged = true;
+                SetVerticesDirty();
+                SetLayoutDirty();
+            }
         }
         [SerializeField]
         protected TMP_SpriteAsset m_spriteAsset;

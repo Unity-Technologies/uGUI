@@ -15,6 +15,10 @@ namespace UnityEngine.EventSystems
         /// </summary>
         public MoveDirection moveDir { get; set; }
 
+        /// <inheritdoc cref="BaseEventData(EventSystem)"/>
+        /// <summary>
+        /// Creates a new <see cref="AxisEventData"/> object with a zero move vector and no move direction.
+        /// </summary>
         public AxisEventData(EventSystem eventSystem)
             : base(eventSystem)
         {

@@ -160,6 +160,10 @@ namespace UnityEngine.EventSystems
 #endif
         }
 
+        /// <summary>
+        /// Returns a multi-line string that lists the values of this raycast result.
+        /// </summary>
+        /// <returns>The formatted description of the raycast result, or an empty string if the result isn't valid.</returns>
         public override string ToString()
         {
             if (!isValid)

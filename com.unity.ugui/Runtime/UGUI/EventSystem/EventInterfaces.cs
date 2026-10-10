@@ -18,6 +18,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Use this callback to detect pointer move events
         /// </summary>
+        /// <param name="eventData">The pointer event data for the move.</param>
         void OnPointerMove(PointerEventData eventData);
     }
 
@@ -30,8 +31,9 @@ namespace UnityEngine.EventSystems
     public interface IPointerEnterHandler : IEventSystemHandler
     {
         /// <summary>
-        /// Use this callback to detect pointer enter events
+        /// Called by the EventSystem when the pointer enters this object.
         /// </summary>
+        /// <param name="eventData">The pointer event data for the enter.</param>
         void OnPointerEnter(PointerEventData eventData);
     }
 
@@ -44,8 +46,9 @@ namespace UnityEngine.EventSystems
     public interface IPointerExitHandler : IEventSystemHandler
     {
         /// <summary>
-        /// Use this callback to detect pointer exit events
+        /// Called by the EventSystem when the pointer exits this object.
         /// </summary>
+        /// <param name="eventData">The pointer event data for the exit.</param>
         void OnPointerExit(PointerEventData eventData);
     }
 
@@ -58,8 +61,9 @@ namespace UnityEngine.EventSystems
     public interface IPointerDownHandler : IEventSystemHandler
     {
         /// <summary>
-        /// Use this callback to detect pointer down events.
+        /// Called by the EventSystem when a PointerDown event occurs.
         /// </summary>
+        /// <param name="eventData">The pointer event data for the press.</param>
         void OnPointerDown(PointerEventData eventData);
     }
 
@@ -73,8 +77,9 @@ namespace UnityEngine.EventSystems
     public interface IPointerUpHandler : IEventSystemHandler
     {
         /// <summary>
-        /// Use this callback to detect pointer up events.
+        /// Called by the EventSystem when a PointerUp event occurs.
         /// </summary>
+        /// <param name="eventData">The pointer event data for the release.</param>
         void OnPointerUp(PointerEventData eventData);
     }
 
@@ -106,7 +111,7 @@ namespace UnityEngine.EventSystems
     public interface IPointerClickHandler : IEventSystemHandler
     {
         /// <summary>
-        /// Use this callback to detect clicks.
+        /// Called by the EventSystem when a Click event occurs.
         /// </summary>
         /// <param name="eventData">The pointer event data for the click.</param>
         void OnPointerClick(PointerEventData eventData);
@@ -122,7 +127,7 @@ namespace UnityEngine.EventSystems
     public interface IBeginDragHandler : IEventSystemHandler
     {
         /// <summary>
-        /// Called by a BaseInputModule before a drag is started.
+        /// Called by the EventSystem before a drag is started.
         /// </summary>
         /// <param name="eventData">The pointer event data for the drag.</param>
         void OnBeginDrag(PointerEventData eventData);
@@ -137,7 +142,7 @@ namespace UnityEngine.EventSystems
     public interface IInitializePotentialDragHandler : IEventSystemHandler
     {
         /// <summary>
-        /// Called by a BaseInputModule when a drag has been found but before it is valid to begin the drag.
+        /// Called by the EventSystem when a drag has been found, but before it is valid to begin the drag.
         /// </summary>
         /// <param name="eventData">The pointer event data for the drag.</param>
         void OnInitializePotentialDrag(PointerEventData eventData);
@@ -239,7 +244,7 @@ namespace UnityEngine.EventSystems
     public interface IDragHandler : IEventSystemHandler
     {
         /// <summary>
-        /// When dragging is occurring this will be called every time the cursor is moved.
+        /// Called by the EventSystem every time the pointer is moved during dragging.
         /// </summary>
         /// <param name="eventData">The pointer event data for the drag.</param>
         void OnDrag(PointerEventData eventData);
@@ -255,7 +260,7 @@ namespace UnityEngine.EventSystems
     public interface IEndDragHandler : IEventSystemHandler
     {
         /// <summary>
-        /// Called by a BaseInputModule when a drag is ended.
+        /// Called by the EventSystem once dragging ends.
         /// </summary>
         /// <param name="eventData">The pointer event data for the drag.</param>
         void OnEndDrag(PointerEventData eventData);
@@ -289,8 +294,9 @@ namespace UnityEngine.EventSystems
     public interface IDropHandler : IEventSystemHandler
     {
         /// <summary>
-        /// Called by a BaseInputModule on a target that can accept a drop.
+        /// Called by the EventSystem when an object can accept a drop.
         /// </summary>
+        /// <param name="eventData">The pointer event data for the drop.</param>
         void OnDrop(PointerEventData eventData);
     }
 
@@ -303,8 +309,9 @@ namespace UnityEngine.EventSystems
     public interface IScrollHandler : IEventSystemHandler
     {
         /// <summary>
-        /// Use this callback to detect scroll events.
+        /// Called by the EventSystem when a new Scroll event occurs.
         /// </summary>
+        /// <param name="eventData">The pointer event data for the scroll.</param>
         void OnScroll(PointerEventData eventData);
     }
 
@@ -317,7 +324,7 @@ namespace UnityEngine.EventSystems
     public interface IUpdateSelectedHandler : IEventSystemHandler
     {
         /// <summary>
-        /// Called by the EventSystem when the object associated with this EventTrigger is updated.
+        /// Called by the EventSystem to update the selected object.
         /// </summary>
         /// <example>
         /// <code>
@@ -335,6 +342,7 @@ namespace UnityEngine.EventSystems
         /// ]]>
         ///</code>
         /// </example>
+        /// <param name="eventData">The event data for the update.</param>
         void OnUpdateSelected(BaseEventData eventData);
     }
 
@@ -346,6 +354,10 @@ namespace UnityEngine.EventSystems
     /// </remarks>
     public interface ISelectHandler : IEventSystemHandler
     {
+        /// <summary>
+        /// Called by the EventSystem when this object becomes selected.
+        /// </summary>
+        /// <param name="eventData">The event data for the selection.</param>
         void OnSelect(BaseEventData eventData);
     }
 
@@ -358,8 +370,9 @@ namespace UnityEngine.EventSystems
     public interface IDeselectHandler : IEventSystemHandler
     {
         /// <summary>
-        /// Called by the EventSystem when a new object is being selected.
+        /// Called by the EventSystem when this object is being deselected.
         /// </summary>
+        /// <param name="eventData">The event data for the deselection.</param>
         void OnDeselect(BaseEventData eventData);
     }
 
@@ -372,8 +385,9 @@ namespace UnityEngine.EventSystems
     public interface IMoveHandler : IEventSystemHandler
     {
         /// <summary>
-        /// Called by a BaseInputModule when a move event occurs.
+        /// Called by the EventSystem when a move event occurs.
         /// </summary>
+        /// <param name="eventData">The axis event data for the move.</param>
         void OnMove(AxisEventData eventData);
     }
 
@@ -386,8 +400,9 @@ namespace UnityEngine.EventSystems
     public interface ISubmitHandler : IEventSystemHandler
     {
         /// <summary>
-        /// Called when a submit event occurs.</summary>
-        /// <param name="eventData">The base event data.</param>
+        /// Called by the EventSystem when a Submit event occurs.
+        /// </summary>
+        /// <param name="eventData">The event data for the submit.</param>
         void OnSubmit(BaseEventData eventData);
     }
 
@@ -399,6 +414,10 @@ namespace UnityEngine.EventSystems
     /// </remarks>
     public interface ICancelHandler : IEventSystemHandler
     {
+        /// <summary>
+        /// Called by the EventSystem when a Cancel event occurs.
+        /// </summary>
+        /// <param name="eventData">The event data for the cancel.</param>
         void OnCancel(BaseEventData eventData);
     }
 }

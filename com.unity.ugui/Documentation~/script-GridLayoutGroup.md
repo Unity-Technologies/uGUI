@@ -28,7 +28,7 @@ There are special considerations to be aware of when using the Grid Layout Group
 
 The auto layout system calculates the horizontal and vertical sizes independently. This can be at odds with the Grid Layout Group, where the number of rows depends on the number of columns and vice versa.
 
-For any given number of cells, there are different combinations of row count and column count that can make the grid fit its content. In order to aid the layout system, you can specify that you intent the table to have a fixed number of columns or rows by using the Constraint property.
+There are different layout combinations of columns and rows for any given number of cells. To help the layout system choose the correct layout, use the Constraint property to specify a fixed number of columns or rows.
 
 Here are suggested ways of using the Layout System with a Content Size Fitter:
 

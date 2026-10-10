@@ -19,6 +19,9 @@ namespace UnityEngine.EventSystems
         /// </summary>
         protected const int kNoEventMaskSet = -1;
 
+        /// <summary>
+        /// The cached camera that this raycaster casts rays from.
+        /// </summary>
         protected Camera m_EventCamera;
 
         /// <summary>
@@ -32,15 +35,29 @@ namespace UnityEngine.EventSystems
         /// </summary>
         [SerializeField]
         protected int m_MaxRayIntersections = 0;
+
+        /// <summary>
+        /// The value of `m_MaxRayIntersections` that the hit buffer was last allocated for.
+        /// </summary>
         protected int m_LastMaxRayIntersections = 0;
 
 #if PACKAGE_PHYSICS
         RaycastHit[] m_Hits;
 #endif
 
+        /// <summary>Protected default constructor. Use <see cref="GameObject.AddComponent{T}"/> to add a PhysicsRaycaster to a GameObject.</summary>
+        /// <remarks>
+        /// Add a PhysicsRaycaster to a camera with the component menu or with <see cref="GameObject.AddComponent{T}"/>.
+        /// </remarks>
         protected PhysicsRaycaster()
         {}
 
+        /// <summary>
+        /// The camera that this raycaster casts rays from.
+        /// </summary>
+        /// <remarks>
+        /// This is the Camera on the same GameObject, or the main camera if the GameObject has no Camera.
+        /// </remarks>
         public override Camera eventCamera
         {
             get
@@ -136,6 +153,11 @@ namespace UnityEngine.EventSystems
             return true;
         }
 
+        /// <summary>
+        /// Raycast against 3D elements in the scene.
+        /// </summary>
+        /// <param name="eventData">Current event data.</param>
+        /// <param name="resultAppendList">List of hit Objects.</param>
         public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
         {
 #if PACKAGE_PHYSICS
@@ -149,23 +171,18 @@ namespace UnityEngine.EventSystems
 
             if (m_MaxRayIntersections == 0)
             {
-                if (ReflectionMethodsCache.Singleton.raycast3DAll == null)
-                    return;
-
-                m_Hits = ReflectionMethodsCache.Singleton.raycast3DAll(ray, distanceToClipPlane, finalEventMask);
+                m_Hits = Physics.RaycastAll(ray, distanceToClipPlane, finalEventMask);
                 hitCount = m_Hits.Length;
             }
             else
             {
-                if (ReflectionMethodsCache.Singleton.getRaycastNonAlloc == null)
-                    return;
                 if (m_LastMaxRayIntersections != m_MaxRayIntersections)
                 {
                     m_Hits = new RaycastHit[m_MaxRayIntersections];
                     m_LastMaxRayIntersections = m_MaxRayIntersections;
                 }
 
-                hitCount = ReflectionMethodsCache.Singleton.getRaycastNonAlloc(ray, m_Hits, distanceToClipPlane, finalEventMask);
+                hitCount = Physics.RaycastNonAlloc(ray, m_Hits, distanceToClipPlane, finalEventMask);
             }
 
             if (hitCount != 0)
@@ -191,6 +208,8 @@ namespace UnityEngine.EventSystems
                     resultAppendList.Add(result);
                 }
             }
+#else
+            PhysicsModuleErrors.LogPhysicsModuleNotPresent();
 #endif
         }
 

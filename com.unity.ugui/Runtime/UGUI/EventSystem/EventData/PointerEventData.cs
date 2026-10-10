@@ -94,6 +94,9 @@ namespace UnityEngine.EventSystems
         /// </summary>
         public RaycastResult pointerPressRaycast { get; set; }
 
+        /// <summary>
+        /// The GameObjects that the pointer is currently over.
+        /// </summary>
         public List<GameObject> hovered = new List<GameObject>();
 
         /// <summary>
@@ -241,6 +244,7 @@ namespace UnityEngine.EventSystems
         /// <remarks>
         /// Add this value to the radius to get the maximum touch radius, subtract it to get the minimum touch radius.
         /// </remarks>
+        /// <seealso cref="UnityEngine.UIElements.IPointerEvent" />
         public Vector2 radiusVariance { get; set; }
         /// <summary>
         /// Specifies in the case of a pointer exit if the pointer has fully exited the area or if it has just entered a child.
@@ -250,8 +254,11 @@ namespace UnityEngine.EventSystems
         /// Specifies in the case of a pointer enter if the pointer has entered a new area or if it has just reentered a parent after leaving a child.
         /// </summary>
         public bool reentered { get; set; }
-        /// <seealso cref="UnityEngine.UIElements.IPointerEvent" />
 
+        /// <summary>
+        /// Creates a new <see cref="PointerEventData"/> object with default pointer state.
+        /// </summary>
+        /// <param name="eventSystem">The event system that sends this event.</param>
         public PointerEventData(EventSystem eventSystem) : base(eventSystem)
         {
             eligibleForClick = false;
@@ -283,6 +290,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Is the pointer moving.
         /// </summary>
+        /// <returns>True if the pointer moved since the last update.</returns>
         public bool IsPointerMoving()
         {
             return delta.sqrMagnitude > 0.0f;
@@ -291,6 +299,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Is scroll being used on the input device.
         /// </summary>
+        /// <returns>True if the input device scrolled since the last update.</returns>
         public bool IsScrolling()
         {
             return scrollDelta.sqrMagnitude > 0.0f;
@@ -328,6 +337,10 @@ namespace UnityEngine.EventSystems
             }
         }
 
+        /// <summary>
+        /// Returns a multi-line string that lists the state of this pointer event.
+        /// </summary>
+        /// <returns>The formatted description of the pointer event.</returns>
         public override string ToString()
         {
             var sb = new StringBuilder();

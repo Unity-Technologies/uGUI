@@ -4,10 +4,30 @@ using UnityEngine.Pool;
 
 namespace UnityEngine.EventSystems
 {
+    /// <summary>
+    /// Sends EventSystem events to the handlers implemented by a GameObject and its ancestors.
+    /// </summary>
+    /// <remarks>
+    /// Each event interface in the EventSystems namespace has a matching EventFunction property on this class,
+    /// such as `EventSystems.ExecuteEvents.pointerDownHandler` for `EventSystems.IPointerDownHandler`.
+    /// Pass one of these properties to Execute or ExecuteHierarchy to invoke that event on a target GameObject.
+    /// </remarks>
     public static class ExecuteEvents
     {
+        /// <summary>
+        /// Invokes a specific EventSystem event on a handler.
+        /// </summary>
+        /// <typeparam name="T1">The handler interface that the event is sent to.</typeparam>
+        /// <param name="handler">The handler to invoke for the event.</param>
+        /// <param name="eventData">The event data to pass to the handler.</param>
         public delegate void EventFunction<T1>(T1 handler, BaseEventData eventData);
 
+        /// <summary>
+        /// Casts a <see cref="BaseEventData"/> to the type that an event handler expects.
+        /// </summary>
+        /// <typeparam name="T">The event data type that the handler expects.</typeparam>
+        /// <param name="data">The BaseEventData to cast.</param>
+        /// <returns>The event data, cast to `T`.</returns>
         public static T ValidateEventData<T>(BaseEventData data) where T : class
         {
             if ((data as T) == null)
@@ -141,91 +161,145 @@ namespace UnityEngine.EventSystems
             handler.OnCancel(eventData);
         }
 
+        /// <summary>
+        /// The event function that sends a pointer move event to an `EventSystems.IPointerMoveHandler`.
+        /// </summary>
         public static EventFunction<IPointerMoveHandler> pointerMoveHandler
         {
             get { return s_PointerMoveHandler; }
         }
 
+        /// <summary>
+        /// The event function that sends a pointer enter event to an `EventSystems.IPointerEnterHandler`.
+        /// </summary>
         public static EventFunction<IPointerEnterHandler> pointerEnterHandler
         {
             get { return s_PointerEnterHandler; }
         }
 
+        /// <summary>
+        /// The event function that sends a pointer exit event to an `EventSystems.IPointerExitHandler`.
+        /// </summary>
         public static EventFunction<IPointerExitHandler> pointerExitHandler
         {
             get { return s_PointerExitHandler; }
         }
 
+        /// <summary>
+        /// The event function that sends a pointer press event to an EventSystems.IPointerDownHandler.
+        /// </summary>
         public static EventFunction<IPointerDownHandler> pointerDownHandler
         {
             get { return s_PointerDownHandler; }
         }
 
+        /// <summary>
+        /// The event function that sends a pointer release event to an EventSystems.IPointerUpHandler.
+        /// </summary>
         public static EventFunction<IPointerUpHandler> pointerUpHandler
         {
             get { return s_PointerUpHandler; }
         }
 
+        /// <summary>
+        /// The event function that sends a pointer click event to an EventSystems.IPointerClickHandler.
+        /// </summary>
         public static EventFunction<IPointerClickHandler> pointerClickHandler
         {
             get { return s_PointerClickHandler; }
         }
 
+        /// <summary>
+        /// The event function that sends an initialize potential drag event to an EventSystems.IInitializePotentialDragHandler.
+        /// </summary>
         public static EventFunction<IInitializePotentialDragHandler> initializePotentialDrag
         {
             get { return s_InitializePotentialDragHandler; }
         }
 
+        /// <summary>
+        /// The event function that sends a begin drag event to an EventSystems.IBeginDragHandler.
+        /// </summary>
         public static EventFunction<IBeginDragHandler> beginDragHandler
         {
             get { return s_BeginDragHandler; }
         }
 
+        /// <summary>
+        /// The event function that sends a drag event to an EventSystems.IDragHandler.
+        /// </summary>
         public static EventFunction<IDragHandler> dragHandler
         {
             get { return s_DragHandler; }
         }
 
+        /// <summary>
+        /// The event function that sends an end drag event to an EventSystems.IEndDragHandler.
+        /// </summary>
         public static EventFunction<IEndDragHandler> endDragHandler
         {
             get { return s_EndDragHandler; }
         }
 
+        /// <summary>
+        /// The event function that sends a drop event to an EventSystems.IDropHandler.
+        /// </summary>
         public static EventFunction<IDropHandler> dropHandler
         {
             get { return s_DropHandler; }
         }
 
+        /// <summary>
+        /// The event function that sends a scroll event to an EventSystems.IScrollHandler.
+        /// </summary>
         public static EventFunction<IScrollHandler> scrollHandler
         {
             get { return s_ScrollHandler; }
         }
 
+        /// <summary>
+        /// The event function that sends an update event to the selected EventSystems.IUpdateSelectedHandler.
+        /// </summary>
         public static EventFunction<IUpdateSelectedHandler> updateSelectedHandler
         {
             get { return s_UpdateSelectedHandler; }
         }
 
+        /// <summary>
+        /// The event function that sends a selection event to an EventSystems.ISelectHandler.
+        /// </summary>
         public static EventFunction<ISelectHandler> selectHandler
         {
             get { return s_SelectHandler; }
         }
 
+        /// <summary>
+        /// The event function that sends a deselection event to an EventSystems.IDeselectHandler.
+        /// </summary>
         public static EventFunction<IDeselectHandler> deselectHandler
         {
             get { return s_DeselectHandler; }
         }
 
+        /// <summary>
+        /// The event function that sends a move event to an EventSystems.IMoveHandler.
+        /// </summary>
         public static EventFunction<IMoveHandler> moveHandler
         {
             get { return s_MoveHandler; }
         }
 
+        /// <summary>
+        /// The event function that sends a submit event to an EventSystems.ISubmitHandler.
+        /// </summary>
         public static EventFunction<ISubmitHandler> submitHandler
         {
             get { return s_SubmitHandler; }
         }
 
+        /// <summary>
+        /// The event function that sends a cancel event to an EventSystems.ICancelHandler.
+        /// </summary>
         public static EventFunction<ICancelHandler> cancelHandler
         {
             get { return s_CancelHandler; }
@@ -245,6 +319,17 @@ namespace UnityEngine.EventSystems
             }
         }
 
+        /// <summary>
+        /// Executes the specified event on every handler of type `T` attached to a GameObject.
+        /// </summary>
+        /// <remarks>
+        /// Handlers on disabled components and inactive GameObjects don't receive the event. If a handler throws an exception, the exception is logged and the remaining handlers still receive the event.
+        /// </remarks>
+        /// <typeparam name="T">The handler interface that the event is sent to.</typeparam>
+        /// <param name="target">The GameObject to send the event to.</param>
+        /// <param name="eventData">The event data to pass to each handler.</param>
+        /// <param name="functor">The event function that invokes the event on a handler.</param>
+        /// <returns>True if the GameObject has at least one handler of type `T`.</returns>
         public static bool Execute<T>(GameObject target, BaseEventData eventData, EventFunction<T> functor) where T : IEventSystemHandler
         {
             var internalHandlers = ListPool<IEventSystemHandler>.Get();
@@ -282,11 +367,19 @@ namespace UnityEngine.EventSystems
             return handlerCount > 0;
         }
 
-        /// <summary>
-        /// Execute the specified event on the first game object underneath the current touch.
-        /// </summary>
         private static readonly List<Transform> s_InternalTransformList = new List<Transform>(30);
 
+        /// <summary>
+        /// Executes the specified event on the first GameObject in the hierarchy that can handle it.
+        /// </summary>
+        /// <remarks>
+        /// The search starts at `root` and walks up through its parents until it reaches a GameObject with a handler of type `T`. Only that GameObject receives the event.
+        /// </remarks>
+        /// <typeparam name="T">The handler interface that the event is sent to.</typeparam>
+        /// <param name="root">The GameObject to start the search from.</param>
+        /// <param name="eventData">The event data to pass to each handler.</param>
+        /// <param name="callbackFunction">The event function that invokes the event on a handler.</param>
+        /// <returns>The GameObject that received the event, or `null` if no GameObject in the hierarchy can handle it.</returns>
         public static GameObject ExecuteHierarchy<T>(GameObject root, BaseEventData eventData, EventFunction<T> callbackFunction) where T : IEventSystemHandler
         {
             GetEventChain(root, s_InternalTransformList);
@@ -344,6 +437,9 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Whether the specified game object will be able to handle the specified event.
         /// </summary>
+        /// <typeparam name="T">The handler interface to look for.</typeparam>
+        /// <param name="go">The GameObject to check.</param>
+        /// <returns>True if the GameObject is active, has at least one enabled handler of type `T`.</returns>
         public static bool CanHandleEvent<T>(GameObject go) where T : IEventSystemHandler
         {
             var internalHandlers = ListPool<IEventSystemHandler>.Get();
@@ -356,6 +452,9 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Bubble the specified event on the game object, figuring out which object will actually receive the event.
         /// </summary>
+        /// <typeparam name="T">The handler interface to look for.</typeparam>
+        /// <param name="root">The GameObject to start the search from.</param>
+        /// <returns>The first active GameObject in the hierarchy that has an enabled handler of type `T`, or `null` if there is none.</returns>
         public static GameObject GetEventHandler<T>(GameObject root) where T : IEventSystemHandler
         {
             if (root == null)

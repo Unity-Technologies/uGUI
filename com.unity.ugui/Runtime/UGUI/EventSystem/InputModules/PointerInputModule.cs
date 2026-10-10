@@ -29,6 +29,9 @@ namespace UnityEngine.EventSystems
         /// </summary>
         public const int kFakeTouchesId = -4;
 
+        /// <summary>
+        /// The pointer event data for every active pointer, indexed by pointer ID.
+        /// </summary>
         protected Dictionary<int, PointerEventData> m_PointerData = new Dictionary<int, PointerEventData>();
 
         /// <summary>
@@ -55,6 +58,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Remove the PointerEventData from the cache.
         /// </summary>
+        /// <param name="data">The pointer event data to remove.</param>
         protected void RemovePointerData(PointerEventData data)
         {
             m_PointerData.Remove(data.pointerId);
@@ -134,6 +138,8 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Copy one PointerEventData to another.
         /// </summary>
+        /// <param name="from">The pointer event data to copy the values from.</param>
+        /// <param name="to">The pointer event data to copy the values to.</param>
         protected void CopyFromTo(PointerEventData @from, PointerEventData @to)
         {
             @to.position = @from.position;
@@ -152,9 +158,10 @@ namespace UnityEngine.EventSystems
         }
 
         /// <summary>
-        /// Given a mouse button return the current state for the frame.
+        /// Returns the current state for this frame for a given a mouse button ID.
         /// </summary>
         /// <param name="buttonId">Mouse button ID</param>
+        /// <returns>The press state of the button for this frame.</returns>
         protected PointerEventData.FramePressState StateForMouseButton(int buttonId)
         {
             var pressed = input.GetMouseButtonDown(buttonId);
@@ -168,16 +175,25 @@ namespace UnityEngine.EventSystems
             return PointerEventData.FramePressState.NotChanged;
         }
 
+        /// <summary>
+        /// Tracks the event data of a single mouse button.
+        /// </summary>
         protected class ButtonState
         {
             private PointerEventData.InputButton m_Button = PointerEventData.InputButton.Left;
 
+            /// <summary>
+            /// The event data of the tracked button.
+            /// </summary>
             public MouseButtonEventData eventData
             {
                 get { return m_EventData; }
                 set { m_EventData = value; }
             }
 
+            /// <summary>
+            /// The mouse button that this state tracks.
+            /// </summary>
             public PointerEventData.InputButton button
             {
                 get { return m_Button; }
@@ -187,10 +203,17 @@ namespace UnityEngine.EventSystems
             private MouseButtonEventData m_EventData;
         }
 
+        /// <summary>
+        /// Tracks the state of every mouse button that the input module processes.
+        /// </summary>
         protected class MouseState
         {
             private List<ButtonState> m_TrackedButtons = new List<ButtonState>();
 
+            /// <summary>
+            /// Checks whether any tracked mouse button was pressed this frame.
+            /// </summary>
+            /// <returns>True if at least one tracked button was pressed this frame.</returns>
             public bool AnyPressesThisFrame()
             {
                 var trackedButtonsCount = m_TrackedButtons.Count;
@@ -202,6 +225,10 @@ namespace UnityEngine.EventSystems
                 return false;
             }
 
+            /// <summary>
+            /// Checks whether any tracked mouse button was released this frame.
+            /// </summary>
+            /// <returns>True if at least one tracked button was released this frame.</returns>
             public bool AnyReleasesThisFrame()
             {
                 var trackedButtonsCount = m_TrackedButtons.Count;
@@ -213,6 +240,11 @@ namespace UnityEngine.EventSystems
                 return false;
             }
 
+            /// <summary>
+            /// Returns the tracked state of a mouse button, and starts tracking the button if it isn't tracked yet.
+            /// </summary>
+            /// <param name="button">The mouse button.</param>
+            /// <returns>The state of the given mouse button.</returns>
             public ButtonState GetButtonState(PointerEventData.InputButton button)
             {
                 ButtonState tracked = null;
@@ -234,6 +266,12 @@ namespace UnityEngine.EventSystems
                 return tracked;
             }
 
+            /// <summary>
+            /// Sets the press state and the pointer data of a mouse button for this frame.
+            /// </summary>
+            /// <param name="button">The mouse button.</param>
+            /// <param name="stateForMouseButton">The press state of the button for this frame.</param>
+            /// <param name="data">The pointer event data of the button for this frame.</param>
             public void SetButtonState(PointerEventData.InputButton button, PointerEventData.FramePressState stateForMouseButton, PointerEventData data)
             {
                 var toModify = GetButtonState(button);
@@ -260,6 +298,7 @@ namespace UnityEngine.EventSystems
             /// <summary>
             /// Was the button pressed this frame?
             /// </summary>
+            /// <returns>True if the mouse button was pressed this frame.</returns>
             public bool PressedThisFrame()
             {
                 return buttonState == PointerEventData.FramePressState.Pressed || buttonState == PointerEventData.FramePressState.PressedAndReleased;
@@ -268,6 +307,7 @@ namespace UnityEngine.EventSystems
             /// <summary>
             /// Was the button released this frame?
             /// </summary>
+            /// <returns>True if the mouse button was released this frame.</returns>
             public bool ReleasedThisFrame()
             {
                 return buttonState == PointerEventData.FramePressState.Released || buttonState == PointerEventData.FramePressState.PressedAndReleased;
@@ -277,16 +317,19 @@ namespace UnityEngine.EventSystems
         private readonly MouseState m_MouseState = new MouseState();
 
         /// <summary>
-        /// Return the current MouseState. Using the default pointer.
+        /// Returns the current MouseState for the default pointer.
         /// </summary>
+        /// <returns>The mouse state, with the left, right, and middle button data updated for this frame.</returns>
         protected virtual MouseState GetMousePointerEventData()
         {
             return GetMousePointerEventData(0);
         }
 
         /// <summary>
-        /// Return the current MouseState.
+        /// Updates and returns the current MouseState.
         /// </summary>
+        /// <param name="id">Ignored.</param>
+        /// <returns>The mouse state, with the left, right, and middle button data updated for this frame.</returns>
         protected virtual MouseState GetMousePointerEventData(int id)
         {
             // Populate the left button...
@@ -340,8 +383,10 @@ namespace UnityEngine.EventSystems
         }
 
         /// <summary>
-        /// Return the last PointerEventData for the given touch / mouse id.
+        /// Returns the last PointerEventData for the given touch or mouse ID.
         /// </summary>
+        /// <param name="id">The touch or mouse ID of the pointer event data.</param>
+        /// <returns>The last pointer event data of the given ID, or null if the pointer isn't tracked.</returns>
         protected PointerEventData GetLastPointerEventData(int id)
         {
             PointerEventData data;
@@ -360,6 +405,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Process movement for the current frame with the given pointer event.
         /// </summary>
+        /// <param name="pointerEvent">The pointer event data for the movement.</param>
         protected virtual void ProcessMove(PointerEventData pointerEvent)
         {
             var targetGO = (Cursor.lockState == CursorLockMode.Locked ? null : pointerEvent.pointerCurrentRaycast.gameObject);
@@ -369,6 +415,7 @@ namespace UnityEngine.EventSystems
         /// <summary>
         /// Process the drag for the current frame with the given pointer event.
         /// </summary>
+        /// <param name="pointerEvent">The pointer event data for the drag.</param>
         protected virtual void ProcessDrag(PointerEventData pointerEvent)
         {
             if (!pointerEvent.IsPointerMoving() ||
@@ -400,6 +447,10 @@ namespace UnityEngine.EventSystems
             }
         }
 
+        /// <inheritdoc/>
+        /// <summary>
+        /// Checks whether the pointer with the specified ID is over an EventSystem object.
+        /// </summary>
         public override bool IsPointerOverGameObject(int pointerId)
         {
             var lastPointer = GetLastPointerEventData(pointerId);
@@ -425,6 +476,10 @@ namespace UnityEngine.EventSystems
             eventSystem.SetSelectedGameObject(null, baseEventData);
         }
 
+        /// <summary>
+        /// Returns a multi-line string that lists the state of every tracked pointer.
+        /// </summary>
+        /// <returns>The formatted description of the input module state.</returns>
         public override string ToString()
         {
             var sb = new StringBuilder("<b>Pointer Input Module of type: </b>" + GetType());

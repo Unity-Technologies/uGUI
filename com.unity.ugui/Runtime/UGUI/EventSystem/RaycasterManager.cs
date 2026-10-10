@@ -2,6 +2,13 @@ using System.Collections.Generic;
 
 namespace UnityEngine.EventSystems
 {
+    /// <summary>
+    /// Keeps track of the BaseRaycasters that the EventSystem raycasts with.
+    /// </summary>
+    /// <remarks>
+    /// A <see cref="BaseRaycaster"/> registers itself when it becomes active and unregisters itself when it becomes inactive.
+    /// <see cref="EventSystems.EventSystem.RaycastAll"/> raycasts with every registered raycaster.
+    /// </remarks>
     public static class RaycasterManager
     {
         private static readonly List<BaseRaycaster> s_Raycasters = new List<BaseRaycaster>();
@@ -15,8 +22,9 @@ namespace UnityEngine.EventSystems
         }
 
         /// <summary>
-        /// List of BaseRaycasters that has been registered.
+        /// List of BaseRaycasters that have been registered.
         /// </summary>
+        /// <returns>The registered raycasters.</returns>
         public static List<BaseRaycaster> GetRaycasters()
         {
             return s_Raycasters;
