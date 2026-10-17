@@ -68,6 +68,15 @@ namespace TMPro
             m_NativeFontAsset = IntPtr.Zero;
         }
 
+        internal void UpdateNativeFaceInfoAndRenderMode()
+        {
+            if (m_NativeFontAsset == IntPtr.Zero)
+                return;
+
+            TextCoreFontAsset.UpdateNativeFaceInfo(m_NativeFontAsset, m_FaceInfo);
+            TextCoreFontAsset.UpdateNativeRenderMode(m_NativeFontAsset, m_AtlasRenderMode);
+        }
+
         internal void UpdateNativeFallbacks()
         {
             if (m_NativeFontAsset == IntPtr.Zero)

@@ -150,6 +150,10 @@ namespace UnityEditor.UI
                 {
                     EditorGUILayout.PropertyField(m_AnimTriggerProperty);
 
+                    var missingTriggers = FindTriggersMissingFromSelectables(targets);
+                    if (missingTriggers.Count > 0)
+                        EditorGUILayout.HelpBox("The Animator Controller has no trigger parameter named " + string.Join(", ", missingTriggers.Select(name => "'" + name + "'")) + ".", MessageType.Warning);
+
                     if (animator == null || animator.runtimeAnimatorController == null)
                     {
                         Rect buttonRect = EditorGUILayout.GetControlRect();
@@ -216,6 +220,50 @@ namespace UnityEditor.UI
         private bool IsDerivedSelectableEditor()
         {
             return GetType() != typeof(SelectableEditor);
+        }
+
+        internal static List<string> FindTriggersMissingFromSelectables(Object[] selectables)
+        {
+            var missingTriggers = new List<string>();
+            foreach (var selectable in selectables.OfType<Selectable>())
+            {
+                var animator = selectable.GetComponent<Animator>();
+                if (animator == null)
+                    continue;
+
+                foreach (var triggerName in FindTriggersMissingFromController(selectable.animationTriggers, animator.runtimeAnimatorController))
+                {
+                    if (!missingTriggers.Contains(triggerName))
+                        missingTriggers.Add(triggerName);
+                }
+            }
+
+            return missingTriggers;
+        }
+
+        internal static List<string> FindTriggersMissingFromController(AnimationTriggers animationTriggers, RuntimeAnimatorController runtimeController)
+        {
+            var missingTriggers = new List<string>();
+
+            while (runtimeController is AnimatorOverrideController overrideController)
+                runtimeController = overrideController.runtimeAnimatorController;
+
+            var controller = runtimeController as Animations.AnimatorController;
+            if (controller == null)
+                return missingTriggers;
+
+            var parameters = controller.parameters;
+            var triggerNames = new[] { animationTriggers.normalTrigger, animationTriggers.highlightedTrigger, animationTriggers.pressedTrigger, animationTriggers.selectedTrigger, animationTriggers.disabledTrigger };
+            foreach (var triggerName in triggerNames)
+            {
+                if (string.IsNullOrEmpty(triggerName) || missingTriggers.Contains(triggerName))
+                    continue;
+
+                if (!parameters.Any(parameter => parameter.name == triggerName && parameter.type == AnimatorControllerParameterType.Trigger))
+                    missingTriggers.Add(triggerName);
+            }
+
+            return missingTriggers;
         }
 
         private static Animations.AnimatorController GenerateSelectableAnimatorContoller(AnimationTriggers animationTriggers, Selectable target)

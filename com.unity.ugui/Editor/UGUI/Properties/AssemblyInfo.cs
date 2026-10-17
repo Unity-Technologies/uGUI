@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -15,6 +16,10 @@ using UnityEngine;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: AssemblyIsEditorAssembly]
+
+#if UNITY_INCLUDE_TESTS
+[assembly: InternalsVisibleTo("UnityEditor.UI.EditorTests")]
+#endif
 
 // Setting ComVisible to false makes the types in this assembly not visible
 // to COM components.  If you need to access a type in this assembly from
