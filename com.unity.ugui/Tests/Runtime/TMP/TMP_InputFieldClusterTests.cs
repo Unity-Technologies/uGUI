@@ -119,9 +119,9 @@ namespace TMPro
             m_InputField.stringPosition = stringPosition;
         }
 
-        void PressKey(KeyCode keyCode)
+        void PressKey(KeyCode keyCode, EventModifiers modifiers = EventModifiers.None)
         {
-            m_InputField.ProcessEvent(new Event { type = EventType.KeyDown, keyCode = keyCode, modifiers = EventModifiers.None });
+            m_InputField.ProcessEvent(new Event { type = EventType.KeyDown, keyCode = keyCode, modifiers = modifiers });
             m_InputField.ForceLabelUpdate();
             m_InputField.textComponent.ForceMeshUpdate();
         }
@@ -263,6 +263,153 @@ namespace TMPro
             PressKey(KeyCode.Backspace);
 
             Assert.AreEqual("ab", m_InputField.text);
+        }
+
+        [Test]
+        public void StringPosition_InsideASurrogatePair_MovesToTheStartOfThePair()
+        {
+            string sourceText = "a" + k_AstralCharacter;
+
+            SetTextAndStringPosition(sourceText, 2);
+
+            Assert.AreEqual(1, m_InputField.stringPosition, "A position between the two halves of a surrogate pair should move to the start of the pair.");
+        }
+
+        // A password field draws one asterisk per UTF-16 code unit, so a surrogate pair shows as two
+        // asterisks. The arrows cross both at once so the caret never splits the pair.
+        [Test]
+        public void RightArrow_InPasswordField_StepsOverTheWholeSurrogatePair()
+        {
+            string sourceText = k_AstralCharacter + "ab";
+            int[] expectedPositions = { 2, 3, 4 };
+
+            m_InputField.contentType = TMP_InputField.ContentType.Password;
+
+            SetTextAndStringPosition(sourceText, 0);
+
+            foreach (var expectedPosition in expectedPositions)
+            {
+                PressKey(KeyCode.RightArrow);
+
+                Assert.AreEqual(expectedPosition, m_InputField.stringPosition, "Arrow-right should not stop between the two halves of the surrogate pair.");
+                Assert.AreEqual(expectedPosition, m_InputField.caretPosition, "The caret should follow the string position.");
+            }
+        }
+
+        [Test]
+        public void LeftArrow_InPasswordField_StepsOverTheWholeSurrogatePair()
+        {
+            string sourceText = k_AstralCharacter + "ab";
+            int[] expectedPositions = { 3, 2, 0 };
+
+            m_InputField.contentType = TMP_InputField.ContentType.Password;
+
+            SetTextAndStringPosition(sourceText, sourceText.Length);
+
+            foreach (var expectedPosition in expectedPositions)
+            {
+                PressKey(KeyCode.LeftArrow);
+
+                Assert.AreEqual(expectedPosition, m_InputField.stringPosition, "Arrow-left should not stop between the two halves of the surrogate pair.");
+                Assert.AreEqual(expectedPosition, m_InputField.caretPosition, "The caret should follow the string position.");
+            }
+        }
+
+        [Test]
+        public void ShiftRightArrow_InPasswordField_SelectsTheWholeSurrogatePair()
+        {
+            string sourceText = k_AstralCharacter + "ab";
+
+            m_InputField.contentType = TMP_InputField.ContentType.Password;
+
+            SetTextAndStringPosition(sourceText, 0);
+
+            PressKey(KeyCode.RightArrow, EventModifiers.Shift);
+
+            Assert.AreEqual(0, m_InputField.selectionStringAnchorPosition, "The selection should start where the caret was.");
+            Assert.AreEqual(2, m_InputField.selectionStringFocusPosition, "Shift+arrow-right should select both halves of the surrogate pair.");
+        }
+
+        [Test]
+        public void Typing_AfterRightArrowInPasswordField_KeepsTheSurrogatePairWhole()
+        {
+            string sourceText = k_AstralCharacter + "ab";
+
+            m_InputField.contentType = TMP_InputField.ContentType.Password;
+
+            SetTextAndStringPosition(sourceText, 0);
+
+            PressKey(KeyCode.RightArrow);
+            m_InputField.ProcessEvent(new Event { type = EventType.KeyDown, character = 'x' });
+
+            Assert.AreEqual(k_AstralCharacter + "xab", m_InputField.text, "Typed text should go after the surrogate pair, not between its halves.");
+        }
+
+        [Test]
+        public void Backspace_AfterSurrogatePairInPasswordField_RemovesBothHalves()
+        {
+            string sourceText = "a" + k_AstralCharacter + "b";
+
+            m_InputField.contentType = TMP_InputField.ContentType.Password;
+
+            SetTextAndStringPosition(sourceText, 3);
+
+            PressKey(KeyCode.Backspace);
+
+            Assert.AreEqual("ab", m_InputField.text, "Backspace should remove both halves of the surrogate pair.");
+            Assert.AreEqual(1, m_InputField.stringPosition, "The string position should be left where the pair started.");
+            Assert.AreEqual(1, m_InputField.caretPosition, "The caret should move back over both asterisks.");
+        }
+
+        [Test]
+        public void Delete_BeforeSurrogatePairInPasswordField_RemovesBothHalves()
+        {
+            string sourceText = "a" + k_AstralCharacter + "b";
+
+            m_InputField.contentType = TMP_InputField.ContentType.Password;
+
+            SetTextAndStringPosition(sourceText, 1);
+
+            PressKey(KeyCode.Delete);
+
+            Assert.AreEqual("ab", m_InputField.text, "Delete should remove both halves of the surrogate pair.");
+            Assert.AreEqual(1, m_InputField.stringPosition, "The string position should not move.");
+            Assert.AreEqual(1, m_InputField.caretPosition, "The caret should not move.");
+        }
+
+        // A click can still place the caret between the two asterisks of a surrogate pair.
+        [Test]
+        public void Backspace_WithCaretBetweenSurrogateHalvesInPasswordField_RemovesBothHalves()
+        {
+            string sourceText = "a" + k_AstralCharacter + "b";
+
+            m_InputField.contentType = TMP_InputField.ContentType.Password;
+
+            SetTextAndStringPosition(sourceText, 0);
+            m_InputField.caretPosition = 2;
+
+            PressKey(KeyCode.Backspace);
+
+            Assert.AreEqual("ab", m_InputField.text, "Backspace should remove both halves of the surrogate pair.");
+            Assert.AreEqual(1, m_InputField.stringPosition, "The string position should be left where the pair started.");
+            Assert.AreEqual(1, m_InputField.caretPosition, "The caret should be left where the pair started.");
+        }
+
+        [Test]
+        public void Delete_WithCaretBetweenSurrogateHalvesInPasswordField_RemovesBothHalves()
+        {
+            string sourceText = "a" + k_AstralCharacter + "b";
+
+            m_InputField.contentType = TMP_InputField.ContentType.Password;
+
+            SetTextAndStringPosition(sourceText, 0);
+            m_InputField.caretPosition = 2;
+
+            PressKey(KeyCode.Delete);
+
+            Assert.AreEqual("ab", m_InputField.text, "Delete should remove both halves of the surrogate pair.");
+            Assert.AreEqual(1, m_InputField.stringPosition, "The string position should be left where the pair started.");
+            Assert.AreEqual(1, m_InputField.caretPosition, "The caret should be left where the pair started.");
         }
     }
 }
