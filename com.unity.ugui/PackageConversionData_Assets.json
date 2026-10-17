@@ -76,16 +76,6 @@
             "replacement": "guid: 2dbab6ddeacf4399a9d621920215cec0"
         },
         {
-            "referencedResource": "TMP_SDF-Surface.shader",
-            "target": "guid: 8e6b9842dbb1a5a4887378afab854e63",
-            "replacement": "guid: e52e3e4586c740459b3c308050ec4b37"
-        },
-        {
-            "referencedResource": "TMP_SDF-Surface-Mobile.shader",
-            "target": "guid: 3c2ea7753c1425145a74d106ec1cd852",
-            "replacement": "guid: 69b418e16fcc46d1adf1e7f05a1d8c83"
-        },
-        {
             "referencedResource": "TMP_Sprite.shader",
             "target": "guid: 3a1c68c8292caf046bd21158886c5e40",
             "replacement": "guid: c13dbb07723c428a869261a1220bd4a2"

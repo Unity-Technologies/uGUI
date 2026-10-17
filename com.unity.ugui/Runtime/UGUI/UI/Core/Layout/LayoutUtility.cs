@@ -88,7 +88,12 @@ namespace UnityEngine.UI
         /// <returns>The minimum width of the layout element.</returns>
         public static float GetMinWidth(RectTransform rect)
         {
-            return GetLayoutProperty(rect, k_GetMinWidth, 0);
+            return GetMinWidth(rect, out _);
+        }
+
+        internal static float GetMinWidth(RectTransform rect, out ILayoutElement source)
+        {
+            return GetLayoutProperty(rect, k_GetMinWidth, k_GreaterThan, 0, out source);
         }
 
 
@@ -102,7 +107,12 @@ namespace UnityEngine.UI
         /// <returns>The maximum width of the layout element.</returns>
         public static float GetMaxWidth(RectTransform rect)
         {
-            return GetLayoutProperty(rect, k_GetMaxWidth, k_LessThan, DefaultMaxSize, out _);
+            return GetMaxWidth(rect, out _);
+        }
+
+        internal static float GetMaxWidth(RectTransform rect, out ILayoutElement source)
+        {
+            return GetLayoutProperty(rect, k_GetMaxWidth, k_LessThan, DefaultMaxSize, out source);
         }
 
         /// <summary>
@@ -115,7 +125,12 @@ namespace UnityEngine.UI
         /// <returns>The preferred width of the layout element.</returns>
         public static float GetPreferredWidth(RectTransform rect)
         {
-            return GetPreferredLayoutProperty(rect, k_GetMinWidth, k_GetPreferredWidth, k_GetMaxWidth, 0);
+            return GetPreferredWidth(rect, out _);
+        }
+
+        internal static float GetPreferredWidth(RectTransform rect, out ILayoutElement source)
+        {
+            return GetPreferredLayoutProperty(rect, k_GetMinWidth, k_GetPreferredWidth, k_GetMaxWidth, 0, out source);
         }
 
         /// <summary>
@@ -128,7 +143,12 @@ namespace UnityEngine.UI
         /// <returns>The flexible width of the layout element.</returns>
         public static float GetFlexibleWidth(RectTransform rect)
         {
-            return GetLayoutProperty(rect, k_GetFlexibleWidth, 0);
+            return GetFlexibleWidth(rect, out _);
+        }
+
+        internal static float GetFlexibleWidth(RectTransform rect, out ILayoutElement source)
+        {
+            return GetLayoutProperty(rect, k_GetFlexibleWidth, k_GreaterThan, 0, out source);
         }
 
         /// <summary>
@@ -141,7 +161,12 @@ namespace UnityEngine.UI
         /// <returns>The minimum height of the layout element.</returns>
         public static float GetMinHeight(RectTransform rect)
         {
-            return GetLayoutProperty(rect, k_GetMinHeight, 0);
+            return GetMinHeight(rect, out _);
+        }
+
+        internal static float GetMinHeight(RectTransform rect, out ILayoutElement source)
+        {
+            return GetLayoutProperty(rect, k_GetMinHeight, k_GreaterThan, 0, out source);
         }
 
         /// <summary>
@@ -154,7 +179,12 @@ namespace UnityEngine.UI
         /// <returns>The maximum height of the layout element.</returns>
         public static float GetMaxHeight(RectTransform rect)
         {
-            return GetLayoutProperty(rect, k_GetMaxHeight, k_LessThan, DefaultMaxSize, out _);
+            return GetMaxHeight(rect, out _);
+        }
+
+        internal static float GetMaxHeight(RectTransform rect, out ILayoutElement source)
+        {
+            return GetLayoutProperty(rect, k_GetMaxHeight, k_LessThan, DefaultMaxSize, out source);
         }
 
         /// <summary>
@@ -167,7 +197,12 @@ namespace UnityEngine.UI
         /// <returns>The preferred height of the layout element.</returns>
         public static float GetPreferredHeight(RectTransform rect)
         {
-            return GetPreferredLayoutProperty(rect, k_GetMinHeight, k_GetPreferredHeight, k_GetMaxHeight, 0);
+            return GetPreferredHeight(rect, out _);
+        }
+
+        internal static float GetPreferredHeight(RectTransform rect, out ILayoutElement source)
+        {
+            return GetPreferredLayoutProperty(rect, k_GetMinHeight, k_GetPreferredHeight, k_GetMaxHeight, 0, out source);
         }
 
         /// <summary>
@@ -180,7 +215,12 @@ namespace UnityEngine.UI
         /// <returns>The flexible height of the layout element.</returns>
         public static float GetFlexibleHeight(RectTransform rect)
         {
-            return GetLayoutProperty(rect, k_GetFlexibleHeight, 0);
+            return GetFlexibleHeight(rect, out _);
+        }
+
+        internal static float GetFlexibleHeight(RectTransform rect, out ILayoutElement source)
+        {
+            return GetLayoutProperty(rect, k_GetFlexibleHeight, k_GreaterThan, 0, out source);
         }
 
         /// <summary>
@@ -268,8 +308,9 @@ namespace UnityEngine.UI
         /// Single-pass equivalent of Mathf.Clamp(Mathf.Max(GetLayoutProperty(min), GetLayoutProperty(preferred)), min, GetLayoutProperty(max)).
         /// More performant to use call this than calling GetLayoutProperty for min/preferred/max individually.
         /// </summary>
-        private static float GetPreferredLayoutProperty(RectTransform rect, System.Func<ILayoutElement, float> minProperty, System.Func<ILayoutElement, float> preferredProperty, System.Func<ILayoutElement, float> maxProperty, float defaultValue)
+        private static float GetPreferredLayoutProperty(RectTransform rect, System.Func<ILayoutElement, float> minProperty, System.Func<ILayoutElement, float> preferredProperty, System.Func<ILayoutElement, float> maxProperty, float defaultValue, out ILayoutElement source)
         {
+            source = null;
             if (rect == null)
                 return 0;
 
@@ -279,6 +320,9 @@ namespace UnityEngine.UI
             int highestPriorityMin = System.Int32.MinValue;
             int highestPriorityPreferred = System.Int32.MinValue;
             int highestPriorityMax = System.Int32.MinValue;
+            ILayoutElement minSource = null;
+            ILayoutElement preferredSource = null;
+            ILayoutElement maxSource = null;
 
             using var _ = ListPool<Component>.Get(out var components);
             rect.GetComponents(typeof(ILayoutElement), components);
@@ -301,10 +345,12 @@ namespace UnityEngine.UI
                         {
                             currentMin = prop;
                             highestPriorityMin = priority;
+                            minSource = layoutComp;
                         }
                         else if (prop > currentMin)
                         {
                             currentMin = prop;
+                            minSource = layoutComp;
                         }
                     }
                 }
@@ -319,10 +365,12 @@ namespace UnityEngine.UI
                         {
                             currentPreferred = prop;
                             highestPriorityPreferred = priority;
+                            preferredSource = layoutComp;
                         }
                         else if (prop > currentPreferred)
                         {
                             currentPreferred = prop;
+                            preferredSource = layoutComp;
                         }
                     }
                 }
@@ -337,17 +385,31 @@ namespace UnityEngine.UI
                         {
                             currentMax = prop;
                             highestPriorityMax = priority;
+                            maxSource = layoutComp;
                         }
                         else if (prop < currentMax)
                         {
                             currentMax = prop;
+                            maxSource = layoutComp;
                         }
                     }
                 }
             }
 
-            // Resolve: clamp the effective preferred (which is at least min) to the max
-            return Mathf.Clamp(currentPreferred, currentMin, currentMax);
+            // Resolve: clamp the effective preferred (which is at least min) to the max.
+            // Same branches as Mathf.Clamp, so the source is the element whose value won.
+            if (currentPreferred < currentMin)
+            {
+                source = minSource;
+                return currentMin;
+            }
+            if (currentPreferred > currentMax)
+            {
+                source = maxSource;
+                return currentMax;
+            }
+            source = preferredSource;
+            return currentPreferred;
         }
     }
 }

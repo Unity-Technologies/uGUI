@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
@@ -32,6 +33,9 @@ namespace UnityEditor.UI
         private static List<SelectableEditor> s_Editors = new List<SelectableEditor>();
         private static bool s_ShowNavigation = false;
         private static string s_ShowNavigationKey = "SelectableEditor.ShowNavigation";
+
+        // Replaced by tests so the controller can be generated without a modal save dialog.
+        internal static Func<string, string, string, string, string> s_SaveFileDialogCallback = EditorUtility.SaveFilePanelInProject;
 
         // Whenever adding new SerializedProperties to the Selectable and SelectableEditor
         // Also update this guy in OnEnable. This makes the inherited classes from Selectable not require a CustomEditor.
@@ -159,16 +163,7 @@ namespace UnityEditor.UI
                         Rect buttonRect = EditorGUILayout.GetControlRect();
                         buttonRect.xMin += EditorGUIUtility.labelWidth;
                         if (GUI.Button(buttonRect, "Auto Generate Animation", EditorStyles.miniButton))
-                        {
-                            var controller = GenerateSelectableAnimatorContoller((target as Selectable).animationTriggers, target as Selectable);
-                            if (controller != null)
-                            {
-                                if (animator == null)
-                                    animator = (target as Selectable).gameObject.AddComponent<Animator>();
-
-                                Animations.AnimatorController.SetAnimatorController(animator, controller);
-                            }
-                        }
+                            AutoGenerateAnimation(target as Selectable, animator);
                     }
                 }
                 EditorGUILayout.EndFadeGroup();
@@ -222,7 +217,22 @@ namespace UnityEditor.UI
             return GetType() != typeof(SelectableEditor);
         }
 
-        internal static List<string> FindTriggersMissingFromSelectables(Object[] selectables)
+        internal static void AutoGenerateAnimation(Selectable selectable, Animator animator)
+        {
+            var controller = GenerateSelectableAnimatorContoller(selectable.animationTriggers, selectable);
+            if (controller == null)
+                return;
+
+            if (animator == null)
+                animator = Undo.AddComponent<Animator>(selectable.gameObject);
+            // in case there is already an animator attached to the button
+            else
+                Undo.RecordObject(animator, "Auto Generate Animation");
+
+            Animations.AnimatorController.SetAnimatorController(animator, controller);
+		}
+
+        internal static List<string> FindTriggersMissingFromSelectables(UnityEngine.Object[] selectables)
         {
             var missingTriggers = new List<string>();
             foreach (var selectable in selectables.OfType<Selectable>())
@@ -300,7 +310,7 @@ namespace UnityEditor.UI
         {
             var defaultName = target.gameObject.name;
             var message = string.Format("Create a new animator for the game object '{0}':", defaultName);
-            return EditorUtility.SaveFilePanelInProject("New Animation Contoller", defaultName, "controller", message);
+            return s_SaveFileDialogCallback("New Animation Contoller", defaultName, "controller", message);
         }
 
         private static AnimationClip GenerateTriggerableTransition(string name, Animations.AnimatorController controller)

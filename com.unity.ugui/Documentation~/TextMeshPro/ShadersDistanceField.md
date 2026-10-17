@@ -80,7 +80,7 @@ Underlay adds an additional rendering of the text underneath the original render
 
 The Distance Field shader does not react to Scene lighting. Instead, it uses the settings in this group to simulate local directional lighting, and light effects.
 
-If you want your text to react to Scene lighting, use the [Distance Field Surface](ShaderDistanceFieldSurface.md) shader.
+If you want your text to react to Scene lighting, use the [Distance Field (URP Lit)](ShadersDistanceFieldURPLit.md) shader.
 
 ![Example image](../images/TMP_Shader_DF_Lighting.png)
 
@@ -166,7 +166,7 @@ You can use an environment map to add a reflection effect to your text face or o
 
 The **Glow** effect adds a smooth outline on top of other text effects, which is typically used to suggest a glow. The effect is additive, so it is more noticeable on dark backgrounds.
 
-When the glow extends beyond the text boundary, the surface shader shades it as if it were part of the solid text, meaning that it gets simulated lighting effects such as specular highlights.
+When the glow extends beyond the text boundary, the shader shades it as if it were part of the solid text, meaning that it gets simulated lighting effects such as specular highlights.
 
 ![Example image](../images/TMP_Shader_DF_Glow.png)
 

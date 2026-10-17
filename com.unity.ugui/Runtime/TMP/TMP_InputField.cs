@@ -2539,6 +2539,10 @@ namespace TMPro
                         position = m_TextComponent.textInfo.characterInfo[caretSelectPositionInternal + 1].index + m_TextComponent.textInfo.characterInfo[caretSelectPositionInternal + 1].stringLength;
                     else
                         position = m_TextComponent.textInfo.characterInfo[caretSelectPositionInternal].index + m_TextComponent.textInfo.characterInfo[caretSelectPositionInternal].stringLength;
+
+                    // A password label draws one asterisk per UTF-16 code unit, so step past the second half of a surrogate pair.
+                    if (position > 0 && position < text.Length && char.IsSurrogatePair(text[position - 1], text[position]))
+                        position++;
                 }
 
             }
@@ -3165,7 +3169,16 @@ namespace TMPro
                             }
                         }
 
+                        bool startMoved = ExtendRangeToWholeSurrogatePairs(text, ref nextCharacterStringPosition, ref numberOfCharactersToRemove);
+
                         m_Text = text.Remove(nextCharacterStringPosition, numberOfCharactersToRemove);
+
+                        // The removal started inside a surrogate pair, so the caret moves to the start of the pair.
+                        if (startMoved)
+                        {
+                            stringSelectPositionInternal = stringPositionInternal = nextCharacterStringPosition;
+                            caretSelectPositionInternal = caretPositionInternal = caretPositionInternal - 1;
+                        }
 
                         m_HasTextBeenRemoved = true;
 
@@ -3251,6 +3264,9 @@ namespace TMPro
                             }
                         }
 
+                        if (ExtendRangeToWholeSurrogatePairs(text, ref removalStringIndex, ref numberOfCharactersToRemove))
+                            caretPositionIndex -= 1;
+
                         // Delete the previous character
                         m_Text = text.Remove(removalStringIndex, numberOfCharactersToRemove);
 
@@ -3279,6 +3295,29 @@ namespace TMPro
         {
             // Variation selector clusters also set alternativeGlyph but they hold a single component.
             return characterInfo.elementType == TMP_TextElementType.Character && characterInfo.alternativeGlyph != null;
+        }
+
+        /// <summary>
+        /// Grows the range so it does not split a surrogate pair, which a password label draws as two asterisks.
+        /// Returns true if the start of the range moved back.
+        /// </summary>
+        static bool ExtendRangeToWholeSurrogatePairs(string text, ref int start, ref int length)
+        {
+            bool startMoved = false;
+
+            if (start > 0 && start < text.Length && char.IsSurrogatePair(text[start - 1], text[start]))
+            {
+                start -= 1;
+                length += 1;
+                startMoved = true;
+            }
+
+            int end = start + length;
+
+            if (end > 0 && end < text.Length && char.IsSurrogatePair(text[end - 1], text[end]))
+                length += 1;
+
+            return startMoved;
         }
 
         static uint GetCodePointBefore(string text, int position, int start, out int length)

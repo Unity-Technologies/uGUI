@@ -6,9 +6,9 @@ All shaders have a desktop and a mobile version. The mobile versions are less de
 
 ## SDF Shaders
 
-There are three variants of the SDF shader, known as Distance Field, Distance Field (Surface), and Distance Field Overlay. The regular and overlay shaders are unlit, so they don't interact with the Scene lighting. They can support locally simulated lighting effects instead.
+There are three variants of the SDF shader, known as Distance Field, Distance Field Overlay, and Distance Field (URP Lit). The regular and overlay shaders are unlit, so they don't interact with the Scene lighting. They can support locally simulated lighting effects instead.
 
-The surface shader versions do interact with the Scene lighting. They use Unity's surface shader framework and are quite flexible, but also more demanding on the GPU. They are not physically based shaders.
+The [Distance Field (URP Lit)](ShadersDistanceFieldURPLit.md) shader interacts with the Scene lighting. It's a Shader Graph shader for the Universal Render Pipeline (URP). In the High Definition Render Pipeline (HDRP), use the `TMP_SDF-HDRP LIT` shader instead.
 
 SDF shaders can use the distance data to generate special effects, like outlines, underlays, and bevels. These effects often increase the visual size of the text. When taken to their extremes, you might see artifacts appear around the edges of character sprites. If this happens, scale down the effects. For example, a soft dilated underlay with large offsets might take things too far.
 

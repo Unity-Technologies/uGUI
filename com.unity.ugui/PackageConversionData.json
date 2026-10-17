@@ -91,11 +91,6 @@
             "replacement": "guid: 21d2d4f2b9fe4a4594c37d2a6c6d4251"
         },
         {
-            "referencedResource": "Bangers SDF Logo.mat",
-            "target": "guid: 4fb51aa7001a2244395ddf6a15d37389",
-            "replacement": "guid: 86e49f97418b437aac1a90a5928697af"
-        },
-        {
             "referencedResource": "Electronic Highway Sign SDF.asset",
             "target": "guid: 163292f6f226d954593d45b079f8aae0",
             "replacement": "guid: 08cd128db64c4445b3422f1b7afdf77f"
@@ -139,11 +134,6 @@
             "referencedResource": "Roboto-Bold SDF - Drop Shadow.mat",
             "target": "guid: 102e7c5c5e3b1f3468518cb166967d77",
             "replacement": "guid: 16c0f8d13ca747979273b94f389bc8ce"
-        },
-        {
-            "referencedResource": "Roboto-Bold SDF - Surface.mat",
-            "target": "guid: e2da38ead8f8238449c54a1ef49e080f",
-            "replacement": "guid: 40b3d01e23e34630a6b8177ea22e7af7"
         },
         {
             "referencedResource": "DropCap Numbers.asset",
@@ -466,16 +456,6 @@
             "replacement": "guid: 2dbab6ddeacf4399a9d621920215cec0"
         },
         {
-            "referencedResource": "TMP_SDF-Surface.shader",
-            "target": "guid: 8e6b9842dbb1a5a4887378afab854e63",
-            "replacement": "guid: e52e3e4586c740459b3c308050ec4b37"
-        },
-        {
-            "referencedResource": "TMP_SDF-Surface-Mobile.shader",
-            "target": "guid: 3c2ea7753c1425145a74d106ec1cd852",
-            "replacement": "guid: 69b418e16fcc46d1adf1e7f05a1d8c83"
-        },
-        {
             "referencedResource": "TMP_Sprite.shader",
             "target": "guid: 3a1c68c8292caf046bd21158886c5e40",
             "replacement": "guid: c13dbb07723c428a869261a1220bd4a2"
@@ -776,11 +756,6 @@
             "replacement": "guid: 18203b4feea144fb96037a8d9126ce8d"
         },
         {
-            "referencedResource": "24 - Surface Shader Example.unity",
-            "target": "guid: 8c4969fd8ba94a68b07cf11f3e7a5137",
-            "replacement": "guid: efb3f0be77274f77a0a4dfe719b9adf2"
-        },
-        {
             "referencedResource": "25 - Sunny Days Example.unity",
             "target": "guid: f9b4c22e15cff344ba9fc6542a58dd07",
             "replacement": "guid: bc544d943eb44ec9bb22b807f98311bd"
@@ -859,11 +834,6 @@
             "referencedResource": "Bangers SDF Logo - URP.mat",
             "target": "guid: 6751ce1a4611b3940812c13a6847d94f",
             "replacement": "guid: d40bbe387d584e1ab8bbad2c87b5ad0e"
-        },
-        {
-            "referencedResource": "Bangers SDF Logo.mat",
-            "target": "guid: f4e195ac1e204eff960149d1cb34e18c",
-            "replacement": "guid: 86e49f97418b437aac1a90a5928697af"
         },
         {
             "referencedResource": "Bangers SDF.asset",
@@ -949,6 +919,11 @@
             "referencedResource": "Default Sprites.png",
             "target": "guid: a0fc465d6cf04254a2938578735e2383",
             "replacement": "guid: 716a5f40975d4fa1a15929895023fb89"
+        },
+        {
+            "referencedResource": "DefaultFont.asset",
+            "target": "guid: 92536db2844e4239aaccc2dd2f7940b3",
+            "replacement": "guid: 40a9ed5c3a3a5d8448a85917f1bb69d9"
         },
         {
             "referencedResource": "DropCap Numbers.asset",
@@ -1038,7 +1013,7 @@
         {
             "referencedResource": "LiberationSans SDF - Fallback.asset",
             "target": "guid: 2e498d1c8094910479dc3e1b768306a4",
-            "replacement": "guid: bb78ff062bb1453c8073f7fe2f93de3e"
+            "replacement": "guid: 1e3843b942b74aabb3c0a44e7a6f5190"
         },
         {
             "referencedResource": "LiberationSans SDF - Metalic Green.mat",
@@ -1119,11 +1094,6 @@
             "referencedResource": "Roboto-Bold SDF - HDRP Unlit.mat",
             "target": "guid: 2ddca8f46aa0838419d568affb0ca6b4",
             "replacement": "guid: a80881e6e2784dfabec9314805cfb8c5"
-        },
-        {
-            "referencedResource": "Roboto-Bold SDF - Surface.mat",
-            "target": "guid: e6b276ec991f467aa14ef1f3cc665993",
-            "replacement": "guid: 40b3d01e23e34630a6b8177ea22e7af7"
         },
         {
             "referencedResource": "Roboto-Bold SDF - URP.mat",
@@ -1286,16 +1256,6 @@
             "replacement": "guid: f99637934d35413090e376899561717a"
         },
         {
-            "referencedResource": "TMP_SDF-Surface-Mobile.shader",
-            "target": "guid: 85187c2149c549c5b33f0cdb02836b17",
-            "replacement": "guid: 69b418e16fcc46d1adf1e7f05a1d8c83"
-        },
-        {
-            "referencedResource": "TMP_SDF-Surface.shader",
-            "target": "guid: f7ada0af4f174f0694ca6a487b8f543d",
-            "replacement": "guid: e52e3e4586c740459b3c308050ec4b37"
-        },
-        {
             "referencedResource": "TMP_SDF-URP Lit.shadergraph",
             "target": "guid: a3d800b099a06e0478fb790c5e79057a",
             "replacement": "guid: e29e7355e8f14ae2a18b9218039b72e2"
@@ -1364,11 +1324,6 @@
             "referencedResource": "TMPro_Properties.cginc",
             "target": "guid: 3997e2241185407d80309a82f9148466",
             "replacement": "guid: 41de848a8090419eb81a7d732162553b"
-        },
-        {
-            "referencedResource": "TMPro_Surface.cginc",
-            "target": "guid: d930090c0cd643c7b55f19a38538c162",
-            "replacement": "guid: a296b22beaf24c7591b08225dfecf477"
         },
         {
             "referencedResource": "TeleType.cs",
