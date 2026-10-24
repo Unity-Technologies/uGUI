@@ -4,6 +4,7 @@ using NUnit.Framework;
 using System.Collections;
 using UnityEngine.UI;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 internal class ImageTests
 {
@@ -56,6 +57,83 @@ internal class ImageTests
 
         Assert.AreEqual(vh.currentVertCount, m_Image.sprite.vertices.Length);
         Assert.AreEqual(vh.currentIndexCount, m_Image.sprite.triangles.Length);
+    }
+
+    [Test]
+    public void TiledImageWithTooManyTilesLogsErrorOnlyOnceUntilBackUnderLimit()
+    {
+        var texture = new Texture2D(32, 32);
+        m_Image.sprite = Sprite.Create(texture, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f), 100, 0, SpriteMeshType.FullRect, new Vector4(10, 10, 10, 10));
+        m_Image.type = Image.Type.Tiled;
+        m_Image.rectTransform.sizeDelta = new Vector2(2000, 2000);
+        var vh = new VertexHelper();
+        var tooManyTilesError = new Regex(Regex.Escape(Image.k_TooManyTilesReduceAdvice));
+
+        LogAssert.Expect(LogType.Error, tooManyTilesError);
+        m_Image.GenerateImageData(vh);
+        m_Image.pixelsPerUnitMultiplier = 2;
+        m_Image.GenerateImageData(vh);
+        LogAssert.NoUnexpectedReceived();
+
+        m_Image.rectTransform.sizeDelta = new Vector2(100, 100);
+        m_Image.GenerateImageData(vh);
+        m_Image.rectTransform.sizeDelta = new Vector2(2000, 2000);
+
+        LogAssert.Expect(LogType.Error, tooManyTilesError);
+        m_Image.GenerateImageData(vh);
+
+        vh.Dispose();
+        Object.DestroyImmediate(texture);
+    }
+
+    [Test]
+    public void TiledImageWithTooManyTilesLogsErrorAgainAfterLeavingTiledType()
+    {
+        var texture = new Texture2D(32, 32);
+        var sprite = Sprite.Create(texture, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f), 100, 0, SpriteMeshType.FullRect, new Vector4(10, 10, 10, 10));
+        m_Image.sprite = sprite;
+        m_Image.type = Image.Type.Tiled;
+        m_Image.rectTransform.sizeDelta = new Vector2(2000, 2000);
+        var vh = new VertexHelper();
+        var tooManyTilesError = new Regex(Regex.Escape(Image.k_TooManyTilesReduceAdvice));
+
+        LogAssert.Expect(LogType.Error, tooManyTilesError);
+        m_Image.GenerateImageData(vh);
+
+        m_Image.type = Image.Type.Simple;
+        m_Image.GenerateImageData(vh);
+        m_Image.type = Image.Type.Tiled;
+
+        LogAssert.Expect(LogType.Error, tooManyTilesError);
+        m_Image.GenerateImageData(vh);
+
+        m_Image.sprite = null;
+        m_Image.GenerateImageData(vh);
+        m_Image.sprite = sprite;
+
+        LogAssert.Expect(LogType.Error, tooManyTilesError);
+        m_Image.GenerateImageData(vh);
+
+        vh.Dispose();
+        Object.DestroyImmediate(texture);
+    }
+
+    [Test]
+    public void TiledImageWithTooManyTilesOnClampedTextureSuggestsRepeatWrapMode()
+    {
+        var texture = new Texture2D(32, 32);
+        texture.wrapMode = TextureWrapMode.Clamp;
+        m_Image.sprite = Sprite.Create(texture, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f), 100);
+        m_Image.type = Image.Type.Tiled;
+        m_Image.pixelsPerUnitMultiplier = 4;
+        m_Image.rectTransform.sizeDelta = new Vector2(2000, 2000);
+        var vh = new VertexHelper();
+
+        LogAssert.Expect(LogType.Error, new Regex(Regex.Escape(Image.k_TooManyTilesRepeatWrapModeAdvice)));
+        m_Image.GenerateImageData(vh);
+
+        vh.Dispose();
+        Object.DestroyImmediate(texture);
     }
 
     [UnityTest]

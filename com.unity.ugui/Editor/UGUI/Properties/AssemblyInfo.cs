@@ -1,7 +1,7 @@
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine;
-
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
@@ -15,6 +15,11 @@ using UnityEngine;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: AssemblyIsEditorAssembly]
+
+#if UNITY_INCLUDE_TESTS
+[assembly: InternalsVisibleTo("UnityEditor.UI.EditorTests")]
+[assembly: InternalsVisibleTo("Unity.Modules.UI.Tests.Editor")]
+#endif
 
 // Setting ComVisible to false makes the types in this assembly not visible
 // to COM components.  If you need to access a type in this assembly from

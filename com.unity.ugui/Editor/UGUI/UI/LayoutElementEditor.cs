@@ -174,6 +174,7 @@ namespace UnityEditor.UI
             bool fieldHasFocus = false;
             bool labelIsDragging = false;
             int undoGroupAtEditStart = 0;
+            bool valuesMixedAtEditStart = false;
 
             // Enable/Disable the property for editing
             var toggle = new UnityEngine.UIElements.Toggle();
@@ -195,23 +196,49 @@ namespace UnityEditor.UI
             // Inspector, undo/redo, script) - including binding updates that raise no change event.
             floatField.TrackPropertyValue(property, prop => ApplyState(prop, prop.floatValue, toggle, floatField));
 
-            // Toggle callback - set the value to default value
+            // Toggle callback - disabling remembers each target's value, enabling restores it (or the default).
             toggle.RegisterValueChangedCallback(evt =>
             {
-                serializedObject.Update();
-                property.floatValue = evt.newValue ? defaultEnabledValue : defaultDisabledValue;
-                serializedObject.ApplyModifiedProperties();
+                string propertyPath = property.propertyPath;
+                foreach (var target in serializedObject.targetObjects)
+                {
+                    if (target == null)
+                        continue;
 
-                toggle.showMixedValue = false;
-                floatField.showMixedValue = false;
-                floatField.style.display = evt.newValue ? DisplayStyle.Flex : DisplayStyle.None;
-                if (evt.newValue)
-                    floatField.SetValueWithoutNotify(defaultEnabledValue);
+                    using (var targetObject = new SerializedObject(target))
+                    {
+                        var targetProperty = targetObject.FindProperty(propertyPath);
+                        if (evt.newValue)
+                        {
+                            if (IsEnabledValue(targetProperty.floatValue))
+                                continue;
+                            targetProperty.floatValue = RecallEnabledValue(target, propertyPath, defaultEnabledValue);
+                        }
+                        else
+                        {
+                            RememberEnabledValue(target, propertyPath, targetProperty.floatValue);
+                            targetProperty.floatValue = defaultDisabledValue;
+                        }
+                        targetObject.ApplyModifiedProperties();
+                    }
+                }
+                serializedObject.Update();
+
+                ApplyState(property, property.floatValue, toggle, floatField);
+                if (evt.newValue && !property.hasMultipleDifferentValues)
+                    floatField.SetValueWithoutNotify(property.floatValue);
             });
 
-            floatField.RegisterCallback<FocusInEvent>(_ => { fieldHasFocus = true; undoGroupAtEditStart = Undo.GetCurrentGroup(); });
+            void BeginEdit()
+            {
+                undoGroupAtEditStart = Undo.GetCurrentGroup();
+                serializedObject.Update();
+                valuesMixedAtEditStart = property.hasMultipleDifferentValues;
+            }
+
+            floatField.RegisterCallback<FocusInEvent>(_ => { fieldHasFocus = true; BeginEdit(); });
             floatField.RegisterCallback<FocusOutEvent>(_ => fieldHasFocus = false);
-            labelElement.RegisterCallback<PointerCaptureEvent>(_ => { labelIsDragging = true; undoGroupAtEditStart = Undo.GetCurrentGroup(); });
+            labelElement.RegisterCallback<PointerCaptureEvent>(_ => { labelIsDragging = true; BeginEdit(); });
             labelElement.RegisterCallback<PointerCaptureOutEvent>(_ => labelIsDragging = false);
 
             floatField.RegisterValueChangedCallback(evt =>
@@ -223,13 +250,16 @@ namespace UnityEditor.UI
                     return;
                 }
 
-                float clampedValue = Mathf.Max(0f, evt.newValue);
-                if (!Mathf.Approximately(clampedValue, evt.newValue))
+                // A mixed field shows no real value, so there is no previous value to fall back to.
+                float previousValue = valuesMixedAtEditStart ? float.NaN : evt.previousValue;
+                float clampedValue = ClampUserValue(evt.newValue, previousValue, defaultEnabledValue, defaultDisabledValue);
+                if (!clampedValue.Equals(evt.newValue))
                 {
                     serializedObject.Update();
                     property.floatValue = clampedValue;
                     serializedObject.ApplyModifiedProperties();
                     floatField.SetValueWithoutNotify(clampedValue);
+                    ApplyState(property, clampedValue, toggle, floatField);
 
                     // Merge the rejected write and this correction into one undo step.
                     Undo.CollapseUndoOperations(undoGroupAtEditStart);
@@ -239,10 +269,43 @@ namespace UnityEditor.UI
             return row;
         }
 
+        // NaN, and +Infinity on fields where it is not the disabled value, would be stored as a disabled value
+        // while the user is editing an enabled field, so they fall back to the previous value or the field's default instead.
+        private static float ClampUserValue(float value, float previousValue, float defaultEnabledValue, float defaultDisabledValue)
+        {
+            bool isInvalid = float.IsNaN(value) || (float.IsPositiveInfinity(value) && !float.IsPositiveInfinity(defaultDisabledValue));
+            if (isInvalid)
+                return IsEnabledValue(previousValue) ? previousValue : defaultEnabledValue;
+            return Mathf.Max(0f, value);
+        }
+
+        internal static bool IsEnabledValue(float value)
+        {
+            return value >= 0f && value < LayoutUtility.DefaultMaxSize;
+        }
+
+        // Entity IDs change when the object is reloaded, so a remembered value only lasts while the object stays loaded.
+        private static string RememberedValueKey(UnityEngine.Object target, string propertyPath)
+        {
+            return "LayoutElementEditor." + target.GetEntityId() + "." + propertyPath;
+        }
+
+        private static void RememberEnabledValue(UnityEngine.Object target, string propertyPath, float value)
+        {
+            if (IsEnabledValue(value))
+                SessionState.SetFloat(RememberedValueKey(target, propertyPath), value);
+        }
+
+        private static float RecallEnabledValue(UnityEngine.Object target, string propertyPath, float defaultValue)
+        {
+            float value = SessionState.GetFloat(RememberedValueKey(target, propertyPath), defaultValue);
+            return IsEnabledValue(value) ? value : defaultValue;
+        }
+
         private static void ApplyState(SerializedProperty property, float value, UnityEngine.UIElements.Toggle toggle, FloatField floatField)
         {
             bool valuesDiffer = property.hasMultipleDifferentValues;
-            bool enabled = value >= 0f && value < LayoutUtility.DefaultMaxSize;
+            bool enabled = IsEnabledValue(value);
             bool enabledMixed = valuesDiffer && EnabledStateIsMixed(property);
 
             toggle.showMixedValue = enabledMixed;
@@ -261,8 +324,7 @@ namespace UnityEditor.UI
             {
                 using (var targetObject = new SerializedObject(target))
                 {
-                    float fieldValue = targetObject.FindProperty(propertyPath).floatValue;
-                    bool enabled = fieldValue >= 0f && fieldValue < LayoutUtility.DefaultMaxSize;
+                    bool enabled = IsEnabledValue(targetObject.FindProperty(propertyPath).floatValue);
                     if (!haveFirst)
                     {
                         firstEnabled = enabled;

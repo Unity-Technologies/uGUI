@@ -1119,13 +1119,23 @@ namespace UnityEngine.UI
             if (transition != Transition.Animation || animator == null || !animator.isActiveAndEnabled || !animator.hasBoundPlayables || string.IsNullOrEmpty(triggername))
                 return;
 
-            animator.ResetTrigger(m_AnimationTriggers.normalTrigger);
-            animator.ResetTrigger(m_AnimationTriggers.highlightedTrigger);
-            animator.ResetTrigger(m_AnimationTriggers.pressedTrigger);
-            animator.ResetTrigger(m_AnimationTriggers.selectedTrigger);
-            animator.ResetTrigger(m_AnimationTriggers.disabledTrigger);
+            // Trigger names missing from the Animator are reported in the Inspector, not on every transition.
+            bool logWarnings = animator.logWarnings;
+            animator.logWarnings = false;
+            try
+            {
+                animator.ResetTrigger(m_AnimationTriggers.normalTrigger);
+                animator.ResetTrigger(m_AnimationTriggers.highlightedTrigger);
+                animator.ResetTrigger(m_AnimationTriggers.pressedTrigger);
+                animator.ResetTrigger(m_AnimationTriggers.selectedTrigger);
+                animator.ResetTrigger(m_AnimationTriggers.disabledTrigger);
 
-            animator.SetTrigger(triggername);
+                animator.SetTrigger(triggername);
+            }
+            finally
+            {
+                animator.logWarnings = logWarnings;
+            }
 #endif
         }
 
