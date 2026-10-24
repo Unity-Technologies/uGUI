@@ -143,9 +143,15 @@ namespace UnityEngine.UIElements
                 var go = new GameObject(panel.name, typeof(PanelEventHandler), typeof(PanelRaycaster));
                 go.transform.SetParent(m_EventSystem.transform);
                 panel.selectableGameObject = go;
-                var destroyed = destroyedActions[panel] = () => DestroyPanelGameObject(panel);
-                panel.destroyed += destroyed;
+                RegisterDestroyedAction(panel);
             }
+        }
+
+        // Kept out of CreatePanelGameObject so its closure isn't allocated on every per-frame call.
+        private void RegisterDestroyedAction(BaseRuntimePanel panel)
+        {
+            var destroyed = destroyedActions[panel] = () => DestroyPanelGameObject(panel);
+            panel.destroyed += destroyed;
         }
 
         private void DestroyPanelGameObject(BaseRuntimePanel panel)
