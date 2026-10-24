@@ -782,6 +782,10 @@ namespace TMPro
             DestroyImmediate(m_Material);
 
             DestroyNativeFontAsset();
+
+            TMP_ResourceManager.RemoveFontAsset(this);
+            MaterialReferenceManager.RemoveFontAsset(this);
+            TMP_Text.ReleaseFontAssetReferences(this);
         }
 
         #if UNITY_EDITOR

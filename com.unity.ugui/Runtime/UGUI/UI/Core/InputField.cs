@@ -517,8 +517,7 @@ namespace UnityEngine.UI
                 m_Text = "";
                 OnValidateInput validatorMethod = onValidateInput ?? Validate;
                 m_CaretPosition = m_CaretSelectPosition = value.Length;
-                int charactersToCheck = characterLimit > 0 ? Math.Min(characterLimit, value.Length) : value.Length;
-                for (int i = 0; i < charactersToCheck; ++i)
+                for (int i = 0; i < value.Length && (characterLimit <= 0 || m_Text.Length < characterLimit); ++i)
                 {
                     char c = validatorMethod(m_Text, m_Text.Length, value[i]);
                     if (c != 0)
@@ -533,6 +532,11 @@ namespace UnityEngine.UI
 #if UNITY_EDITOR
             if (!Application.isPlaying)
             {
+                if (m_CaretPosition > m_Text.Length)
+                    m_CaretPosition = m_CaretSelectPosition = m_Text.Length;
+                else if (m_CaretSelectPosition > m_Text.Length)
+                    m_CaretSelectPosition = m_Text.Length;
+
                 SendOnValueChangedAndUpdateLabel();
                 return;
             }

@@ -1011,9 +1011,22 @@ namespace TMPro
 		private bool m_IsKeyboardBeingClosedInTouchscreen = false;
 
         /// <summary>
-        /// Get: Returns the focus position as thats the position that moves around even during selection.
-        /// Set: Set both the anchor and focus position such that a selection doesn't happen
+        /// The position of the cursor in the text displayed by the component.
         /// </summary>
+        /// <remarks>
+        /// This property represents the index into the <see cref="TMP_TextInfo.characterInfo"/> array, which are the characters the text component actually displays.
+        /// A character that consists of two UTF-16 code units, such as some emoji, counts as one position.
+        ///
+        /// When the Rich Text setting is enabled or <see cref="isRichTextEditingAllowed"/> is set to <c>true</c>, formatting tags are excluded from this index because they don't display any characters.
+        /// For example, if <see cref="text"/> is <c>&lt;b&gt;Hi&lt;/b&gt;</c> and the cursor is between <c>H</c> and <c>i</c>, the position is 1.
+        /// Tags that produce text elements, such as <c>&lt;br&gt;</c>, do occupy caret positions.
+        ///
+        /// For a cursor position that includes rich text tags, use <see cref="stringPosition"/> instead.
+        ///
+        /// When text is selected, the value is the focus position, which is the endpoint that moves during selection.
+        ///
+        /// When you set this property, it moves the input field cursor, clears the selection, and updates <see cref="stringPosition"/> to match.
+        /// </remarks>
         public int caretPosition
         {
             get => caretSelectPositionInternal;
@@ -1063,8 +1076,21 @@ namespace TMPro
 
 
         /// <summary>
-        /// The current cursor position in the raw text string (excluding rich text tags).
+        /// The position of the cursor in the raw text string, including any rich text tags.
         /// </summary>
+        /// <remarks>
+        /// This property represents the UTF-16 index into <see cref="text"/>. You can use it directly with string operations such as <see cref="string.Insert"/> or <see cref="string.Substring(int)"/>.
+        /// A character that consists of two UTF-16 code units, such as some emoji, counts as two positions.
+        ///
+        /// Rich text tags count toward this index. For example, if <see cref="text"/> is <c>&lt;b&gt;Hi&lt;/b&gt;</c> and the cursor is between <c>H</c> and <c>i</c>, the position is 4.
+        ///
+        /// For a cursor position in the displayed text, excluding rich text tags, use <see cref="caretPosition"/> instead.
+        ///
+        /// When text is selected, the value is the focus position, which is the endpoint that moves during selection.
+        ///
+        /// When you set this property, it moves the input field cursor, clears the selection, and updates <see cref="caretPosition"/> to match.
+        /// If the new value is inside a rich text tag, <see cref="caretPosition"/> points to the next displayed character.
+        /// </remarks>
         public int stringPosition
         {
             get => stringSelectPositionInternal;

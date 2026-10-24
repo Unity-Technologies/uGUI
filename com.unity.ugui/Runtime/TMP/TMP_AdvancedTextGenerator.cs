@@ -729,9 +729,11 @@ namespace TMPro
             meshInfo.vertices[vertexIndex + 2] = ToLocalPosition(element.topRight.position, textAreaTopLeft, verticalOffset);
             meshInfo.vertices[vertexIndex + 3] = ToLocalPosition(element.bottomRight.position, textAreaTopLeft, verticalOffset);
 
-            // The native bold flag is carried in uv2.y; TMP shaders expect the SDF scale in uv0.w,
+            // The native bold flag is carried in uv2.y and the glyph scale relative to the text (face scale,
+            // sub/superscript, small caps, size tags) in uv2.x; TMP shaders expect the SDF scale in uv0.w,
             // negated for bold.
-            float signedScale = element.bottomLeft.uv2.y != 0 ? -xScale : xScale;
+            float glyphScale = element.bottomLeft.uv2.x > 0 ? element.bottomLeft.uv2.x : 1;
+            float signedScale = (element.bottomLeft.uv2.y != 0 ? -xScale : xScale) * glyphScale;
 
             Vector2 uvBL, uvTL, uvTR, uvBR;
             ComputeAtlasUVs(ref element, glyphRect, group, padding, out uvBL, out uvTL, out uvTR, out uvBR);

@@ -207,14 +207,6 @@ namespace TMPro
             m_materialReferenceIndexLookup.Clear();
             m_materialReferenceStack = new TMP_TextProcessingStack<MaterialReference>(new MaterialReference[16]);
 
-            OnCharacterRequest = null;
-            OnFontAssetRequest = null;
-            OnFontMaterialRequest = null;
-            OnSpriteAssetRequest = null;
-            OnColorGradientAssetRequest = null;
-
-            OnMissingCharacter = null;
-
             Array.Clear(m_htmlTag, 0, m_htmlTag.Length);
             Array.Clear(m_xmlAttribute, 0, m_xmlAttribute.Length);
             Array.Clear(m_attributeParameterValues, 0, m_attributeParameterValues.Length);
@@ -228,6 +220,57 @@ namespace TMPro
             m_EllipsisInsertionCandidateStack = new(8, 8);
         }
 #endif
+
+
+        internal static void ReleaseFontAssetReferences(TMP_FontAsset fontAsset)
+        {
+            for (int i = 0; i < m_materialReferences.Length; i++)
+            {
+                if (ReferenceEquals(m_materialReferences[i].fontAsset, fontAsset))
+                    m_materialReferences[i] = default;
+            }
+
+            ReleaseFontAssetReferences(ref m_materialReferenceStack, fontAsset);
+
+            ReleaseFontAssetReferences(ref m_SavedWordWrapState, fontAsset);
+            ReleaseFontAssetReferences(ref m_SavedLineState, fontAsset);
+            ReleaseFontAssetReferences(ref m_SavedEllipsisState, fontAsset);
+            ReleaseFontAssetReferences(ref m_SavedLastValidState, fontAsset);
+            ReleaseFontAssetReferences(ref m_SavedSoftLineBreakState, fontAsset);
+
+            if (m_EllipsisInsertionCandidateStack.itemStack != null)
+            {
+                for (int i = 0; i < m_EllipsisInsertionCandidateStack.itemStack.Length; i++)
+                    ReleaseFontAssetReferences(ref m_EllipsisInsertionCandidateStack.itemStack[i], fontAsset);
+            }
+
+            WordWrapState ellipsisDefaultState = m_EllipsisInsertionCandidateStack.defaultItem;
+            ReleaseFontAssetReferences(ref ellipsisDefaultState, fontAsset);
+            m_EllipsisInsertionCandidateStack.defaultItem = ellipsisDefaultState;
+        }
+
+        static void ReleaseFontAssetReferences(ref WordWrapState state, TMP_FontAsset fontAsset)
+        {
+            if (ReferenceEquals(state.currentFontAsset, fontAsset))
+                state.currentFontAsset = null;
+
+            ReleaseFontAssetReferences(ref state.materialReferenceStack, fontAsset);
+        }
+
+        static void ReleaseFontAssetReferences(ref TMP_TextProcessingStack<MaterialReference> stack, TMP_FontAsset fontAsset)
+        {
+            if (stack.itemStack != null)
+            {
+                for (int i = 0; i < stack.itemStack.Length; i++)
+                {
+                    if (ReferenceEquals(stack.itemStack[i].fontAsset, fontAsset))
+                        stack.itemStack[i] = default;
+                }
+            }
+
+            if (ReferenceEquals(stack.defaultItem.fontAsset, fontAsset))
+                stack.defaultItem = default;
+        }
 
 
         /// <summary>
@@ -3477,7 +3520,10 @@ namespace TMPro
             {
                 uint c = sourceText[readIndex];
 
-                if (c == 0 || c == '>' || c == '=' || c == ' ')
+                if (c == 0)
+                    return 0;
+
+                if (c == '>' || c == '=' || c == ' ')
                     return hashCode;
 
                 hashCode = ((hashCode << 5) + hashCode) ^ (int)TMP_TextParsingUtilities.ToUpperASCIIFast(c);

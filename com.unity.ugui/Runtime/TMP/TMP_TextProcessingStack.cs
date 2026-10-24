@@ -218,6 +218,13 @@ namespace TMPro
         }
 
 
+        internal T defaultItem
+        {
+            get { return m_DefaultItem; }
+            set { m_DefaultItem = value; }
+        }
+
+
         /// <summary>
         /// Returns the current item on the stack.
         /// </summary>

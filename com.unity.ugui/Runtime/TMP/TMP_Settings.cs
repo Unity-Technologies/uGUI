@@ -40,19 +40,6 @@ namespace TMPro
             get { return "1.4.0"; }
         }
 
-        [SerializeField]
-        bool m_IsBuiltInSettings;
-
-        /// <summary>
-        /// True for the TMP Settings asset shipped with the package, used when the project defines none.
-        /// </summary>
-        internal bool isBuiltInSettings => m_IsBuiltInSettings;
-
-        internal void ClearBuiltInFlag()
-        {
-            m_IsBuiltInSettings = false;
-        }
-
         /// <summary>
         /// Controls the text wrapping mode of newly created text objects.
         /// </summary>
@@ -597,6 +584,13 @@ namespace TMPro
         internal const string k_BuiltInSettingsGUID = "0104df30113748678d4d2f9079d0d107";
 
         /// <summary>
+        /// True for the TMP Settings asset shipped with the package, used when the project defines none.
+        /// </summary>
+        internal bool isBuiltInSettings =>
+            UnityEditor.AssetDatabase.TryGetGUIDAndLocalFileIdentifier(this, out string guid, out long _) &&
+            guid == k_BuiltInSettingsGUID;
+
+        /// <summary>
         /// Returns the TMP Settings asset of the project, or the built-in one when the project has none.
         /// </summary>
         /// <param name="userSettings">Every non built-in TMP Settings asset found in the project, sorted by path. Only the first is used.</param>
@@ -605,7 +599,8 @@ namespace TMPro
         internal static TMP_Settings FindSettingsInEditor(out List<TMP_Settings> userSettings, out TMP_Settings builtInSettings, bool logErrors)
         {
             userSettings = new List<TMP_Settings>();
-            builtInSettings = null;
+            string builtInPath = UnityEditor.AssetDatabase.GUIDToAssetPath(k_BuiltInSettingsGUID);
+            builtInSettings = UnityEditor.AssetDatabase.LoadAssetAtPath<TMP_Settings>(builtInPath);
 
             string[] guids = UnityEditor.AssetDatabase.FindAssets("t:TMP_Settings");
             var paths = new List<string>(guids.Length);
@@ -615,18 +610,13 @@ namespace TMPro
 
             foreach (string path in paths)
             {
-                var settings = UnityEditor.AssetDatabase.LoadAssetAtPath<TMP_Settings>(path);
-                if (settings == null)
+                if (path == builtInPath)
                     continue;
 
-                if (settings.isBuiltInSettings)
-                    builtInSettings ??= settings;
-                else
+                var settings = UnityEditor.AssetDatabase.LoadAssetAtPath<TMP_Settings>(path);
+                if (settings != null)
                     userSettings.Add(settings);
             }
-
-            if (builtInSettings == null)
-                builtInSettings = UnityEditor.AssetDatabase.LoadAssetAtPath<TMP_Settings>(UnityEditor.AssetDatabase.GUIDToAssetPath(k_BuiltInSettingsGUID));
 
             if (logErrors && userSettings.Count > 1)
             {

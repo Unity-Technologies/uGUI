@@ -1,3 +1,4 @@
+using Unity.Scripting.LifecycleManagement;
 using UnityEngine;
 using System.Collections;
 
@@ -25,7 +26,9 @@ namespace TMPro.Examples
 
         //private int m_frame = 0;
 
+        [NoAutoStaticsCleanup]
         static WaitForEndOfFrame k_WaitForEndOfFrame = new WaitForEndOfFrame();
+        [NoAutoStaticsCleanup]
         static WaitForSeconds[] k_WaitForSecondsRandom = new WaitForSeconds[]
         {
             new WaitForSeconds(0.05f), new WaitForSeconds(0.1f), new WaitForSeconds(0.15f), new WaitForSeconds(0.2f), new WaitForSeconds(0.25f),

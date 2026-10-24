@@ -59,6 +59,7 @@
       * [Physics Raycaster](script-PhysicsRaycaster.md)
       * [Physics 2D Raycaster](script-Physics2DRaycaster.md)
       * [Standalone Input Module](script-StandaloneInputModule.md)
+      * [Base Input](script-BaseInput.md)
       * [Event Trigger](script-EventTrigger.md)
   * [UI How Tos](UIHowTos.md)
     * [Designing UI for Multiple Resolutions](HOWTO-UIMultiResolution.md)

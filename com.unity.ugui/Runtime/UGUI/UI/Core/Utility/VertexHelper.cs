@@ -335,7 +335,7 @@ namespace UnityEngine.UI
             if (m_VertCount >= k_MaxVertCount)
                 throw new ArgumentException($"Mesh can not have more than {k_MaxVertCount} vertices");
 
-            if (m_VertCount == 0 || m_IndexCount == 0)
+            if (m_VertCount == 0)
             {
                 mesh.Clear();
                 return;

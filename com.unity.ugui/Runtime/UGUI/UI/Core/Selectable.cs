@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine.Serialization;
 using UnityEngine.EventSystems;
@@ -23,6 +24,9 @@ namespace UnityEngine.UI
         private const int k_SelectablesDefaultCapacity = 8;
         /// <summary>Global list of all currently active Selectable instances.</summary>
         protected static readonly List<Selectable> s_Selectables = new List<Selectable>(k_SelectablesDefaultCapacity);
+		/// <summary>Obsolete. The number of active Selectable instances in <see cref="s_Selectables"/>. Use <see cref="allSelectableCount"/> instead.</summary>
+        [Obsolete("Selectable.s_SelectableCount is obsolete. Use Selectable.allSelectableCount instead (UnityUpgradable) -> allSelectableCount", true)]
+		protected static int s_SelectableCount = 0;
 
 #if UNITY_EDITOR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]

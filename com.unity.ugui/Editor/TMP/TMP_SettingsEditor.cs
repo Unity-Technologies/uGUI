@@ -524,7 +524,7 @@ namespace TMPro.EditorUtilities
         public override void OnGUI(string searchContext)
         {
             // Embedded editor lost its asset, or a project asset appeared while showing the built-in state.
-            if (m_Editor != null ? m_Editor.target == null : !TMP_Settings.instance.isBuiltInSettings)
+            if (m_Editor != null ? m_Editor.target == null : TMP_Settings.instance != m_BuiltInSettings)
                 Refresh();
 
             float labelWidth = EditorGUIUtility.labelWidth;
@@ -595,7 +595,6 @@ namespace TMPro.EditorUtilities
         {
             var settings = m_BuiltInSettings != null ? Object.Instantiate(m_BuiltInSettings) : ScriptableObject.CreateInstance<TMP_Settings>();
             settings.name = "TMP Settings";
-            settings.ClearBuiltInFlag();
 
             if (!AssetDatabase.IsValidFolder(k_SettingsFolder))
             {

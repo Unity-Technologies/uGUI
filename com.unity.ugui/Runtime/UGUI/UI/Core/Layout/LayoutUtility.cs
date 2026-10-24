@@ -304,6 +304,29 @@ namespace UnityEngine.UI
             return currentValue;
         }
 
+        internal static bool TryGetMinMaxConflict(
+            RectTransform rect,
+            int axis,
+            out float min,
+            out ILayoutElement minSource,
+            out float max,
+            out ILayoutElement maxSource
+        )
+        {
+            if (rect == null)
+            {
+                min = 0;
+                minSource = null;
+                max = DefaultMaxSize;
+                maxSource = null;
+                return false;
+            }
+
+            min = GetLayoutProperty(rect, axis == 0 ? k_GetMinWidth : k_GetMinHeight, k_GreaterThan, 0, out minSource);
+            max = GetLayoutProperty(rect, axis == 0 ? k_GetMaxWidth : k_GetMaxHeight, k_LessThan, DefaultMaxSize, out maxSource);
+            return min > max;
+        }
+
         /// <summary>
         /// Single-pass equivalent of Mathf.Clamp(Mathf.Max(GetLayoutProperty(min), GetLayoutProperty(preferred)), min, GetLayoutProperty(max)).
         /// More performant to use call this than calling GetLayoutProperty for min/preferred/max individually.
