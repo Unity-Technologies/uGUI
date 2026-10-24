@@ -26,7 +26,7 @@ namespace UnityEngine.UIElements
             set
             {
                 if (m_EventSystem == value) return;
-                Debug.Assert(!m_Started && !m_Enabled, "Expect EventSystem set before OnEnable and Start");
+                Debug.Assert(!m_Enabled, "Expect EventSystem set before OnEnable");
                 m_EventSystem = value;
             }
         }
@@ -37,7 +37,6 @@ namespace UnityEngine.UIElements
         private float m_WorldPickingMaxDistance = Mathf.Infinity;
         private bool m_CreateDefaultPanelComponents = true;
 
-        private bool m_Started;
         private bool m_Enabled;
         private bool m_IsTrackingPanels;
         private GameObject m_WorldSpaceGo;
@@ -86,7 +85,7 @@ namespace UnityEngine.UIElements
         }
 
         private bool shouldTrackPanels => overrideUIToolkitEvents && createDefaultPanelComponents &&
-                                          m_Started && m_Enabled;
+                                          m_Enabled && m_EventSystem.didStart;
 
         private void StartTrackingUIToolkitPanels()
         {
@@ -158,9 +157,15 @@ namespace UnityEngine.UIElements
 
                 go.transform.SetParent(m_EventSystem.transform);
                 panel.selectableGameObject = go;
-                var destroyed = destroyedActions[panel] = () => DestroyPanelGameObject(panel);
-                panel.destroyed += destroyed;
+                RegisterDestroyedAction(panel);
             }
+        }
+
+        // Kept out of CreatePanelGameObject so its closure isn't allocated on every per-frame call.
+        private void RegisterDestroyedAction(IRuntimePanel panel)
+        {
+            var destroyed = destroyedActions[panel] = () => DestroyPanelGameObject(panel);
+            panel.destroyed += destroyed;
         }
 
         private void DestroyPanelGameObject(IRuntimePanel panel)
@@ -215,7 +220,6 @@ namespace UnityEngine.UIElements
 
         public void Start()
         {
-            m_Started = true;
             StartTrackingUIToolkitPanels();
         }
 
@@ -228,8 +232,7 @@ namespace UnityEngine.UIElements
                 Apply(PanelInputState.current);
             PanelInputState.onApply += Apply;
 
-            if (m_Started)
-                StartTrackingUIToolkitPanels();
+            StartTrackingUIToolkitPanels();
 
             // Can be null if runtime panels have not been created yet; mark for retry in Update()
             if (m_OverrideUIToolkitEvents)

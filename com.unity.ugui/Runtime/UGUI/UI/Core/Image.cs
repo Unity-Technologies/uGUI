@@ -623,6 +623,12 @@ namespace UnityEngine.UI
         // Whether this is being tracked for Atlas Binding.
         private bool m_Tracked = false;
 
+        // Logged once per transition over the tile limit, as the mesh is rebuilt on every property change.
+        private bool m_TooManyTilesErrorLogged;
+
+        internal const string k_TooManyTilesReduceAdvice = "To reduce the number of tiles, lower the Pixels Per Unit Multiplier or use a larger sprite.";
+        internal const string k_TooManyTilesRepeatWrapModeAdvice = "To remove the limit on the number of tiles, set the Wrap mode to Repeat in the Image Import Settings.";
+
         /// <summary>
         /// The alpha threshold specifies the minimum alpha a pixel must have for the event to considered a "hit" on the Image.
         /// </summary>
@@ -900,6 +906,9 @@ namespace UnityEngine.UI
         /// <param name="toFill">The VertexHelper to populate with geometry.</param>
         protected override void OnPopulateMesh(VertexHelper toFill)
         {
+            if (activeSprite == null || type != Type.Tiled)
+                m_TooManyTilesErrorLogged = false;
+
             if (activeSprite == null)
             {
                 base.OnPopulateMesh(toFill);
@@ -1279,6 +1288,7 @@ namespace UnityEngine.UI
 
                 long nTilesW = 0;
                 long nTilesH = 0;
+                bool tooManyTiles = false;
                 if (m_FillCenter)
                 {
                     nTilesW = (long)Math.Ceiling((xMax - xMin) / tileWidth);
@@ -1296,7 +1306,7 @@ namespace UnityEngine.UI
 
                     if (nVertices > 65000.0)
                     {
-                        Debug.LogError("Too many sprite tiles on Image \"" + name + "\". The tile size will be increased. To remove the limit on the number of tiles, set the Wrap mode to Repeat in the Image Import Settings", this);
+                        tooManyTiles = true;
 
                         double maxTiles = 65000.0 / 4.0; // Max number of vertices is 65000; 4 vertices per tile.
                         double imageRatio;
@@ -1333,7 +1343,7 @@ namespace UnityEngine.UI
                         double nVertices = (nTilesH + nTilesW + 2.0 /*corners*/) * 2.0 /*sides*/ * 4.0 /*vertices per tile*/;
                         if (nVertices > 65000.0)
                         {
-                            Debug.LogError("Too many sprite tiles on Image \"" + name + "\". The tile size will be increased. To remove the limit on the number of tiles, set the Wrap mode to Repeat in the Image Import Settings", this);
+                            tooManyTiles = true;
 
                             double maxTiles = 65000.0 / 4.0; // Max number of vertices is 65000; 4 vertices per tile.
                             double imageRatio = (double)nTilesW / nTilesH;
@@ -1351,6 +1361,15 @@ namespace UnityEngine.UI
                         nTilesH = nTilesW = 0;
                     }
                 }
+
+                if (tooManyTiles && !m_TooManyTilesErrorLogged)
+                {
+                    string advice = hasBorder || activeSprite.packed
+                        ? k_TooManyTilesReduceAdvice
+                        : k_TooManyTilesRepeatWrapModeAdvice;
+                    Debug.LogError($"Too many sprite tiles on Image \"{name}\". The tile size will be increased. {advice}", this);
+                }
+                m_TooManyTilesErrorLogged = tooManyTiles;
 
                 if (m_FillCenter)
                 {
@@ -1459,6 +1478,7 @@ namespace UnityEngine.UI
             else
             {
                 // Texture has no border, is in repeat mode and not packed. Use texture tiling.
+                m_TooManyTilesErrorLogged = false;
                 Vector2 uvScale = new Vector2((xMax - xMin) / tileWidth, (yMax - yMin) / tileHeight);
 
                 if (m_FillCenter)

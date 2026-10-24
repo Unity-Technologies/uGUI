@@ -16,6 +16,8 @@ namespace TMPro
         private Dictionary<int, TMP_SpriteAsset> m_SpriteAssetReferenceLookup = new Dictionary<int, TMP_SpriteAsset>();
         private Dictionary<int, TMP_ColorGradient> m_ColorGradientReferenceLookup = new Dictionary<int, TMP_ColorGradient>();
 
+        static readonly List<int> s_RemovalKeys = new List<int>();
+
 
         /// <summary>
         /// Get a singleton instance of the registry
@@ -73,6 +75,32 @@ namespace TMPro
 
             // Add reference to the font material.
             m_FontMaterialReferenceLookup.Add(fontAsset.materialHashCode, fontAsset.material);
+        }
+
+        internal static void RemoveFontAsset(TMP_FontAsset fontAsset)
+        {
+            if (s_Instance == null)
+                return;
+
+            RemoveValue(s_Instance.m_FontAssetReferenceLookup, fontAsset);
+            RemoveValue(s_Instance.m_FontMaterialReferenceLookup, fontAsset.m_Material);
+        }
+
+        static void RemoveValue<T>(Dictionary<int, T> lookup, T value) where T : class
+        {
+            if (value == null)
+                return;
+
+            s_RemovalKeys.Clear();
+
+            foreach (var pair in lookup)
+            {
+                if (ReferenceEquals(pair.Value, value))
+                    s_RemovalKeys.Add(pair.Key);
+            }
+
+            for (int i = 0; i < s_RemovalKeys.Count; i++)
+                lookup.Remove(s_RemovalKeys[i]);
         }
 
 

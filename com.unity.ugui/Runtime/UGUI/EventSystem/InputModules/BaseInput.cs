@@ -5,6 +5,7 @@ namespace UnityEngine.EventSystems
     /// <summary>
     /// Interface to the Input system used by the BaseInputModule. With this it is possible to bypass the Input system with your own but still use the same InputModule. For example this can be used to feed fake input into the UI or interface with a different input system.
     /// </summary>
+    [UGUIHelpURL("BaseInput")]
     public class BaseInput : UIBehaviour
     {
         /// <summary>

@@ -149,23 +149,18 @@ namespace UnityEngine.EventSystems
 
             if (m_MaxRayIntersections == 0)
             {
-                if (ReflectionMethodsCache.Singleton.raycast3DAll == null)
-                    return;
-
-                m_Hits = ReflectionMethodsCache.Singleton.raycast3DAll(ray, distanceToClipPlane, finalEventMask);
+                m_Hits = Physics.RaycastAll(ray, distanceToClipPlane, finalEventMask);
                 hitCount = m_Hits.Length;
             }
             else
             {
-                if (ReflectionMethodsCache.Singleton.getRaycastNonAlloc == null)
-                    return;
                 if (m_LastMaxRayIntersections != m_MaxRayIntersections)
                 {
                     m_Hits = new RaycastHit[m_MaxRayIntersections];
                     m_LastMaxRayIntersections = m_MaxRayIntersections;
                 }
 
-                hitCount = ReflectionMethodsCache.Singleton.getRaycastNonAlloc(ray, m_Hits, distanceToClipPlane, finalEventMask);
+                hitCount = Physics.RaycastNonAlloc(ray, m_Hits, distanceToClipPlane, finalEventMask);
             }
 
             if (hitCount != 0)
@@ -191,6 +186,8 @@ namespace UnityEngine.EventSystems
                     resultAppendList.Add(result);
                 }
             }
+#else
+            PhysicsModuleErrors.LogPhysicsModuleNotPresent();
 #endif
         }
 

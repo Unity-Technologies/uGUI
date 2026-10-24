@@ -21,17 +21,33 @@ namespace UnityEngine.UI
         IPointerEnterHandler, IPointerExitHandler,
         ISelectHandler, IDeselectHandler
     {
-        /// <summary>Global array of all currently active Selectable instances.</summary>
-        protected static Selectable[] s_Selectables = new Selectable[10];
-        /// <summary>The number of active Selectable instances in <see cref="s_Selectables"/>.</summary>
+        private const int k_SelectablesDefaultCapacity = 8;
+        /// <summary>Global list of all currently active Selectable instances.</summary>
+        protected static readonly List<Selectable> s_Selectables = new List<Selectable>(k_SelectablesDefaultCapacity);
+        /// <summary>Deprecated. The number of active Selectable instances in <see cref="s_Selectables"/>. Use <see cref="allSelectableCount"/> instead.</summary>
+        [Obsolete("Selectable.s_SelectableCount is deprecated. Use Selectable.allSelectableCount instead (UnityUpgradable) -> allSelectableCount")]
         protected static int s_SelectableCount = 0;
 
 #if UNITY_EDITOR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         static void ResetStaticsOnLoad()
         {
-            s_Selectables = new Selectable[10];
-            s_SelectableCount = default;
+            List<Selectable> previousSelectables = new List<Selectable>(s_Selectables);
+            s_Selectables.Clear();
+            s_Selectables.Capacity = k_SelectablesDefaultCapacity;
+
+            foreach (var selectable in previousSelectables)
+            {
+                // Unity null check - destroyed instances simply drop out.
+                if (selectable ==null)
+                    continue;
+
+                selectable.m_CurrentIndex = -1;
+                if (selectable.m_EnableCalled && selectable.isActiveAndEnabled)
+                    selectable.RegisterSelectable();
+                else
+                    selectable.m_EnableCalled = false;
+            }
         }
 #endif
 
@@ -65,20 +81,18 @@ namespace UnityEngine.UI
         {
             get
             {
-                Selectable[] temp = new Selectable[s_SelectableCount];
-                Array.Copy(s_Selectables, temp, s_SelectableCount);
-                return temp;
+                return s_Selectables.ToArray();
             }
         }
 
         /// <summary>
         /// How many selectable elements are currently active.
         /// </summary>
-        public static int allSelectableCount { get { return s_SelectableCount; } }
+        public static int allSelectableCount { get { return s_Selectables.Count; } }
 
         /// <summary>
         /// Non allocating version for getting the all selectables.
-        /// If selectables.Length is less then s_SelectableCount only selectables.Length elments will be copied which
+        /// If selectables.Length is less then allSelectableCount only selectables.Length elments will be copied which
         /// could result in a incomplete list of elements.
         /// </summary>
         /// <param name="selectables">The array to be filled with current selectable objects</param>
@@ -113,9 +127,9 @@ namespace UnityEngine.UI
         /// </example>
         public static int AllSelectablesNoAlloc(Selectable[] selectables)
         {
-            int copyCount = selectables.Length < s_SelectableCount ? selectables.Length : s_SelectableCount;
+            int copyCount = selectables.Length < s_Selectables.Count ? selectables.Length : s_Selectables.Count;
 
-            Array.Copy(s_Selectables, selectables, copyCount);
+            s_Selectables.CopyTo(0, selectables, 0, copyCount);
 
             return copyCount;
         }
@@ -182,7 +196,7 @@ namespace UnityEngine.UI
 
 
         private bool m_GroupsAllowInteraction = true;
-        /// <summary>This selectable's index in the global <see cref="s_Selectables"/> array.</summary>
+        /// <summary>This selectable's index in the global <see cref="s_Selectables"/> list.</summary>
         protected int m_CurrentIndex = -1;
 
         /// <summary>
@@ -497,6 +511,36 @@ namespace UnityEngine.UI
             OnSetProperty();
         }
 
+        // Adds this instance to the static registry. Assumes it is not already registered.
+        private void RegisterSelectable()
+        {
+            //Register this selectable onto the static registry
+            m_CurrentIndex = s_Selectables.Count;
+            s_Selectables.Add(this);
+        }
+        private void UnregisterSelectable()
+        {
+            if (m_CurrentIndex < 0 || m_CurrentIndex >= s_Selectables.Count ||
+                s_Selectables[m_CurrentIndex] != this)
+                //If m_CurrentIndex is not valid, set -1 and return
+            {
+                m_CurrentIndex = -1;
+                return;
+            }
+
+            int lastIndex = s_Selectables.Count - 1;
+
+            // Move the last element into this slot and fix up its index.
+            Selectable last = s_Selectables[lastIndex];
+            last.m_CurrentIndex = m_CurrentIndex;
+            s_Selectables[m_CurrentIndex] = last;
+
+            // Drop the vacated last element.
+            s_Selectables.RemoveAt(lastIndex);
+
+            m_CurrentIndex = -1;
+        }
+
         /// <summary>Called when it becomes enabled. Registers in the global selectable list and performs an initial state transition.</summary>
         protected override void OnEnable()
         {
@@ -506,21 +550,13 @@ namespace UnityEngine.UI
 
             base.OnEnable();
 
-            if (s_SelectableCount == s_Selectables.Length)
-            {
-                Selectable[] temp = new Selectable[s_Selectables.Length * 2];
-                Array.Copy(s_Selectables, temp, s_Selectables.Length);
-                s_Selectables = temp;
-            }
-
             if (EventSystem.current && EventSystem.current.currentSelectedGameObject == gameObject)
             {
                 hasSelection = true;
             }
 
-            m_CurrentIndex = s_SelectableCount;
-            s_Selectables[m_CurrentIndex] = this;
-            s_SelectableCount++;
+            RegisterSelectable();
+
             isPointerDown = false;
             m_GroupsAllowInteraction = ParentGroupAllowsInteraction();
             DoStateTransition(currentSelectionState, true);
@@ -558,21 +594,12 @@ namespace UnityEngine.UI
             if (!m_EnableCalled)
                 return;
 
-            s_SelectableCount--;
+            m_EnableCalled = false;
 
-            // Update the last elements index to be this index
-            s_Selectables[s_SelectableCount].m_CurrentIndex = m_CurrentIndex;
-
-            // Swap the last element and this element
-            s_Selectables[m_CurrentIndex] = s_Selectables[s_SelectableCount];
-
-            // null out last element.
-            s_Selectables[s_SelectableCount] = null;
+            UnregisterSelectable();
 
             InstantClearState();
             base.OnDisable();
-
-            m_EnableCalled = false;
         }
 
         void OnApplicationFocus(bool hasFocus)
@@ -798,7 +825,7 @@ namespace UnityEngine.UI
             Selectable bestPick = null;
             Selectable bestFurthestPick = null;
 
-            for (int i = 0; i < s_SelectableCount; ++i)
+            for (int i = 0; i < s_Selectables.Count; ++i)
             {
                 Selectable sel = s_Selectables[i];
 

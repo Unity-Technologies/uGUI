@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 
@@ -193,30 +192,27 @@ namespace UnityEngine.UI
                         ? Mathf.Infinity
                         : Mathf.Abs((currentEventCamera.farClipPlane - currentEventCamera.nearClipPlane) / projectionDirection);
                 }
-#if PACKAGE_PHYSICS
+
                 if (blockingObjects == BlockingObjects.ThreeD || blockingObjects == BlockingObjects.All)
                 {
-                    if (ReflectionMethodsCache.Singleton.raycast3D != null)
-                    {
-                        RaycastHit hit;
-                        if (ReflectionMethodsCache.Singleton.raycast3D(ray, out hit, distanceToClipPlane, (int)m_BlockingMask))
-                        {
-                            hitDistance = hit.distance;
-                        }
-                    }
-                }
+#if PACKAGE_PHYSICS
+                    if (Physics.Raycast(ray, out var hit, distanceToClipPlane, (int)m_BlockingMask))
+                        hitDistance = hit.distance;
+#else
+                    PhysicsModuleErrors.LogPhysicsModuleNotPresent();
 #endif
-#if PACKAGE_PHYSICS2D
+                }
+
                 if (blockingObjects == BlockingObjects.TwoD || blockingObjects == BlockingObjects.All)
                 {
-                    if (ReflectionMethodsCache.Singleton.raycast2D != null)
-                    {
-                        var hits = ReflectionMethodsCache.Singleton.getRayIntersectionAll(ray, distanceToClipPlane, (int)m_BlockingMask);
-                        if (hits.Length > 0)
-                            hitDistance = hits[0].distance;
-                    }
-                }
+#if PACKAGE_PHYSICS2D
+                    var hits = Physics2D.GetRayIntersectionAll(ray, distanceToClipPlane, (int)m_BlockingMask);
+                    if (hits.Length > 0)
+                        hitDistance = hits[0].distance;
+#else
+                    PhysicsModuleErrors.LogPhysics2DModuleNotPresent();
 #endif
+                }
             }
 
             m_RaycastResults.Clear();
