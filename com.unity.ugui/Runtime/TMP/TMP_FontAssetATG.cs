@@ -52,6 +52,7 @@ namespace TMPro
 #endif
 
             m_NativeFontAsset = TextCoreFontAsset.CreateNativeFontAsset(m_FaceInfo, m_SourceFontFile, sourceFontEditorRef, m_SourceFontFilePath, this.GetEntityId(), fallbacks, regularWeights, italicWeights, m_AtlasRenderMode, italicStyle, boldStyle, (int)(boldSpacing * 64.0f), this);
+            UpdateNativeProperties();
         }
 
         void OnDisable()
@@ -68,13 +69,20 @@ namespace TMPro
             m_NativeFontAsset = IntPtr.Zero;
         }
 
-        internal void UpdateNativeFaceInfoAndRenderMode()
+        // Pushes the face info and the style properties of the font asset to its native twin. Updating it
+        // invalidates the cached layouts that use it, so text regenerates with the new values.
+        internal void UpdateNativeProperties()
         {
             if (m_NativeFontAsset == IntPtr.Zero)
                 return;
 
             TextCoreFontAsset.UpdateNativeFaceInfo(m_NativeFontAsset, m_FaceInfo);
             TextCoreFontAsset.UpdateNativeRenderMode(m_NativeFontAsset, m_AtlasRenderMode);
+            TextCoreFontAsset.UpdateNativeItalicAngle(m_NativeFontAsset, italicStyle);
+            TextCoreFontAsset.UpdateNativeBoldWeight(m_NativeFontAsset, boldStyle);
+            TextCoreFontAsset.UpdateNativeBoldSpacing(m_NativeFontAsset, (int)(boldSpacing * 64.0f));
+            TextCoreFontAsset.UpdateNativeTabMultiple(m_NativeFontAsset, tabSize);
+            TextCoreFontAsset.UpdateNativeNormalSpacingOffset(m_NativeFontAsset, (int)(normalSpacingOffset * 64.0f));
         }
 
         internal void UpdateNativeFallbacks()

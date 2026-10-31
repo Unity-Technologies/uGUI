@@ -6,7 +6,7 @@ namespace UnityEngine.UIElements
 {
     // This code is disabled unless the com.unity.modules.uielements module is present.
     // The UIElements module is always present in the Editor but it can be stripped from a project build if unused.
-#if PACKAGE_UITOOLKIT
+#if !DISABLE_UGUI_UITK_SUPPORT && PACKAGE_UITOOLKIT
     /// <summary>
     /// Use this class to handle input and send events to UI Toolkit runtime panels.
     /// </summary>

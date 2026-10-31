@@ -286,6 +286,12 @@ namespace UnityEngine.UI.Tweening
             if (!info.ValidTarget())
                 return;
 
+            if (info.duration <= 0f)
+            {
+                info.TweenValue(1.0f);
+                return;
+            }
+
             m_TweenInfo = info;
             m_ElapsedTime = 0.0f;
             m_Duration = info.duration;

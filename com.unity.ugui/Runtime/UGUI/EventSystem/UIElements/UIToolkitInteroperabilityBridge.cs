@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 namespace UnityEngine.UIElements
 {
     // This code is disabled unless the com.unity.modules.uielements module is activated in the package manager.
-#if PACKAGE_UITOOLKIT
+#if !DISABLE_UGUI_UITK_SUPPORT && PACKAGE_UITOOLKIT
     /// <summary>
     /// Enables UI Toolkit interoperability with uGUI events.
     /// </summary>

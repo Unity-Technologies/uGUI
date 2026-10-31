@@ -2192,6 +2192,8 @@ namespace TMPro.EditorUtilities
                 // Delay callback until user has decided to Apply or Revert the changes.
                 if (m_DisplayDestructiveChangeWarning == false)
                 {
+                    // Face info and style edits (line metrics, spacing, tab size...) must reach the Advanced Text Generator.
+                    m_fontAsset.UpdateNativeProperties();
                     TMP_ResourceManager.RebuildFontAssetCache();
                     TMPro_EventManager.ON_FONT_PROPERTY_CHANGED(true, m_fontAsset);
                     m_IsFallbackGlyphCacheDirty = false;
