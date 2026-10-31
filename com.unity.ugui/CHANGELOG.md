@@ -15,10 +15,12 @@ uGUI 2.7 is shipped alongside Unity 6000.7 as a [core package](https://docs.unit
 - Marked the Graphic.m_CachedMesh, Graphic.m_CachedUvs and Graphic.useLegacyMeshGeneration members as obsolete (with an error).
 
 ### Removed
-- BaseMeshEffect.ModifyMesh(Mesh mesh).
+`BaseMeshEffect.ModifyMesh(Mesh mesh)`, `Graphic.OnPopulateMesh(Mesh m)`, `ShaderUtilities.isInitialized` and `ShaderUtilities.GetShaderPropertyIDs()` were marked obsolete in uGUI 2.6. Earlier versions didn't flag them, so if you upgrade from uGUI 2.5 or earlier, code that uses these APIs will fail to compile.
+
+- BaseMeshEffect.ModifyMesh(Mesh mesh). Override `ModifyMesh(VertexHelper vh)` instead.
 - BaseRaycaster.priority property.
 - EventSystem.lastSelectedGameObject property.
-- Graphic.OnPopulateMesh(Mesh m).
+- Graphic.OnPopulateMesh(Mesh m). Override `OnPopulateMesh(VertexHelper vh)` instead.
 - Image.eventAlphaThreshold property.
 - InputField.onValueChange property.
 - InputField.ScreenToLocal(Vector2 screen).
@@ -28,7 +30,7 @@ uGUI 2.7 is shipped alongside Unity 6000.7 as a [core package](https://docs.unit
 - PointerEventData.worldPosition and PointerEventData.worldNormal properties.
 - RaycastResult.document property.
 - Selectable.allSelectables property.
-- ShaderUtilities.isInitialized and ShaderUtilities.GetShaderPropertyIDs().
+- ShaderUtilities.isInitialized and ShaderUtilities.GetShaderPropertyIDs(). `ShaderUtilities` initializes automatically, so you can remove these calls.
 - StandaloneInputModule.InputMode enum.
 - StandaloneInputModule.inputMode, StandaloneInputModule.allowActivationOnMobileDevice and StandaloneInputModule.forceModuleActive properties.
 - StandaloneInputModule.ForceAutoSelect().
@@ -51,6 +53,13 @@ uGUI 2.6 is shipped alongside Unity 6000.6 as a [core package](https://docs.unit
 
 ### Added
 - New SafeArea component that insets a RectTransform to respect the device's safe area. Supports per-edge control over which sides are inset, a configurable reference orientation so that edge assignments remain stable across device rotations, and a balance mode that symmetrically mirrors the inset on the opposite edge to keep the UI centered.
+
+### Changed
+The following APIs were marked obsolete in uGUI 2.6. Earlier versions didn't flag them, so if you upgrade from uGUI 2.5 or earlier, code that uses these APIs will fail to compile.
+
+- Marked BaseMeshEffect.ModifyMesh(Mesh mesh) as obsolete. Override `ModifyMesh(VertexHelper vh)` instead.
+- Marked Graphic.OnPopulateMesh(Mesh m) as obsolete. Override `OnPopulateMesh(VertexHelper vh)` instead.
+- Marked ShaderUtilities.isInitialized and ShaderUtilities.GetShaderPropertyIDs() as obsolete. `ShaderUtilities` initializes automatically, so you can remove these calls.
 
 ## [2.5.0] - 2026-02-27
 uGUI 2.5 is shipped alongside Unity 6000.5 as a [core package](https://docs.unity3d.com/Manual/pack-core.html).

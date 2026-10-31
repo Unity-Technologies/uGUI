@@ -293,8 +293,10 @@ namespace UnityEngine.UI
         /// </summary>
         /// <param name="vertex">Vertex to populate</param>
         /// <param name="i">Index to populate.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="i"/> is less than 0, or greater than or equal to <see cref="currentVertCount"/>.</exception>
         public void PopulateUIVertex(ref UIVertex vertex, int i)
         {
+            ValidateVertIndex(i);
             InitializeIfRequired();
             vertex = m_Verts[i];
         }
@@ -304,10 +306,19 @@ namespace UnityEngine.UI
         /// </summary>
         /// <param name="vertex">The vertex to fill</param>
         /// <param name="i">the position in the current list to fill.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="i"/> is less than 0, or greater than or equal to <see cref="currentVertCount"/>.</exception>
         public void SetUIVertex(UIVertex vertex, int i)
         {
+            ValidateVertIndex(i);
             InitializeIfRequired();
             m_Verts[i] = vertex;
+        }
+
+        // m_Verts is sized by capacity rather than count, so its indexer does not catch indices past the stream.
+        void ValidateVertIndex(int i)
+        {
+            if ((uint)i >= (uint)m_VertCount)
+                throw new ArgumentOutOfRangeException(nameof(i), i, $"Index must be within [0, {m_VertCount}).");
         }
 
         // Cached single-stream layout — built once, reused for every FillMesh call.
@@ -335,7 +346,7 @@ namespace UnityEngine.UI
             if (m_VertCount >= k_MaxVertCount)
                 throw new ArgumentException($"Mesh can not have more than {k_MaxVertCount} vertices");
 
-            if (m_VertCount == 0 || m_IndexCount == 0)
+            if (m_VertCount == 0)
             {
                 mesh.Clear();
                 return;

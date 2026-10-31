@@ -168,26 +168,28 @@ namespace UnityEngine.UI
         {
             base.CalculateLayoutInputHorizontal();
 
-            float totalMin, totalMax, totalPreferred = 0;
+            float totalMin, totalPreferred = 0;
             float cellWidthWithSpacing = cellSize.x + spacing.x;
 
-            // If constraint type is fixed, we can calculate total min, max, and preferred to be the same desired value.
+            // Cells never stretch, so extra space only realigns them and the grid has no maximum size.
+            float totalMax = LayoutUtility.DefaultMaxSize;
+
+            // If constraint type is fixed, we can calculate total min and preferred to be the same desired value.
             if (m_Constraint == Constraint.FixedColumnCount)
             {
                 // ConstraintCount is the number of columns, we can use the number of columns to calculate the width
-                totalMin = totalMax = totalPreferred = padding.horizontal + cellWidthWithSpacing * m_ConstraintCount - spacing.x;
+                totalMin = totalPreferred = padding.horizontal + cellWidthWithSpacing * m_ConstraintCount - spacing.x;
             }
             else if (m_Constraint == Constraint.FixedRowCount)
             {
                 // We can calculate the number of columns based on the constraint count (rows).
                 // Then we use the number of columns to calculate the total width of the layout group.
                 int columns = Mathf.CeilToInt(rectChildren.Count / (float)m_ConstraintCount - 0.001f);
-                totalMin = totalMax = totalPreferred = padding.horizontal + cellWidthWithSpacing * columns - spacing.x;
+                totalMin = totalPreferred = padding.horizontal + cellWidthWithSpacing * columns - spacing.x;
             }
             else
             {
                 // Flexible mode...
-                totalMax = LayoutUtility.DefaultMaxSize;
                 totalMin = padding.horizontal + cellWidthWithSpacing - spacing.x;
 
                 // Calculate the preferredColumnCount, we want to calculate as close to a square grid as possible.
@@ -208,26 +210,28 @@ namespace UnityEngine.UI
         /// </summary>
         public override void CalculateLayoutInputVertical()
         {
-            float totalMin, totalMax, totalPreferred = 0;
+            float totalMin, totalPreferred = 0;
             float cellHeightWithSpacing = cellSize.y + spacing.y;
 
-            // If constraint type is fixed, we can calculate total min, max, and preferred to be the same desired value.
+            // Cells never stretch, so extra space only realigns them and the grid has no maximum size.
+            float totalMax = LayoutUtility.DefaultMaxSize;
+
+            // If constraint type is fixed, we can calculate total min and preferred to be the same desired value.
             if (m_Constraint == Constraint.FixedColumnCount)
             {
                 // We can calculate the number of rows based on the constraint count (columns).
                 // Then we use the number of rows to calculate the total height of the layout group.
                 var rows = Mathf.CeilToInt(rectChildren.Count / (float)m_ConstraintCount - 0.001f);
-                totalMin = totalMax = totalPreferred = padding.vertical + cellHeightWithSpacing * rows - spacing.y;
+                totalMin = totalPreferred = padding.vertical + cellHeightWithSpacing * rows - spacing.y;
             }
             else if (m_Constraint == Constraint.FixedRowCount)
             {
                 // ConstraintCount is the number of rows, we can use the number of rows to calculate the height.
-                totalMin = totalMax = totalPreferred = padding.vertical + cellHeightWithSpacing * m_ConstraintCount - spacing.y;
+                totalMin = totalPreferred = padding.vertical + cellHeightWithSpacing * m_ConstraintCount - spacing.y;
             }
             else
             {
                 // Flexible mode...
-                totalMax = LayoutUtility.DefaultMaxSize;
                 totalMin = padding.vertical + cellHeightWithSpacing - spacing.y;
 
                 // Find the usable width available and the horizontal size of each cell with spacing.
