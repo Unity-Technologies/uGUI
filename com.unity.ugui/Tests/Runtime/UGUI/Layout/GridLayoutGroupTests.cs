@@ -403,6 +403,8 @@ class GridLayoutGroupTests : IPrebuildSetup
         Assert.AreEqual(250, m_LayoutGroup.preferredHeight, "Expected layout group preferred height to match but it did not");
         Assert.AreEqual(-1, m_LayoutGroup.flexibleWidth, "Expected layout group flexiblle width to match but it did not");
         Assert.AreEqual(-1, m_LayoutGroup.flexibleHeight, "Expected layout group flexiblle height to match but it did not");
+        Assert.AreEqual(LayoutUtility.DefaultMaxSize, m_LayoutGroup.maxWidth, "Expected fixed grid max width to be unbounded");
+        Assert.AreEqual(LayoutUtility.DefaultMaxSize, m_LayoutGroup.maxHeight, "Expected fixed grid max height to be unbounded");
 
         Vector2[] expectedPositions =
         {
@@ -448,6 +450,8 @@ class GridLayoutGroupTests : IPrebuildSetup
         Assert.AreEqual(100, m_LayoutGroup.preferredHeight, "Expected layout group preferred height to match but it did not");
         Assert.AreEqual(-1, m_LayoutGroup.flexibleWidth, "Expected layout group flexiblle width to match but it did not");
         Assert.AreEqual(-1, m_LayoutGroup.flexibleHeight, "Expected layout group flexiblle height to match but it did not");
+        Assert.AreEqual(LayoutUtility.DefaultMaxSize, m_LayoutGroup.maxWidth, "Expected fixed grid max width to be unbounded");
+        Assert.AreEqual(LayoutUtility.DefaultMaxSize, m_LayoutGroup.maxHeight, "Expected fixed grid max height to be unbounded");
 
         Vector2[] expectedPositions =
         {
@@ -471,5 +475,22 @@ class GridLayoutGroupTests : IPrebuildSetup
             Assert.AreEqual(expectedPositions[i], rectTransform.anchoredPosition, $"Expected Element { i + 1 } position to match but it did not");
             Assert.AreEqual(expectedSize, rectTransform.sizeDelta, $"Expected Element { i + 1 } size to match but it did not");
         }
+    }
+
+    [Test]
+    public void TestFixedColumnCount_MinEqualsPreferredAndMaxIsDefaultMaxSize()
+    {
+        m_LayoutGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        m_LayoutGroup.constraintCount = 2;
+        LayoutRebuilder.ForceRebuildLayoutImmediate(m_LayoutGroup.GetComponent<RectTransform>());
+
+        // A fixed constraint produces an exact size, but the grid can still be given more space than it needs.
+        Assert.AreEqual(190, m_LayoutGroup.minWidth, "Expected fixed grid min width to match its columns");
+        Assert.AreEqual(m_LayoutGroup.minWidth, m_LayoutGroup.preferredWidth, "Expected fixed grid preferred width to equal min width");
+        Assert.AreEqual(LayoutUtility.DefaultMaxSize, m_LayoutGroup.maxWidth, "Expected fixed grid max width to be unbounded");
+
+        Assert.AreEqual(200, m_LayoutGroup.minHeight, "Expected fixed grid min height to match its rows");
+        Assert.AreEqual(m_LayoutGroup.minHeight, m_LayoutGroup.preferredHeight, "Expected fixed grid preferred height to equal min height");
+        Assert.AreEqual(LayoutUtility.DefaultMaxSize, m_LayoutGroup.maxHeight, "Expected fixed grid max height to be unbounded");
     }
 }

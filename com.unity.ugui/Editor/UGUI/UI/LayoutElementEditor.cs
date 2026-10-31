@@ -1,3 +1,4 @@
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor.UIElements;
@@ -18,6 +19,7 @@ namespace UnityEditor.UI
         private const float k_RowMarginBottom = 2f;
         private const float k_ToggleMarginRight = 4f;
 
+        HelpBox m_MinMaxConflictHelpBox;
         SerializedProperty m_IgnoreLayout;
         SerializedProperty m_MinWidth;
         SerializedProperty m_MinHeight;
@@ -50,6 +52,12 @@ namespace UnityEditor.UI
         public override VisualElement CreateInspectorGUI()
         {
             var root = new VisualElement();
+
+            m_MinMaxConflictHelpBox = new HelpBox(string.Empty, HelpBoxMessageType.Warning) { name = "MinMaxConflictHelpBox" };
+            m_MinMaxConflictHelpBox.style.marginBottom = 8f;
+            root.Add(m_MinMaxConflictHelpBox);
+            UpdateMinMaxConflictHelpBox();
+            root.schedule.Execute(UpdateMinMaxConflictHelpBox).Every(200);
 
             // Show Ignore Layout as a uniform bool row to maintain formatting
             var ignoreLayoutRow = CreateBoolField(m_IgnoreLayout, "Ignore Layout");
@@ -90,6 +98,62 @@ namespace UnityEditor.UI
 
             root.Bind(serializedObject);
             return root;
+        }
+
+        void UpdateMinMaxConflictHelpBox()
+        {
+            int conflictingComponentCount = 0;
+            string singleComponentMessages = null;
+            foreach (var selected in targets)
+            {
+                var rectTransform = selected is LayoutElement layoutElement ? layoutElement.transform as RectTransform : null;
+                string componentMessages = null;
+                for (int axis = 0; axis < 2; axis++)
+                {
+                    if (!TryGetMinMaxConflictMessage(rectTransform, axis, out string message))
+                        continue;
+                    componentMessages = componentMessages == null ? message : componentMessages + "\n" + message;
+                }
+
+                if (componentMessages == null)
+                    continue;
+
+                conflictingComponentCount++;
+                singleComponentMessages = componentMessages;
+            }
+
+            if (conflictingComponentCount == 0)
+            {
+                m_MinMaxConflictHelpBox.style.display = DisplayStyle.None;
+                return;
+            }
+
+            // The per-component message is long; listing one per selection buries the Inspector.
+            m_MinMaxConflictHelpBox.text = conflictingComponentCount == 1
+                ? singleComponentMessages
+                : $"{conflictingComponentCount} selected components have a minimum size greater than their maximum. Select them individually for specific messages.";
+            m_MinMaxConflictHelpBox.style.display = DisplayStyle.Flex;
+        }
+
+        static bool TryGetMinMaxConflictMessage(RectTransform rect, int axis, out string message)
+        {
+            message = null;
+            bool hasConflict = LayoutUtility.TryGetMinMaxConflict(
+                rect,
+                axis,
+                out float min,
+                out ILayoutElement minSource,
+                out float max,
+                out ILayoutElement maxSource
+            );
+            if (!hasConflict)
+                return false;
+
+            string dimension = axis == 0 ? "width" : "height";
+            message = $"'{rect.name}' has a minimum {dimension} of {min.ToString(CultureInfo.InvariantCulture)} (from {minSource.GetType().Name}) "
+                + $"greater than its maximum {dimension} of {max.ToString(CultureInfo.InvariantCulture)} (from {maxSource.GetType().Name}). "
+                + "This will result in undefined behaviour.";
+            return true;
         }
 
         /// <summary>
