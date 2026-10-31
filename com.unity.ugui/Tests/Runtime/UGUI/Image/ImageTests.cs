@@ -89,6 +89,27 @@ internal class ImageTests
     }
 
     [UnityTest]
+    public IEnumerator CanvasRefPixPerUnitChangeAfterMeshBuiltWillUpdateImageMesh()
+    {
+        var canvas = m_CanvasGO.GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        m_Image.type = Image.Type.Sliced;
+        var texture = new Texture2D(120, 120);
+        m_Image.sprite = Sprite.Create(texture, new Rect(0, 0, 120, 120), new Vector2(0.5f, 0.5f), 100, 1, SpriteMeshType.Tight, new Vector4(30, 30, 30, 30), true);
+
+        // Build the mesh at the default referencePixelsPerUnit of 100
+        Canvas.ForceUpdateCanvases();
+        m_Image.isOnPopulateMeshCalled = false;
+
+        // Changing the canvas referencePixelsPerUnit resizes the sliced borders, so the mesh must be rebuilt
+        canvas.referencePixelsPerUnit = 200;
+
+        yield return null;
+
+        Assert.IsTrue(m_Image.isOnPopulateMeshCalled);
+    }
+
+    [UnityTest]
     public IEnumerator Sprite_Layout()
     {
         m_Image.sprite = Sprite.Create(m_DefaultTexture, new Rect(0, 0, Width, Height), Vector2.zero);
