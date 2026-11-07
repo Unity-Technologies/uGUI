@@ -274,6 +274,12 @@ namespace TMPro
             RecalculateMasking();
 
             //SetAllDirty();
+
+            if (m_TextComponent != null)
+            {
+                m_TextComponent.havePropertiesChanged = true;
+                m_TextComponent.SetVerticesDirty();
+            }
         }
 
 

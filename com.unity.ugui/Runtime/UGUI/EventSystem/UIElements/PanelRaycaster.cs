@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace UnityEngine.UIElements
 {
     // This code is disabled unless the com.unity.modules.uielements module is activated in the package manager.
-#if PACKAGE_UITOOLKIT
+#if !DISABLE_UGUI_UITK_SUPPORT && PACKAGE_UITOOLKIT
     /// <summary>
     /// A derived BaseRaycaster to raycast against UI Toolkit panel instances at runtime.
     /// </summary>

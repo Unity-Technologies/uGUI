@@ -88,6 +88,11 @@ namespace TMPro
             m_InternalUpdateQueue.Add(textObject);
         }
 
+        internal static bool IsRegisteredForUpdate(TMP_Text textObject)
+        {
+            return instance.m_InternalUpdateLookup.Contains(textObject.GetEntityId());
+        }
+
         /// <summary>
         /// Registers elements which require a layout rebuild.
         /// </summary>
