@@ -119,7 +119,7 @@ namespace TMPro
             get
             {
                 if (m_IsTextBackingStringDirty)
-                    return InternalTextBackingArrayToString();
+                    m_text = InternalTextBackingArrayToString();
 
                 return m_text;
             }
@@ -3470,7 +3470,10 @@ namespace TMPro
             {
                 uint c = sourceText[readIndex];
 
-                if (c == 0 || c == '>' || c == '=' || c == ' ')
+                if (c == 0)
+                    return 0;
+
+                if (c == '>' || c == '=' || c == ' ')
                     return hashCode;
 
                 hashCode = ((hashCode << 5) + hashCode) ^ (int)TMP_TextParsingUtilities.ToUpperASCIIFast(c);

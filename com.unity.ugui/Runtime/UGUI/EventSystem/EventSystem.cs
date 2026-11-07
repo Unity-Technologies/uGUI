@@ -22,7 +22,7 @@ namespace UnityEngine.EventSystems
     {
         private static readonly List<EventSystem> m_EventSystems = new List<EventSystem>();
 
-#if PACKAGE_UITOOLKIT
+#if !DISABLE_UGUI_UITK_SUPPORT && PACKAGE_UITOOLKIT
         private struct UIToolkitOverrideConfigOld
         {
             public EventSystem activeEventSystem;
@@ -38,7 +38,7 @@ namespace UnityEngine.EventSystems
         {
             m_EventSystems.Clear();
 
-#if PACKAGE_UITOOLKIT
+#if !DISABLE_UGUI_UITK_SUPPORT && PACKAGE_UITOOLKIT
             s_UIToolkitOverrideConfigOld = null;
 #endif
         }
@@ -348,7 +348,7 @@ namespace UnityEngine.EventSystems
 
         // This code is disabled unless the com.unity.modules.uielements module is present.
         // The UIElements module is always present in the Editor but it can be stripped from a project build if unused.
-#if PACKAGE_UITOOLKIT
+#if !DISABLE_UGUI_UITK_SUPPORT && PACKAGE_UITOOLKIT
         private UIToolkitInteroperabilityBridge m_UIToolkitInterop = new ();
 
         /// <summary>
@@ -365,7 +365,7 @@ namespace UnityEngine.EventSystems
         {
             get
             {
-#if PACKAGE_UITOOLKIT
+#if !DISABLE_UGUI_UITK_SUPPORT && PACKAGE_UITOOLKIT
                 return uiToolkitInterop.overrideUIToolkitEvents && IRuntimePanel.uIElementsRuntimeUtility != null && IRuntimePanel.uIElementsRuntimeUtility.HasActiveDocuments();
 #else
                 return false;
@@ -396,7 +396,7 @@ namespace UnityEngine.EventSystems
         [Obsolete("Use PanelInputConfiguration component instead.")]
         public static void SetUITookitEventSystemOverride(EventSystem activeEventSystem, bool sendEvents = true, bool createPanelGameObjectsOnStart = true)
         {
-#if PACKAGE_UITOOLKIT
+#if !DISABLE_UGUI_UITK_SUPPORT && PACKAGE_UITOOLKIT
             s_UIToolkitOverrideConfigOld = activeEventSystem == null && sendEvents && createPanelGameObjectsOnStart ? null : new UIToolkitOverrideConfigOld
             {
                 activeEventSystem = activeEventSystem,
@@ -423,7 +423,7 @@ namespace UnityEngine.EventSystems
             base.OnEnable();
             m_EventSystems.Add(this);
 
-#if PACKAGE_UITOOLKIT
+#if !DISABLE_UGUI_UITK_SUPPORT && PACKAGE_UITOOLKIT
             if (s_UIToolkitOverrideConfigOld != null)
             {
                 m_UIToolkitInterop = new();
@@ -440,7 +440,7 @@ namespace UnityEngine.EventSystems
 
         protected override void OnDisable()
         {
-#if PACKAGE_UITOOLKIT
+#if !DISABLE_UGUI_UITK_SUPPORT && PACKAGE_UITOOLKIT
             m_UIToolkitInterop.OnDisable();
 #endif
 
@@ -459,7 +459,7 @@ namespace UnityEngine.EventSystems
         {
             base.Start();
 
-#if PACKAGE_UITOOLKIT
+#if !DISABLE_UGUI_UITK_SUPPORT && PACKAGE_UITOOLKIT
             m_UIToolkitInterop.Start();
 #endif
         }
@@ -483,7 +483,7 @@ namespace UnityEngine.EventSystems
 
         protected virtual void Update()
         {
-#if PACKAGE_UITOOLKIT
+#if !DISABLE_UGUI_UITK_SUPPORT && PACKAGE_UITOOLKIT
             m_UIToolkitInterop.Update();
 #endif
 

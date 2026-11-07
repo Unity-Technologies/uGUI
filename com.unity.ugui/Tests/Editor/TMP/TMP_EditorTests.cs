@@ -542,6 +542,36 @@ namespace TMPro
         }
 
         [Test]
+        [TestCase("A<br")]
+        [TestCase("A<cr")]
+        [TestCase("A<nbsp")]
+        [TestCase("A<zwsp")]
+        [TestCase("A<zwj")]
+        [TestCase("A<shy")]
+        public void SetText_String_UnclosedTagAtEnd_RendersAsText(string sourceText)
+        {
+            m_TextComponent.SetText(sourceText);
+
+            AssertRenderedText(sourceText);
+        }
+
+        [Test]
+        public void SetText_String_ClosedLineBreakTagAtEnd_RendersLineFeed()
+        {
+            m_TextComponent.SetText("A<br>");
+
+            AssertRenderedText("A\n");
+        }
+
+        [Test]
+        public void SetText_ReadOnlySpan_RangeEndingInUnclosedTag_RendersAsText()
+        {
+            m_TextComponent.SetText("A<br>".AsSpan(), 0, 4);
+
+            AssertRenderedText("A<br");
+        }
+
+        [Test]
         [TestCase("A <style=H1>heading</style> B", "A *heading* B")]
         [TestCase("A <style=Quote>quote</style> B", "A quote B")]
         public void SetText_String_StyleTags_RendersExpectedCharacters(string sourceText, string expectedText)

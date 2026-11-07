@@ -224,8 +224,9 @@ namespace UnityEngine.UI
             }
             else
             {
-                // Flexible mode...
-                totalMin = padding.vertical + cellHeightWithSpacing - spacing.y;
+                // Flexible mode. The height depends on the width, which the layout system sets
+                // before asking for the vertical inputs, so all the rows the children need at
+                // that width are required and are also the preferred height.
 
                 // Find the usable width available and the horizontal size of each cell with spacing.
                 float usableWidth = rectTransform.rect.width - padding.horizontal + spacing.x + 0.001f;
@@ -236,8 +237,10 @@ namespace UnityEngine.UI
                 int cellCountX = Mathf.Max(1, Mathf.FloorToInt(usableWidth / cellWidthWithSpacing));
                 int rowCount = Mathf.CeilToInt(rectChildren.Count / (float)cellCountX);
 
-                // Calculate the total height of the cells, then subtract spacing.y to remove trailing space.
-                totalPreferred =  padding.vertical + cellHeightWithSpacing * rowCount - spacing.y;
+                // Calculate the total height of the cells, then subtract the spacing after the last row.
+                // An empty grid has no last row, so it has no trailing spacing to subtract.
+                float trailingSpacingY = rowCount > 0 ? spacing.y : 0f;
+                totalMin = totalPreferred = padding.vertical + cellHeightWithSpacing * rowCount - trailingSpacingY;
             }
 
             SetLayoutInputForAxis(totalMin, totalMax, totalPreferred, -1, 1);

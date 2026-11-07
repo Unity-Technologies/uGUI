@@ -333,5 +333,59 @@ namespace TMPro
             Canvas.ForceUpdateCanvases();
             Assert.AreEqual(w * 2, m_TextComponent.textInfo.meshInfo[0].uvs0[0].w);
         }
+
+        [Test]
+        public void SetText_FormatWithFloat_TextGetterReturnsSameValueOnRepeatedReads()
+        {
+            m_TextComponent.text = "Test0";
+            m_TextComponent.SetText("Test{0}", 1f);
+
+            Assert.AreEqual("Test1", m_TextComponent.text);
+            Assert.AreEqual("Test1", m_TextComponent.text);
+        }
+
+        [Test]
+        public void SetText_CharArray_TextGetterReturnsSameValueOnRepeatedReads()
+        {
+            m_TextComponent.text = "Test0";
+            m_TextComponent.SetText("Test1".ToCharArray());
+
+            Assert.AreEqual("Test1", m_TextComponent.text);
+            Assert.AreEqual("Test1", m_TextComponent.text);
+        }
+
+        [Test]
+        public void SetText_StringBuilder_TextGetterReturnsSameValueOnRepeatedReads()
+        {
+            m_TextComponent.text = "Test0";
+            m_TextComponent.SetText(new System.Text.StringBuilder("Test1"));
+
+            Assert.AreEqual("Test1", m_TextComponent.text);
+            Assert.AreEqual("Test1", m_TextComponent.text);
+        }
+
+        [Test]
+        public void SetText_ReadOnlySpan_TextGetterReturnsSameValueOnRepeatedReads()
+        {
+            m_TextComponent.text = "Test0";
+            m_TextComponent.SetText(System.MemoryExtensions.AsSpan("Test1"));
+
+            Assert.AreEqual("Test1", m_TextComponent.text);
+            Assert.AreEqual("Test1", m_TextComponent.text);
+        }
+
+        [Test]
+        public void SetText_ThenTextSetter_AppliesNewValue()
+        {
+            m_TextComponent.text = "Test0";
+            m_TextComponent.SetText("Test{0}", 1f);
+            Assert.AreEqual("Test1", m_TextComponent.text);
+
+            m_TextComponent.text = "Test1";
+            m_TextComponent.SetText("Test{0}", 2f);
+            m_TextComponent.text = "Test2";
+
+            Assert.AreEqual("Test2", m_TextComponent.text);
+        }
     }
 }

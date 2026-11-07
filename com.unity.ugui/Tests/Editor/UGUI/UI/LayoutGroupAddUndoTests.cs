@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 using UnityEngine.TestTools.Utils;
 using UnityEngine.UI;
 
 namespace UnityEditor.UI.Tests
 {
-    // Covers the reach of the Undo registration in LayoutGroup.Reset: the whole subtree, including the group's own
-    // RectTransform. ScrollRectLayoutUndoTests covers the per-layout-group-type cases.
+    // Covers undoing the add of a LayoutGroup across the whole subtree, including the group's own RectTransform.
+    // ScrollRectLayoutUndoTests covers the per-layout-group-type cases.
     internal class LayoutGroupAddUndoTests
     {
         GameObject m_Canvas;
@@ -210,6 +211,31 @@ namespace UnityEditor.UI.Tests
             Assert.That(innerRect.GetComponent<HorizontalLayoutGroup>(), Is.Null,
                 "A single undo should remove the added HorizontalLayoutGroup.");
             AssertRestored(before, afterAdd);
+        }
+
+        [Test]
+        public void UndoAddLayoutGroup_OnPlainTransform_RestoresTransformWithoutErrors()
+        {
+            m_Root = new GameObject("Root", typeof(BoxCollider));
+            m_Root.transform.SetParent(m_Canvas.transform, false);
+            var child = new GameObject("Child", typeof(BoxCollider));
+            child.transform.SetParent(m_Root.transform, false);
+            Assume.That(m_Root.transform is RectTransform, Is.False);
+
+            Undo.IncrementCurrentGroup();
+            int undoGroup = Undo.GetCurrentGroup();
+
+            ObjectFactory.AddComponent<VerticalLayoutGroup>(m_Root);
+            Assume.That(m_Root.transform is RectTransform, "Adding a LayoutGroup should replace the Transform with a RectTransform.");
+
+            Undo.CollapseUndoOperations(undoGroup);
+            Undo.PerformUndo();
+
+            Assert.That(m_Root.GetComponent<VerticalLayoutGroup>(), Is.Null, "A single undo should remove the added VerticalLayoutGroup.");
+            Assert.That(m_Root.GetComponents<Transform>().Length, Is.EqualTo(1), "The GameObject should have exactly one Transform after the undo.");
+            Assert.That(m_Root.transform is RectTransform, Is.False, "The undo should restore the original Transform.");
+            Assert.That(child.transform.parent, Is.EqualTo(m_Root.transform));
+            LogAssert.NoUnexpectedReceived();
         }
     }
 }
