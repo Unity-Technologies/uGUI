@@ -712,6 +712,8 @@ namespace TMPro
             if (m_isAwake == false)
                 return;
 
+            isTextObjectScaleStatic = m_IsTextObjectScaleStatic;
+
             if (meshFilter != null && m_meshFilter.hideFlags != (HideFlags.HideInInspector | HideFlags.HideAndDontSave))
                 m_meshFilter.hideFlags = HideFlags.HideInInspector | HideFlags.HideAndDontSave;
 

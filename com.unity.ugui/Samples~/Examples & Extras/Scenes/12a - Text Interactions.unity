@@ -484,7 +484,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: See the <link="ID_01"><u><#40A0FF>online documentation</color></u></link>
-    for more information <a href="http://url...">about this product</a> \U0001F60A
+    for more information <a href="http://url...">about this product</a>. <sprite name="Smiley">
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1e3843b942b74aabb3c0a44e7a6f5190, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: ca5c41f7c6b74198bd3bc55bcd079729, type: 2}
@@ -503,7 +503,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
+  m_spriteAsset: {fileID: 11400000, guid: 43da6d30dfea4a0aa0eb692dbeddbbcc, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901

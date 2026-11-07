@@ -252,6 +252,7 @@ namespace UnityEngine.EventSystems
                 for (var i = 0; i < hoveredCount; ++i)
                 {
                     currentPointerData.fullyExited = true;
+                    currentPointerData.reentered = false;
                     ExecuteEvents.Execute(currentPointerData.hovered[i], currentPointerData, ExecuteEvents.pointerMoveHandler);
                     ExecuteEvents.Execute(currentPointerData.hovered[i], currentPointerData, ExecuteEvents.pointerExitHandler);
                 }
@@ -278,14 +279,13 @@ namespace UnityEngine.EventSystems
             }
 
             GameObject commonRoot = FindCommonRoot(currentPointerData.pointerEnter, newEnterTarget);
-            GameObject pointerParent = ((Component)newEnterTarget.GetComponentInParent<IPointerExitHandler>())?.gameObject;
 
             // and we already an entered object from last time
             if (currentPointerData.pointerEnter != null)
             {
                 // send exit handler call to all elements in the chain
                 // until we reach the new target, or null!
-                // ** or when !m_SendPointerEnterToParent, stop when meeting a gameobject with an exit event handler
+                // ** or when !m_SendPointerEnterToParent, only the old target is exited
                 Transform t = currentPointerData.pointerEnter.transform;
 
                 while (t != null)
@@ -294,22 +294,17 @@ namespace UnityEngine.EventSystems
                     if (m_SendPointerHoverToParent && commonRoot != null && commonRoot.transform == t)
                         break;
 
-                    // if we reach a PointerExitEvent break out!
-                    if (!m_SendPointerHoverToParent && pointerParent == t.gameObject)
-                        break;
-
                     currentPointerData.fullyExited = t.gameObject != commonRoot && currentPointerData.pointerEnter != newEnterTarget;
+                    currentPointerData.reentered = false;
                     ExecuteEvents.Execute(t.gameObject, currentPointerData, ExecuteEvents.pointerMoveHandler);
                     ExecuteEvents.Execute(t.gameObject, currentPointerData, ExecuteEvents.pointerExitHandler);
                     currentPointerData.hovered.Remove(t.gameObject);
 
-                    if (m_SendPointerHoverToParent) t = t.parent;
-
-                    // if we reach the common root break out!
-                    if (commonRoot != null && commonRoot.transform == t)
+                    // without hover-to-parent, only the target was hovered
+                    if (!m_SendPointerHoverToParent)
                         break;
 
-                    if (!m_SendPointerHoverToParent) t = t.parent;
+                    t = t.parent;
                 }
             }
 
@@ -327,21 +322,20 @@ namespace UnityEngine.EventSystems
                     if (m_SendPointerHoverToParent && currentPointerData.reentered)
                         break;
 
+                    currentPointerData.fullyExited = false;
                     ExecuteEvents.Execute(t.gameObject, currentPointerData, ExecuteEvents.pointerEnterHandler);
                     ExecuteEvents.Execute(t.gameObject, currentPointerData, ExecuteEvents.pointerMoveHandler);
                     currentPointerData.hovered.Add(t.gameObject);
 
-                    // stop when encountering an object with the pointerEnterHandler
-                    if (!m_SendPointerHoverToParent && t.gameObject.GetComponent<IPointerEnterHandler>() != null)
+                    // without hover-to-parent, only the target is hovered
+                    if (!m_SendPointerHoverToParent)
                         break;
 
-                    if (m_SendPointerHoverToParent) t = t.parent;
+                    t = t.parent;
 
                     // if we reach the common root break out!
                     if (commonRoot != null && commonRoot.transform == t)
                         break;
-
-                    if (!m_SendPointerHoverToParent) t = t.parent;
                 }
             }
         }

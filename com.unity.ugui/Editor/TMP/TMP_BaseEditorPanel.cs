@@ -1164,10 +1164,7 @@ namespace TMPro.EditorUtilities
             EditorGUILayout.PropertyField(m_IsTextObjectScaleStaticProp, k_IsTextObjectScaleStatic);
 
             if (EditorGUI.EndChangeCheck())
-            {
-                m_TextComponent.isTextObjectScaleStatic = m_IsTextObjectScaleStaticProp.boolValue;
                 m_HavePropertiesChanged = true;
-            }
 
             EditorGUILayout.Space();
         }

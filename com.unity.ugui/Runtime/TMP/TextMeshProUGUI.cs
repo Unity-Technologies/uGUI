@@ -971,6 +971,14 @@ namespace TMPro
             if (m_isAwake == false)
                 return;
 
+            if (isActiveAndEnabled)
+            {
+                if (m_IsTextObjectScaleStatic || m_canvas == null || m_canvas.enabled == false)
+                    TMP_UpdateManager.UnRegisterTextObjectForUpdate(this);
+                else
+                    TMP_UpdateManager.RegisterTextObjectForUpdate(this);
+            }
+
             // Handle Font Asset changes in the inspector.
             if (m_fontAsset == null || m_hasFontAssetChanged)
             {

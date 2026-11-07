@@ -89,6 +89,9 @@ namespace UnityEditor.UI
             }
 
             assignToGraphic(graphic, asset);
+
+            // Without this, a change to a Prefab instance is not saved with the scene
+            PrefabUtility.RecordPrefabInstancePropertyModifications(graphic);
             return true;
         }
 
@@ -112,7 +115,12 @@ namespace UnityEditor.UI
 
             var clip = MecanimUtilities.CreateNewClipAtPath(clipPath);
             addAnimationCurve(clip, assets);
-            return MecanimUtilities.AddClipToAnimatorComponent(animator, clip);
+            if (!MecanimUtilities.AddClipToAnimatorComponent(animator, clip))
+                return false;
+
+            // A new controller assigned to an existing Animator on a Prefab instance must be saved as an override
+            PrefabUtility.RecordPrefabInstancePropertyModifications(animator);
+            return true;
         }
     }
 }

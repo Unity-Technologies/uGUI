@@ -217,6 +217,8 @@ namespace TMPro
         // FNV hash of an empty name, matching NativeRichTextAssetRegistry.HashName.
         const uint k_EmptyNameHash = 2166136261u;
 
+        const char k_SoftHyphen = (char)0xAD;
+
         static bool ResolveTagSprite(EntityId textSettingsId, uint assetNameHash, uint spriteNameHash, int spriteIndexHint,
             out int spriteIndex, out EntityId spriteAssetId, out GlyphMetrics metrics, out float scale)
         {
@@ -400,8 +402,17 @@ namespace TMPro
                 return Vector2.zero;
 
             float positionScale = generator.m_PositionScale;
-            generator.m_NativeSettings.screenWidth = width < 0 ? TextLib.k_unconstrainedScreenSize : Mathf.RoundToInt(Mathf.Max(0, width) / positionScale * 64.0f);
-            generator.m_NativeSettings.screenHeight = height < 0 ? TextLib.k_unconstrainedScreenSize : Mathf.RoundToInt(Mathf.Max(0, height) / positionScale * 64.0f);
+            generator.m_NativeSettings.screenWidth = ToNativeMeasureSize(width, positionScale);
+
+            if (generator.m_NativeSettings.bestFit)
+            {
+                generator.m_NativeSettings.screenHeight = ToNativeMeasureSize(height, positionScale);
+            }
+            else
+            {
+                generator.m_NativeSettings.screenHeight = TextLib.k_unconstrainedScreenSize;
+                generator.m_NativeSettings.overflow = TextOverflow.Clip;
+            }
 
             if (textComponent.m_TextGenerationInfo == IntPtr.Zero)
                 textComponent.m_TextGenerationInfo = TextGenerationInfo.Create(isPermanent: true);
@@ -410,6 +421,17 @@ namespace TMPro
 
             Vector2 size = GetTextLib().MeasureText(generator.m_NativeSettings, textComponent.m_TextGenerationInfo);
             return size * positionScale;
+        }
+
+        const float k_MaxNativeMeasureSize = 0x1000000;
+
+        static int ToNativeMeasureSize(float size, float positionScale)
+        {
+            if (size < 0 || float.IsNaN(size) || float.IsInfinity(size))
+                return TextLib.k_unconstrainedScreenSize;
+
+            float pixels = size / positionScale;
+            return pixels >= k_MaxNativeMeasureSize ? TextLib.k_unconstrainedScreenSize : Mathf.RoundToInt(pixels * 64.0f);
         }
 
         bool ConvertToNativeGenerationSettings(string textOverride)
@@ -1138,7 +1160,8 @@ namespace TMPro
                 int slot = elementSlot[meshIndex][elementIndex];
                 ref var element = ref meshInfos[meshIndex].textElementInfos[elementIndex];
 
-                characterInfo.isVisible = true;
+                bool isInvisibleCharacter = char.IsWhiteSpace(characterInfo.character) || characterInfo.character == k_SoftHyphen;
+                characterInfo.isVisible = !isInvisibleCharacter;
                 characterInfo.materialReferenceIndex = groupIndex;
                 characterInfo.vertexIndex = slot * 4;
                 characterInfo.fontAsset = group.tmpFontAsset;

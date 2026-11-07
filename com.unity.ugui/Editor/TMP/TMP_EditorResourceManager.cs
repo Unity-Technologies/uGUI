@@ -62,8 +62,10 @@ namespace TMPro
                 // during unload and only recreated on the next rendered frame, so that check cannot
                 // distinguish the pipelines here. Re-subscribe both instead: only the callback matching
                 // the active pipeline is ever invoked, so the extra subscription is inert.
+                #pragma warning disable CS0618 // Camera.onPostRender is obsolete, but still needed for the Built-In Render Pipeline
                 Camera.onPostRender -= s_Instance.OnCameraPostRender;
                 Camera.onPostRender += s_Instance.OnCameraPostRender;
+                #pragma warning restore CS0618
                 #if UNITY_2023_3_OR_NEWER
                     RenderPipelineManager.endContextRendering -= s_Instance.OnEndOfFrame;
                     RenderPipelineManager.endContextRendering += s_Instance.OnEndOfFrame;
@@ -108,7 +110,11 @@ namespace TMPro
         {
             // Register to the appropriate callback for the given render pipeline.
             if (RenderPipelineManager.currentPipeline == null)
+            {
+                #pragma warning disable CS0618 // Camera.onPostRender is obsolete, but still needed for the Built-In Render Pipeline
                 Camera.onPostRender += OnCameraPostRender;
+                #pragma warning restore CS0618
+            }
             else
             {
                 #if UNITY_2023_3_OR_NEWER

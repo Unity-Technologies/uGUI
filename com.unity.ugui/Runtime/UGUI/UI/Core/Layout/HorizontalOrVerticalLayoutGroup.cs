@@ -146,6 +146,8 @@ namespace UnityEngine.UI
                 totalMax -= spacing;
                 totalPreferred -= spacing;
             }
+            // Children's sizes can conflict; keep max >= min so preferred never drops below min.
+            totalMax = Mathf.Max(totalMax, totalMin);
             totalPreferred = Mathf.Clamp(totalPreferred, totalMin, totalMax);
             SetLayoutInputForAxis(totalMin, totalMax, totalPreferred, totalFlexible, axis);
         }
@@ -238,7 +240,8 @@ namespace UnityEngine.UI
             if (!controlSize)
             {
                 min = child.sizeDelta[axis];
-                max = min;
+                // The group does not resize this child, so it does not limit the group's max size.
+                max = LayoutUtility.DefaultMaxSize;
                 preferred = min;
                 flexible = 0;
             }
