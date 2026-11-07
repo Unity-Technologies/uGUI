@@ -113,7 +113,7 @@ namespace UnityEngine.EventSystems
 
         // This code is disabled unless the com.unity.modules.uielements module is present.
         // The UIElements module is always present in the Editor but it can be stripped from a project build if unused.
-#if PACKAGE_UITOOLKIT
+#if !DISABLE_UGUI_UITK_SUPPORT && PACKAGE_UITOOLKIT
         /// <summary>
         /// The UIToolkit Document that was intersected by this raycast, if any.
         /// </summary>
@@ -146,7 +146,7 @@ namespace UnityEngine.EventSystems
             worldPosition = Vector3.zero;
             screenPosition = Vector3.zero;
             displayIndex = 0;
-#if PACKAGE_UITOOLKIT
+#if !DISABLE_UGUI_UITK_SUPPORT && PACKAGE_UITOOLKIT
             document = null;
             element = null;
 #endif

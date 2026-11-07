@@ -386,7 +386,7 @@ namespace UnityEngine.EventSystems
         /// <seealso cref="UnityEngine.UIElements.IPointerEvent" />
         public virtual int ConvertUIToolkitPointerId(PointerEventData sourcePointerData)
         {
-#if PACKAGE_UITOOLKIT
+#if !DISABLE_UGUI_UITK_SUPPORT && PACKAGE_UITOOLKIT
             return sourcePointerData.pointerId < 0 ?
                 UIElements.PointerId.mousePointerId :
                 UIElements.PointerId.touchPointerIdBase + sourcePointerData.pointerId;
