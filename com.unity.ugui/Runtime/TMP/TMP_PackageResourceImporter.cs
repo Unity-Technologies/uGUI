@@ -26,7 +26,12 @@ namespace TMPro
 
         public void OnDestroy()
         {
-            if (m_LogErrors && (TMP_Settings.isTMPSettingsNull || TMP_Settings.instance?.assetVersion != TMP_Settings.s_CurrentAssetVersion))
+            if (!m_LogErrors)
+                return;
+
+            // The cached instance stays empty after a first import until something reads it, so load the asset directly.
+            TMP_Settings settings = TMP_Settings.isTMPSettingsNull ? Resources.Load<TMP_Settings>("TMP Settings") : TMP_Settings.instance;
+            if (settings == null || settings.assetVersion != TMP_Settings.s_CurrentAssetVersion)
                 Debug.LogError("TextMesh Pro Essential Resources are missing, which are crucial for proper functionality. To import them, go to 'Window > Text Mesh Pro > Import TMP Essential Resources' in the menu.");
         }
 
