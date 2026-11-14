@@ -75,6 +75,7 @@ namespace TMPro.EditorUtilities
         }
 
         SerializedProperty m_PropUseAdvancedText;
+        bool m_LastUseAdvancedText;
         SerializedProperty m_PropFontAsset;
         SerializedProperty m_PropDefaultFontAssetPath;
         SerializedProperty m_PropDefaultFontSize;
@@ -130,6 +131,7 @@ namespace TMPro.EditorUtilities
                 return;
 
             m_PropUseAdvancedText = serializedObject.FindProperty("m_UseAdvancedText");
+            m_LastUseAdvancedText = m_PropUseAdvancedText.boolValue;
             m_PropFontAsset = serializedObject.FindProperty("m_defaultFontAsset");
             m_PropDefaultFontAssetPath = serializedObject.FindProperty("m_defaultFontAssetPath");
             m_PropDefaultFontSize = serializedObject.FindProperty("m_defaultFontSize");
@@ -412,6 +414,15 @@ namespace TMPro.EditorUtilities
             if (serializedObject.ApplyModifiedProperties() || evt_cmd == k_UndoRedo)
             {
                 EditorUtility.SetDirty(target);
+
+                // Font features are not populated with the Advanced Text Generator, so the dynamic data is cleared when switching.
+                serializedObject.Update();
+                if (m_PropUseAdvancedText.boolValue != m_LastUseAdvancedText)
+                {
+                    m_LastUseAdvancedText = m_PropUseAdvancedText.boolValue;
+                    TMP_PreBuildProcessor.ClearDynamicFontAssetData();
+                }
+
                 TMPro_EventManager.ON_TMP_SETTINGS_CHANGED();
             }
         }
@@ -490,7 +501,9 @@ namespace TMPro.EditorUtilities
             : base("Project/TextMesh Pro", SettingsScope.Project)
         {
             label = "TextMesh Pro";
-            keywords = GetSearchKeywordsFromGUIContentProperties<TMP_SettingsEditor.Styles>().Concat(GetSearchKeywordsFromGUIContentProperties<Styles>());
+            keywords = GetSearchKeywordsFromGUIContentProperties<TMP_SettingsEditor.Styles>()
+                .Concat(GetSearchKeywordsFromGUIContentProperties<Styles>())
+                .Append("ATG");
         }
 
         public override void OnActivate(string searchContext, UnityEngine.UIElements.VisualElement rootElement)

@@ -1131,6 +1131,7 @@ namespace TMPro
                 m_havePropertiesChanged = true;
 
                 UpdateMeshPadding();
+                ResetAdvancedTextLayout();
 
                 SetLayoutDirty();
                 SetVerticesDirty();
@@ -3590,7 +3591,13 @@ namespace TMPro
                     widthOfTextArea = m_width != -1 ? Mathf.Min(marginWidth + 0.0001f - marginLeft - marginRight, m_width) : marginWidth + 0.0001f - marginLeft - marginRight;
 
                     // Calculate the line breaking width of the text.
-                    float textWidth = Mathf.Abs(m_xAdvance) + (!m_isRightToLeft ? currentGlyphMetrics.horizontalAdvance : 0) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale * (charCode == 0xAD ? currentElementUnmodifiedScale : currentElementScale);
+                    float textWidth;
+                    if (m_monoSpacing != 0 && !m_isRightToLeft && charCode != k_TabCharacter)
+                    {
+                        textWidth = Mathf.Abs(m_xAdvance - monoAdvance) + GetMonoCellWidth(charCode) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
+                    }
+                    else
+                        textWidth = Mathf.Abs(m_xAdvance) + (!m_isRightToLeft ? currentGlyphMetrics.horizontalAdvance : 0) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale * (charCode == 0xAD ? currentElementUnmodifiedScale : currentElementScale);
                     float textHeight = m_maxTextAscender - (m_maxLineDescender - m_lineOffset) + (m_lineOffset > 0 && m_IsDrivenLineSpacing == false ? m_maxLineAscender - m_startOfLineAscender : 0);
 
                     int testedCharacterCount = m_characterCount;
@@ -4388,11 +4395,11 @@ namespace TMPro
                 {
                     float monoAdjustment;
                     if (m_duoSpace && (charCode == '.' || charCode == ':' || charCode == ','))
-                        monoAdjustment = m_monoSpacing / 2 - monoAdvance;
+                        monoAdjustment = m_monoSpacing / 2;
                     else
-                        monoAdjustment = m_monoSpacing - monoAdvance;
+                        monoAdjustment = m_monoSpacing;
 
-                    m_xAdvance += (monoAdjustment + ((m_currentFontAsset.normalSpacingOffset + characterSpacingAdjustment) * currentEmScale) + m_cSpacing) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
+                    m_xAdvance += (monoAdjustment + ((m_currentFontAsset.normalSpacingOffset + characterSpacingAdjustment) * currentEmScale) + m_cSpacing) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale - monoAdvance;
 
                     if (isWhiteSpace || charCode == 0x200B)
                         m_xAdvance += m_wordSpacing * currentEmScale;

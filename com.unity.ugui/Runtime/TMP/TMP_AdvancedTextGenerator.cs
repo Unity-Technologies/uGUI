@@ -350,15 +350,8 @@ namespace TMPro
         internal float m_preferredWidth;
         internal float m_preferredHeight;
 
-        // Set when the TMP overflow mode has no vertical constraint (Overflow and unsupported
-        // modes); vertical alignment is then applied during output conversion instead of natively.
-        bool m_UnconstrainedHeight;
-
         // Glyph position scale from native layout units (font points) to component local units.
         float m_PositionScale;
-
-        // Text area height in local units after margins, captured when converting the settings.
-        float m_MarginHeight;
 
         internal GenerationOutcome GenerateText()
         {
@@ -463,20 +456,14 @@ namespace TMPro
             m_NativeSettings.minFontSize = Mathf.RoundToInt(textComponent.fontSizeMin * 64.0f);
 
             var overflowMode = textComponent.overflowMode;
-            m_UnconstrainedHeight = !textComponent.enableAutoSizing &&
-                overflowMode != TextOverflowModes.Ellipsis &&
-                overflowMode != TextOverflowModes.Truncate &&
-                overflowMode != TextOverflowModes.Masking &&
-                overflowMode != TextOverflowModes.ScrollRect;
-
             var rect = textComponent.rectTransform.rect;
             var margin = textComponent.margin;
             float marginWidth = rect.width - margin.x - margin.z;
-            m_MarginHeight = rect.height - margin.y - margin.w;
+            float marginHeight = rect.height - margin.y - margin.w;
 
             m_NativeSettings.overflow = overflowMode == TextOverflowModes.Ellipsis ? TextOverflow.Ellipsis : TextOverflow.Clip;
             m_NativeSettings.screenWidth = Mathf.RoundToInt(Mathf.Max(0, marginWidth) / m_PositionScale * 64.0f);
-            m_NativeSettings.screenHeight = m_UnconstrainedHeight ? TextLib.k_unconstrainedScreenSize : Mathf.RoundToInt(Mathf.Max(0, m_MarginHeight) / m_PositionScale * 64.0f);
+            m_NativeSettings.screenHeight = Mathf.RoundToInt(Mathf.Max(0, marginHeight) / m_PositionScale * 64.0f);
 
             var textWrappingMode = textComponent.textWrappingMode;
             m_NativeSettings.wordWrapEnabled = textWrappingMode == TextWrappingModes.Normal || textWrappingMode == TextWrappingModes.PreserveWhitespace;
@@ -486,6 +473,12 @@ namespace TMPro
 
             m_NativeSettings.horizontalAlignment = GetHorizontalAlignment(textComponent.horizontalAlignment);
             m_NativeSettings.verticalAlignment = GetVerticalAlignment(textComponent.verticalAlignment);
+            m_NativeSettings.verticalOffset = Mathf.RoundToInt(GetLegacyVerticalAnchorOffset(textComponent.verticalAlignment, margin) / m_PositionScale * 64.0f);
+
+            m_NativeSettings.applyVisibilityLimits = true;
+            m_NativeSettings.maxVisibleCharacters = textComponent.maxVisibleCharacters;
+            m_NativeSettings.maxVisibleWords = textComponent.maxVisibleWords;
+            m_NativeSettings.maxVisibleLines = textComponent.maxVisibleLines;
 
             // Bold is carried by the font weight in the native settings.
             var fontStyle = textComponent.fontStyle;
@@ -600,6 +593,41 @@ namespace TMPro
             }
         }
 
+        static void SetStylePadding(MeshGroup group, float normalStyle, float boldStyle)
+        {
+            var material = group.material;
+            if (material == null || !material.HasProperty(ShaderUtilities.ID_GradientScale) || !material.HasProperty(ShaderUtilities.ID_ScaleRatio_A))
+                return;
+
+            float gradientScale = material.GetFloat(ShaderUtilities.ID_GradientScale);
+            float stylePaddingScale = 0.25f * gradientScale * material.GetFloat(ShaderUtilities.ID_ScaleRatio_A);
+
+            group.gradientScale = gradientScale;
+            group.normalStylePadding = normalStyle * stylePaddingScale;
+            group.boldStylePadding = boldStyle * stylePaddingScale;
+        }
+
+        static void ApplyStylePadding(ref Vector3 bottomLeft, ref Vector3 topLeft, ref Vector3 topRight, ref Vector3 bottomRight, GlyphMetrics metrics, float padding, float glyphPadding, float stylePadding)
+        {
+            float paddedWidth = metrics.width + 2 * padding;
+            float paddedHeight = metrics.height + 2 * padding;
+            if (paddedWidth <= 0 || paddedHeight <= 0)
+                return;
+
+            Vector3 widthStep = (topRight - topLeft) / paddedWidth;
+            Vector3 heightStep = (topLeft - bottomLeft) / paddedHeight;
+            Vector3 widthAxis = widthStep.normalized;
+            Vector3 shearStep = widthAxis * Vector3.Dot(heightStep, widthAxis);
+
+            Vector3 horizontal = widthStep * (glyphPadding + stylePadding - padding);
+            Vector3 vertical = heightStep * (glyphPadding - padding) + shearStep * stylePadding;
+
+            bottomLeft += -horizontal - vertical;
+            topLeft += -horizontal + vertical;
+            topRight += horizontal + vertical;
+            bottomRight += horizontal - vertical;
+        }
+
         static VerticalAlignment GetVerticalAlignment(VerticalAlignmentOptions alignment)
         {
             switch (alignment)
@@ -608,8 +636,27 @@ namespace TMPro
                     return VerticalAlignment.Top;
                 case VerticalAlignmentOptions.Bottom:
                     return VerticalAlignment.Bottom;
+                case VerticalAlignmentOptions.Baseline:
+                    return VerticalAlignment.Baseline;
+                case VerticalAlignmentOptions.Geometry:
+                    return VerticalAlignment.Midline;
+                case VerticalAlignmentOptions.Capline:
+                    return VerticalAlignment.Capline;
                 default:
                     return VerticalAlignment.Middle;
+            }
+        }
+
+        static float GetLegacyVerticalAnchorOffset(VerticalAlignmentOptions alignment, Vector4 margin)
+        {
+            switch (alignment)
+            {
+                case VerticalAlignmentOptions.Baseline:
+                    return (margin.w - margin.y) * 0.5f;
+                case VerticalAlignmentOptions.Capline:
+                    return -margin.y;
+                default:
+                    return 0;
             }
         }
 
@@ -622,10 +669,15 @@ namespace TMPro
             public bool isColorFont;
             public float inverseAtlasWidth;
             public float inverseAtlasHeight;
+            public float padding;
+            public float gradientScale = float.PositiveInfinity;
+            public float normalStylePadding;
+            public float boldStylePadding;
             public readonly List<(int mesh, int element)> elements = new List<(int, int)>();
         }
 
         readonly List<MeshGroup> m_MeshGroups = new List<MeshGroup>();
+        RangeInt[] m_Words;
         readonly Dictionary<EntityId, int> m_MaterialToGroupIndex = new Dictionary<EntityId, int>();
 
         void ConvertOutput(NativeTextInfo nativeTextInfo, IntPtr textGenerationInfo)
@@ -642,22 +694,6 @@ namespace TMPro
             if (textInfo.meshInfo.Length < materialCount)
                 TMP_TextInfo.Resize(ref textInfo.meshInfo, materialCount, false);
 
-            // Vertical alignment is applied manually when the native layout ran unconstrained.
-            float verticalOffset = 0;
-            if (m_UnconstrainedHeight)
-            {
-                float totalHeight = nativeTextInfo.totalHeight / 64.0f * m_PositionScale;
-                switch (GetVerticalAlignment(m_TextComponent.verticalAlignment))
-                {
-                    case VerticalAlignment.Middle:
-                        verticalOffset = (m_MarginHeight - totalHeight) * 0.5f;
-                        break;
-                    case VerticalAlignment.Bottom:
-                        verticalOffset = m_MarginHeight - totalHeight;
-                        break;
-                }
-            }
-
             // Top left corner of the text area in local space. Corners are ordered BL, TL, TR, BR.
             var componentMargin = m_TextComponent.margin;
             Vector3 textAreaTopLeft = m_TextComponent.GetTextContainerLocalCornersInternal()[1] + new Vector3(componentMargin.x, -componentMargin.y, 0);
@@ -665,6 +701,8 @@ namespace TMPro
             Span<ATGMeshInfo> meshInfos = nativeTextInfo.meshInfos;
             float padding = m_NativeSettings.vertexPadding / 64.0f;
             bool convertToLinearSpace = m_TextComponent.GetConvertToLinearSpace();
+            var sharedMaterial = m_TextComponent.fontSharedMaterial;
+            bool isSdfShader = sharedMaterial != null && sharedMaterial.HasProperty(ShaderUtilities.ID_WeightNormal);
 
             // Per (mesh, element) mapping to the group index and quad slot, used to fill character info.
             var elementGroup = new int[meshInfos.Length][];
@@ -712,15 +750,15 @@ namespace TMPro
                     elementGroup[meshIndex][elementIndex] = groupIndex;
                     elementSlot[meshIndex][elementIndex] = slot;
 
-                    GlyphRect glyphRect = GetGlyphRect(group, (uint)element.glyphID);
-                    FillQuad(ref meshInfo, slot, ref element, glyphRect, group, textAreaTopLeft, verticalOffset, groupPadding, xScale, convertToLinearSpace);
+                    Glyph glyph = GetGlyph(group, (uint)element.glyphID);
+                    FillQuad(ref meshInfo, slot, ref element, glyph, group, textAreaTopLeft, groupPadding, xScale, convertToLinearSpace, isSdfShader);
                 }
 
                 // Degenerate any stale quads left from a previous, larger generation.
                 meshInfo.ClearUnusedVertices(meshInfo.vertexCount);
             }
 
-            FillTextInfo(nativeTextInfo, textGenerationInfo, textAreaTopLeft, verticalOffset, elementGroup, elementSlot);
+            FillTextInfo(nativeTextInfo, textGenerationInfo, textAreaTopLeft, elementGroup, elementSlot);
         }
 
         // Material reference used by the components to create and configure sub text objects.
@@ -742,23 +780,45 @@ namespace TMPro
             return Mathf.Max(pointSize, 1);
         }
 
-        void FillQuad(ref TMP_MeshInfo meshInfo, int slot, ref UnityEngine.TextCore.Text.NativeTextElementInfo element, GlyphRect glyphRect, MeshGroup group, Vector3 textAreaTopLeft, float verticalOffset, float padding, float xScale, bool convertToLinearSpace)
+        void FillQuad(ref TMP_MeshInfo meshInfo, int slot, ref UnityEngine.TextCore.Text.NativeTextElementInfo element, Glyph glyph, MeshGroup group, Vector3 textAreaTopLeft, float padding, float xScale, bool convertToLinearSpace, bool isSdfShader)
         {
             int vertexIndex = slot * 4;
+            GlyphRect glyphRect = glyph != null ? glyph.glyphRect : default;
 
-            meshInfo.vertices[vertexIndex + 0] = ToLocalPosition(element.bottomLeft.position, textAreaTopLeft, verticalOffset);
-            meshInfo.vertices[vertexIndex + 1] = ToLocalPosition(element.topLeft.position, textAreaTopLeft, verticalOffset);
-            meshInfo.vertices[vertexIndex + 2] = ToLocalPosition(element.topRight.position, textAreaTopLeft, verticalOffset);
-            meshInfo.vertices[vertexIndex + 3] = ToLocalPosition(element.bottomRight.position, textAreaTopLeft, verticalOffset);
+            Vector3 bottomLeft = ToLocalPosition(element.bottomLeft.position, textAreaTopLeft);
+            Vector3 topLeft = ToLocalPosition(element.topLeft.position, textAreaTopLeft);
+            Vector3 topRight = ToLocalPosition(element.topRight.position, textAreaTopLeft);
+            Vector3 bottomRight = ToLocalPosition(element.bottomRight.position, textAreaTopLeft);
 
             // The native bold flag is carried in uv2.y and the glyph scale relative to the text (face scale,
             // sub/superscript, small caps, size tags) in uv2.x; TMP shaders expect the SDF scale in uv0.w,
             // negated for bold.
+            bool isSyntheticBold = element.bottomLeft.uv2.y != 0;
             float glyphScale = element.bottomLeft.uv2.x > 0 ? element.bottomLeft.uv2.x : 1;
-            float signedScale = (element.bottomLeft.uv2.y != 0 ? -xScale : xScale) * glyphScale;
+            float signedScale = (isSyntheticBold ? -xScale : xScale) * glyphScale;
+
+            float stylePadding = 0;
+            float glyphPadding = padding;
+            if (glyph != null)
+            {
+                glyphPadding = group.padding;
+                stylePadding = isSyntheticBold ? group.boldStylePadding : group.normalStylePadding;
+                if (stylePadding + glyphPadding > group.gradientScale)
+                    glyphPadding = group.gradientScale - stylePadding;
+
+                ApplyStylePadding(ref bottomLeft, ref topLeft, ref topRight, ref bottomRight, glyph.metrics, padding, glyphPadding, stylePadding);
+
+                if (!isSdfShader)
+                    stylePadding = 0;
+            }
+
+            meshInfo.vertices[vertexIndex + 0] = bottomLeft;
+            meshInfo.vertices[vertexIndex + 1] = topLeft;
+            meshInfo.vertices[vertexIndex + 2] = topRight;
+            meshInfo.vertices[vertexIndex + 3] = bottomRight;
 
             Vector2 uvBL, uvTL, uvTR, uvBR;
-            ComputeAtlasUVs(ref element, glyphRect, group, padding, out uvBL, out uvTL, out uvTR, out uvBR);
+            ComputeAtlasUVs(ref element, glyphRect, group, glyphPadding + stylePadding, out uvBL, out uvTL, out uvTR, out uvBR);
 
             meshInfo.uvs0[vertexIndex + 0] = new Vector4(uvBL.x, uvBL.y, 0, signedScale);
             meshInfo.uvs0[vertexIndex + 1] = new Vector4(uvTL.x, uvTL.y, 0, signedScale);
@@ -786,11 +846,11 @@ namespace TMPro
             }
         }
 
-        Vector3 ToLocalPosition(Vector3 nativePosition, Vector3 textAreaTopLeft, float verticalOffset)
+        Vector3 ToLocalPosition(Vector3 nativePosition, Vector3 textAreaTopLeft)
         {
             return new Vector3(
                 textAreaTopLeft.x + nativePosition.x * m_PositionScale,
-                textAreaTopLeft.y - nativePosition.y * m_PositionScale - verticalOffset,
+                textAreaTopLeft.y - nativePosition.y * m_PositionScale,
                 0);
         }
 
@@ -814,95 +874,86 @@ namespace TMPro
             br = new Vector2(Mathf.Lerp(xMin, xMax, uv3.x), Mathf.Lerp(yMin, yMax, uv3.y));
         }
 
-        GlyphRect GetGlyphRect(MeshGroup group, uint glyphID)
+        Glyph GetGlyph(MeshGroup group, uint glyphID)
         {
             if (group.tmpSpriteAsset != null)
             {
                 int spriteIndex = (int)glyphID - 0xE000;
                 var table = group.tmpSpriteAsset.spriteCharacterTable;
-                if (spriteIndex >= 0 && spriteIndex < table.Count && table[spriteIndex] != null && table[spriteIndex].glyph != null)
-                    return table[spriteIndex].glyph.glyphRect;
+                if (spriteIndex >= 0 && spriteIndex < table.Count && table[spriteIndex] != null)
+                    return table[spriteIndex].glyph;
 
-                return default;
+                return null;
             }
 
             if (group.tmpFontAsset != null && group.tmpFontAsset.glyphLookupTable.TryGetValue(glyphID, out var glyph))
-                return glyph.glyphRect;
+                return glyph;
 
             if (group.coreFontAsset != null)
-            {
-                var coreGlyph = group.coreFontAsset.GetGlyphInCache(glyphID);
-                if (coreGlyph != null)
-                    return coreGlyph.glyphRect;
-            }
+                return group.coreFontAsset.GetGlyphInCache(glyphID);
 
-            return default;
+            return null;
         }
 
         void ResolveMissingGlyphs(ref NativeTextInfo nativeTextInfo)
         {
-            s_MissingGlyphsPerFontAsset.Clear();
+            foreach (var missingGlyphs in s_MissingGlyphsPerFontAsset.Values)
+            {
+                missingGlyphs.Clear();
+            }
 
             // Remap native OS fallback fonts (created during shaping) to their managed twins.
             OSFontFallbackResolver.Resolve(nativeTextInfo, s_MissingGlyphsPerFontAsset);
-
-            bool addedTMPGlyphs = false;
 
             Span<ATGMeshInfo> meshInfos = nativeTextInfo.meshInfos;
             foreach (ref var meshInfo in meshInfos)
             {
                 var textAsset = Resources.EntityIdToObject(meshInfo.textAssetId);
-                if (textAsset is TMP_FontAsset tmpFontAsset)
-                {
-                    s_GlyphsToAdd.Clear();
-                    var elements = meshInfo.textElementInfos;
-                    for (int i = 0; i < elements.Length; i++)
-                    {
-                        uint glyphID = (uint)elements[i].glyphID;
-                        if (!tmpFontAsset.glyphLookupTable.ContainsKey(glyphID) && !s_GlyphsToAdd.Contains(glyphID))
-                            s_GlyphsToAdd.Add(glyphID);
-                    }
+                var tmpFontAsset = textAsset as TMP_FontAsset;
+                var coreFontAsset = textAsset as TextCoreFontAsset;
+                if (tmpFontAsset == null && coreFontAsset == null)
+                    continue;
 
-                    foreach (var glyphID in s_GlyphsToAdd)
-                    {
-                        tmpFontAsset.TryAddGlyphInternal(glyphID, out _);
-                        addedTMPGlyphs = true;
-                    }
-                }
-                else if (textAsset is TextCoreFontAsset coreFontAsset)
+                var elements = meshInfo.textElementInfos;
+                for (int i = 0; i < elements.Length; i++)
                 {
-                    var elements = meshInfo.textElementInfos;
-                    for (int i = 0; i < elements.Length; i++)
-                    {
-                        uint glyphID = (uint)elements[i].glyphID;
-                        if (coreFontAsset.GetGlyphInCache(glyphID) != null)
-                            continue;
+                    uint glyphID = (uint)elements[i].glyphID;
+                    bool isGlyphInAtlas = tmpFontAsset != null
+                        ? tmpFontAsset.glyphLookupTable.ContainsKey(glyphID)
+                        : coreFontAsset.GetGlyphInCache(glyphID) != null;
+                    if (isGlyphInAtlas)
+                        continue;
 
-                        if (!s_MissingGlyphsPerFontAsset.TryGetValue(meshInfo.textAssetId, out var missingGlyphs))
-                        {
-                            missingGlyphs = new HashSet<uint>();
-                            s_MissingGlyphsPerFontAsset.Add(meshInfo.textAssetId, missingGlyphs);
-                        }
-                        missingGlyphs.Add(glyphID);
+                    if (!s_MissingGlyphsPerFontAsset.TryGetValue(meshInfo.textAssetId, out var missingGlyphs))
+                    {
+                        missingGlyphs = new HashSet<uint>();
+                        s_MissingGlyphsPerFontAsset.Add(meshInfo.textAssetId, missingGlyphs);
                     }
+                    missingGlyphs.Add(glyphID);
                 }
             }
 
             foreach (var entry in s_MissingGlyphsPerFontAsset)
             {
-                if (Resources.EntityIdToObject(entry.Key) is not TextCoreFontAsset coreFontAsset || entry.Value.Count == 0)
+                if (entry.Value.Count == 0)
                     continue;
 
                 s_GlyphsToAdd.Clear();
                 s_GlyphsToAdd.AddRange(entry.Value);
-                coreFontAsset.TryAddGlyphs(s_GlyphsToAdd, populateFontFeatures: false);
+
+                var textAsset = Resources.EntityIdToObject(entry.Key);
+                if (textAsset is TMP_FontAsset tmpFontAsset)
+                {
+                    tmpFontAsset.TryAddGlyphs(s_GlyphsToAdd);
+                }
+                else if (textAsset is TextCoreFontAsset coreFontAsset)
+                {
+                    coreFontAsset.TryAddGlyphs(s_GlyphsToAdd, populateFontFeatures: false);
+                }
             }
 
-            if (s_MissingGlyphsPerFontAsset.Count > 0)
-                TextCoreFontAsset.UpdateFontAssetsInUpdateQueue();
-
-            if (addedTMPGlyphs)
-                TMP_FontAsset.UpdateFontAssetsInUpdateQueue();
+            TextCoreFontAsset.UpdateFontAssetsInUpdateQueue();
+            TMP_FontAsset.UpdateFontAssetsInUpdateQueue();
         }
 
         void BuildMeshGroups(ref NativeTextInfo nativeTextInfo)
@@ -976,7 +1027,6 @@ namespace TMPro
         int AddMeshGroup(Material material, TMP_FontAsset tmpFontAsset, TextCoreFontAsset coreFontAsset, TMP_SpriteAsset tmpSpriteAsset)
         {
             var group = new MeshGroup { material = material, tmpFontAsset = tmpFontAsset, coreFontAsset = coreFontAsset, tmpSpriteAsset = tmpSpriteAsset };
-
             if (tmpSpriteAsset != null)
             {
                 var spriteSheet = tmpSpriteAsset.spriteSheet;
@@ -988,12 +1038,16 @@ namespace TMPro
                 group.isColorFont = ((GlyphRasterModes)tmpFontAsset.atlasRenderMode & GlyphRasterModes.RASTER_MODE_COLOR) == GlyphRasterModes.RASTER_MODE_COLOR;
                 group.inverseAtlasWidth = 1.0f / tmpFontAsset.atlasWidth;
                 group.inverseAtlasHeight = 1.0f / tmpFontAsset.atlasHeight;
+                group.padding = GetMaterialPadding(material);
+                SetStylePadding(group, tmpFontAsset.normalStyle, tmpFontAsset.boldStyle);
             }
             else if (coreFontAsset != null)
             {
                 group.isColorFont = coreFontAsset.IsColor();
                 group.inverseAtlasWidth = 1.0f / coreFontAsset.atlasWidth;
                 group.inverseAtlasHeight = 1.0f / coreFontAsset.atlasHeight;
+                group.padding = GetMaterialPadding(material);
+                SetStylePadding(group, coreFontAsset.regularStyleWeight, coreFontAsset.boldStyleWeight);
             }
 
             m_MeshGroups.Add(group);
@@ -1001,19 +1055,36 @@ namespace TMPro
             return m_MeshGroups.Count - 1;
         }
 
+        float GetMaterialPadding(Material material)
+        {
+            if (material == m_TextComponent.fontSharedMaterial)
+                return m_TextComponent.materialPadding;
+
+            return ShaderUtilities.GetPadding(material, m_TextComponent.extraPadding, m_TextComponent.isUsingBold);
+        }
+
         Material ResolveMaterial(TMP_FontAsset tmpFontAsset, TextCoreFontAsset coreFontAsset, int atlasIndex)
         {
             if (tmpFontAsset != null)
             {
                 var sharedMaterial = m_TextComponent.fontSharedMaterial;
-                Material baseMaterial = tmpFontAsset == m_TextComponent.font && sharedMaterial != null
-                    ? sharedMaterial
-                    : tmpFontAsset.material;
+                Material baseMaterial;
+                if (tmpFontAsset == m_TextComponent.font)
+                    baseMaterial = sharedMaterial != null ? sharedMaterial : tmpFontAsset.material;
+                else if (TMP_Settings.matchMaterialPreset && sharedMaterial != null)
+                    baseMaterial = TMP_MaterialManager.GetFallbackMaterial(sharedMaterial, tmpFontAsset.material);
+                else
+                    baseMaterial = tmpFontAsset.material;
 
                 return atlasIndex == 0 ? baseMaterial : TMP_MaterialManager.GetFallbackMaterial(tmpFontAsset, baseMaterial, atlasIndex);
             }
 
-            return GetBridgeMaterial(coreFontAsset, atlasIndex);
+            var bridgeMaterial = GetBridgeMaterial(coreFontAsset, atlasIndex);
+            var componentMaterial = m_TextComponent.fontSharedMaterial;
+            if (TMP_Settings.matchMaterialPreset && componentMaterial != null && bridgeMaterial != null)
+                return TMP_MaterialManager.GetFallbackMaterial(componentMaterial, bridgeMaterial);
+
+            return bridgeMaterial;
         }
 
         // Materials rendering TextCore font assets (OS/emoji fallbacks) with TMP shaders so that
@@ -1057,7 +1128,7 @@ namespace TMPro
             return material;
         }
 
-        void FillTextInfo(NativeTextInfo nativeTextInfo, IntPtr textGenerationInfo, Vector3 textAreaTopLeft, float verticalOffset, int[][] elementGroup, int[][] elementSlot)
+        void FillTextInfo(NativeTextInfo nativeTextInfo, IntPtr textGenerationInfo, Vector3 textAreaTopLeft, int[][] elementGroup, int[][] elementSlot)
         {
             var textInfo = m_TextInfo;
 
@@ -1111,7 +1182,7 @@ namespace TMPro
                 float ascender = TextGenerationInfo.GetLineAscender(textGenerationInfo, lineIndex) * m_PositionScale;
                 float baselineY = TextGenerationInfo.GetLineBaselineY(textGenerationInfo, lineIndex) * m_PositionScale;
 
-                float baseline = textAreaTopLeft.y - baselineY - verticalOffset;
+                float baseline = textAreaTopLeft.y - baselineY;
                 lineInfo.baseline = baseline;
                 lineInfo.ascender = baseline + ascender;
                 lineInfo.descender = baseline - Mathf.Max(lineHeight - ascender, 0);
@@ -1121,6 +1192,8 @@ namespace TMPro
             }
 
             var meshInfos = nativeTextInfo.meshInfos;
+
+            int wordCount = TextGenerationInfo.GetWords(textGenerationInfo, ref m_Words);
 
             for (int glyphIndex = 0; glyphIndex < glyphCount; glyphIndex++)
             {
@@ -1161,17 +1234,22 @@ namespace TMPro
                 ref var element = ref meshInfos[meshIndex].textElementInfos[elementIndex];
 
                 bool isInvisibleCharacter = char.IsWhiteSpace(characterInfo.character) || characterInfo.character == k_SoftHyphen;
-                characterInfo.isVisible = !isInvisibleCharacter;
+                bool isHiddenByVisibilityLimit = renderInfo.isHiddenByVisibilityLimit;
+                characterInfo.isVisible = !isInvisibleCharacter && !isHiddenByVisibilityLimit;
                 characterInfo.materialReferenceIndex = groupIndex;
                 characterInfo.vertexIndex = slot * 4;
+
+                // Like the legacy generator: keep the quad slot, zero its vertices.
+                if (isHiddenByVisibilityLimit)
+                    CollapseQuad(ref textInfo.meshInfo[groupIndex], slot);
                 characterInfo.fontAsset = group.tmpFontAsset;
                 characterInfo.material = group.material;
                 characterInfo.color = element.bottomLeft.color;
 
-                characterInfo.bottomLeft = ToLocalPosition(element.bottomLeft.position, textAreaTopLeft, verticalOffset);
-                characterInfo.topLeft = ToLocalPosition(element.topLeft.position, textAreaTopLeft, verticalOffset);
-                characterInfo.topRight = ToLocalPosition(element.topRight.position, textAreaTopLeft, verticalOffset);
-                characterInfo.bottomRight = ToLocalPosition(element.bottomRight.position, textAreaTopLeft, verticalOffset);
+                characterInfo.bottomLeft = ToLocalPosition(element.bottomLeft.position, textAreaTopLeft);
+                characterInfo.topLeft = ToLocalPosition(element.topLeft.position, textAreaTopLeft);
+                characterInfo.topRight = ToLocalPosition(element.topRight.position, textAreaTopLeft);
+                characterInfo.bottomRight = ToLocalPosition(element.bottomRight.position, textAreaTopLeft);
 
                 characterInfo.origin = characterInfo.bottomLeft.x;
                 characterInfo.xAdvance = characterInfo.bottomRight.x;
@@ -1202,6 +1280,62 @@ namespace TMPro
 
             textInfo.pageInfo[0].firstCharacterIndex = 0;
             textInfo.pageInfo[0].lastCharacterIndex = Mathf.Max(characterCount - 1, 0);
+
+            FillWordInfo(wordCount, characterCount);
+        }
+
+        static void CollapseQuad(ref TMP_MeshInfo meshInfo, int slot)
+        {
+            int vertexIndex = slot * 4;
+            if (meshInfo.vertices == null || vertexIndex + 3 >= meshInfo.vertices.Length)
+                return;
+
+            meshInfo.vertices[vertexIndex + 0] = Vector3.zero;
+            meshInfo.vertices[vertexIndex + 1] = Vector3.zero;
+            meshInfo.vertices[vertexIndex + 2] = Vector3.zero;
+            meshInfo.vertices[vertexIndex + 3] = Vector3.zero;
+        }
+
+        // Native word segmentation: unlike the legacy generator, punctuation splits words and CJK is segmented.
+        void FillWordInfo(int wordCount, int characterCount)
+        {
+            var textInfo = m_TextInfo;
+            var words = m_Words;
+
+            if (textInfo.wordInfo == null || textInfo.wordInfo.Length < Mathf.Max(wordCount, 1))
+                TMP_TextInfo.Resize(ref textInfo.wordInfo, Mathf.Max(wordCount, 1));
+
+            int filledWordCount = 0;
+            for (int i = 0; i < wordCount; i++)
+            {
+                int start = words[i].start;
+                int length = words[i].length;
+                if (length <= 0 || start >= characterCount)
+                    continue;
+
+                int last = Mathf.Min(start + length - 1, characterCount - 1);
+                ref var wordInfo = ref textInfo.wordInfo[filledWordCount++];
+                wordInfo.firstCharacterIndex = start;
+                wordInfo.lastCharacterIndex = last;
+                wordInfo.characterCount = last - start + 1;
+                wordInfo.textComponent = m_TextComponent;
+
+                int lineNumber = textInfo.characterInfo[start].lineNumber;
+                if (lineNumber >= 0 && lineNumber < textInfo.lineCount)
+                    textInfo.lineInfo[lineNumber].wordCount += 1;
+            }
+
+            // Like the legacy generator, no words reports one empty word (GetWord reads its textComponent).
+            if (filledWordCount == 0)
+            {
+                ref var emptyWord = ref textInfo.wordInfo[0];
+                emptyWord.firstCharacterIndex = 0;
+                emptyWord.lastCharacterIndex = -1;
+                emptyWord.characterCount = 0;
+                emptyWord.textComponent = m_TextComponent;
+            }
+
+            textInfo.wordCount = filledWordCount != 0 && characterCount > 0 ? filledWordCount : 1;
         }
     }
 }

@@ -364,8 +364,6 @@ namespace TMPro
         {
             get { return inputSystem != null ? inputSystem.compositionString : Input.compositionString; }
         }
-        private bool m_ShouldUpdateIMEWindowPosition = false;
-        private int m_PreviousIMEInsertionLine = 0;
 
         private int compositionLength
         {
@@ -3633,8 +3631,6 @@ namespace TMPro
                 else
                 {
                     fullText = text;
-                    m_ShouldUpdateIMEWindowPosition = true;
-
                 }
 
                 //Debug.Log("Handling IME Input... [" + compositionString + "] of length [" + compositionLength + "] at StringPosition [" + m_StringPosition + "]");
@@ -3984,6 +3980,11 @@ namespace TMPro
                     SendOnTextSelection();
                 }
 
+                // A retained selection keeps rebuilding after the field loses focus, and the slot
+                // belongs to whichever field is focused now.
+                if (isFocused)
+                    UpdateIMECompositionCursorPos();
+
                 helper.FillMesh(vbo);
             }
         }
@@ -4001,38 +4002,12 @@ namespace TMPro
 
             // TODO: Optimize to only update the caret position when needed.
 
-            Vector2 startPosition = Vector2.zero;
-            float height = 0;
+            Vector2 startPosition;
+            float height;
             TMP_CharacterInfo currentCharacter;
 
-            // Make sure caret position does not exceed characterInfo array size or less than zero.
-            if (caretPositionInternal >= m_TextComponent.textInfo.characterInfo.Length || caretPositionInternal < 0)
+            if (!TryGetCaretLocalLine(caretPositionInternal, out startPosition, out height, out currentCharacter))
                 return;
-
-            int currentLine = m_TextComponent.textInfo.characterInfo[caretPositionInternal].lineNumber;
-
-            // Caret is positioned at the origin for the first character of each lines and at the advance for subsequent characters.
-            if (caretPositionInternal == m_TextComponent.textInfo.lineInfo[currentLine].firstCharacterIndex)
-            {
-                currentCharacter = m_TextComponent.textInfo.characterInfo[caretPositionInternal];
-                height = currentCharacter.ascender - currentCharacter.descender;
-
-                if (m_TextComponent.verticalAlignment == VerticalAlignmentOptions.Geometry)
-                    startPosition = new Vector2(currentCharacter.origin, 0 - height / 2);
-                else
-                    startPosition = new Vector2(currentCharacter.origin, currentCharacter.descender);
-            }
-            else
-            {
-                currentCharacter = m_TextComponent.textInfo.characterInfo[caretPositionInternal - 1];
-                height = currentCharacter.ascender - currentCharacter.descender;
-
-                if (m_TextComponent.verticalAlignment == VerticalAlignmentOptions.Geometry)
-                    startPosition = new Vector2(currentCharacter.xAdvance, 0 - height / 2);
-                else
-                    startPosition = new Vector2(currentCharacter.xAdvance, currentCharacter.descender);
-
-            }
 
             if (m_SoftKeyboard != null && compositionLength == 0)
             {
@@ -4078,37 +4053,85 @@ namespace TMPro
 
             vbo.AddUIVertexQuad(m_CursorVerts);
 
-            // Update position of IME window when necessary.
-            if (m_ShouldUpdateIMEWindowPosition || currentLine != m_PreviousIMEInsertionLine)
-            {
-                m_ShouldUpdateIMEWindowPosition = false;
-                m_PreviousIMEInsertionLine = currentLine;
-
-                // Calculate position of IME Window in screen space.
-                Camera cameraRef;
-                if (m_TextComponent.canvas.renderMode == RenderMode.ScreenSpaceOverlay)
-                    cameraRef = null;
-                else
-                {
-                    cameraRef = m_TextComponent.canvas.worldCamera;
-
-                    if (cameraRef == null)
-                        cameraRef = Camera.current;
-                }
-
-                Vector3 cursorPosition = m_CachedInputRenderer.gameObject.transform.TransformPoint(m_CursorVerts[0].position);
-                Vector2 screenPosition = RectTransformUtility.WorldToScreenPoint(cameraRef, cursorPosition);
-                screenPosition.y = Screen.height - screenPosition.y;
-
-                if (inputSystem != null)
-                    inputSystem.compositionCursorPos = screenPosition;
-
-                //Debug.Log("[" + Time.frameCount + "] Updating IME Window position  Cursor Pos: (" + cursorPosition + ")  Screen Pos: (" + screenPosition + ") with Composition Length: " + compositionLength);
-            }
-
             //#if TMP_DEBUG_MODE
             //Debug.Log("Caret position updated at frame: " + Time.frameCount);
             //#endif
+        }
+
+        // The caret's line for a character index, in the text component's local space.
+        private bool TryGetCaretLocalLine(int charIndex, out Vector2 startPosition, out float height, out TMP_CharacterInfo currentCharacter)
+        {
+            startPosition = Vector2.zero;
+            height = 0f;
+            currentCharacter = default;
+
+            TMP_TextInfo textInfo = m_TextComponent.textInfo;
+
+            // Make sure caret position does not exceed characterInfo array size or less than zero.
+            if (textInfo == null || charIndex >= textInfo.characterInfo.Length || charIndex < 0)
+                return false;
+
+            int currentLine = textInfo.characterInfo[charIndex].lineNumber;
+
+            // Caret is positioned at the origin for the first character of each lines and at the advance for subsequent characters.
+            if (charIndex == textInfo.lineInfo[currentLine].firstCharacterIndex)
+            {
+                currentCharacter = textInfo.characterInfo[charIndex];
+                height = currentCharacter.ascender - currentCharacter.descender;
+
+                if (m_TextComponent.verticalAlignment == VerticalAlignmentOptions.Geometry)
+                    startPosition = new Vector2(currentCharacter.origin, 0 - height / 2);
+                else
+                    startPosition = new Vector2(currentCharacter.origin, currentCharacter.descender);
+            }
+            else
+            {
+                currentCharacter = textInfo.characterInfo[charIndex - 1];
+                height = currentCharacter.ascender - currentCharacter.descender;
+
+                if (m_TextComponent.verticalAlignment == VerticalAlignmentOptions.Geometry)
+                    startPosition = new Vector2(currentCharacter.xAdvance, 0 - height / 2);
+                else
+                    startPosition = new Vector2(currentCharacter.xAdvance, currentCharacter.descender);
+            }
+
+            return true;
+        }
+
+        // An IME places its candidate window from this, and it can ask at any time while the field has focus,
+        // including before a selection has collapsed into a caret and between caret blinks.
+        private void UpdateIMECompositionCursorPos()
+        {
+            if (inputSystem == null || m_TextComponent == null || m_TextComponent.canvas == null || m_CachedInputRenderer == null)
+                return;
+
+            if (!TryGetCaretLocalLine(caretPositionInternal, out Vector2 startPosition, out float height, out _))
+                return;
+
+            // Calculate position of IME Window in screen space.
+            Camera cameraRef;
+            if (m_TextComponent.canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+                cameraRef = null;
+            else
+            {
+                cameraRef = m_TextComponent.canvas.worldCamera;
+
+                if (cameraRef == null)
+                    cameraRef = Camera.current;
+            }
+
+            // WorldToScreenPoint projects into the camera's display, which is not the canvas's
+            // once a camera renders a canvas that targets another one.
+            int displayIndex = cameraRef != null ? cameraRef.targetDisplay : m_TextComponent.canvas.targetDisplay;
+            int screenHeight = displayIndex > 0 && displayIndex < Display.displays.Length
+                ? Display.displays[displayIndex].renderingHeight
+                : Screen.height;
+
+            Vector3 cursorPosition = m_CachedInputRenderer.gameObject.transform.TransformPoint(new Vector3(startPosition.x, startPosition.y, 0f));
+            Vector2 screenPosition = RectTransformUtility.WorldToScreenPoint(cameraRef, cursorPosition);
+            screenPosition.y = screenHeight - screenPosition.y;
+
+            inputSystem.compositionCursorPos = screenPosition;
         }
 
 

@@ -4,6 +4,14 @@ using UnityEngine.EventSystems;
 
 namespace UnityEditor.EventSystems
 {
+    /// <summary>
+    /// Custom Editor for the EventTrigger component.
+    /// Extend this class to write a custom editor for a component derived from EventTrigger.
+    /// </summary>
+    /// <remarks>
+    /// This editor displays a list of the event types that the <see cref="EventTrigger"/> responds to, each with its callback list.
+    /// Use the **Add New Event Type** button to add an event type, and the remove button next to each entry to remove it.
+    /// </remarks>
     [CustomEditor(typeof(EventTrigger), true)]
     public class EventTriggerEditor : Editor
     {
@@ -14,6 +22,12 @@ namespace UnityEditor.EventSystems
         GUIContent[] m_EventTypes;
         GUIContent m_AddButonContent;
 
+        /// <summary>
+        /// Called when the editor is enabled. Initializes the serialized properties and GUI content for this editor.
+        /// </summary>
+        /// <remarks>
+        /// If you override this method, call the base implementation so that the Inspector draws correctly.
+        /// </remarks>
         protected virtual void OnEnable()
         {
             m_DelegatesProperty = serializedObject.FindProperty("m_Delegates");
@@ -31,6 +45,9 @@ namespace UnityEditor.EventSystems
             }
         }
 
+        /// <summary>
+        /// Draws the Inspector for the <see cref="EventTrigger"/> component.
+        /// </summary>
         public override void OnInspectorGUI()
         {
             serializedObject.Update();

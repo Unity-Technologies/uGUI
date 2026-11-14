@@ -2990,6 +2990,8 @@ namespace UnityEngine.UI
                 else
                     GenerateHighlight(helper, roundingOffset);
 
+                UpdateIMECompositionCursorPos();
+
                 helper.FillMesh(vbo);
             }
         }
@@ -3005,32 +3007,11 @@ namespace UnityEngine.UI
             }
 
             float width = m_CaretWidth;
-            int adjustedPos = Mathf.Max(0, caretPositionInternal - m_DrawStart);
-            TextGenerator gen = m_TextComponent.cachedTextGenerator;
 
-            if (gen == null)
+            if (!TryGetCaretLocalLine(caretPositionInternal, out var caretX, out var topY, out var height))
                 return;
 
-            if (gen.lineCount == 0)
-                return;
-
-            Vector2 startPosition = Vector2.zero;
-
-            // Calculate startPosition
-            if (adjustedPos < gen.characters.Count)
-            {
-                UICharInfo cursorChar = gen.characters[adjustedPos];
-                startPosition.x = cursorChar.cursorPos.x;
-            }
-            startPosition.x /= m_TextComponent.pixelsPerUnit;
-
-            // TODO: Only clamp when Text uses horizontal word wrap.
-            if (startPosition.x > m_TextComponent.rectTransform.rect.xMax)
-                startPosition.x = m_TextComponent.rectTransform.rect.xMax;
-
-            int characterLine = DetermineCharacterLine(adjustedPos, gen);
-            startPosition.y = gen.lines[characterLine].topY / m_TextComponent.pixelsPerUnit;
-            float height = gen.lines[characterLine].height / m_TextComponent.pixelsPerUnit;
+            Vector2 startPosition = new Vector2(caretX, topY);
 
             for (int i = 0; i < m_CursorVerts.Length; i++)
                 m_CursorVerts[i].color = caretColor;
@@ -3051,14 +3032,18 @@ namespace UnityEngine.UI
             }
 
             vbo.AddUIVertexQuad(m_CursorVerts);
+        }
 
-            int screenHeight = Screen.height;
-            // Multiple display support only when not the main display. For display 0 the reported
-            // resolution is always the desktops resolution since its part of the display API,
-            // so we use the standard none multiple display method. (case 741751)
-            int displayIndex = m_TextComponent.canvas.targetDisplay;
-            if (displayIndex > 0 && displayIndex < Display.displays.Length)
-                screenHeight = Display.displays[displayIndex].renderingHeight;
+        // An IME places its candidate window from this, and it can ask at any time while the field has focus,
+        // including before a selection has collapsed into a caret and between caret blinks. caretPositionInternal
+        // is the anchor the composition preview is inserted at, so it tracks the composed text.
+        private void UpdateIMECompositionCursorPos()
+        {
+            if (input == null || m_TextComponent == null || m_TextComponent.canvas == null || m_CachedInputRenderer == null)
+                return;
+
+            if (!TryGetCaretLocalLine(caretPositionInternal, out var caretX, out var topY, out var height))
+                return;
 
             // Calculate position of IME Window in screen space.
             Camera cameraRef;
@@ -3067,12 +3052,48 @@ namespace UnityEngine.UI
             else
                 cameraRef = m_TextComponent.canvas.worldCamera;
 
-            Vector3 cursorPosition = m_CachedInputRenderer.gameObject.transform.TransformPoint(m_CursorVerts[0].position);
+            int screenHeight = Screen.height;
+            // Multiple display support only when not the main display. For display 0 the reported
+            // resolution is always the desktops resolution since its part of the display API,
+            // so we use the standard none multiple display method. (case 741751)
+            // WorldToScreenPoint projects into the camera's display, which is not the canvas's
+            // once a camera renders a canvas that targets another one.
+            int displayIndex = cameraRef != null ? cameraRef.targetDisplay : m_TextComponent.canvas.targetDisplay;
+            if (displayIndex > 0 && displayIndex < Display.displays.Length)
+                screenHeight = Display.displays[displayIndex].renderingHeight;
+
+            Vector3 cursorPosition = m_CachedInputRenderer.gameObject.transform.TransformPoint(new Vector3(caretX, topY - height, 0f));
             Vector2 screenPosition = RectTransformUtility.WorldToScreenPoint(cameraRef, cursorPosition);
             screenPosition.y = screenHeight - screenPosition.y;
 
-            if (input != null)
-                input.compositionCursorPos = screenPosition;
+            input.compositionCursorPos = screenPosition;
+        }
+
+        // The caret's line for a character index, in the text component's local space.
+        private bool TryGetCaretLocalLine(int charIndex, out float caretX, out float topY, out float height)
+        {
+            caretX = 0f;
+            topY = 0f;
+            height = 0f;
+
+            TextGenerator gen = m_TextComponent.cachedTextGenerator;
+            if (gen == null || gen.lineCount == 0)
+                return false;
+
+            int adjustedPos = Mathf.Max(0, charIndex - m_DrawStart);
+
+            if (adjustedPos < gen.characters.Count)
+                caretX = gen.characters[adjustedPos].cursorPos.x;
+            caretX /= m_TextComponent.pixelsPerUnit;
+
+            // TODO: Only clamp when Text uses horizontal word wrap.
+            if (caretX > m_TextComponent.rectTransform.rect.xMax)
+                caretX = m_TextComponent.rectTransform.rect.xMax;
+
+            int characterLine = DetermineCharacterLine(adjustedPos, gen);
+            topY = gen.lines[characterLine].topY / m_TextComponent.pixelsPerUnit;
+            height = gen.lines[characterLine].height / m_TextComponent.pixelsPerUnit;
+            return true;
         }
 
         private void CreateCursorVerts()

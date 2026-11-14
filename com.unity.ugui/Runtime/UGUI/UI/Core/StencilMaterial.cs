@@ -23,6 +23,7 @@ namespace UnityEngine.UI
             public int writeMask;
             public bool useAlphaClip;
             public ColorWriteMask colorMask;
+            public int baseCrc;
         }
 
         private static readonly List<MatEntry> m_List = new List<MatEntry>();
@@ -116,6 +117,16 @@ namespace UnityEngine.UI
                     && ent.writeMask == writeMask
                     && ent.colorMask == colorWriteMask)
                 {
+                    // [UUM-159131] baseMat may have been modified since this copy was made,
+                    // so refresh it or edits to a reused base material never render.
+                    int crc = baseMat.ComputeCRC();
+                    if (crc != ent.baseCrc)
+                    {
+                        ent.customMat.shader = baseMat.shader;
+                        ent.customMat.CopyPropertiesFromMaterial(baseMat);
+                        ApplyStencilProperties(ent);
+                        ent.baseCrc = crc;
+                    }
                     ++ent.count;
                     return ent.customMat;
                 }
@@ -125,6 +136,7 @@ namespace UnityEngine.UI
             newEnt.count = 1;
             newEnt.baseMat = baseMat;
             newEnt.customMat = new Material(baseMat);
+            newEnt.baseCrc = baseMat.ComputeCRC();
             newEnt.customMat.hideFlags = HideFlags.HideAndDontSave;
             newEnt.stencilId = stencilID;
             newEnt.operation = operation;
@@ -136,21 +148,26 @@ namespace UnityEngine.UI
 
             newEnt.customMat.name = string.Format("Stencil Id:{0}, Op:{1}, Comp:{2}, WriteMask:{3}, ReadMask:{4}, ColorMask:{5} AlphaClip:{6} ({7})", stencilID, operation, compareFunction, writeMask, readMask, colorWriteMask, newEnt.useAlphaClip, baseMat.name);
 
-            newEnt.customMat.SetFloat("_Stencil", (float)stencilID);
-            newEnt.customMat.SetFloat("_StencilOp", (float)operation);
-            newEnt.customMat.SetFloat("_StencilComp", (float)compareFunction);
-            newEnt.customMat.SetFloat("_StencilReadMask", (float)readMask);
-            newEnt.customMat.SetFloat("_StencilWriteMask", (float)writeMask);
-            newEnt.customMat.SetFloat("_ColorMask", (float)colorWriteMask);
-            newEnt.customMat.SetFloat("_UseUIAlphaClip", newEnt.useAlphaClip ? 1.0f : 0.0f);
-
-            if (newEnt.useAlphaClip)
-                newEnt.customMat.EnableKeyword("UNITY_UI_ALPHACLIP");
-            else
-                newEnt.customMat.DisableKeyword("UNITY_UI_ALPHACLIP");
+            ApplyStencilProperties(newEnt);
 
             m_List.Add(newEnt);
             return newEnt.customMat;
+        }
+
+        static void ApplyStencilProperties(MatEntry ent)
+        {
+            ent.customMat.SetFloat("_Stencil", (float)ent.stencilId);
+            ent.customMat.SetFloat("_StencilOp", (float)ent.operation);
+            ent.customMat.SetFloat("_StencilComp", (float)ent.compareFunction);
+            ent.customMat.SetFloat("_StencilReadMask", (float)ent.readMask);
+            ent.customMat.SetFloat("_StencilWriteMask", (float)ent.writeMask);
+            ent.customMat.SetFloat("_ColorMask", (float)ent.colorMask);
+            ent.customMat.SetFloat("_UseUIAlphaClip", ent.useAlphaClip ? 1.0f : 0.0f);
+
+            if (ent.useAlphaClip)
+                ent.customMat.EnableKeyword("UNITY_UI_ALPHACLIP");
+            else
+                ent.customMat.DisableKeyword("UNITY_UI_ALPHACLIP");
         }
 
         /// <summary>
