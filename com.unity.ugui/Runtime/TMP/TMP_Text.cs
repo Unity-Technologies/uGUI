@@ -746,6 +746,11 @@ namespace TMPro
         protected float m_monoSpacing = 0;
         protected bool m_duoSpace;
 
+        internal float GetMonoCellWidth(uint charCode)
+        {
+            return m_duoSpace && (charCode == '.' || charCode == ':' || charCode == ',') ? m_monoSpacing / 2 : m_monoSpacing;
+        }
+
         /// <summary>
         /// The horizontal scale of characters.
         /// A value of 1.0 is normal. Value greater than 1.0 increases the width. Value less than 1.0 decreases the width.
@@ -2026,13 +2031,17 @@ namespace TMPro
 
         internal void ReleaseAdvancedTextResources()
         {
-            if (m_TextGenerationInfo != IntPtr.Zero)
-            {
-                UnityEngine.TextCore.Text.TextGenerationInfo.Destroy(m_TextGenerationInfo);
-                m_TextGenerationInfo = IntPtr.Zero;
-            }
-
+            ResetAdvancedTextLayout();
             m_ATGTextBuffer.Dispose();
+        }
+
+        internal void ResetAdvancedTextLayout()
+        {
+            if (m_TextGenerationInfo == IntPtr.Zero)
+                return;
+
+            UnityEngine.TextCore.Text.TextGenerationInfo.Destroy(m_TextGenerationInfo);
+            m_TextGenerationInfo = IntPtr.Zero;
         }
 
         internal void FetchStateFromAdvancedGenerator(TMP_AdvancedTextGenerator generator)
@@ -4710,7 +4719,10 @@ namespace TMPro
                 float monoAdvance = 0;
                 if (m_monoSpacing != 0)
                 {
-                    monoAdvance = (m_monoSpacing / 2 - (m_cached_TextElement.glyph.metrics.width / 2 + m_cached_TextElement.glyph.metrics.horizontalBearingX) * currentElementScale) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
+                    if (m_duoSpace && (charCode == '.' || charCode == ':' || charCode == ','))
+                        monoAdvance = (m_monoSpacing / 4 - (m_cached_TextElement.glyph.metrics.width / 2 + m_cached_TextElement.glyph.metrics.horizontalBearingX) * currentElementScale) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
+                    else
+                        monoAdvance = (m_monoSpacing / 2 - (m_cached_TextElement.glyph.metrics.width / 2 + m_cached_TextElement.glyph.metrics.horizontalBearingX) * currentElementScale) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
                     m_xAdvance += monoAdvance;
                 }
                 #endregion
@@ -4814,7 +4826,12 @@ namespace TMPro
                     widthOfTextArea = m_width != -1 ? Mathf.Min(marginWidth + 0.0001f - m_marginLeft - m_marginRight, m_width) : marginWidth + 0.0001f - m_marginLeft - m_marginRight;
 
                     // Calculate the line breaking width of the text.
-                    textWidth = Mathf.Abs(m_xAdvance) + currentGlyphMetrics.horizontalAdvance * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale * (charCode == 0xAD ? currentElementUnmodifiedScale : currentElementScale);
+                    if (m_monoSpacing != 0 && charCode != k_TabCharacter)
+                    {
+                        textWidth = Mathf.Abs(m_xAdvance - monoAdvance) + GetMonoCellWidth(charCode) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
+                    }
+                    else
+                        textWidth = Mathf.Abs(m_xAdvance) + currentGlyphMetrics.horizontalAdvance * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale * (charCode == 0xAD ? currentElementUnmodifiedScale : currentElementScale);
 
                     int testedCharacterCount = m_characterCount;
 
@@ -4979,7 +4996,7 @@ namespace TMPro
                 }
                 else if (m_monoSpacing != 0)
                 {
-                    m_xAdvance += (m_monoSpacing - monoAdvance + ((m_currentFontAsset.normalSpacingOffset + characterSpacingAdjustment) * currentEmScale) + m_cSpacing) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
+                    m_xAdvance += (GetMonoCellWidth(charCode) + ((m_currentFontAsset.normalSpacingOffset + characterSpacingAdjustment) * currentEmScale) + m_cSpacing) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale - monoAdvance;
 
                     if (isWhiteSpace || charCode == 0x200B)
                         m_xAdvance += m_wordSpacing * currentEmScale;
@@ -5321,6 +5338,7 @@ namespace TMPro
         }
         protected static readonly Vector2 k_LargePositiveVector2 = new Vector2(TMP_Math.INT_MAX, TMP_Math.INT_MAX);
         protected static readonly Vector2 k_LargeNegativeVector2 = new Vector2(TMP_Math.INT_MIN, TMP_Math.INT_MIN);
+        internal const int k_TabCharacter = 9;
         protected const float k_LargePositiveFloat = TMP_Math.FLOAT_MAX;
         protected const float k_LargeNegativeFloat = TMP_Math.FLOAT_MIN;
         protected const int k_LargePositiveInt = TMP_Math.INT_MAX;
@@ -7965,7 +7983,7 @@ namespace TMPro
                         else
                         {
                             // Name of requested material
-                            string materialName = new string(m_htmlTag, m_xmlAttribute[1].valueStartIndex, m_xmlAttribute[1].valueLength);
+                            string materialName = new string(m_htmlTag, m_xmlAttribute[0].valueStartIndex, m_xmlAttribute[0].valueLength);
 
                             // Try loading requested material from potential delegate or resources.
                             if (!TryLoadAsset(materialHashCode, materialName, TMP_Settings.defaultFontAssetPath, OnFontMaterialRequest, out tempMaterial))

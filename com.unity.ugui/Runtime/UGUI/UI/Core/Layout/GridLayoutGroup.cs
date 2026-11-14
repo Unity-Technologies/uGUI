@@ -376,6 +376,8 @@ namespace UnityEngine.UI
                     childrenToMove += 1;
             }
 
+            int maxPositionX = -1;
+            int maxPositionY = -1;
             for (int i = 0; i < rectChildrenCount; i++)
             {
                 int positionX;
@@ -407,6 +409,9 @@ namespace UnityEngine.UI
                     }
                 }
 
+                maxPositionX = Mathf.Max(maxPositionX, positionX);
+                maxPositionY = Mathf.Max(maxPositionY, positionY);
+
                 if (cornerX == 1)
                     positionX = actualCellCountX - 1 - positionX;
                 if (cornerY == 1)
@@ -416,8 +421,8 @@ namespace UnityEngine.UI
                 SetChildAlongAxis(rectChildren[i], 1, startOffset.y + (cellSize[1] + spacing[1]) * positionY, cellSize[1]);
             }
 
-            generatedRowCount = actualCellCountY;
-            generatedColumnCount = actualCellCountX;
+            generatedRowCount = maxPositionY + 1;
+            generatedColumnCount = maxPositionX + 1;
         }
 
         /// <summary>

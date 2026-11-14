@@ -802,6 +802,8 @@ namespace TMPro
             // Make sure our lookup dictionary have been initialized.
             if (m_CharacterLookupDictionary == null || m_GlyphLookupDictionary == null)
                 ReadFontAssetDefinition();
+
+            UpdateNativeProperties();
         }
         #endif
 
@@ -876,7 +878,7 @@ namespace TMPro
             styleNameHashCode = TMP_TextUtilities.GetHashCode(m_FaceInfo.styleName);
             materialHashCode = TMP_TextUtilities.GetSimpleHashCode(this.name + k_DefaultMaterialSuffix);
 
-            UpdateNativeFaceInfoAndRenderMode();
+            UpdateNativeProperties();
 
             // Add reference to font asset in TMP Resource Manager
             TMP_ResourceManager.AddFontAsset(this);

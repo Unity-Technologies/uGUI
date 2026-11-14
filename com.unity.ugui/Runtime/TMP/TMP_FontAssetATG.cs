@@ -51,7 +51,7 @@ namespace TMPro
             sourceFontEditorRef = SourceFont_EditorRef;
 #endif
 
-            m_NativeFontAsset = TextCoreFontAsset.CreateNativeFontAsset(m_FaceInfo, m_SourceFontFile, sourceFontEditorRef, m_SourceFontFilePath, this.GetEntityId(), fallbacks, regularWeights, italicWeights, m_AtlasRenderMode, italicStyle, boldStyle, (int)(boldSpacing * 64.0f), this);
+            m_NativeFontAsset = TextCoreFontAsset.CreateNativeFontAsset(m_FaceInfo, m_SourceFontFile, sourceFontEditorRef, m_SourceFontFilePath, this.GetEntityId(), fallbacks, regularWeights, italicWeights, m_AtlasRenderMode, italicStyle, boldStyle, (int)(boldSpacing * 64.0f), tabSize, (int)(normalSpacingOffset * 64.0f), this);
         }
 
         void OnDisable()
@@ -68,13 +68,18 @@ namespace TMPro
             m_NativeFontAsset = IntPtr.Zero;
         }
 
-        internal void UpdateNativeFaceInfoAndRenderMode()
+        internal void UpdateNativeProperties()
         {
             if (m_NativeFontAsset == IntPtr.Zero)
                 return;
 
             TextCoreFontAsset.UpdateNativeFaceInfo(m_NativeFontAsset, m_FaceInfo);
             TextCoreFontAsset.UpdateNativeRenderMode(m_NativeFontAsset, m_AtlasRenderMode);
+            TextCoreFontAsset.UpdateNativeItalicAngle(m_NativeFontAsset, italicStyle);
+            TextCoreFontAsset.UpdateNativeBoldWeight(m_NativeFontAsset, boldStyle);
+            TextCoreFontAsset.UpdateNativeBoldSpacing(m_NativeFontAsset, (int)(boldSpacing * 64.0f));
+            TextCoreFontAsset.UpdateNativeTabMultiple(m_NativeFontAsset, tabSize);
+            TextCoreFontAsset.UpdateNativeNormalSpacingOffset(m_NativeFontAsset, (int)(normalSpacingOffset * 64.0f));
         }
 
         internal void UpdateNativeFallbacks()
