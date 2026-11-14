@@ -335,6 +335,34 @@ namespace TMPro
         }
 
         [Test]
+        public void MaterialTag_UncachedMaterial_LoadsThroughRequestCallback()
+        {
+            string requestedName = null;
+            Material loaded = new Material(m_TextComponent.fontSharedMaterial);
+            System.Func<int, string, Material> handler = (hash, name) =>
+            {
+                requestedName = name;
+                return loaded;
+            };
+
+            TMP_Text.OnFontMaterialRequest += handler;
+            try
+            {
+                string materialName = "TestMaterial_" + System.Guid.NewGuid().ToString("N");
+                m_TextComponent.text = "<material=\"" + materialName + "\">Hi</material>";
+                m_TextComponent.ForceMeshUpdate();
+
+                Assert.AreEqual(materialName, requestedName);
+                Assert.AreEqual(2, m_TextComponent.textInfo.characterCount);
+                Assert.AreEqual(2, m_TextComponent.textInfo.materialCount);
+            }
+            finally
+            {
+                TMP_Text.OnFontMaterialRequest -= handler;
+                UnityEngine.Object.DestroyImmediate(loaded);
+            }
+        }
+      
         public void SetText_FormatWithFloat_TextGetterReturnsSameValueOnRepeatedReads()
         {
             m_TextComponent.text = "Test0";

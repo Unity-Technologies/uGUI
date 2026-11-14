@@ -7875,7 +7875,7 @@ namespace TMPro
                         else
                         {
                             // Name of requested material
-                            string materialName = new string(m_htmlTag, m_xmlAttribute[1].valueStartIndex, m_xmlAttribute[1].valueLength);
+                            string materialName = new string(m_htmlTag, m_xmlAttribute[0].valueStartIndex, m_xmlAttribute[0].valueLength);
 
                             // Try loading requested material from potential delegate or resources.
                             if (!TryLoadAsset(materialHashCode, materialName, TMP_Settings.defaultFontAssetPath, OnFontMaterialRequest, out tempMaterial))
