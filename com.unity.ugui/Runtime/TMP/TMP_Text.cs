@@ -161,11 +161,24 @@ namespace TMPro
         /// </summary>
         public bool isRightToLeftText
         {
-            get { return m_isRightToLeft; }
-            set { if (m_isRightToLeft == value) return; m_isRightToLeft = value; m_havePropertiesChanged = true; SetVerticesDirty(); SetLayoutDirty(); }
+            get { return m_TextDirection == TextDirection.RTL; }
+            set { textDirection = value ? TextDirection.RTL : TextDirection.LTR; }
         }
-        [SerializeField]
-        protected bool m_isRightToLeft = false;
+
+        /// <summary>
+        /// The base direction the text is laid out in.
+        /// </summary>
+        public TextDirection textDirection
+        {
+            get { return m_TextDirection; }
+            set { if (m_TextDirection == value) return; m_TextDirection = value; m_havePropertiesChanged = true; SetVerticesDirty(); SetLayoutDirty(); }
+        }
+
+        /// <summary>
+        /// The serialized base direction of the text. See <see cref="textDirection"/>.
+        /// </summary>
+        [SerializeField] [FormerlySerializedAs("m_isRightToLeft")]
+        protected TextDirection m_TextDirection;
 
 
         /// <summary>
@@ -3510,7 +3523,7 @@ namespace TMPro
                 hashCode = ((hashCode << 5) + hashCode) ^ (int)TMP_TextParsingUtilities.ToUpperASCIIFast(c);
             }
 
-            return hashCode;
+            return readIndex == sourceTextLength ? 0 : hashCode;
         }
 
         /// <summary>
@@ -5399,7 +5412,7 @@ namespace TMPro
 
             float glyphAdjustment = m_textInfo.characterInfo[m_lastVisibleCharacterOfLine].adjustedHorizontalAdvance;
             float maxAdvanceOffset = (glyphAdjustment * currentElementScale + (m_currentFontAsset.normalSpacingOffset + characterSpacingAdjustment + boldSpacingAdjustment) * currentEmScale + m_cSpacing) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
-            float adjustedHorizontalAdvance = m_textInfo.lineInfo[m_lineNumber].maxAdvance = m_textInfo.characterInfo[m_lastVisibleCharacterOfLine].xAdvance + (m_isRightToLeft ? maxAdvanceOffset : - maxAdvanceOffset);
+            float adjustedHorizontalAdvance = m_textInfo.lineInfo[m_lineNumber].maxAdvance = m_textInfo.characterInfo[m_lastVisibleCharacterOfLine].xAdvance + (isRightToLeftText ? maxAdvanceOffset : - maxAdvanceOffset);
             m_textInfo.characterInfo[m_lastVisibleCharacterOfLine].xAdvance = adjustedHorizontalAdvance;
 
             m_textInfo.lineInfo[m_lineNumber].baseline = 0 - m_lineOffset;

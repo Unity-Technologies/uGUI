@@ -10,7 +10,6 @@ namespace TMPro.EditorUtilities
     public abstract class TMP_BaseEditorPanel : Editor
     {
         //Labels and Tooltips
-        static readonly GUIContent k_RtlToggleLabel = new GUIContent("Enable RTL Editor", "Reverses text direction and allows right to left editing.");
         //static readonly GUIContent k_MainSettingsLabel = new GUIContent("Main Settings");
         static readonly GUIContent k_FontAssetLabel = new GUIContent("Font Asset", "The Font Asset containing the glyphs that can be rendered for this text.");
         static readonly GUIContent k_MaterialPresetLabel = new GUIContent("Material Preset", "The material used for rendering. Only materials created from the Font Asset can be used.");
@@ -60,6 +59,7 @@ namespace TMPro.EditorUtilities
         static readonly GUIContent k_EscapeCharactersLabel = new GUIContent("Parse Escape Characters", "Whether to display strings such as \"\\n\" as is or replace them by the character they represent.");
         static readonly GUIContent k_VisibleDescenderLabel = new GUIContent("Visible Descender", "Compute descender values from visible characters only. Used to adjust layout behavior when hiding and revealing characters dynamically.");
         static readonly GUIContent k_EmojiFallbackSupportLabel = new GUIContent("Emoji Fallback Support", "When text contains Emojis, try using and displaying those from the potential Text Assets assigned in the TMP Settings Emoji Fallback Text Assets.");
+        static readonly GUIContent k_TextDirectionLabel = new GUIContent("Text Direction", "The base direction the text is laid out in. For character shaping and bidirectional text, use the Advanced Text Generator.");
         static readonly GUIContent k_EnableAdvancedTextLabel = new GUIContent("Advanced Text Generator (Experimental)", "Generate text using the Advanced Text Generator. Enables complex script shaping and bidirectional text. Some TMP features are not supported yet. Requires a dynamic font asset.");
         static readonly GUIContent k_SpriteAssetLabel = new GUIContent("Sprite Asset", "The Sprite Asset used when NOT specifically referencing one using <sprite=\"Sprite Asset Name\">.");
         static readonly GUIContent k_StyleSheetAssetLabel = new GUIContent("Style Sheet Asset", "The Style Sheet Asset used by this text object.");
@@ -99,7 +99,10 @@ namespace TMPro.EditorUtilities
 
         protected SerializedProperty m_TextProp;
 
-        protected SerializedProperty m_IsRightToLeftProp;
+        /// <summary>
+        /// Represents the serialized <see cref="TMP_Text.textDirection"/> property of the inspected text component.
+        /// </summary>
+        protected SerializedProperty m_TextDirectionProp;
         protected string m_RtlText;
 
         protected SerializedProperty m_FontAssetProp;
@@ -200,7 +203,7 @@ namespace TMPro.EditorUtilities
         protected virtual void OnEnable()
         {
             m_TextProp = serializedObject.FindProperty("m_text");
-            m_IsRightToLeftProp = serializedObject.FindProperty("m_isRightToLeft");
+            m_TextDirectionProp = serializedObject.FindProperty("m_TextDirection");
             m_FontAssetProp = serializedObject.FindProperty("m_fontAsset");
             m_FontSharedMaterialProp = serializedObject.FindProperty("m_sharedMaterial");
 
@@ -473,14 +476,6 @@ namespace TMPro.EditorUtilities
             }
             else
             {
-                // Display RTL Toggle
-                float labelWidth = EditorGUIUtility.labelWidth;
-                EditorGUIUtility.labelWidth = 110f;
-
-                m_IsRightToLeftProp.boolValue = EditorGUI.Toggle(new Rect(rect.width - 120, rect.y + 3, 130, 20), k_RtlToggleLabel, m_IsRightToLeftProp.boolValue);
-
-                EditorGUIUtility.labelWidth = labelWidth;
-
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.PropertyField(m_TextProp, GUIContent.none);
 
@@ -489,34 +484,6 @@ namespace TMPro.EditorUtilities
                 {
                     m_TextComponent.m_inputSource = TMP_Text.TextInputSources.TextInputBox;
                     m_HavePropertiesChanged = true;
-                }
-
-                if (m_IsRightToLeftProp.boolValue)
-                {
-                    // Copy source text to RTL string
-                    m_RtlText = string.Empty;
-                    string sourceText = m_TextProp.stringValue;
-
-                    // Reverse Text displayed in Text Input Box
-                    for (int i = 0; i < sourceText.Length; i++)
-                        m_RtlText += sourceText[sourceText.Length - i - 1];
-
-                    GUILayout.Label("RTL Text Input");
-
-                    EditorGUI.BeginChangeCheck();
-                    m_RtlText = EditorGUILayout.TextArea(m_RtlText, TMP_UIStyleManager.wrappingTextArea, GUILayout.Height(EditorGUI.GetPropertyHeight(m_TextProp) - EditorGUIUtility.singleLineHeight), GUILayout.ExpandWidth(true));
-
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        // Convert RTL input
-                        sourceText = string.Empty;
-
-                        // Reverse Text displayed in Text Input Box
-                        for (int i = 0; i < m_RtlText.Length; i++)
-                            sourceText += m_RtlText[m_RtlText.Length - i - 1];
-
-                        m_TextProp.stringValue = sourceText;
-                    }
                 }
 
                 // TEXT STYLE
@@ -1196,6 +1163,17 @@ namespace TMPro.EditorUtilities
             EditorGUI.BeginChangeCheck();
 
             EditorGUILayout.PropertyField(m_EmojiFallbackSupportProp, k_EmojiFallbackSupportLabel);
+            if (EditorGUI.EndChangeCheck())
+                m_HavePropertiesChanged = true;
+        }
+
+        /// <summary>
+        /// Draws the inspector control that sets <see cref="TMP_Text.textDirection"/> on the inspected text component.
+        /// </summary>
+        protected void DrawTextDirection()
+        {
+            EditorGUI.BeginChangeCheck();
+            EditorGUILayout.PropertyField(m_TextDirectionProp, k_TextDirectionLabel);
             if (EditorGUI.EndChangeCheck())
                 m_HavePropertiesChanged = true;
         }

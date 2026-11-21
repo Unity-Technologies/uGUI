@@ -187,7 +187,11 @@ namespace TMPro
         /// </summary>
         public static bool warningsDisabled
         {
-            get { return instance.m_warningsDisabled; }
+            get
+            {
+                var settings = instance;
+                return settings != null && settings.m_warningsDisabled;
+            }
         }
         [SerializeField]
         private bool m_warningsDisabled;

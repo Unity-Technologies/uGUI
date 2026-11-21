@@ -3,6 +3,9 @@
 ## [2.7.0] - 2026-07-27
 uGUI 2.7 is shipped alongside Unity 6000.7 as a [core package](https://docs.unity3d.com/Manual/pack-core.html).
 
+### Changed
+- Replaced the **Enable RTL Editor** toggle in the TextMesh Pro Text Input section with a **Text Direction** property in **Extra Settings**, exposed to scripts as `TMP_Text.textDirection`. Text objects that had **Enable RTL Editor** enabled keep displaying right-to-left. The protected `TMP_Text.m_isRightToLeft` field was replaced by `m_TextDirection`.
+
 ### Deprecated
 - Marked the PositionAsUV1, TMP_TextElement_Legacy, FaceInfo_Legacy, TMP_Glyph, TMP_Sprite, KerningPair and KerningTable classes as deprecated (with a warning).
 - Marked the GlyphValueRecord_Legacy struct as deprecated (with a warning).

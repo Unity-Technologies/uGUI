@@ -323,6 +323,14 @@ namespace TMPro
         [SerializeField]
         private bool m_ClearDynamicDataOnBuild;
 
+        internal bool ShouldGetFontFeatures()
+        {
+            if (!m_GetFontFeatures || !TMP_Settings.getFontFeaturesAtRuntime)
+                return false;
+
+            return !(TMP_Settings.useAdvancedText && m_ClearDynamicDataOnBuild);
+        }
+
         /// <summary>
         /// The width of the atlas texture(s) used by this font asset.
         /// </summary>
@@ -754,6 +762,7 @@ namespace TMPro
         private static readonly ProfilerMarker k_ReadFontAssetDefinitionMarker = new ProfilerMarker("TMP.ReadFontAssetDefinition");
         private static readonly ProfilerMarker k_AddSynthesizedCharactersMarker = new ProfilerMarker("TMP.AddSynthesizedCharacters");
         private static readonly ProfilerMarker k_TryAddGlyphMarker = new ProfilerMarker("TMP.TryAddGlyph");
+        private static readonly ProfilerMarker k_TryAddGlyphsMarker = new ProfilerMarker("TMP.TryAddGlyphs");
         private static readonly ProfilerMarker k_TryAddCharacterMarker = new ProfilerMarker("TMP.TryAddCharacter");
         private static readonly ProfilerMarker k_TryAddCharactersMarker = new ProfilerMarker("TMP.TryAddCharacters");
         private static readonly ProfilerMarker k_UpdateLigatureSubstitutionRecordsMarker = new ProfilerMarker("TMP.UpdateLigatureSubstitutionRecords");
@@ -1767,7 +1776,11 @@ namespace TMPro
             int count = k_FontAssets_AtlasTexturesUpdateQueueLookup.Count;
 
             for (int i = 0; i < count; i++)
-                k_FontAssets_AtlasTexturesUpdateQueue[i].Apply(false, false);
+            {
+                var texture = k_FontAssets_AtlasTexturesUpdateQueue[i];
+                if (texture != null)
+                    texture.Apply(false, false);
+            }
 
             if (count > 0)
             {
@@ -2478,7 +2491,7 @@ namespace TMPro
             }
 
             // Set texture upload mode to batching texture.Apply()
-            //FontEngine.SetTextureUploadMode(false);
+            FontEngine.SetTextureUploadMode(false);
 
             // Try adding glyph to local atlas texture
             if (FontEngine.TryAddGlyphToTexture(m_FontFaceHandle, glyphIndex, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, m_AtlasTextures[m_AtlasTextureIndex], out glyph))
@@ -2498,14 +2511,14 @@ namespace TMPro
                 m_GlyphIndexList.Add(glyphIndex);
                 m_GlyphIndexListNewlyAdded.Add(glyphIndex);
 
-                if (m_GetFontFeatures && TMP_Settings.getFontFeaturesAtRuntime)
+                if (ShouldGetFontFeatures())
                 {
                     UpdateGSUBFontFeaturesForNewGlyphIndex(glyphIndex);
                     RegisterFontAssetForFontFeatureUpdate(this);
                 }
 
-                //RegisterAtlasTextureForApply(m_AtlasTextures[m_AtlasTextureIndex]);
-                //FontEngine.SetTextureUploadMode(true);
+                RegisterAtlasTextureForApply(m_AtlasTextures[m_AtlasTextureIndex]);
+                FontEngine.SetTextureUploadMode(true);
 
                 #if UNITY_EDITOR
                 // Makes the changes to the font asset persistent.
@@ -2540,14 +2553,14 @@ namespace TMPro
                     m_GlyphIndexList.Add(glyphIndex);
                     m_GlyphIndexListNewlyAdded.Add(glyphIndex);
 
-                    if (m_GetFontFeatures && TMP_Settings.getFontFeaturesAtRuntime)
+                    if (ShouldGetFontFeatures())
                     {
                         UpdateGSUBFontFeaturesForNewGlyphIndex(glyphIndex);
                         RegisterFontAssetForFontFeatureUpdate(this);
                     }
 
-                    //RegisterAtlasTextureForApply(m_AtlasTextures[m_AtlasTextureIndex]);
-                    //FontEngine.SetTextureUploadMode(true);
+                    RegisterAtlasTextureForApply(m_AtlasTextures[m_AtlasTextureIndex]);
+                    FontEngine.SetTextureUploadMode(true);
 
                     #if UNITY_EDITOR
                     // Make changes to font asset persistent.
@@ -2559,9 +2572,87 @@ namespace TMPro
                 }
             }
 
+            FontEngine.SetTextureUploadMode(true);
+
             k_TryAddGlyphMarker.End();
 
             return false;
+        }
+
+        internal bool TryAddGlyphs(List<uint> glyphIndexes)
+        {
+            if (glyphIndexes.Count == 0)
+                return true;
+
+            k_TryAddGlyphsMarker.Begin();
+
+            if (m_AtlasPopulationMode == AtlasPopulationMode.Static || LoadFontFace() != FontEngineError.Success)
+            {
+                k_TryAddGlyphsMarker.End();
+                return false;
+            }
+
+            if (m_AtlasTextures[m_AtlasTextureIndex].isReadable == false)
+            {
+                Debug.LogWarning("Unable to add the requested glyphs to font asset [" + this.name + "]'s atlas texture. Please make the texture [" + m_AtlasTextures[m_AtlasTextureIndex].name + "] readable.", m_AtlasTextures[m_AtlasTextureIndex]);
+
+                k_TryAddGlyphsMarker.End();
+                return false;
+            }
+
+            if (m_AtlasTextures[m_AtlasTextureIndex].width <= 1 || m_AtlasTextures[m_AtlasTextureIndex].height <= 1)
+            {
+                m_AtlasTextures[m_AtlasTextureIndex].Reinitialize(m_AtlasWidth, m_AtlasHeight);
+                FontEngine.ResetAtlasTexture(m_AtlasTextures[m_AtlasTextureIndex]);
+            }
+
+            bool populateFontFeatures = ShouldGetFontFeatures();
+            bool anyGlyphAdded = false;
+            bool allGlyphsAdded;
+
+            while (true)
+            {
+                allGlyphsAdded = FontEngine.TryAddGlyphsToTexture(m_FontFaceHandle, glyphIndexes, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, m_AtlasTextures[m_AtlasTextureIndex], out Glyph[] glyphs);
+
+                for (int i = 0; i < glyphs.Length && glyphs[i] != null; i++)
+                {
+                    Glyph glyph = glyphs[i];
+                    uint glyphIndex = glyph.index;
+
+                    glyph.atlasIndex = m_AtlasTextureIndex;
+
+                    m_GlyphTable.Add(glyph);
+                    m_GlyphLookupDictionary.Add(glyphIndex, glyph);
+
+                    m_GlyphIndexList.Add(glyphIndex);
+                    m_GlyphIndexListNewlyAdded.Add(glyphIndex);
+
+                    if (populateFontFeatures)
+                        UpdateGSUBFontFeaturesForNewGlyphIndex(glyphIndex);
+
+                    anyGlyphAdded = true;
+                }
+
+                if (allGlyphsAdded || !m_IsMultiAtlasTexturesEnabled || m_UsedGlyphRects.Count == 0)
+                    break;
+
+                glyphIndexes.RemoveAll(m_GlyphLookupDictionary.ContainsKey);
+                SetupNewAtlasTexture();
+            }
+
+            if (anyGlyphAdded)
+            {
+                if (populateFontFeatures)
+                    RegisterFontAssetForFontFeatureUpdate(this);
+
+                #if UNITY_EDITOR
+                RegisterResourceForUpdate?.Invoke(this);
+                #endif
+            }
+
+            k_TryAddGlyphsMarker.End();
+
+            return allGlyphsAdded;
         }
 
         /// <summary>
@@ -2685,7 +2776,7 @@ namespace TMPro
             }
 
             // Set texture upload mode to batching texture.Apply()
-            //FontEngine.SetTextureUploadMode(false);
+            FontEngine.SetTextureUploadMode(false);
 
             // Try adding glyph to local atlas texture
             if (FontEngine.TryAddGlyphToTexture(m_FontFaceHandle, glyphIndex, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, m_AtlasTextures[m_AtlasTextureIndex], out glyph))
@@ -2705,14 +2796,14 @@ namespace TMPro
                 m_GlyphIndexList.Add(glyphIndex);
                 m_GlyphIndexListNewlyAdded.Add(glyphIndex);
 
-                if (m_GetFontFeatures && TMP_Settings.getFontFeaturesAtRuntime)
+                if (ShouldGetFontFeatures())
                 {
                     UpdateGSUBFontFeaturesForNewGlyphIndex(glyphIndex);
                     RegisterFontAssetForFontFeatureUpdate(this);
                 }
 
-                //RegisterAtlasTextureForApply(m_AtlasTextures[m_AtlasTextureIndex]);
-                //FontEngine.SetTextureUploadMode(true);
+                RegisterAtlasTextureForApply(m_AtlasTextures[m_AtlasTextureIndex]);
+                FontEngine.SetTextureUploadMode(true);
 
                 #if UNITY_EDITOR
                 // Makes the changes to the font asset persistent.
@@ -2747,14 +2838,14 @@ namespace TMPro
                     m_GlyphIndexList.Add(glyphIndex);
                     m_GlyphIndexListNewlyAdded.Add(glyphIndex);
 
-                    if (m_GetFontFeatures && TMP_Settings.getFontFeaturesAtRuntime)
+                    if (ShouldGetFontFeatures())
                     {
                         UpdateGSUBFontFeaturesForNewGlyphIndex(glyphIndex);
                         RegisterFontAssetForFontFeatureUpdate(this);
                     }
 
-                    //RegisterAtlasTextureForApply(m_AtlasTextures[m_AtlasTextureIndex]);
-                    //FontEngine.SetTextureUploadMode(true);
+                    RegisterAtlasTextureForApply(m_AtlasTextures[m_AtlasTextureIndex]);
+                    FontEngine.SetTextureUploadMode(true);
 
                     #if UNITY_EDITOR
                     // Make changes to font asset persistent.
@@ -2765,6 +2856,8 @@ namespace TMPro
                     return true;
                 }
             }
+
+            FontEngine.SetTextureUploadMode(true);
 
             k_TryAddCharacterMarker.End();
 
@@ -2855,7 +2948,7 @@ namespace TMPro
                 m_GlyphIndexList.Add(glyphIndex);
                 m_GlyphIndexListNewlyAdded.Add(glyphIndex);
 
-                if (m_GetFontFeatures && TMP_Settings.getFontFeaturesAtRuntime)
+                if (ShouldGetFontFeatures())
                 {
                     UpdateGSUBFontFeaturesForNewGlyphIndex(glyphIndex);
                     RegisterFontAssetForFontFeatureUpdate(this);
@@ -3481,7 +3574,7 @@ namespace TMPro
 
             // Add existing glyphs and characters back in the font asset (if any)
             if (unicodeCharacters.Length > 0)
-                TryAddCharacters(unicodeCharacters, m_GetFontFeatures && TMP_Settings.getFontFeaturesAtRuntime);
+                TryAddCharacters(unicodeCharacters, ShouldGetFontFeatures());
 
             k_UpdateFontAssetDataMarker.End();
         }

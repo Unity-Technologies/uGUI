@@ -3339,7 +3339,7 @@ namespace TMPro
 
                 // Initial Implementation for RTL support.
                 #region Handle Right-to-Left
-                if (m_isRightToLeft)
+                if (isRightToLeftText)
                 {
                     m_xAdvance -= currentGlyphMetrics.horizontalAdvance * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale * currentElementScale;
 
@@ -3592,12 +3592,12 @@ namespace TMPro
 
                     // Calculate the line breaking width of the text.
                     float textWidth;
-                    if (m_monoSpacing != 0 && !m_isRightToLeft && charCode != k_TabCharacter)
+                    if (m_monoSpacing != 0 && !isRightToLeftText && charCode != k_TabCharacter)
                     {
                         textWidth = Mathf.Abs(m_xAdvance - monoAdvance) + GetMonoCellWidth(charCode) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
                     }
                     else
-                        textWidth = Mathf.Abs(m_xAdvance) + (!m_isRightToLeft ? currentGlyphMetrics.horizontalAdvance : 0) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale * (charCode == 0xAD ? currentElementUnmodifiedScale : currentElementScale);
+                        textWidth = Mathf.Abs(m_xAdvance) + (!isRightToLeftText ? currentGlyphMetrics.horizontalAdvance : 0) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale * (charCode == 0xAD ? currentElementUnmodifiedScale : currentElementScale);
                     float textHeight = m_maxTextAscender - (m_maxLineDescender - m_lineOffset) + (m_lineOffset > 0 && m_IsDrivenLineSpacing == false ? m_maxLineAscender - m_startOfLineAscender : 0);
 
                     int testedCharacterCount = m_characterCount;
@@ -4351,7 +4351,7 @@ namespace TMPro
                     }
 
                     float textHeight = m_maxTextAscender - (m_maxLineDescender - m_lineOffset) + (m_lineOffset > 0 && m_IsDrivenLineSpacing == false ? m_maxLineAscender - m_startOfLineAscender : 0);
-                    float textWidth = Mathf.Abs(m_xAdvance) + (!m_isRightToLeft ? m_Ellipsis.character.m_Glyph.metrics.horizontalAdvance : 0) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale * scale;
+                    float textWidth = Mathf.Abs(m_xAdvance) + (!isRightToLeftText ? m_Ellipsis.character.m_Glyph.metrics.horizontalAdvance : 0) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale * scale;
                     float widthOfTextAreaForEllipsis = m_width != -1 ? Mathf.Min(marginWidth + 0.0001f - marginLeft - marginRight, m_width) : marginWidth + 0.0001f - marginLeft - marginRight;
 
                     if (textWidth < widthOfTextAreaForEllipsis * (isJustifiedOrFlush ? 1.05f : 1.0f) && textHeight < marginHeight + 0.0001f)
@@ -4380,7 +4380,7 @@ namespace TMPro
                 {
                     float tabSize = m_currentFontAsset.m_FaceInfo.tabWidth * m_currentFontAsset.tabSize * currentElementScale;
                     // Adjust horizontal tab depending on RTL
-                    if (m_isRightToLeft)
+                    if (isRightToLeftText)
                     {
                         float tabs = Mathf.Floor(m_xAdvance / tabSize) * tabSize;
                         m_xAdvance = tabs < m_xAdvance ? tabs : m_xAdvance - tabSize;
@@ -4404,7 +4404,7 @@ namespace TMPro
                     if (isWhiteSpace || charCode == 0x200B)
                         m_xAdvance += m_wordSpacing * currentEmScale;
                 }
-                else if (m_isRightToLeft)
+                else if (isRightToLeftText)
                 {
                     m_xAdvance -= (glyphAdjustments.xAdvance * currentElementScale + (m_currentFontAsset.normalSpacingOffset + characterSpacingAdjustment + boldSpacingAdjustment) * currentEmScale + m_cSpacing) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
 
@@ -4520,9 +4520,9 @@ namespace TMPro
 
                     float maxAdvanceOffset = ((m_currentFontAsset.normalSpacingOffset + characterSpacingAdjustment + boldSpacingAdjustment) * currentEmScale + m_cSpacing) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
                     if (m_textInfo.characterInfo[m_lastVisibleCharacterOfLine].isVisible)
-                        m_textInfo.lineInfo[m_lineNumber].maxAdvance = m_textInfo.characterInfo[m_lastVisibleCharacterOfLine].xAdvance + (m_isRightToLeft ? maxAdvanceOffset : - maxAdvanceOffset);
+                        m_textInfo.lineInfo[m_lineNumber].maxAdvance = m_textInfo.characterInfo[m_lastVisibleCharacterOfLine].xAdvance + (isRightToLeftText ? maxAdvanceOffset : - maxAdvanceOffset);
                     else
-                        m_textInfo.lineInfo[m_lineNumber].maxAdvance = m_textInfo.characterInfo[m_lastCharacterOfLine].xAdvance + (m_isRightToLeft ? maxAdvanceOffset : - maxAdvanceOffset);
+                        m_textInfo.lineInfo[m_lineNumber].maxAdvance = m_textInfo.characterInfo[m_lastCharacterOfLine].xAdvance + (isRightToLeftText ? maxAdvanceOffset : - maxAdvanceOffset);
 
                     m_textInfo.lineInfo[m_lineNumber].baseline = 0 - m_lineOffset;
                     m_textInfo.lineInfo[m_lineNumber].ascender = lineAscender;
@@ -4847,7 +4847,7 @@ namespace TMPro
                 switch (lineAlignment)
                 {
                     case HorizontalAlignmentOptions.Left:
-                        if (!m_isRightToLeft)
+                        if (!isRightToLeftText)
                             justificationOffset = new Vector3(0 + lineInfo.marginLeft, 0, 0);
                         else
                             justificationOffset = new Vector3(0 - lineInfo.maxAdvance, 0, 0);
@@ -4862,7 +4862,7 @@ namespace TMPro
                         break;
 
                     case HorizontalAlignmentOptions.Right:
-                        if (!m_isRightToLeft)
+                        if (!isRightToLeftText)
                             justificationOffset = new Vector3(lineInfo.marginLeft + lineInfo.width - lineInfo.maxAdvance, 0, 0);
                         else
                             justificationOffset = new Vector3(lineInfo.marginLeft + lineInfo.width, 0, 0);
@@ -4884,7 +4884,7 @@ namespace TMPro
                             // First character of each line.
                             if (currentLine != lastLine || i == 0 || i == m_firstVisibleCharacter)
                             {
-                                if (!m_isRightToLeft)
+                                if (!isRightToLeftText)
                                     justificationOffset = new Vector3(lineInfo.marginLeft, 0, 0);
                                 else
                                     justificationOffset = new Vector3(lineInfo.marginLeft + lineInfo.width, 0, 0);
@@ -4896,7 +4896,7 @@ namespace TMPro
                             }
                             else
                             {
-                                float gap = !m_isRightToLeft ? lineInfo.width - lineInfo.maxAdvance : lineInfo.width + lineInfo.maxAdvance;
+                                float gap = !isRightToLeftText ? lineInfo.width - lineInfo.maxAdvance : lineInfo.width + lineInfo.maxAdvance;
                                 int visibleCount = lineInfo.visibleCharacterCount - 1 + lineInfo.controlCharacterCount;
                                 int spaces = lineInfo.visibleSpaceCount - lineInfo.controlCharacterCount;
 
@@ -4908,14 +4908,14 @@ namespace TMPro
 
                                 if (unicode != 0xA0 && (unicode == 9 || char.IsSeparator(unicode)))
                                 {
-                                    if (!m_isRightToLeft)
+                                    if (!isRightToLeftText)
                                         justificationOffset += new Vector3(gap * (1 - ratio) / spaces, 0, 0);
                                     else
                                         justificationOffset -= new Vector3(gap * (1 - ratio) / spaces, 0, 0);
                                 }
                                 else
                                 {
-                                    if (!m_isRightToLeft)
+                                    if (!isRightToLeftText)
                                         justificationOffset += new Vector3(gap * ratio / visibleCount, 0, 0);
                                     else
                                         justificationOffset -= new Vector3(gap * ratio / visibleCount, 0, 0);
@@ -4924,7 +4924,7 @@ namespace TMPro
                         }
                         else
                         {
-                            if (!m_isRightToLeft)
+                            if (!isRightToLeftText)
                                 justificationOffset = new Vector3(lineInfo.marginLeft, 0, 0); // Keep last line left justified.
                             else
                                 justificationOffset = new Vector3(lineInfo.marginLeft + lineInfo.width, 0, 0); // Keep last line right justified.

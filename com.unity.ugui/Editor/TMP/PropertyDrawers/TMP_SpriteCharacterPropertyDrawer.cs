@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.TextCore;
 using UnityEditor;
-using System.Collections.Generic;
 
 
 namespace TMPro.EditorUtilities
@@ -11,7 +10,6 @@ namespace TMPro.EditorUtilities
     public class TMP_SpriteCharacterPropertyDrawer : PropertyDrawer
     {
         int m_GlyphSelectedForEditing = -1;
-        private Dictionary<uint, GlyphProxy> m_GlyphLookupDictionary;
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -42,7 +40,7 @@ namespace TMPro.EditorUtilities
                 EditorGUI.LabelField(new Rect(rect.x, rect.y + 18, 120, 18), new GUIContent("Glyph ID: <color=#FFFF80>" + prop_SpriteGlyphIndex.intValue + "</color>"), style);
 
                 // Draw Sprite Glyph (if exists)
-                DrawSpriteGlyph((uint)prop_SpriteGlyphIndex.intValue, position, property);
+                DrawSpriteGlyph(position, property);
 
                 EditorGUI.LabelField(new Rect(rect.x, rect.y + 36, 80, 18), new GUIContent("Scale: <color=#FFFF80>" + prop_SpriteScale.floatValue + "</color>"), style);
             }
@@ -96,7 +94,7 @@ namespace TMPro.EditorUtilities
                 }
 
                 // Draw Sprite Glyph (if exists)
-                DrawSpriteGlyph((uint)prop_SpriteGlyphIndex.intValue, position, property);
+                DrawSpriteGlyph(position, property);
 
                 int glyphIndex = prop_SpriteGlyphIndex.intValue;
 
@@ -121,15 +119,10 @@ namespace TMPro.EditorUtilities
                 {
                     if (spriteAsset != null)
                     {
-                        // Lookup glyph and draw glyph (if available)
-                        int elementIndex = spriteAsset.spriteGlyphTable.FindIndex(item => item.index == glyphIndex);
+                        SerializedProperty prop_SpriteGlyph = FindSpriteGlyphProperty(property.serializedObject, (uint)glyphIndex);
 
-                        if (elementIndex != -1)
+                        if (prop_SpriteGlyph != null)
                         {
-                            // Get a reference to the Sprite Glyph Table
-                            SerializedProperty prop_SpriteGlyphTable = property.serializedObject.FindProperty("m_GlyphTable");
-
-                            SerializedProperty prop_SpriteGlyph = prop_SpriteGlyphTable.GetArrayElementAtIndex(elementIndex);
                             SerializedProperty prop_GlyphMetrics = prop_SpriteGlyph.FindPropertyRelative("m_Metrics");
                             SerializedProperty prop_GlyphRect = prop_SpriteGlyph.FindPropertyRelative("m_GlyphRect");
 
@@ -164,24 +157,52 @@ namespace TMPro.EditorUtilities
         }
 
 
-        void DrawSpriteGlyph(uint glyphIndex,  Rect position, SerializedProperty property)
+        internal static SerializedProperty FindSpriteGlyphProperty(SerializedObject serializedObject, uint glyphIndex)
         {
-            if (m_GlyphLookupDictionary == null)
-                m_GlyphLookupDictionary = TMP_PropertyDrawerUtilities.GetGlyphProxyLookupDictionary(property.serializedObject);
+            SerializedProperty prop_SpriteGlyphTable = serializedObject.FindProperty("m_GlyphTable");
+            int glyphCount = prop_SpriteGlyphTable.arraySize;
 
-            // Try getting a reference to the glyph for the given glyph index.
-            if (!m_GlyphLookupDictionary.TryGetValue(glyphIndex, out GlyphProxy glyph))
+            // The live glyph table can diverge from the serialized one, so its index is only a hint.
+            TMP_SpriteAsset spriteAsset = serializedObject.targetObject as TMP_SpriteAsset;
+            int hintIndex = spriteAsset != null ? spriteAsset.spriteGlyphTable.FindIndex(item => item.index == glyphIndex) : -1;
+            if (hintIndex >= 0 && hintIndex < glyphCount)
+            {
+                SerializedProperty prop_SpriteGlyph = prop_SpriteGlyphTable.GetArrayElementAtIndex(hintIndex);
+                if ((uint)prop_SpriteGlyph.FindPropertyRelative("m_Index").intValue == glyphIndex)
+                    return prop_SpriteGlyph;
+            }
+
+            for (int i = 0; i < glyphCount; i++)
+            {
+                SerializedProperty prop_SpriteGlyph = prop_SpriteGlyphTable.GetArrayElementAtIndex(i);
+                if ((uint)prop_SpriteGlyph.FindPropertyRelative("m_Index").intValue == glyphIndex)
+                    return prop_SpriteGlyph;
+            }
+
+            return null;
+        }
+
+        void DrawSpriteGlyph(Rect position, SerializedProperty property)
+        {
+            TMP_SpriteAsset spriteAsset = property.serializedObject.targetObject as TMP_SpriteAsset;
+
+            if (spriteAsset == null)
                 return;
 
-            GlyphRect glyphRect = glyph.glyphRect;
+            SerializedProperty prop_SpriteGlyph = FindSpriteGlyphProperty(property.serializedObject, (uint)property.FindPropertyRelative("m_GlyphIndex").intValue);
 
-            // Get a reference to the sprite texture
-            Texture tex = property.serializedObject.FindProperty("spriteSheet").objectReferenceValue as Texture;
+            if (prop_SpriteGlyph == null)
+                return;
+
+            Texture tex = spriteAsset.spriteSheet;
+
             if (tex == null)
             {
-                Debug.LogWarning("Please assign a valid Sprite Atlas texture to the [" + property.serializedObject.targetObject.name + "] Sprite Asset.", property.serializedObject.targetObject);
+                Debug.LogWarning("Please assign a valid Sprite Atlas texture to the [" + spriteAsset.name + "] Sprite Asset.", spriteAsset);
                 return;
             }
+
+            GlyphRect glyphRect = TMP_PropertyDrawerUtilities.GetGlyphRectFromGlyphSerializedProperty(prop_SpriteGlyph);
 
             Vector2 spriteTexPosition = new Vector2(position.x, position.y);
             Vector2 spriteSize = new Vector2(48, 48);
@@ -207,6 +228,5 @@ namespace TMPro.EditorUtilities
             Rect texCoords = new Rect(x / tex.width, y / tex.height, spriteWidth / tex.width, spriteHeight / tex.height);
             GUI.DrawTextureWithTexCoords(new Rect(spriteTexPosition.x + alignmentOffset.x, spriteTexPosition.y + alignmentOffset.y, spriteSize.x, spriteSize.y), tex, texCoords, true);
         }
-
     }
 }
