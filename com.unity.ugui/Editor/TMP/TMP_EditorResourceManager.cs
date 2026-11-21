@@ -248,10 +248,28 @@ namespace TMPro
             if (!EditorUtility.IsPersistent(obj))
                 return;
 
+            if (IsInImmutablePackage(obj))
+            {
+                if (tex != null)
+                    tex.hideFlags = HideFlags.DontSaveInEditor | HideFlags.DontUnloadUnusedAsset;
+
+                return;
+            }
+
             if (tex != null)
                 AssetDatabase.AddObjectToAsset(tex, obj);
 
             RegisterResourceForReimport(obj);
+        }
+
+        internal static bool IsInImmutablePackage(Object obj)
+        {
+            return IsInImmutablePackage(AssetDatabase.GetAssetPath(obj));
+        }
+
+        internal static bool IsInImmutablePackage(string assetPath)
+        {
+            return !string.IsNullOrEmpty(assetPath) && AssetDatabase.TryGetAssetFolderInfo(assetPath, out _, out bool immutable) && immutable;
         }
 
         /// <summary>

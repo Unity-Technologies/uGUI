@@ -1,4 +1,4 @@
-Shader "TextMeshPro/Distance Field SSD - SpaceWarp" {
+Shader "TextMeshPro/Default/Distance Field SSD - SpaceWarp" {
 
 Properties {
     _FaceTex            ("Face Texture", 2D) = "white" {}
@@ -161,8 +161,7 @@ SubShader {
 
         float4 _FaceTex_ST;
         float4 _OutlineTex_ST;
-        float _UIMaskSoftnessX;
-        float _UIMaskSoftnessY;
+        float4 _UIMaskSoftness;
         int _UIVertexColorAlwaysGammaSpace;
 
         float4 SRGBToLinear(float4 rgba)
@@ -298,9 +297,12 @@ SubShader {
             #endif
 
             #if UNITY_UI_CLIP_RECT
-            half2 maskSoftness = half2(max(_UIMaskSoftnessX, _MaskSoftnessX), max(_UIMaskSoftnessY, _MaskSoftnessY));
-            float2 maskZW = 0.25 / (0.25 * maskSoftness + 1 / scale);
-            half2 m = saturate((_ClipRect.zw - _ClipRect.xy - abs(input.mask.xy)) * maskZW);
+            // Each edge fades over its own distance and softness: left, bottom, right, top.
+            half4 maskSoftness = max(_UIMaskSoftness, half4(_MaskSoftnessX, _MaskSoftnessY, _MaskSoftnessX, _MaskSoftnessY));
+            float4 maskZW = 0.25 / (0.25 * maskSoftness + 1 / scale);
+            float2 clipSize = _ClipRect.zw - _ClipRect.xy;
+            half4 edgeMask = saturate(float4(clipSize + input.mask.xy, clipSize - input.mask.xy) * maskZW);
+            half2 m = min(edgeMask.xy, edgeMask.zw);
             faceColor *= m.x * m.y;
             #endif
 
@@ -370,8 +372,7 @@ SubShader {
             #endif
         };
 
-        float _UIMaskSoftnessX;
-        float _UIMaskSoftnessY;
+        float4 _UIMaskSoftness;
         int _UIVertexColorAlwaysGammaSpace;
 
         pixel_t VertShaderMotion(vertex_t input)
@@ -464,9 +465,12 @@ SubShader {
             #endif
 
             #if UNITY_UI_CLIP_RECT
-            half2 maskSoftness = half2(max(_UIMaskSoftnessX, _MaskSoftnessX), max(_UIMaskSoftnessY, _MaskSoftnessY));
-            float2 maskZW = 0.25 / (0.25 * maskSoftness + 1 / scale);
-            half2 m = saturate((_ClipRect.zw - _ClipRect.xy - abs(input.mask.xy)) * maskZW);
+            // Each edge fades over its own distance and softness: left, bottom, right, top.
+            half4 maskSoftness = max(_UIMaskSoftness, half4(_MaskSoftnessX, _MaskSoftnessY, _MaskSoftnessX, _MaskSoftnessY));
+            float4 maskZW = 0.25 / (0.25 * maskSoftness + 1 / scale);
+            float2 clipSize = _ClipRect.zw - _ClipRect.xy;
+            half4 edgeMask = saturate(float4(clipSize + input.mask.xy, clipSize - input.mask.xy) * maskZW);
+            half2 m = min(edgeMask.xy, edgeMask.zw);
             faceColor *= m.x * m.y;
             #endif
 
@@ -486,6 +490,6 @@ SubShader {
     }
 }
 
-Fallback "TextMeshPro/Mobile/Distance Field"
+Fallback "TextMeshPro/Default/Mobile/Distance Field"
 CustomEditor "TMPro.EditorUtilities.TMP_SDFShaderGUI"
 }

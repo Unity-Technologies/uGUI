@@ -15,14 +15,13 @@
   ],
   "description": "uGUI (Unity UI) is a set of tools for developing user interfaces for games and applications. It is a GameObject-based UI system that uses Components and the Game View to arrange, position, and style user interfaces. ​ You cannot use Unity UI to create or change user interfaces in the Unity Editor.",
   "dependencies": {
-    "com.unity.modules.ui": "1.0.0",
-    "com.unity.modules.imgui": "1.0.0"
+    "com.unity.modules.ui": "1.0.0"
   },
   "samples": [
     {
-      "displayName": "Examples & Extras",
-      "description": "Additional resources and example scenes that make discovering and learning TextMesh Pro's features easier. If your project already contains the TMP Examples & Extras imported by an earlier Unity version, this sample adds a second copy; the existing one keeps working and can be removed.",
-      "path": "Samples~/Examples & Extras"
+      "displayName": "TextMesh Pro Examples & Extras",
+      "description": "Example scenes and extra resources that help you learn TextMesh Pro's features.",
+      "path": "Samples~/TextMesh Pro Examples & Extras"
     }
   ]
 }

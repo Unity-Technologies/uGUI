@@ -1,4 +1,4 @@
-Shader "TextMeshPro/Sprite"
+Shader "TextMeshPro/Default/Sprite"
 {
 	Properties
 	{
@@ -82,8 +82,7 @@ Shader "TextMeshPro/Sprite"
 			fixed4 _TextureSampleAdd;
 			float4 _ClipRect;
             float4 _MainTex_ST;
-		    float _UIMaskSoftnessX;
-            float _UIMaskSoftnessY;
+		    float4 _UIMaskSoftness;
             int _UIVertexColorAlwaysGammaSpace;
 
             v2f vert(appdata_t v)
@@ -98,9 +97,8 @@ Shader "TextMeshPro/Sprite"
             	float2 pixelSize = vPosition.w;
                 pixelSize /= abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
 
-				float4 clampedRect = clamp(_ClipRect, -2e10, 2e10);
                 OUT.texcoord = TRANSFORM_TEX(v.texcoord, _MainTex);
-                OUT.mask = half4(v.vertex.xy * 2 - clampedRect.xy - clampedRect.zw, 0.25 / (0.25 * half2(_UIMaskSoftnessX, _UIMaskSoftnessY) + abs(pixelSize.xy)));
+                OUT.mask = float4(v.vertex.xy, abs(pixelSize.xy));
 
                 if (_UIVertexColorAlwaysGammaSpace && !IsGammaSpace())
                 {
@@ -115,8 +113,7 @@ Shader "TextMeshPro/Sprite"
 				half4 color = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
 
                 #if UNITY_UI_CLIP_RECT
-				half2 m = saturate((_ClipRect.zw - _ClipRect.xy - abs(IN.mask.xy)) * IN.mask.zw);
-				color *= m.x * m.y;
+				color *= UnityGet2DSoftClippingTMP(IN.mask, _ClipRect, _UIMaskSoftness);
 				#endif
 
 				#ifdef UNITY_UI_ALPHACLIP

@@ -432,16 +432,6 @@ namespace TMPro
         [SerializeField]
         private TMP_FontWeightPair[] m_FontWeightTable = new TMP_FontWeightPair[10];
 
-#pragma warning disable 0414
-        // FONT WEIGHTS
-        /// <summary>
-        /// Font weights used by font asset prior to version 1.1.0.
-        /// This is legacy and will be removed at some point in the future.
-        /// </summary>
-        [SerializeField]
-        private TMP_FontWeightPair[] fontWeights = null;
-#pragma warning restore 0414
-
         //private int[] m_characterSet; // Array containing all the characters in this font asset.
         /// <summary>
         /// Defines the dilation of the text when using regular style.
@@ -1986,7 +1976,7 @@ namespace TMPro
             }
 
             Glyph[] glyphs;
-            bool allGlyphsAddedToTexture = FontEngine.TryAddGlyphsToTexture(m_FontFaceHandle, m_GlyphsToAdd, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, m_AtlasTextures[m_AtlasTextureIndex], out glyphs);
+            bool allGlyphsAddedToTexture = FontEngine.TryAddGlyphsToTexture(m_FontFaceHandle, m_GlyphsToAdd, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, false, m_AtlasTextures[m_AtlasTextureIndex], out glyphs);
 
             // Add new glyphs to relevant font asset data structure
             for (int i = 0; i < glyphs.Length && glyphs[i] != null; i++)
@@ -2211,7 +2201,7 @@ namespace TMPro
 
             Glyph[] glyphs;
 
-            bool allGlyphsAddedToTexture = FontEngine.TryAddGlyphsToTexture(m_FontFaceHandle, m_GlyphsToAdd, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, m_AtlasTextures[m_AtlasTextureIndex], out glyphs);
+            bool allGlyphsAddedToTexture = FontEngine.TryAddGlyphsToTexture(m_FontFaceHandle, m_GlyphsToAdd, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, false, m_AtlasTextures[m_AtlasTextureIndex], out glyphs);
 
             for (int i = 0; i < glyphs.Length && glyphs[i] != null; i++)
             {
@@ -2494,7 +2484,7 @@ namespace TMPro
             FontEngine.SetTextureUploadMode(false);
 
             // Try adding glyph to local atlas texture
-            if (FontEngine.TryAddGlyphToTexture(m_FontFaceHandle, glyphIndex, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, m_AtlasTextures[m_AtlasTextureIndex], out glyph))
+            if (FontEngine.TryAddGlyphToTexture(m_FontFaceHandle, glyphIndex, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, false, m_AtlasTextures[m_AtlasTextureIndex], out glyph))
             {
                 // Update glyph atlas index
                 glyph.atlasIndex = m_AtlasTextureIndex;
@@ -2536,7 +2526,7 @@ namespace TMPro
                 SetupNewAtlasTexture();
 
                 // Try adding glyph to newly created atlas texture
-                if (FontEngine.TryAddGlyphToTexture(m_FontFaceHandle, glyphIndex, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, m_AtlasTextures[m_AtlasTextureIndex], out glyph))
+                if (FontEngine.TryAddGlyphToTexture(m_FontFaceHandle, glyphIndex, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, false, m_AtlasTextures[m_AtlasTextureIndex], out glyph))
                 {
                     // Update glyph atlas index
                     glyph.atlasIndex = m_AtlasTextureIndex;
@@ -2612,7 +2602,7 @@ namespace TMPro
 
             while (true)
             {
-                allGlyphsAdded = FontEngine.TryAddGlyphsToTexture(m_FontFaceHandle, glyphIndexes, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, m_AtlasTextures[m_AtlasTextureIndex], out Glyph[] glyphs);
+                allGlyphsAdded = FontEngine.TryAddGlyphsToTexture(m_FontFaceHandle, glyphIndexes, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, false, m_AtlasTextures[m_AtlasTextureIndex], out Glyph[] glyphs);
 
                 for (int i = 0; i < glyphs.Length && glyphs[i] != null; i++)
                 {
@@ -2779,7 +2769,7 @@ namespace TMPro
             FontEngine.SetTextureUploadMode(false);
 
             // Try adding glyph to local atlas texture
-            if (FontEngine.TryAddGlyphToTexture(m_FontFaceHandle, glyphIndex, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, m_AtlasTextures[m_AtlasTextureIndex], out glyph))
+            if (FontEngine.TryAddGlyphToTexture(m_FontFaceHandle, glyphIndex, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, false, m_AtlasTextures[m_AtlasTextureIndex], out glyph))
             {
                 // Update glyph atlas index
                 glyph.atlasIndex = m_AtlasTextureIndex;
@@ -2821,7 +2811,7 @@ namespace TMPro
                 SetupNewAtlasTexture();
 
                 // Try adding glyph to newly created atlas texture
-                if (FontEngine.TryAddGlyphToTexture(m_FontFaceHandle, glyphIndex, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, m_AtlasTextures[m_AtlasTextureIndex], out glyph))
+                if (FontEngine.TryAddGlyphToTexture(m_FontFaceHandle, glyphIndex, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, false, m_AtlasTextures[m_AtlasTextureIndex], out glyph))
                 {
                     // Update glyph atlas index
                     glyph.atlasIndex = m_AtlasTextureIndex;
@@ -3036,7 +3026,7 @@ namespace TMPro
             Glyph[] glyphs;
 
             // Try adding remaining glyphs in the newly created atlas texture
-            bool allGlyphsAddedToTexture = FontEngine.TryAddGlyphsToTexture(m_FontFaceHandle, m_GlyphsToAdd, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, m_AtlasTextures[m_AtlasTextureIndex], out glyphs);
+            bool allGlyphsAddedToTexture = FontEngine.TryAddGlyphsToTexture(m_FontFaceHandle, m_GlyphsToAdd, m_AtlasPadding, GlyphPackingMode.BestShortSideFit, m_FreeGlyphRects, m_UsedGlyphRects, m_AtlasRenderMode, false, m_AtlasTextures[m_AtlasTextureIndex], out glyphs);
 
             // Add new glyphs to relevant data structures.
             for (int i = 0; i < glyphs.Length && glyphs[i] != null; i++)
@@ -3860,16 +3850,6 @@ namespace TMPro
             }
 
             //m_fontInfo = null;
-
-            // Convert font weight table
-            if (fontWeights != null && fontWeights.Length > 0)
-            {
-                m_FontWeightTable[4] = fontWeights[4];
-                m_FontWeightTable[7] = fontWeights[7];
-
-                // Clear old fontWeight
-                //fontWeights = null;
-            }
 
             // Convert font fallbacks
             if (fallbackFontAssets != null && fallbackFontAssets.Count > 0)

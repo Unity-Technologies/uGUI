@@ -218,6 +218,8 @@ namespace TMPro
         const uint k_EmptyNameHash = 2166136261u;
 
         const char k_SoftHyphen = (char)0xAD;
+        const char k_ZeroWidthSpace = (char)0x200B;
+        const char k_EndOfText = (char)0x03;
 
         static bool ResolveTagSprite(EntityId textSettingsId, uint assetNameHash, uint spriteNameHash, int spriteIndexHint,
             out int spriteIndex, out EntityId spriteAssetId, out GlyphMetrics metrics, out float scale)
@@ -490,6 +492,7 @@ namespace TMPro
             bool richText = textComponent.richText;
             m_NativeSettings.color = textComponent.color;
             m_NativeSettings.richTextEnabled = richText;
+            m_NativeSettings.emojiFallbackSupport = textComponent.emojiFallbackSupport;
             m_NativeSettings.languageDirection = textComponent.isRightToLeftText ? LanguageDirection.RTL : LanguageDirection.LTR;
 
             float characterSpacing = textComponent.characterSpacing;
@@ -1233,7 +1236,7 @@ namespace TMPro
                 int slot = elementSlot[meshIndex][elementIndex];
                 ref var element = ref meshInfos[meshIndex].textElementInfos[elementIndex];
 
-                bool isInvisibleCharacter = char.IsWhiteSpace(characterInfo.character) || characterInfo.character == k_SoftHyphen;
+                bool isInvisibleCharacter = char.IsWhiteSpace(characterInfo.character) || characterInfo.character == k_SoftHyphen || characterInfo.character == k_ZeroWidthSpace || characterInfo.character == k_EndOfText;
                 bool isHiddenByVisibilityLimit = renderInfo.isHiddenByVisibilityLimit;
                 characterInfo.isVisible = !isInvisibleCharacter && !isHiddenByVisibilityLimit;
                 characterInfo.materialReferenceIndex = groupIndex;

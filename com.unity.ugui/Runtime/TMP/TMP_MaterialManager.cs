@@ -423,8 +423,15 @@ namespace TMPro
         /// <returns>A material instance with source properties and target material's main texture.</returns>
         public static Material GetFallbackMaterial (Material sourceMaterial, Material targetMaterial)
         {
-            var sourceID = sourceMaterial.GetEntityId();
+            if (sourceMaterial == null || targetMaterial == null || !targetMaterial.HasProperty(ShaderUtilities.ID_MainTex))
+                return targetMaterial;
+
+            // Runtime materials report no texture when their shader is unsupported, e.g. with -nographics
             var tex = targetMaterial.GetTexture(ShaderUtilities.ID_MainTex);
+            if (tex == null)
+                return targetMaterial;
+
+            var sourceID = sourceMaterial.GetEntityId();
             var texID = tex.GetEntityId();
             var key = (sourceID, texID);
             FallbackMaterial fallback;

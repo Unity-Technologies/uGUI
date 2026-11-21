@@ -2,7 +2,7 @@
 
 The Distance Field (URP Lit) shader is a Shader Graph version of the Distance Field shader for the Universal Render Pipeline (URP). Unlike the Distance Field shader, it interacts with scene lighting. It replaces the Distance Field (Surface) shader, which was available only in the Built-In Render Pipeline.
 
-To use this shader, select **TextMeshPro** > **SRP** > **TMP_SDF-URP Lit** in the **Shader** dropdown of the text's material. Your project must use URP.
+To use this shader, select **TextMeshPro** > **Default** > **SRP** > **TMP_SDF-URP Lit** in the **Shader** dropdown of the text's material. Your project must use URP.
 
 ## Properties
 

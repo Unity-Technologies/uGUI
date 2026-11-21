@@ -8,6 +8,7 @@ The settings appear under the following groups:
 
 | **Group** | **Description** |
 |:--|:--|
+| **[Advanced Text Generator (Experimental)](#advanced-text-generator-experimental)** | Make every TextMesh Pro component use the Advanced Text Generator. |
 | **[Default Font Asset](#default-font-asset)** | Set the default font for text objects. |
 | **[Fallback Font Assets](#fallback-font-assets)** | Choose font assets to search when TextMesh Pro can’t find a character in a text object’s main font asset. |
 | **[Fallback Material Settings](#fallback-material-settings)** | Set style options for characters retrieved from fallback fonts. |
@@ -20,6 +21,12 @@ The settings appear under the following groups:
 | **[Color Gradient Presets](#color-gradient-presets)** | Choose a location to store color gradient presets. |
 | **[Line Breaking for Asian Languages](#line-breaking-for-asian-languages)** | Define leading and following characters to get proper line breaking when using Asian fonts. |
 | **[Korean Language Options](#korean-language-options)** | Define whether to use Modern or Traditional line breaking rules for Korean text. |
+
+## Advanced Text Generator (Experimental)
+
+| **Property** | **Description** |
+|:--|:--|
+|**Use Advanced Text**|Enable this setting to make every TextMesh Pro component in the project use the Advanced Text Generator. Components can't opt out while this setting is on, and their own **Advanced Text Generator** option is unavailable.<br/><br/>This feature is experimental.|
 
 ## Default Font Asset
 

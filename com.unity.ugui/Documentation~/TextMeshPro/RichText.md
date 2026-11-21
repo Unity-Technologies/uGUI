@@ -81,8 +81,6 @@ The first `<color>` tag’s scope is the entire text block. The the second `<col
 
 When you nest tags, you don't have to close their scopes in the same order that you started them.
 
-## Rich-text tags and right-to-left text
+## Right-to-left text
 
-TextMesh Pro's right-to-left editor does not distinguish between regular text and rich text tags. Rich text tags that you enter in the right-to-left editor do not work unless you type them right-to-left as well.
-
-The easiest way to apply rich text tags to right-to-left text is to type the text in the right-to-left editor, and then apply the tags in the regular editor.
+For full right-to-left support, including character shaping and mixed-direction text, use the Advanced Text Generator. Enable **Advanced Text Generator (Experimental)** in the text object's **Extra Settings**, or enable **Use Advanced Text** in **Project Settings** > **TextMesh Pro** to apply it to all text objects. The Advanced Text Generator requires a dynamic font asset. For more information, refer to [Migrate static font assets to the Advanced Text Generator](FontAssetsMigration.md).

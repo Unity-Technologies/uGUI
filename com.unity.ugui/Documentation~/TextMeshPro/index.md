@@ -28,4 +28,4 @@ If your project does not use TextMesh Pro, disable **Include Default Settings In
 
 TextMesh Pro also includes additional resources and examples to help you learn about various features.
 
-To import them, open the **Package Manager** window, select the **uGUI** package, and import the **Examples & Extras** sample from the **Samples** tab.
+To import them, open the **Package Manager** window, select the **uGUI** package, and import the **TextMesh Pro Examples & Extras** sample from the **Samples** tab.

@@ -3,7 +3,7 @@
 // - No Glow Option
 // - Softness is applied on both side of the outline
 
-Shader "TextMeshPro/Mobile/Distance Field Overlay" {
+Shader "TextMeshPro/Default/Mobile/Distance Field Overlay" {
 
 Properties {
 	_FaceColor		    ("Face Color", Color) = (1,1,1,1)
@@ -112,7 +112,7 @@ SubShader {
 			fixed4	outlineColor	: COLOR1;
 			float4	texcoord0		: TEXCOORD0;			// Texture UV, Mask UV
 			half4	param			: TEXCOORD1;			// Scale(x), BiasIn(y), BiasOut(z), Bias(w)
-			half4	mask			: TEXCOORD2;			// Position in clip space(xy), Softness(zw)
+			float4	mask			: TEXCOORD2;			// Edge fade: left, bottom, right, top
 
 		    #if (UNDERLAY_ON | UNDERLAY_INNER)
 			float4	texcoord1		: TEXCOORD3;			// Texture UV, alpha, reserved
@@ -120,8 +120,7 @@ SubShader {
 		    #endif
 		};
 
-		float _UIMaskSoftnessX;
-        float _UIMaskSoftnessY;
+		float4 _UIMaskSoftness;
         int _UIVertexColorAlwaysGammaSpace;
 
 
@@ -193,8 +192,7 @@ SubShader {
 			output.outlineColor = outlineColor;
 			output.texcoord0 = float4(input.texcoord0.x, input.texcoord0.y, maskUV.x, maskUV.y);
 			output.param = half4(scale, bias - outline, bias + outline, bias);
-			const half2 maskSoftness = half2(max(_UIMaskSoftnessX, _MaskSoftnessX), max(_UIMaskSoftnessY, _MaskSoftnessY));
-			output.mask = half4(vert.xy * 2 - clampedRect.xy - clampedRect.zw, 0.25 / (0.25 * maskSoftness + pixelSize.xy));
+			output.mask = float4(vert.xy, pixelSize.xy);
 			#if (UNDERLAY_ON || UNDERLAY_INNER)
 			output.texcoord1 = float4(input.texcoord0 + layerOffset, input.color.a, 0);
 			output.underlayParam = half2(layerScale, layerBias);
@@ -230,8 +228,7 @@ SubShader {
 
 		    // Alternative implementation to UnityGet2DClipping with support for softness.
 		    #if UNITY_UI_CLIP_RECT
-			half2 m = saturate((_ClipRect.zw - _ClipRect.xy - abs(input.mask.xy)) * input.mask.zw);
-			c *= m.x * m.y;
+			c *= UnityGet2DSoftClippingTMP(input.mask, _ClipRect, max(_UIMaskSoftness, half4(_MaskSoftnessX, _MaskSoftnessY, _MaskSoftnessX, _MaskSoftnessY)));
 		    #endif
 
 		    #if (UNDERLAY_ON | UNDERLAY_INNER)

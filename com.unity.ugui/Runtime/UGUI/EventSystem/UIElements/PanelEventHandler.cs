@@ -179,7 +179,8 @@ namespace UnityEngine.UIElements
             // that was last hovered will not always be the one receiving the pointer up.
             if (eventData.pointerCurrentRaycast.gameObject == gameObject &&
                 eventData.pointerPressRaycast.gameObject != gameObject &&
-                m_PointerEvent.pointerId != PointerId.mousePointerId)
+                m_PointerEvent.pointerId != PointerId.mousePointerId &&
+                ReadPointerData(m_PointerEvent, eventData, PointerEventType.Cancel))
             {
                 var handled = m_Panel.SendPointerCancelEvent(
                     m_PointerEvent,
@@ -449,7 +450,7 @@ namespace UnityEngine.UIElements
 
         enum PointerEventType
         {
-            Default, Down, Up
+            Default, Down, Up, Cancel
         }
 
         class PointerEvent : IPointerEvent
@@ -570,7 +571,7 @@ namespace UnityEngine.UIElements
                         // Can be null if runtime panels have not been created or UI Toolkit is stripped
                         IRuntimePanel.pointerDeviceState?.PressButton(pointerId, button);
                     }
-                    else if (eventType == PointerEventType.Up)
+                    else if (eventType == PointerEventType.Up || eventType == PointerEventType.Cancel)
                     {
                         // Can be null if runtime panels have not been created or UI Toolkit is stripped
                         IRuntimePanel.pointerDeviceState?.ReleaseButton(pointerId, button);

@@ -2,7 +2,7 @@
 
 TextMesh Pro has been designed to take advantage of signed distance field (SDF) rendering and includes a collection of shaders for this purpose. There are also bitmap-only shaders, in case you don't want to use SDF rendering.
 
-All shaders have a desktop and a mobile version. The mobile versions are less demanding and suitable for mobile devices, but support fewer effects. All shaders can be found in the shader menu under TextMeshPro and TextMeshPro / Mobile.
+All shaders have a desktop and a mobile version. The mobile versions are less demanding and suitable for mobile devices, but support fewer effects. All shaders can be found in the shader menu under **TextMeshPro** > **Default** and **TextMeshPro** > **Default** > **Mobile**.
 
 ## SDF Shaders
 

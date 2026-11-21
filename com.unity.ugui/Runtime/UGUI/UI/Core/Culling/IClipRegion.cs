@@ -1,3 +1,5 @@
+using System;
+
 namespace UnityEngine.UI
 {
     /// <summary>
@@ -55,6 +57,16 @@ namespace UnityEngine.UI
         /// The softness is a linear alpha falloff over clipSoftness pixels.
         /// </summary>
         /// <param name="clipSoftness">The number of pixels to apply the softness to </param>
+        [Obsolete("SetClipSoftness(Vector2) is deprecated. Use SetClipSoftness(Vector4) instead.", false)]
         void SetClipSoftness(Vector2 clipSoftness);
+
+        /// <summary>
+        /// Set the clip softness of each edge for the IClippable.
+        /// </summary>
+        /// <remarks>
+        /// X is the left edge, Y the bottom, Z the right and W the top.
+        /// </remarks>
+        /// <param name="clipSoftness">The number of pixels to apply the softness to on each edge.</param>
+        void SetClipSoftness(Vector4 clipSoftness);
     }
 }

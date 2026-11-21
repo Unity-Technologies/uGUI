@@ -4,7 +4,7 @@
 // - Softness is applied on both side of the outline
 // - Screen-space derivative based SDF scaling with SpaceWarp motion vectors
 
-Shader "TextMeshPro/Mobile/Distance Field SSD - SpaceWarp" {
+Shader "TextMeshPro/Default/Mobile/Distance Field SSD - SpaceWarp" {
 
 Properties {
 	_FaceColor		    ("Face Color", Color) = (1,1,1,1)
@@ -130,8 +130,7 @@ SubShader {
 			return float4(lerp(rgba.rgb / 12.92f, pow((rgba.rgb + 0.055f) / 1.055f, 2.4f), step(0.04045f, rgba.rgb)), rgba.a);
 		}
 
-		float _UIMaskSoftnessX;
-		float _UIMaskSoftnessY;
+		float4 _UIMaskSoftness;
 
 		pixel_t VertShader(vertex_t input)
 		{
@@ -246,9 +245,12 @@ SubShader {
 			#endif
 
 			#if UNITY_UI_CLIP_RECT
-			half2 maskSoftness = half2(max(_UIMaskSoftnessX, _MaskSoftnessX), max(_UIMaskSoftnessY, _MaskSoftnessY));
-			float2 maskZW = 0.25 / (0.25 * maskSoftness + 1 / scale);
-			float2 m = saturate((_ClipRect.zw - _ClipRect.xy - abs(input.mask.xy)) * maskZW);
+			// Each edge fades over its own distance and softness: left, bottom, right, top.
+			half4 maskSoftness = max(_UIMaskSoftness, half4(_MaskSoftnessX, _MaskSoftnessY, _MaskSoftnessX, _MaskSoftnessY));
+			float4 maskZW = 0.25 / (0.25 * maskSoftness + 1 / scale);
+			float2 clipSize = _ClipRect.zw - _ClipRect.xy;
+			float4 edgeMask = saturate(float4(clipSize + input.mask.xy, clipSize - input.mask.xy) * maskZW);
+			float2 m = min(edgeMask.xy, edgeMask.zw);
 			faceColor *= m.x * m.y;
 			#endif
 
@@ -327,8 +329,7 @@ SubShader {
 			return float4(lerp(rgba.rgb / 12.92f, pow((rgba.rgb + 0.055f) / 1.055f, 2.4f), step(0.04045f, rgba.rgb)), rgba.a);
 		}
 
-		float _UIMaskSoftnessX;
-		float _UIMaskSoftnessY;
+		float4 _UIMaskSoftness;
 
 		pixel_t VertShader(vertex_t input)
 		{
@@ -449,9 +450,12 @@ SubShader {
 			#endif
 
 			#if UNITY_UI_CLIP_RECT
-			half2 maskSoftness = half2(max(_UIMaskSoftnessX, _MaskSoftnessX), max(_UIMaskSoftnessY, _MaskSoftnessY));
-			float2 maskZW = 0.25 / (0.25 * maskSoftness + 1 / scale);
-			float2 m = saturate((_ClipRect.zw - _ClipRect.xy - abs(input.mask.xy)) * maskZW);
+			// Each edge fades over its own distance and softness: left, bottom, right, top.
+			half4 maskSoftness = max(_UIMaskSoftness, half4(_MaskSoftnessX, _MaskSoftnessY, _MaskSoftnessX, _MaskSoftnessY));
+			float4 maskZW = 0.25 / (0.25 * maskSoftness + 1 / scale);
+			float2 clipSize = _ClipRect.zw - _ClipRect.xy;
+			float4 edgeMask = saturate(float4(clipSize + input.mask.xy, clipSize - input.mask.xy) * maskZW);
+			float2 m = min(edgeMask.xy, edgeMask.zw);
 			faceColor *= m.x * m.y;
 			#endif
 

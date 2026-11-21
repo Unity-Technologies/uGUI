@@ -161,11 +161,24 @@ namespace TMPro
         /// </summary>
         public bool isRightToLeftText
         {
-            get { return m_isRightToLeft; }
-            set { if (m_isRightToLeft == value) return; m_isRightToLeft = value; m_havePropertiesChanged = true; SetVerticesDirty(); SetLayoutDirty(); }
+            get { return m_TextDirection == TextDirection.RTL; }
+            set { textDirection = value ? TextDirection.RTL : TextDirection.LTR; }
         }
-        [SerializeField]
-        protected bool m_isRightToLeft = false;
+
+        /// <summary>
+        /// The base direction the text is laid out in.
+        /// </summary>
+        public TextDirection textDirection
+        {
+            get { return m_TextDirection; }
+            set { if (m_TextDirection == value) return; m_TextDirection = value; m_havePropertiesChanged = true; SetVerticesDirty(); SetLayoutDirty(); }
+        }
+
+        /// <summary>
+        /// The serialized base direction of the text. See <see cref="textDirection"/>.
+        /// </summary>
+        [SerializeField] [FormerlySerializedAs("m_isRightToLeft")]
+        protected TextDirection m_TextDirection;
 
 
         /// <summary>
@@ -1749,6 +1762,7 @@ namespace TMPro
         protected TMP_TextElement m_cached_TextElement; // Glyph / Character information is cached into this variable which is faster than having to fetch from the Dictionary multiple times.
 
         protected SpecialCharacter m_Ellipsis;
+        internal bool m_EllipsisUsesAlternateTypeface;
         protected SpecialCharacter m_Underline;
 
         protected TMP_SpriteAsset m_defaultSpriteAsset;
@@ -3510,7 +3524,7 @@ namespace TMPro
                 hashCode = ((hashCode << 5) + hashCode) ^ (int)TMP_TextParsingUtilities.ToUpperASCIIFast(c);
             }
 
-            return hashCode;
+            return readIndex == sourceTextLength ? 0 : hashCode;
         }
 
         /// <summary>
@@ -4418,6 +4432,8 @@ namespace TMPro
                             m_internalCharacterInfo[m_characterCount].fontAsset = m_Ellipsis.fontAsset;
                             m_internalCharacterInfo[m_characterCount].material = m_Ellipsis.material;
                             m_internalCharacterInfo[m_characterCount].materialReferenceIndex = m_Ellipsis.materialIndex;
+                            m_internalCharacterInfo[m_characterCount].isUsingAlternateTypeface = m_EllipsisUsesAlternateTypeface;
+                            isUsingAltTypeface = m_EllipsisUsesAlternateTypeface;
 
                             // Indicates the source parsing data has been modified.
                             m_isTextTruncated = true;
@@ -5399,7 +5415,7 @@ namespace TMPro
 
             float glyphAdjustment = m_textInfo.characterInfo[m_lastVisibleCharacterOfLine].adjustedHorizontalAdvance;
             float maxAdvanceOffset = (glyphAdjustment * currentElementScale + (m_currentFontAsset.normalSpacingOffset + characterSpacingAdjustment + boldSpacingAdjustment) * currentEmScale + m_cSpacing) * (1 - m_charWidthAdjDelta) * m_characterHorizontalScale;
-            float adjustedHorizontalAdvance = m_textInfo.lineInfo[m_lineNumber].maxAdvance = m_textInfo.characterInfo[m_lastVisibleCharacterOfLine].xAdvance + (m_isRightToLeft ? maxAdvanceOffset : - maxAdvanceOffset);
+            float adjustedHorizontalAdvance = m_textInfo.lineInfo[m_lineNumber].maxAdvance = m_textInfo.characterInfo[m_lastVisibleCharacterOfLine].xAdvance + (isRightToLeftText ? maxAdvanceOffset : - maxAdvanceOffset);
             m_textInfo.characterInfo[m_lastVisibleCharacterOfLine].xAdvance = adjustedHorizontalAdvance;
 
             m_textInfo.lineInfo[m_lineNumber].baseline = 0 - m_lineOffset;
@@ -6394,31 +6410,21 @@ namespace TMPro
 
         protected void GetEllipsisSpecialCharacter(TMP_FontAsset fontAsset)
         {
-            bool isUsingAlternativeTypeface;
+            TMP_Character character = FindEllipsisInFontAsset(fontAsset, m_FontStyleInternal, m_FontWeightInternal, out bool isUsingAlternativeTypeface);
 
-            // Search base font asset
-            TMP_Character character = TMP_FontAssetUtilities.GetCharacterFromFontAsset(0x2026, fontAsset, false, m_FontStyleInternal, m_FontWeightInternal, out isUsingAlternativeTypeface);
-
-            if (character == null)
+            // Same order as GetTextElement: the font's own regular glyph, style synthesized, wins over a styled global fallback.
+            if (character == null && (m_FontStyleInternal != FontStyles.Normal || m_FontWeightInternal != FontWeight.Regular))
             {
-                // Search primary fallback list
-                if (fontAsset.m_FallbackFontAssetTable != null && fontAsset.m_FallbackFontAssetTable.Count > 0)
-                    character = TMP_FontAssetUtilities.GetCharacterFromFontAssets(0x2026, fontAsset, fontAsset.m_FallbackFontAssetTable, true, m_FontStyleInternal, m_FontWeightInternal, out isUsingAlternativeTypeface);
+                character = FindEllipsisInFontAsset(fontAsset, FontStyles.Normal, FontWeight.Regular, out isUsingAlternativeTypeface);
+
+                if (character == null)
+                    character = FindEllipsisInGlobalFallbacks(fontAsset, FontStyles.Normal, FontWeight.Regular, out isUsingAlternativeTypeface);
             }
 
-            // Search TMP Settings general fallback list
             if (character == null)
-            {
-                if (TMP_Settings.fallbackFontAssets != null && TMP_Settings.fallbackFontAssets.Count > 0)
-                    character = TMP_FontAssetUtilities.GetCharacterFromFontAssets(0x2026, fontAsset, TMP_Settings.fallbackFontAssets, true, m_FontStyleInternal, m_FontWeightInternal, out isUsingAlternativeTypeface);
-            }
+                character = FindEllipsisInGlobalFallbacks(fontAsset, m_FontStyleInternal, m_FontWeightInternal, out isUsingAlternativeTypeface);
 
-            // Search TMP Settings' default font asset
-            if (character == null)
-            {
-                if (TMP_Settings.defaultFontAsset != null)
-                    character = TMP_FontAssetUtilities.GetCharacterFromFontAsset(0x2026, TMP_Settings.defaultFontAsset, true, m_FontStyleInternal, m_FontWeightInternal, out isUsingAlternativeTypeface);
-            }
+            m_EllipsisUsesAlternateTypeface = character != null && isUsingAlternativeTypeface;
 
             if (character != null)
                 m_Ellipsis = new SpecialCharacter(character, 0);
@@ -6426,6 +6432,32 @@ namespace TMPro
                 // No reachable ellipsis glyph. Clear any previously cached ellipsis so the
                 // overflow setup falls back to Truncate instead of using a stale glyph.
                 m_Ellipsis = default;
+        }
+
+        const uint k_EllipsisUnicode = 0x2026;
+
+        static TMP_Character FindEllipsisInFontAsset(TMP_FontAsset fontAsset, FontStyles fontStyle, FontWeight fontWeight, out bool isUsingAlternativeTypeface)
+        {
+            TMP_Character character = TMP_FontAssetUtilities.GetCharacterFromFontAsset(k_EllipsisUnicode, fontAsset, false, fontStyle, fontWeight, out isUsingAlternativeTypeface);
+
+            if (character == null && fontAsset.m_FallbackFontAssetTable != null && fontAsset.m_FallbackFontAssetTable.Count > 0)
+                character = TMP_FontAssetUtilities.GetCharacterFromFontAssets(k_EllipsisUnicode, fontAsset, fontAsset.m_FallbackFontAssetTable, true, fontStyle, fontWeight, out isUsingAlternativeTypeface);
+
+            return character;
+        }
+
+        static TMP_Character FindEllipsisInGlobalFallbacks(TMP_FontAsset fontAsset, FontStyles fontStyle, FontWeight fontWeight, out bool isUsingAlternativeTypeface)
+        {
+            TMP_Character character = null;
+            isUsingAlternativeTypeface = false;
+
+            if (TMP_Settings.fallbackFontAssets != null && TMP_Settings.fallbackFontAssets.Count > 0)
+                character = TMP_FontAssetUtilities.GetCharacterFromFontAssets(k_EllipsisUnicode, fontAsset, TMP_Settings.fallbackFontAssets, true, fontStyle, fontWeight, out isUsingAlternativeTypeface);
+
+            if (character == null && TMP_Settings.defaultFontAsset != null)
+                character = TMP_FontAssetUtilities.GetCharacterFromFontAsset(k_EllipsisUnicode, TMP_Settings.defaultFontAsset, true, fontStyle, fontWeight, out isUsingAlternativeTypeface);
+
+            return character;
         }
 
 

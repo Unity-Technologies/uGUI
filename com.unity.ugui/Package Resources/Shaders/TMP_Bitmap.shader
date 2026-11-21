@@ -1,4 +1,4 @@
-Shader "TextMeshPro/Bitmap" {
+Shader "TextMeshPro/Default/Bitmap" {
 
 Properties {
 	_MainTex		    ("Font Atlas", 2D) = "white" {}
@@ -83,8 +83,7 @@ SubShader{
 		uniform float4		_ClipRect;
 		uniform float		_MaskSoftnessX;
 		uniform float		_MaskSoftnessY;
-		uniform float		_UIMaskSoftnessX;
-        uniform float		_UIMaskSoftnessY;
+		uniform float4		_UIMaskSoftness;
         uniform int _UIVertexColorAlwaysGammaSpace;
 
 		v2f vert (appdata_t v)
@@ -113,9 +112,7 @@ SubShader{
 			pixelSize /= abs(float2(_ScreenParams.x * UNITY_MATRIX_P[0][0], _ScreenParams.y * UNITY_MATRIX_P[1][1]));
 
 			// Clamp _ClipRect to 16bit.
-			const float4 clampedRect = clamp(_ClipRect, -2e10, 2e10);
-			const half2 maskSoftness = half2(max(_UIMaskSoftnessX, _MaskSoftnessX), max(_UIMaskSoftnessY, _MaskSoftnessY));
-			OUT.mask = float4(vert.xy * 2 - clampedRect.xy - clampedRect.zw, 0.25 / (0.25 * maskSoftness + pixelSize.xy));
+			OUT.mask = float4(vert.xy, pixelSize.xy);
 
 			return OUT;
 		}
@@ -127,8 +124,7 @@ SubShader{
 
 			// Alternative implementation to UnityGet2DClipping with support for softness.
 			#if UNITY_UI_CLIP_RECT
-				half2 m = saturate((_ClipRect.zw - _ClipRect.xy - abs(IN.mask.xy)) * IN.mask.zw);
-				color *= m.x * m.y;
+				color *= UnityGet2DSoftClippingTMP(IN.mask, _ClipRect, max(_UIMaskSoftness, half4(_MaskSoftnessX, _MaskSoftnessY, _MaskSoftnessX, _MaskSoftnessY)));
 			#endif
 
 			#if UNITY_UI_ALPHACLIP

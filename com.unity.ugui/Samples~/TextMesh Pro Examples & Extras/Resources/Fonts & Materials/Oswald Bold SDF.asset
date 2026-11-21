@@ -1,14 +1,14 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!21 &2140032
+--- !u!21 &2147374
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Electronic Highway Sign SDF Material
-  m_Shader: {fileID: 4800000, guid: f99637934d35413090e376899561717a, type: 3}
+  m_Name: Oswald Bold SDF Material
+  m_Shader: {fileID: 4800000, guid: abcf10cc92e843dd8530c741953ac8fd, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 5
   m_EnableInstancingVariants: 0
@@ -32,7 +32,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 28981121099961358}
+        m_Texture: {fileID: 28256370963634744}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OutlineTex:
@@ -58,7 +58,7 @@ Material:
     - _GlowOffset: 0
     - _GlowOuter: 0.05
     - _GlowPower: 0.75
-    - _GradientScale: 11
+    - _GradientScale: 10
     - _LightAngle: 3.1416
     - _MaskSoftnessX: 0
     - _MaskSoftnessY: 0
@@ -68,9 +68,9 @@ Material:
     - _OutlineWidth: 0
     - _PerspectiveFilter: 0.875
     - _Reflectivity: 10
-    - _ScaleRatioA: 0.90909094
+    - _ScaleRatioA: 0.9
     - _ScaleRatioB: 0.73125
-    - _ScaleRatioC: 0.7386364
+    - _ScaleRatioC: 0.73125
     - _ScaleX: 1
     - _ScaleY: 1
     - _ShaderFlags: 0
@@ -112,40 +112,40 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
-  m_Name: Electronic Highway Sign SDF
+  m_Name: Oswald Bold SDF
   m_EditorClassIdentifier: 
   m_Version: 1.1.0
-  m_Material: {fileID: 2140032}
-  m_SourceFontFileGUID: 02dec5df1dc441a486e3a037e75729e8
-  m_SourceFontFile: {fileID: 12800000, guid: 02dec5df1dc441a486e3a037e75729e8, type: 3}
+  m_Material: {fileID: 2147374}
+  m_SourceFontFileGUID: 3087ebc4bfca4c89b39ffbd6e8ad884d
+  m_SourceFontFile: {fileID: 12800000, guid: 3087ebc4bfca4c89b39ffbd6e8ad884d, type: 3}
   m_AtlasPopulationMode: 1
   InternalDynamicOS: 0
   m_FaceInfo:
     m_FaceIndex: 0
-    m_FamilyName: Electronic Highway Sign
-    m_StyleName: Regular
-    m_PointSize: 144
+    m_FamilyName: Oswald
+    m_StyleName: Bold
+    m_PointSize: 90
     m_Scale: 1
     m_UnitsPerEM: 2048
-    m_LineHeight: 146.57143
-    m_AscentLine: 123.42857
-    m_CapLine: 115
-    m_MeanLine: 115
+    m_LineHeight: 133.37402
+    m_AscentLine: 107.40234
+    m_CapLine: 80
+    m_MeanLine: 58
     m_Baseline: 0
-    m_DescentLine: -23.142857
-    m_SuperscriptOffset: 123.42857
+    m_DescentLine: -25.97168
+    m_SuperscriptOffset: 107.40234
     m_SuperscriptSize: 0.5
-    m_SubscriptOffset: -23.142857
+    m_SubscriptOffset: -25.97168
     m_SubscriptSize: 0.5
-    m_UnderlineOffset: -14.708571
-    m_UnderlineThickness: 2.0571427
-    m_StrikethroughOffset: 46
-    m_StrikethroughThickness: 2.0571427
-    m_TabWidth: 88
+    m_UnderlineOffset: -13.491211
+    m_UnderlineThickness: 4.482422
+    m_StrikethroughOffset: 23.2
+    m_StrikethroughThickness: 4.482422
+    m_TabWidth: 18
   m_GlyphTable: []
   m_CharacterTable: []
   m_AtlasTextures:
-  - {fileID: 28981121099961358}
+  - {fileID: 28256370963634744}
   m_AtlasTextureIndex: 0
   m_IsMultiAtlasTexturesEnabled: 0
   m_ClearDynamicDataOnBuild: 1
@@ -156,31 +156,31 @@ MonoBehaviour:
     m_Width: 1023
     m_Height: 1023
   m_fontInfo:
-    Name: Electronic Highway Sign
-    PointSize: 144
+    Name: Oswald
+    PointSize: 71
     Scale: 1
-    CharacterCount: 95
-    LineHeight: 168
+    CharacterCount: 97
+    LineHeight: 105.21875
     Baseline: 0
-    Ascender: 123.4375
-    CapHeight: 115.1875
-    Descender: -23.15625
+    Ascender: 84.71875
+    CapHeight: 62.40625
+    Descender: -20.5
     CenterLine: 0
-    SuperscriptOffset: 123.4375
-    SubscriptOffset: -14.708571
+    SuperscriptOffset: 84.71875
+    SubscriptOffset: -10.643066
     SubSize: 0.5
-    Underline: -14.708571
-    UnderlineThickness: 2.057143
-    strikethrough: 36.465908
-    strikethroughThickness: 2.057143
-    TabWidth: 881.5625
-    Padding: 9
-    AtlasWidth: 1024
-    AtlasHeight: 1024
+    Underline: -10.643066
+    UnderlineThickness: 3.5361328
+    strikethrough: 24.9625
+    strikethroughThickness: 0
+    TabWidth: 142.1875
+    Padding: 5
+    AtlasWidth: 512
+    AtlasHeight: 512
   atlas: {fileID: 0}
   m_AtlasWidth: 1024
   m_AtlasHeight: 1024
-  m_AtlasPadding: 10
+  m_AtlasPadding: 9
   m_AtlasRenderMode: 4165
   m_glyphInfoList: []
   m_KerningTable:
@@ -195,45 +195,24 @@ MonoBehaviour:
   m_FallbackFontAssetTable: []
   m_CreationSettings:
     sourceFontFileName: 
-    sourceFontFileGUID: 02dec5df1dc441a486e3a037e75729e8
+    sourceFontFileGUID: 3087ebc4bfca4c89b39ffbd6e8ad884d
     faceIndex: 0
     pointSizeSamplingMode: 1
-    pointSize: 144
-    padding: 10
+    pointSize: 90
+    padding: 9
     paddingMode: 0
     packingMode: 4
     atlasWidth: 1024
     atlasHeight: 1024
     characterSetSelectionMode: 6
-    characterSequence: 
-    referencedFontAssetGUID: 1e3843b942b74aabb3c0a44e7a6f5190
+    characterSequence: 20-7E,A0,2026
+    referencedFontAssetGUID: 90347108ce5f4fcab194986cf2cb96e2
     referencedTextAssetGUID: 
     fontStyle: 0
     fontStyleModifier: 0
     renderMode: 4165
-    includeFontFeatures: 1
+    includeFontFeatures: 0
   m_FontWeightTable:
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
-  fontWeights:
   - regularTypeface: {fileID: 0}
     italicTypeface: {fileID: 0}
   - regularTypeface: {fileID: 0}
@@ -260,13 +239,13 @@ MonoBehaviour:
   boldSpacing: 7
   italicStyle: 35
   tabSize: 10
---- !u!28 &28981121099961358
+--- !u!28 &28256370963634744
 Texture2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Electronic Highway Sign SDF Atlas
+  m_Name: Oswald Bold SDF Atlas
   m_ImageContentsHash:
     serializedVersion: 2
     Hash: 00000000000000000000000000000000

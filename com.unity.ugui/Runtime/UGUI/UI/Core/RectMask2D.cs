@@ -67,21 +67,56 @@ namespace UnityEngine.UI
             }
         }
 
+        // Version of the serialized data. Until an edit sets it, Right/Top mirror Left/Bottom on read, so data and prefab
+        // overrides saved while m_Softness was a Vector2Int reach both edges. Loading never changes it, or overrides would be lost.
+        internal const int k_EdgeSoftnessVersion = 1;
+        [SerializeField, HideInInspector]
+        private int m_Version;
+
+        // Left, Bottom, Right, Top. Data saved while this was a Vector2Int loads into Left and Bottom only.
         [SerializeField]
-        private Vector2Int m_Softness;
+        private Vector4 m_Softness;
+
+        /// <summary>
+        /// The softness to apply to each edge of the mask.
+        /// </summary>
+        /// <remarks>
+        /// X is the left edge, Y the bottom, Z the right and W the top, in the same order as <see cref="padding"/>.
+        /// Each edge fades linearly over half that many pixels.
+        /// Negative values are clamped to zero.
+        /// </remarks>
+        public Vector4 edgeSoftness
+        {
+            get
+            {
+                if (m_Version < k_EdgeSoftnessVersion)
+                    return new Vector4(m_Softness.x, m_Softness.y, m_Softness.x, m_Softness.y);
+                return m_Softness;
+            }
+            set
+            {
+                m_Softness = Vector4.Max(value, Vector4.zero);
+                m_Version = k_EdgeSoftnessVersion;
+                MaskUtilities.Notify2DMaskStateChanged(this);
+            }
+        }
 
         /// <summary>
         /// The softness to apply to the horizontal and vertical axis.
         /// </summary>
+        /// <remarks>
+        /// Setting it applies X to the left and right edges and Y to the bottom and top edges.
+        /// Getting it returns the larger of the left and right edges, and of the bottom and top edges.
+        /// </remarks>
+        [Obsolete("softness is deprecated. Use edgeSoftness instead.", false)]
         public Vector2Int softness
         {
-            get { return m_Softness;  }
-            set
+            get
             {
-                m_Softness.x = Mathf.Max(0, value.x);
-                m_Softness.y = Mathf.Max(0, value.y);
-                MaskUtilities.Notify2DMaskStateChanged(this);
+                var edges = edgeSoftness;
+                return new Vector2Int(Mathf.RoundToInt(Mathf.Max(edges.x, edges.z)), Mathf.RoundToInt(Mathf.Max(edges.y, edges.w)));
             }
+            set { edgeSoftness = new Vector4(value.x, value.y, value.x, value.y); }
         }
 
         /// <remarks>
@@ -116,6 +151,27 @@ namespace UnityEngine.UI
             {
                 return m_VertexClipper.GetCanvasRect(rectTransform, Canvas);
             }
+        }
+
+        /// <summary>
+        /// Get the mask's rect with padding applied, in the canvas's local space.
+        /// </summary>
+        /// <returns>The padded rect in canvas space, or an empty rect if the padding leaves no area.</returns>
+        internal Rect GetPaddedCanvasRect()
+        {
+            // Padded before projecting, so it stays on its own edge and scales with the mask at any angle.
+            Rect rect = rectTransform.rect;
+            Rect padded = Rect.MinMaxRect(rect.xMin + m_Padding.x, rect.yMin + m_Padding.y, rect.xMax - m_Padding.z, rect.yMax - m_Padding.w);
+            if (padded.width <= 0 || padded.height <= 0)
+                return new Rect();
+
+            // Past 90 degrees the mask projects mirrored, giving a negative, invalid rect.
+            Rect canvasRect = m_VertexClipper.GetCanvasRect(rectTransform, Canvas, padded);
+            return Rect.MinMaxRect(
+                Mathf.Min(canvasRect.xMin, canvasRect.xMax),
+                Mathf.Min(canvasRect.yMin, canvasRect.yMax),
+                Mathf.Max(canvasRect.xMin, canvasRect.xMax),
+                Mathf.Max(canvasRect.yMin, canvasRect.yMax));
         }
 
         /// <summary>
@@ -168,8 +224,7 @@ namespace UnityEngine.UI
             m_ShouldRecalculateClipRects = true;
 
             // Dont allow negative softness.
-            m_Softness.x = Mathf.Max(0, m_Softness.x);
-            m_Softness.y = Mathf.Max(0, m_Softness.y);
+            m_Softness = Vector4.Max(m_Softness, Vector4.zero);
 
             if (!IsActive())
                 return;
@@ -301,14 +356,17 @@ namespace UnityEngine.UI
                 return;
             }
 
+            Vector2 scale = m_VertexClipper.GetCanvasScale(rectTransform, Canvas);
+            Vector4 softness = Vector4.Scale(edgeSoftness, new Vector4(scale.x, scale.y, scale.x, scale.y));
+
             foreach (IClippable clipTarget in m_ClipTargets)
             {
-                clipTarget.SetClipSoftness(m_Softness);
+                clipTarget.SetClipSoftness(softness);
             }
 
             foreach (MaskableGraphic maskableTarget in m_MaskableTargets)
             {
-                maskableTarget.SetClipSoftness(m_Softness);
+                maskableTarget.SetClipSoftness(softness);
             }
         }
 

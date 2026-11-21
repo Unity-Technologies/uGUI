@@ -798,6 +798,9 @@ namespace TMPro.EditorUtilities
                             : glyphLoadFlags;
                         #endif
 
+                        if (((GlyphRasterModes)m_GlyphRenderMode & (GlyphRasterModes.RASTER_MODE_SDF | GlyphRasterModes.RASTER_MODE_SDFAA)) != 0)
+                            glyphLoadFlags |= GlyphLoadFlags.LOAD_NO_BITMAP;
+
                         //
                         AutoResetEvent autoEvent = new AutoResetEvent(false);
 

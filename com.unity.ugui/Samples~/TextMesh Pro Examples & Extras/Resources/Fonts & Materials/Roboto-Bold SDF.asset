@@ -1,13 +1,13 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!21 &2140474
+--- !u!21 &2164040
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Anton SDF Material
+  m_Name: Roboto-Bold SDF Material
   m_Shader: {fileID: 4800000, guid: f99637934d35413090e376899561717a, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 5
@@ -32,7 +32,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 28933816116536082}
+        m_Texture: {fileID: 28204114720316640}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OutlineTex:
@@ -69,7 +69,7 @@ Material:
     - _PerspectiveFilter: 0.875
     - _Reflectivity: 10
     - _ScaleRatioA: 0.9
-    - _ScaleRatioB: 0.6770833
+    - _ScaleRatioB: 0.73125
     - _ScaleRatioC: 0.73125
     - _ScaleX: 1
     - _ScaleY: 1
@@ -112,40 +112,40 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
-  m_Name: Anton SDF
+  m_Name: Roboto-Bold SDF
   m_EditorClassIdentifier: 
   m_Version: 1.1.0
-  m_Material: {fileID: 2140474}
-  m_SourceFontFileGUID: 3a7b228ca2e94106ae627b91c2680626
-  m_SourceFontFile: {fileID: 12800000, guid: 3a7b228ca2e94106ae627b91c2680626, type: 3}
+  m_Material: {fileID: 2164040}
+  m_SourceFontFileGUID: 896d592458b24ec6a6ad6cdf977275fd
+  m_SourceFontFile: {fileID: 12800000, guid: 896d592458b24ec6a6ad6cdf977275fd, type: 3}
   m_AtlasPopulationMode: 1
   InternalDynamicOS: 0
   m_FaceInfo:
     m_FaceIndex: 0
-    m_FamilyName: Anton
-    m_StyleName: Regular
+    m_FamilyName: Roboto
+    m_StyleName: Bold
     m_PointSize: 90
     m_Scale: 1
     m_UnitsPerEM: 2048
-    m_LineHeight: 132.05566
-    m_AscentLine: 102.43652
-    m_CapLine: 70
-    m_MeanLine: 66
+    m_LineHeight: 105.46875
+    m_AscentLine: 83.49609
+    m_CapLine: 64
+    m_MeanLine: 48
     m_Baseline: 0
-    m_DescentLine: -29.61914
-    m_SuperscriptOffset: 102.43652
+    m_DescentLine: -21.972656
+    m_SuperscriptOffset: 83.49609
     m_SuperscriptSize: 0.5
-    m_SubscriptOffset: -29.61914
+    m_SubscriptOffset: -21.972656
     m_SubscriptSize: 0.5
-    m_UnderlineOffset: -13.491211
-    m_UnderlineThickness: 4.482422
-    m_StrikethroughOffset: 26.4
-    m_StrikethroughThickness: 4.482422
-    m_TabWidth: 21
+    m_UnderlineOffset: -8.7890625
+    m_UnderlineThickness: 4.3945312
+    m_StrikethroughOffset: 19.2
+    m_StrikethroughThickness: 4.3945312
+    m_TabWidth: 22
   m_GlyphTable: []
   m_CharacterTable: []
   m_AtlasTextures:
-  - {fileID: 28933816116536082}
+  - {fileID: 28204114720316640}
   m_AtlasTextureIndex: 0
   m_IsMultiAtlasTexturesEnabled: 0
   m_ClearDynamicDataOnBuild: 1
@@ -156,27 +156,27 @@ MonoBehaviour:
     m_Width: 1023
     m_Height: 1023
   m_fontInfo:
-    Name: Anton
-    PointSize: 73
+    Name: Roboto
+    PointSize: 146
     Scale: 1
-    CharacterCount: 97
-    LineHeight: 107.125
+    CharacterCount: 98
+    LineHeight: 192.5625
     Baseline: 0
-    Ascender: 83.09375
-    CapHeight: 56.8125
-    Descender: -24.03125
+    Ascender: 153
+    CapHeight: 103.8125
+    Descender: -39.5625
     CenterLine: 0
-    SuperscriptOffset: 83.09375
-    SubscriptOffset: -10.942871
+    SuperscriptOffset: 153
+    SubscriptOffset: -14.2578125
     SubSize: 0.5
-    Underline: -10.942871
-    UnderlineThickness: 3.6357422
-    strikethrough: 22.725
-    strikethroughThickness: 0
-    TabWidth: 171.25
-    Padding: 5
-    AtlasWidth: 512
-    AtlasHeight: 512
+    Underline: -14.2578125
+    UnderlineThickness: 7.1289062
+    strikethrough: 41.25
+    strikethroughThickness: 7.1289062
+    TabWidth: 363.4375
+    Padding: 9
+    AtlasWidth: 1024
+    AtlasHeight: 1024
   atlas: {fileID: 0}
   m_AtlasWidth: 1024
   m_AtlasHeight: 1024
@@ -195,7 +195,7 @@ MonoBehaviour:
   m_FallbackFontAssetTable: []
   m_CreationSettings:
     sourceFontFileName: 
-    sourceFontFileGUID: 3a7b228ca2e94106ae627b91c2680626
+    sourceFontFileGUID: 896d592458b24ec6a6ad6cdf977275fd
     faceIndex: 0
     pointSizeSamplingMode: 1
     pointSize: 90
@@ -205,8 +205,8 @@ MonoBehaviour:
     atlasWidth: 1024
     atlasHeight: 1024
     characterSetSelectionMode: 6
-    characterSequence: 
-    referencedFontAssetGUID: a30eb7d7297c4f53ae3971c23a57648a
+    characterSequence: 20-7E,A0,200B,2026
+    referencedFontAssetGUID: 01e62767a5fa417d9a212a53e293fed7
     referencedTextAssetGUID: 
     fontStyle: 0
     fontStyleModifier: 0
@@ -233,40 +233,19 @@ MonoBehaviour:
     italicTypeface: {fileID: 0}
   - regularTypeface: {fileID: 0}
     italicTypeface: {fileID: 0}
-  fontWeights:
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
-  - regularTypeface: {fileID: 0}
-    italicTypeface: {fileID: 0}
   normalStyle: 0
   normalSpacingOffset: 0
   boldStyle: 0.75
   boldSpacing: 7
   italicStyle: 35
   tabSize: 10
---- !u!28 &28933816116536082
+--- !u!28 &28204114720316640
 Texture2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Anton SDF Atlas
+  m_Name: Roboto-Bold SDF Atlas
   m_ImageContentsHash:
     serializedVersion: 2
     Hash: 00000000000000000000000000000000

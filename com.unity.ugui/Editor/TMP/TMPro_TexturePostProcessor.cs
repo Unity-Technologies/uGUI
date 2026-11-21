@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
@@ -50,6 +51,19 @@ namespace TMPro.EditorUtilities
 
     internal class TMP_FontAssetPostProcessor : UnityEditor.AssetModificationProcessor
     {
+        static string[] OnWillSaveAssets(string[] paths)
+        {
+            var savedPaths = new List<string>(paths.Length);
+
+            foreach (string path in paths)
+            {
+                if (!TMP_EditorResourceManager.IsInImmutablePackage(path) || AssetDatabase.GetMainAssetTypeAtPath(path) != typeof(TMP_FontAsset))
+                    savedPaths.Add(path);
+            }
+
+            return savedPaths.Count == paths.Length ? paths : savedPaths.ToArray();
+        }
+
         static AssetDeleteResult OnWillDeleteAsset(string path, RemoveAssetOptions opt)
         {
             if (AssetDatabase.GetMainAssetTypeAtPath(path) == typeof(TMP_FontAsset))

@@ -156,9 +156,22 @@ namespace UnityEngine.UI
         }
 
         /// <inheritdoc/>
+        [Obsolete("SetClipSoftness(Vector2) is deprecated. Use SetClipSoftness(Vector4) instead.", false)]
         public virtual void SetClipSoftness(Vector2 clipSoftness)
         {
-            canvasRenderer.clippingSoftness = clipSoftness;
+            canvasRenderer.clippingEdgeSoftness = new Vector4(clipSoftness.x, clipSoftness.y, clipSoftness.x, clipSoftness.y);
+        }
+
+        /// <inheritdoc/>
+        public virtual void SetClipSoftness(Vector4 clipSoftness)
+        {
+            // Even edges go through the Vector2 overload so overrides written before per-edge softness still run.
+            if (clipSoftness.x == clipSoftness.z && clipSoftness.y == clipSoftness.w)
+#pragma warning disable 618
+                SetClipSoftness(new Vector2(clipSoftness.x, clipSoftness.y));
+#pragma warning restore 618
+            else
+                canvasRenderer.clippingEdgeSoftness = clipSoftness;
         }
 
         /// <summary>Called when it becomes enabled. Marks this to recalculate the stencil and update the material.</summary>

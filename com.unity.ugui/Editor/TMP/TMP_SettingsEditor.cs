@@ -15,7 +15,9 @@ namespace TMPro.EditorUtilities
         internal class Styles
         {
             public static readonly GUIContent advancedTextLabel = new GUIContent("Advanced Text Generator");
-            public static readonly GUIContent useAdvancedTextLabel = new GUIContent("Use Advanced Text", "Makes all text components use the Advanced Text Generator.");
+            public const string advancedTextHelp = "Applies to every TextMesh Pro component. Components can't opt out while this is on. This feature is still in development. Missing features and fixes are being added.";
+            public static readonly GUIContent experimentalTag = new GUIContent("Experimental");
+            public static readonly GUIContent useAdvancedTextLabel = new GUIContent("Use Advanced Text", "Applies to every TextMesh Pro component. Components can't opt out while this is on.");
 
             public static readonly GUIContent defaultFontAssetLabel = new GUIContent("Default Font Asset", "The Font Asset that will be assigned by default to newly created text objects when no Font Asset is specified.");
             public static readonly GUIContent defaultFontAssetPathLabel = new GUIContent("Path:        Resources/", "The relative path to a Resources folder where the Font Assets and Material Presets are located.\nExample \"Fonts & Materials/\"");
@@ -216,6 +218,23 @@ namespace TMPro.EditorUtilities
             m_PropUseModernHangulLineBreakingRules = serializedObject.FindProperty("m_UseModernHangulLineBreakingRules");
         }
 
+        static readonly Color k_ExperimentalColor = new Color(0.98f, 0.75f, 0.05f);
+
+        static GUIStyle s_ExperimentalTagStyle;
+
+        static void DrawExperimentalTag(Rect rowRect)
+        {
+            s_ExperimentalTagStyle ??= new GUIStyle(EditorStyles.miniLabel) { alignment = TextAnchor.MiddleCenter, normal = { textColor = k_ExperimentalColor } };
+            Vector2 labelSize = EditorStyles.label.CalcSize(Styles.useAdvancedTextLabel);
+            Vector2 tagSize = s_ExperimentalTagStyle.CalcSize(Styles.experimentalTag);
+            var tagRect = new Rect(rowRect.x + EditorGUI.indentLevel * 15 + 18 + labelSize.x + 8, rowRect.y + 1, tagSize.x + 10, rowRect.height - 2);
+            EditorGUI.DrawRect(new Rect(tagRect.x, tagRect.y, tagRect.width, 1), k_ExperimentalColor);
+            EditorGUI.DrawRect(new Rect(tagRect.x, tagRect.yMax - 1, tagRect.width, 1), k_ExperimentalColor);
+            EditorGUI.DrawRect(new Rect(tagRect.x, tagRect.y, 1, tagRect.height), k_ExperimentalColor);
+            EditorGUI.DrawRect(new Rect(tagRect.xMax - 1, tagRect.y, 1, tagRect.height), k_ExperimentalColor);
+            GUI.Label(tagRect, Styles.experimentalTag, s_ExperimentalTagStyle);
+        }
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
@@ -232,7 +251,10 @@ namespace TMPro.EditorUtilities
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             GUILayout.Label(Styles.advancedTextLabel, EditorStyles.boldLabel);
             EditorGUI.indentLevel = 1;
-            EditorGUILayout.PropertyField(m_PropUseAdvancedText, Styles.useAdvancedTextLabel);
+            Rect toggleRect = EditorGUILayout.GetControlRect();
+            EditorGUI.PropertyField(toggleRect, m_PropUseAdvancedText, Styles.useAdvancedTextLabel);
+            DrawExperimentalTag(toggleRect);
+            EditorGUILayout.HelpBox(Styles.advancedTextHelp, MessageType.Info);
             EditorGUI.indentLevel = 0;
 
             EditorGUILayout.Space();

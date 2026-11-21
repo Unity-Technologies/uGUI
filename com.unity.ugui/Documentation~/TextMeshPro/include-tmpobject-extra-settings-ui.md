@@ -16,6 +16,9 @@ This section contains options for further controlling how text looks and behaves
 |**Parse Escape Characters**||Enable this option to make TextMesh Pro interpret backslash-escaped characters as special characters. <br/><br/> For example `\n` is interpreted as a newline, `\t` as a tab, and so on. <br/><br/> **Note:** This applies to rendered text. In code, escaped characters are already parsed by the compiler.|
 |**Visible Descender**|| Use this option when using a script to slowly reveal text. <br/><br/> Enable it to reveal the text at the bottom and move up as new lines are revealed. <br/><br/> Disable it to reveal the text from top to bottom. <br/><br/> To set up this type of text reveal, you must also set the vertical alignment to Bottom.|
 |**Emoji Fallback Support**||Disable this option to turn off [color emoji](ColorEmojis.md) support for the TextMesh Pro GameObject.|
+|**Text Direction**||Choose the base direction the text is laid out in.<br/><br/>For full right-to-left support, including character shaping and mixed-direction text, use the Advanced Text Generator. Enable **Advanced Text Generator (Experimental)** in the text object's **Extra Settings**, or enable **Use Advanced Text** in **Project Settings** > **TextMesh Pro** to apply it to all text objects. The Advanced Text Generator requires a dynamic font asset. For more information, refer to [Migrate static font assets to the Advanced Text Generator](FontAssetsMigration.md).|
+||LTR|TextMesh Pro lays out the text left-to-right.|
+||RTL|TextMesh Pro lays out the text right-to-left.|
 | **Sprite Asset** |||
 | **Style Sheet Asset** ||Style sheet used by the text object, overriding the default style sheet.|
 |**Font Features**||Control which [OpenType FontFeatures](TMPObjects.md#opentype-fontfeature) are enabled.|
