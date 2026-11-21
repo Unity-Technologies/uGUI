@@ -21,6 +21,18 @@ namespace UnityEngine.UI
         private RectTransform m_RectTransform;
         private DrivenRectTransformTracker m_Tracker;
 
+        static SafeArea()
+        {
+            RectTransform.reapplyDrivenProperties += ReapplyDrivenProperties;
+        }
+
+        // Reassert the safe area rect when a driven value is overwritten, e.g. by the scene view move gizmo.
+        private static void ReapplyDrivenProperties(RectTransform driven)
+        {
+            if (driven.drivenByObject is SafeArea safeArea)
+                safeArea.ApplySafeArea();
+        }
+
         /// <summary>
         /// Whether to respect the safe area of the device. Relative to Reference Orientation.
         /// </summary>

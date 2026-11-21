@@ -13,6 +13,11 @@ namespace SafeAreaTests
         private static readonly MethodInfo s_SafeAreaUpdate =
             typeof(SafeArea).GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
 
+        // Reflection because SendReapplyDrivenProperties is internal to UnityEngine.CoreModule and
+        // not visible to this assembly; a public test hook is not worth the API surface for one fixture.
+        private static readonly MethodInfo s_SendReapplyDrivenProperties =
+            typeof(RectTransform).GetMethod("SendReapplyDrivenProperties", BindingFlags.NonPublic | BindingFlags.Static);
+
         private GameObject _canvasGo;
         private GameObject _parentGo;
         private RectTransform _parentRect;
@@ -203,6 +208,20 @@ namespace SafeAreaTests
 
             _safeArea.enabled = true;
             Assert.AreEqual(_safeArea, _targetRect.drivenByObject, "SafeArea should reclaim RectTransform driven ownership when enabled");
+        }
+
+        [Test]
+        [Category("RegressionTest")]
+        [Description("CoveredBugID = UUM-144066 UI GameObjects under the Safe Area are changing their position without being able to restore it when changing the Safe Zone position and then Reference Orientation")]
+        public void GizmoMove_SafeAreaOwnsRect_ReapplyRestoresDrivenPosition()
+        {
+            var drivenAnchoredPosition = _targetRect.anchoredPosition;
+
+            // Same call the scene-view move gizmo makes after writing the position.
+            _targetRect.anchoredPosition = drivenAnchoredPosition + new Vector2(123f, 456f);
+            s_SendReapplyDrivenProperties.Invoke(null, new object[] { _targetRect });
+
+            Assert.AreEqual(drivenAnchoredPosition, _targetRect.anchoredPosition, "SafeArea should reassert its driven position when the gizmo moves the rect.");
         }
 
         [Test]
